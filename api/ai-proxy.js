@@ -1,22 +1,25 @@
 // /api/ai-proxy.js
 // Vercel Serverless Function — proxy entre la app Tequio (formato Anthropic)
-// y la API de Gemini (Google AI Studio). Permite mantener TODO el código
-// de la app sin cambios, sólo redirigiendo la URL.
+// y la API de Gemini con RAG sobre leyes mexicanas en Supabase.
 //
 // Variables de entorno requeridas:
-//   GEMINI_API_KEY   – clave creada en https://aistudio.google.com/apikey
+//   GEMINI_API_KEY       – clave Gemini bound a service account
+//   SUPABASE_URL         – ej. https://<id>.supabase.co
+//   SUPABASE_ANON_KEY    – clave anon pública (con RLS read-only)
 //
-// Body esperado (estilo Anthropic):
-//   { model, max_tokens, system, messages: [{role:'user'|'assistant', content:string|array}] }
-//
-// Body devuelto (estilo Anthropic):
-//   { content: [{ type:'text', text:'...' }] }
+// Flujo:
+//   1) Genera embedding de la última pregunta del usuario (text-embedding-004, 768d)
+//   2) Llama al RPC match_legal_documents en Supabase para top-5 leyes/jurisprudencias
+//   3) Inyecta esas fuentes como contexto adicional al system prompt
+//   4) Llama a Gemini generateContent
+//   5) Devuelve respuesta en formato Anthropic
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const EMBED_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+const RAG_TOP_K = 5;
+const RAG_MAX_CONTEXT_CHARS = 4000;
 
-// Convierte el contenido de un mensaje Anthropic a texto plano.
-// Anthropic puede mandar content como string o como [{type:'text', text:'...'}]
 function contentToText(content) {
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
@@ -28,9 +31,69 @@ function contentToText(content) {
   return String(content || '');
 }
 
-// Convierte el body estilo Anthropic a formato Gemini
-function anthropicToGemini(body) {
+// ── RAG: get top-K legal documents matching the user's query ──
+async function searchLegalContext(apiKey, queryText) {
+  const supaUrl = process.env.SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_ANON_KEY;
+  if (!supaUrl || !supaKey || !queryText) return [];
+
+  try {
+    // 1) Generate embedding via Gemini text-embedding-004
+    const embedRes = await fetch(`${EMBED_ENDPOINT}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'models/text-embedding-004',
+        content: { parts: [{ text: queryText.substring(0, 2000) }] },
+        taskType: 'RETRIEVAL_QUERY',
+      }),
+    });
+    if (!embedRes.ok) return [];
+    const embedData = await embedRes.json();
+    const embedding = embedData?.embedding?.values;
+    if (!Array.isArray(embedding)) return [];
+
+    // 2) Call Supabase RPC match_legal_documents
+    const rpcRes = await fetch(`${supaUrl}/rest/v1/rpc/match_legal_documents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supaKey,
+        Authorization: `Bearer ${supaKey}`,
+      },
+      body: JSON.stringify({ query_embedding: embedding, match_count: RAG_TOP_K }),
+    });
+    if (!rpcRes.ok) return [];
+    const docs = await rpcRes.json();
+    return Array.isArray(docs) ? docs : [];
+  } catch (err) {
+    // RAG failure should NOT break the AI call — degrade gracefully
+    console.error('RAG error:', err.message);
+    return [];
+  }
+}
+
+function buildRagSystem(originalSystem, docs) {
+  if (!docs || docs.length === 0) return originalSystem;
+
+  let context = '\n\n📚 FUENTES LEGALES MEXICANAS RELEVANTES (úsalas para responder):\n';
+  let usedChars = 0;
+  for (let i = 0; i < docs.length; i++) {
+    const d = docs[i];
+    const tipo = d.tipo === 'ley' ? 'LEY' : 'JURISPRUDENCIA';
+    const block = `\n── ${tipo} ${i + 1}: ${d.titulo || ''} ──\nFuente: ${d.fuente || ''}${d.fecha ? ' · ' + d.fecha : ''}\n${(d.texto || '').substring(0, 800)}\n`;
+    if (usedChars + block.length > RAG_MAX_CONTEXT_CHARS) break;
+    context += block;
+    usedChars += block.length;
+  }
+  context += `\n\nINSTRUCCIÓN: cita estas fuentes explícitamente cuando sean pertinentes. Si las fuentes NO cubren la pregunta, indica honestamente que no encontraste leyes específicas y aporta orientación general.\n`;
+
+  return (originalSystem || '') + context;
+}
+
+function anthropicToGemini(body, systemOverride) {
   const { system, messages = [], max_tokens, temperature } = body || {};
+  const finalSystem = systemOverride !== undefined ? systemOverride : system;
 
   const contents = [];
   for (const m of messages) {
@@ -49,12 +112,10 @@ function anthropicToGemini(body) {
     },
   };
 
-  // system prompt
-  if (system && typeof system === 'string' && system.trim()) {
-    geminiBody.system_instruction = { parts: [{ text: system }] };
+  if (finalSystem && typeof finalSystem === 'string' && finalSystem.trim()) {
+    geminiBody.system_instruction = { parts: [{ text: finalSystem }] };
   }
 
-  // Safety settings — permitir contenido cívico/legal sin bloqueos excesivos
   geminiBody.safetySettings = [
     { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
     { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
@@ -65,27 +126,19 @@ function anthropicToGemini(body) {
   return geminiBody;
 }
 
-// Convierte la respuesta de Gemini al formato Anthropic
-function geminiToAnthropic(data, originalModel) {
+function geminiToAnthropic(data, originalModel, docs) {
   let text = '';
-
   const cand = data?.candidates?.[0];
   if (cand?.content?.parts?.length) {
     text = cand.content.parts.map(p => p.text || '').join('');
   }
-
-  // Si Gemini bloqueó por seguridad, dar un mensaje claro
   if (!text && cand?.finishReason && cand.finishReason !== 'STOP') {
-    text = `[Respuesta no disponible. Razón: ${cand.finishReason}. Reformula tu pregunta o consulta directamente a un profesional.]`;
+    text = `[Respuesta no disponible. Razón: ${cand.finishReason}. Reformula tu pregunta.]`;
   }
-
   if (!text && data?.promptFeedback?.blockReason) {
-    text = `[Tu pregunta fue bloqueada por filtros de seguridad: ${data.promptFeedback.blockReason}. Reformúlala con otras palabras.]`;
+    text = `[Tu pregunta fue bloqueada por filtros de seguridad: ${data.promptFeedback.blockReason}.]`;
   }
-
-  if (!text) {
-    text = 'Lo siento, no pude generar una respuesta. Intenta reformular la pregunta.';
-  }
+  if (!text) text = 'Lo siento, no pude generar una respuesta. Intenta reformular.';
 
   return {
     id: 'msg_' + Date.now().toString(36),
@@ -98,20 +151,23 @@ function geminiToAnthropic(data, originalModel) {
       input_tokens: data?.usageMetadata?.promptTokenCount || 0,
       output_tokens: data?.usageMetadata?.candidatesTokenCount || 0,
     },
+    // Custom Tequio metadata: which laws were retrieved for this answer
+    tequio_sources: (docs || []).map(d => ({
+      tipo: d.tipo,
+      titulo: d.titulo,
+      fuente: d.fuente,
+      fecha: d.fecha,
+      similarity: d.similarity,
+    })),
   };
 }
 
 module.exports = async function handler(req, res) {
-  // CORS — permitir desde cualquier origen (la app puede correr en preview de Vercel también)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, anthropic-version');
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
+  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') {
     res.status(405).json({ error: { type: 'method_not_allowed', message: 'Only POST allowed' } });
     return;
@@ -120,7 +176,7 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     res.status(500).json({
-      error: { type: 'config_error', message: 'GEMINI_API_KEY no configurada en variables de entorno' },
+      error: { type: 'config_error', message: 'GEMINI_API_KEY no configurada' },
     });
     return;
   }
@@ -131,18 +187,34 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const geminiBody = anthropicToGemini(body);
+    // 1) Extract the user's last question for RAG retrieval
+    let lastUserText = '';
+    const msgs = Array.isArray(body?.messages) ? body.messages : [];
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i]?.role === 'user') {
+        lastUserText = contentToText(msgs[i].content);
+        break;
+      }
+    }
 
+    // 2) Pull relevant legal docs (degrades silently if RAG unavailable)
+    const docs = await searchLegalContext(apiKey, lastUserText);
+
+    // 3) Inyecta docs into the system prompt
+    const enrichedSystem = buildRagSystem(body?.system, docs);
+
+    // 4) Build Gemini request
+    const geminiBody = anthropicToGemini(body, enrichedSystem);
+
+    // 5) Call Gemini
     const upstream = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(geminiBody),
     });
-
     const data = await upstream.json();
 
     if (!upstream.ok) {
-      // Errores de Gemini — mapeados a formato Anthropic
       res.status(upstream.status).json({
         type: 'error',
         error: {
@@ -153,8 +225,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const anthropicResp = geminiToAnthropic(data, body?.model);
-    res.status(200).json(anthropicResp);
+    res.status(200).json(geminiToAnthropic(data, body?.model, docs));
   } catch (err) {
     res.status(500).json({
       type: 'error',
