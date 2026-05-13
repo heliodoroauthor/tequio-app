@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-backfill_embeddings.py v2 — Diagnóstico verboso
-================================================
+backfill_embeddings.py v3 — gemini-embedding-001 con MRL 768d
+=============================================================
 Llena embeddings NULL en leyes/jurisprudencia.
 Usa filtro en Python (no PostgREST) para evitar bugs con columnas vector.
+v3: text-embedding-004 fue deprecado por Google; usa gemini-embedding-001
+    con outputDimensionality=768 (Matryoshka Representation Learning).
 """
 import os, sys, time, json, requests
 
-print("Tequio Backfill Embeddings v2 — text-embedding-004 (768d)")
+print("Tequio Backfill Embeddings v3 — gemini-embedding-001 (MRL 768d)")
 print(f"  Python: {sys.version.split()[0]}")
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
@@ -22,7 +24,7 @@ if not (SUPABASE_URL and SERVICE_KEY and GEMINI_KEY):
     print("ERROR: faltan variables de entorno. Abortando.")
     sys.exit(1)
 
-EMBED_URL = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={GEMINI_KEY}"
+EMBED_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={GEMINI_KEY}"
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -33,12 +35,13 @@ HEADERS_SB = {
 
 def test_gemini():
     """Smoke test: ¿La API key Gemini funciona?"""
-    print("\n[TEST] Probando Gemini text-embedding-004...")
+    print("\n[TEST] Probando Gemini gemini-embedding-001 (768d via MRL)...")
     try:
         r = requests.post(EMBED_URL, json={
-            'model': 'models/text-embedding-004',
+            'model': 'models/gemini-embedding-001',
             'content': {'parts': [{'text': 'hola mundo'}]},
             'taskType': 'RETRIEVAL_DOCUMENT',
+            'outputDimensionality': 768,
         }, timeout=20)
         print(f"  Status: {r.status_code}")
         if not r.ok:
@@ -71,12 +74,13 @@ def test_supabase():
 
 
 def get_embedding(text):
-    """Genera embedding 768d via Gemini."""
+    """Genera embedding 768d via Gemini (gemini-embedding-001 con MRL)."""
     try:
         r = requests.post(EMBED_URL, json={
-            'model': 'models/text-embedding-004',
+            'model': 'models/gemini-embedding-001',
             'content': {'parts': [{'text': text[:2000]}]},
             'taskType': 'RETRIEVAL_DOCUMENT',
+            'outputDimensionality': 768,
         }, timeout=30)
         if not r.ok:
             print(f"    [Gemini ERR {r.status_code}] {r.text[:200]}")
