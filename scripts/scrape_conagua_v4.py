@@ -142,9 +142,20 @@ def scrape_clima_municipal():
                 'timezone':  'America/Mexico_City',
                 'forecast_days': 1,
             }
-            r = requests.get(base, params=params, headers=HEADERS, timeout=35)
-            if not r.ok:
-                print(f"   [WARN] {capital}: HTTP {r.status_code}")
+            # Reintento: timeout 60s + 1 retry si falla
+            r = None
+            for intento in range(2):
+                try:
+                    r = requests.get(base, params=params, headers=HEADERS, timeout=60)
+                    if r.ok:
+                        break
+                except Exception:
+                    if intento == 0:
+                        import time; time.sleep(2)
+                        continue
+                    r = None
+            if not r or not r.ok:
+                print(f"   [WARN] {capital}: HTTP {r.status_code if r else 'TIMEOUT'} tras 2 intentos")
                 continue
             d = r.json().get('daily', {})
             if not d.get('temperature_2m_max'):
