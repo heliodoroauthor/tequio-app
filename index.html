@@ -1998,197 +1998,140 @@
       </div>
     </div>
 
-    <!-- ───── DASHBOARD ───── -->
+    <!-- ───── DASHBOARD v2 (datos vivos vía /api/data) ───── -->
     <div id="page-dashboard" class="page active">
       <div class="content">
 
-        <!-- SALUDO PERSONAL -->
-        <div id="dash-saludo" style="margin-bottom:20px">
-          <div style="font-size:22px;font-weight:800;margin-bottom:2px" id="dash-bienvenida">Buenos días 👋</div>
-          <div style="font-size:13px;color:var(--text3)" id="dash-fecha"></div>
+        <!-- Saludo personal -->
+        <div style="padding:20px 0 0">
+          <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);letter-spacing:-0.5px;margin-bottom:4px">
+            Hola, Mexicano <span style="display:inline-block;transform:rotate(-12deg)">👋</span>
+          </h1>
+          <p style="color:var(--text2);font-size:14px" id="dash-fecha-hoy">Cargando fecha…</p>
         </div>
 
-        <!-- ALERTA IA POR ESTADO -->
-        <div id="dash-alerta-ia-card" style="display:none;margin-bottom:16px">
-          <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(245,158,11,0.08));border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:14px 16px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div style="font-size:10px;color:var(--red2);font-weight:700;letter-spacing:0.5px">🚨 ALERTA IA PARA TU ESTADO</div>
-              <button onclick="recargarAlertaEstado()" style="background:none;border:none;font-size:10px;color:var(--text3);cursor:pointer;font-family:inherit">↻</button>
+        <!-- HERO: 3 indicadores grandes vivos -->
+        <div style="padding:16px 0 0">
+          <div id="dash-hero" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <!-- Tipo de cambio -->
+            <div class="dash-card" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:18px;padding:20px;color:#fff;position:relative;overflow:hidden">
+              <div style="font-size:11px;letter-spacing:1.5px;opacity:0.8;font-weight:600">DÓLAR HOY</div>
+              <div style="font-size:42px;font-weight:800;margin:6px 0 2px;font-family:var(--font-display)" id="dash-dolar">—</div>
+              <div style="font-size:13px;opacity:0.9" id="dash-dolar-variacion">cargando…</div>
+              <div style="font-size:10px;opacity:0.6;margin-top:8px">Banxico FIX</div>
             </div>
-            <div id="dash-alerta-ia-texto" style="font-size:13px;line-height:1.6;color:var(--text)">Cargando alerta de tu estado...</div>
+            <!-- Inflación -->
+            <div class="dash-card" style="background:linear-gradient(135deg,#7c2d12,#ea580c);border-radius:18px;padding:20px;color:#fff">
+              <div style="font-size:11px;letter-spacing:1.5px;opacity:0.8;font-weight:600">INFLACIÓN ANUAL</div>
+              <div style="font-size:42px;font-weight:800;margin:6px 0 2px;font-family:var(--font-display)" id="dash-inflacion">—</div>
+              <div style="font-size:13px;opacity:0.9" id="dash-inflacion-mes">cargando…</div>
+              <div style="font-size:10px;opacity:0.6;margin-top:8px">Banxico SP30577</div>
+            </div>
+            <!-- Tasa Banxico -->
+            <div class="dash-card" style="background:linear-gradient(135deg,#14532d,#16a34a);border-radius:18px;padding:20px;color:#fff">
+              <div style="font-size:11px;letter-spacing:1.5px;opacity:0.8;font-weight:600">TASA BANXICO</div>
+              <div style="font-size:42px;font-weight:800;margin:6px 0 2px;font-family:var(--font-display)" id="dash-tasa">—</div>
+              <div style="font-size:13px;opacity:0.9">Tasa de referencia</div>
+              <div style="font-size:10px;opacity:0.6;margin-top:8px">Banxico SF61745</div>
+            </div>
           </div>
         </div>
 
-        <!-- TARJETA: TU DIPUTADO HOY -->
-        <div class="card mb-16" style="background:linear-gradient(135deg,rgba(99,179,237,0.08),rgba(139,92,246,0.05));border-color:var(--accent2)" id="dash-diputado-card">
-          <div style="font-size:10px;color:var(--accent2);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🗳️ TU REPRESENTANTE — ÚLTIMA VOTACIÓN</div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <div id="dash-diputado-avatar" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">CM</div>
-            <div style="flex:1">
-              <div style="font-size:14px;font-weight:700" id="dash-diputado-nombre">Cargando...</div>
-              <div style="font-size:11px;color:var(--text3)" id="dash-diputado-info"></div>
+        <!-- CTA primario: Consultar la Ley -->
+        <div style="padding:24px 0 0">
+          <button onclick="showPage('ia')"
+            style="width:100%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;color:#fff;border-radius:20px;padding:22px 24px;font-size:18px;font-weight:700;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 32px rgba(59,130,246,0.3);transition:transform 0.15s">
+            <div style="text-align:left">
+              <div style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:0.5px">PREGUNTA EN ESPAÑOL SENCILLO</div>
+              <div style="font-size:22px;margin-top:4px">Consultar la Ley con IA</div>
+              <div style="font-size:11px;opacity:0.7;margin-top:6px" id="dash-leyes-count">— leyes indexadas</div>
             </div>
-            <button onclick="showPage('votaciones')" style="background:none;border:1px solid var(--accent2);color:var(--accent2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Ver más →</button>
-          </div>
-          <div id="dash-votos-recientes" style="display:flex;flex-direction:column;gap:6px"></div>
-          <button onclick="compartirDashDiputado()" style="width:100%;margin-top:10px;background:rgba(99,179,237,0.1);border:1px solid var(--accent2);color:var(--accent2);border-radius:10px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            📸 Generar imagen para compartir
+            <div style="font-size:36px">⚖️</div>
           </button>
         </div>
 
-        <!-- ALERTA DEL DÍA -->
-        <div id="dash-alerta-card" class="card mb-16" style="border-color:var(--red);background:rgba(239,68,68,0.05);display:none">
-          <div style="font-size:10px;color:var(--red2);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">🚨 ALERTA EN TU REGIÓN</div>
-          <div id="dash-alerta-texto" style="font-size:13px;line-height:1.6"></div>
-          <button id="dash-alerta-btn" style="margin-top:10px;background:none;border:1px solid var(--red);color:var(--red2);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Ver alerta completa →</button>
-        </div>
-
-        <!-- SESIÓN EN CURSO — solo se muestra si hay sesión activa -->
-        <div class="alert alert-info mb-16" id="dash-sesion-vivo" style="display:none">
-          <span>🔴</span>
-          <span>Sesión en curso — Se vota la <strong>Reforma de Agua Potable</strong>. <a onclick="showPage('votaciones');setTimeout(()=>abrirVotacion('agua'),200)" style="color:var(--accent2);cursor:pointer;text-decoration:underline">Ver en vivo →</a></span>
-        </div>
-
-        <!-- NOTICIA DESTACADA DE TU ESTADO -->
-        <div class="card mb-16" id="dash-noticia-estado" style="cursor:pointer;border-left:4px solid var(--green2)" onclick="showPage('noticias')">
-          <div style="font-size:10px;color:var(--green2);font-weight:700;letter-spacing:0.5px;margin-bottom:8px">📰 NOTICIA DESTACADA EN TU ESTADO</div>
-          <div style="font-size:15px;font-weight:700;margin-bottom:6px;line-height:1.3" id="dash-noticia-titulo">Cargando noticias...</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.5" id="dash-noticia-resumen"></div>
-          <div style="font-size:11px;color:var(--text3);margin-top:8px" id="dash-noticia-meta"></div>
-        </div>
-
-        <!-- NOTICIAS IA en tiempo real -->
-        <div class="card mb-16" style="border-color:rgba(99,179,237,0.3)">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:10px;color:var(--accent2);font-weight:700;letter-spacing:0.5px">🤖 NOTICIAS IA · ACTUALIZACIÓN EN VIVO</div>
-            <button onclick="actualizarDashboard()" style="background:none;border:none;font-size:10px;color:var(--accent2);cursor:pointer;font-family:inherit">↻ Actualizar</button>
-          </div>
-          <div id="dash-ia-noticias"><div style="font-size:12px;color:var(--text3)">Toca "Actualizar" para cargar noticias de tu estado con IA 🧠</div></div>
-        </div>
-
-        <!-- ACCIONES RÁPIDAS -->
-        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:10px">⚡ ACCIONES RÁPIDAS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-          <div onclick="showPage('acciones')" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(99,179,237,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">⚡</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Genera tu denuncia</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">La IA la redacta en segundos</div>
-          </div>
-          <div onclick="showPage('politicos')" style="background:linear-gradient(135deg,#1a1a1a,#dc2626);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(239,68,68,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">📋</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Promesas rotas</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Comparte y viraliza</div>
-          </div>
-          <div onclick="showPage('organizacion');switchOrgTab('ot-planeador')" style="background:linear-gradient(135deg,#0f2027,#7c3aed);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(139,92,246,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">✊</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Organízate</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Plan de acción con IA</div>
-          </div>
-          <div onclick="showPage('noticias')" style="background:linear-gradient(135deg,#0f2027,#16a34a);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(34,197,94,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">📰</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Noticias de hoy</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Lo que pasa en tu estado</div>
-          </div>
-        </div>
-
-        <!-- STATS + ACTIVIDAD -->
-        <div class="grid-4 mb-16">
-          <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
-            <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" style="color:var(--accent2)">~1,240</div>
-            <div class="stat-change" style="color:var(--text3)">Muestra de 15 en app</div>
-          </div>
-          <div class="stat-card" onclick="showPage('iniciativas')" style="cursor:pointer">
-            <div class="stat-label">INICIATIVAS ACTIVAS <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('iniciativas_activas')">🔍</button></div>
-            <div class="stat-value" style="color:var(--green2)">47</div>
-            <div class="stat-change up">↑ 12 nuevas hoy</div>
-          </div>
-          <div class="stat-card" onclick="showPage('dinero')" style="cursor:pointer">
-            <div class="stat-label">DEUDA PÚBLICA <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('deuda_publica')">🔍</button></div>
-            <div class="stat-value" style="color:var(--red2)">$13.7T</div>
-            <div class="stat-change down">↑ 3.2% vs 2023</div>
-          </div>
-          <div class="stat-card" onclick="showPage('ia')" style="cursor:pointer">
-            <div class="stat-label">CONSULTAS IA HOY <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('consultas_ia')">🔍</button></div>
-            <div class="stat-value" style="color:var(--purple)">18.4K</div>
-            <div class="stat-change up">↑ 340% vs ayer</div>
-          </div>
-        </div>
-
-        <!-- ACTIVIDAD LEGISLATIVA + INICIATIVAS -->
-        <div class="grid-2 mb-16" style="grid-template-columns:1.4fr 1fr">
-          <div class="card">
-            <div class="section-header">
-              <div>
-                <div class="card-title">Actividad Legislativa Reciente</div>
-                <div class="card-subtitle">Últimas votaciones en el Congreso</div>
-              </div>
-              <button class="btn btn-ghost" onclick="showPage('votaciones')">Ver todo →</button>
+        <!-- Accesos rápidos -->
+        <div style="padding:24px 0 0">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1.5px;margin-bottom:12px">ACCESOS RÁPIDOS</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+            <div class="dash-quick" onclick="showPage('pide-ayuda')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.15s">
+              <div style="font-size:28px;margin-bottom:8px">🤝</div>
+              <div style="font-weight:700;font-size:14px">Pide ayuda legal</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">Despachos verificados</div>
             </div>
-            <div class="flex flex-col gap-12">
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-green">Aprobada</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Ley General de Agua Potable</div><div class="text-xs">278 a favor · 42 en contra · 12 abstenciones</div></div>
-                <div class="text-xs">Hoy</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-red">Rechazada</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Reforma Fiscal Progresiva</div><div class="text-xs">140 a favor · 195 en contra · 5 abstenciones</div></div>
-                <div class="text-xs">Ayer</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-yellow">En debate</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Ley de IA en Sector Público</div><div class="text-xs">Comisión de Ciencia y Tecnología</div></div>
-                <div class="text-xs">Hace 2 días</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0">
-                <span class="badge badge-blue">Nueva</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Paridad Salarial Empresas +50</div><div class="text-xs">Presentada por 3 partidos</div></div>
-                <div class="text-xs">Hace 3 días</div>
-              </div>
+            <div class="dash-quick" onclick="showPage('economia')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.15s">
+              <div style="font-size:28px;margin-bottom:8px">📈</div>
+              <div style="font-weight:700;font-size:14px">Economía</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">CETES, INPC, reservas</div>
             </div>
-          </div>
-          <div class="card">
-            <div class="section-header">
-              <div><div class="card-title">Iniciativas Ciudadanas</div><div class="card-subtitle">Las más votadas</div></div>
+            <div class="dash-quick" onclick="showPage('municipio')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.15s">
+              <div style="font-size:28px;margin-bottom:8px">📊</div>
+              <div style="font-weight:700;font-size:14px">Tu Estado</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">Población, escolaridad</div>
             </div>
-            <div class="flex flex-col gap-16">
-              <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">🌊 Agua pública sin privatizar</div><div class="init-prog-label"><span>128,430 firmas</span><span>85%</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:85%"></div></div></div>
-              <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">🏫 Internet gratuito en escuelas</div><div class="init-prog-label"><span>94,210 firmas</span><span>63%</span></div><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:63%"></div></div></div>
-              <div><div style="font-size:13px;font-weight:500;margin-bottom:6px">⚕️ Clínicas comunitarias 24/7</div><div class="init-prog-label"><span>61,800 firmas</span><span>41%</span></div><div class="progress-bar-outer"><div class="progress-bar-inner yellow" style="width:41%"></div></div></div>
-              <button class="btn btn-primary w-full" onclick="showPage('iniciativas')" style="justify-content:center;margin-top:4px">Ver todas</button>
+            <div class="dash-quick" onclick="showPage('clima')" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all 0.15s">
+              <div style="font-size:28px;margin-bottom:8px">🌤️</div>
+              <div style="font-weight:700;font-size:14px">Clima</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">32 capitales hoy</div>
             </div>
           </div>
         </div>
 
-        <!-- GASTO PÚBLICO + DERECHOS -->
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-title mb-8">💰 Gasto Público Hoy</div>
-            <div class="card-subtitle mb-12">Ejercido del presupuesto federal</div>
-            <div class="flex flex-col gap-10">
-              <div><div class="flex justify-between text-xs mb-8"><span>🏥 Salud</span><span class="mono">$148.3B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:72%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🏫 Educación</span><span class="mono">$124.7B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:60%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🛡️ Seguridad</span><span class="mono">$98.2B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner yellow" style="width:47%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🏗️ Infraestructura</span><span class="mono">$76.1B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner red" style="width:37%"></div></div></div>
-            </div>
-            <button class="btn btn-ghost w-full" onclick="showPage('dinero')" style="justify-content:center;margin-top:12px">Ver desglose completo →</button>
-          </div>
-          <div class="card">
-            <div class="card-title mb-8">🛡️ Derechos más Consultados</div>
-            <div class="card-subtitle mb-12">Esta semana</div>
-            <div class="flex flex-col gap-10">
-              <div class="flex items-center gap-10"><span style="font-size:18px">⚖️</span><div><div style="font-size:13px;font-weight:500">Derechos en detención</div><div class="text-xs">8,420 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">💼</span><div><div style="font-size:13px;font-weight:500">Derechos laborales</div><div class="text-xs">6,210 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">🏥</span><div><div style="font-size:13px;font-weight:500">Acceso a salud pública</div><div class="text-xs">4,100 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">🌿</span><div><div style="font-size:13px;font-weight:500">Derechos ambientales</div><div class="text-xs">2,840 consultas</div></div></div>
-            </div>
-            <button class="btn btn-danger w-full" onclick="showPage('emergencia')" style="justify-content:center;margin-top:12px">🚨 Modo Emergencia</button>
-          </div>
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
+          Datos actualizados cada semana ·
+          <a href="https://www.banxico.org.mx/" target="_blank" style="color:var(--accent2)">Banxico</a> ·
+          <a href="https://www.inegi.org.mx/" target="_blank" style="color:var(--accent2)">INEGI</a> ·
+          <a href="https://smn.conagua.gob.mx/" target="_blank" style="color:var(--accent2)">SMN</a>
         </div>
 
       </div>
     </div>
+    <style>
+      .dash-quick:hover { transform: translateY(-2px); border-color: var(--border2); background: var(--surface2); }
+      .dash-card { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+      @media (max-width: 480px) {
+        #dash-hero { grid-template-columns: 1fr !important; }
+        .dash-card { padding: 16px !important; }
+        .dash-card div:nth-child(2) { font-size: 36px !important; }
+      }
+    </style>
+    <script>
+      // Carga datos del dashboard desde /api/data?vista=dashboard
+      (async function loadTequioDashboard() {
+        try {
+          const r = await fetch('/api/data?vista=dashboard');
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const d = await r.json();
+          const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+          const ahora = new Date();
+          const fechaEl = document.getElementById('dash-fecha-hoy');
+          if (fechaEl) fechaEl.textContent = 'Hoy es ' + ahora.getDate() + ' de ' + meses[ahora.getMonth()] + ' de ' + ahora.getFullYear();
+          if (d.dolar) {
+            document.getElementById('dash-dolar').textContent = '$' + d.dolar.valor.toFixed(2);
+            const v = d.dolar.variacion_pct || 0;
+            const flecha = v > 0 ? '↑' : v < 0 ? '↓' : '→';
+            const color = v > 0 ? '#fecaca' : v < 0 ? '#bbf7d0' : '#e5e7eb';
+            document.getElementById('dash-dolar-variacion').innerHTML =
+              '<span style="color:' + color + '">' + flecha + ' ' + Math.abs(v).toFixed(2) + '% vs. ayer</span>';
+          }
+          if (d.inflacion) {
+            document.getElementById('dash-inflacion').textContent = d.inflacion.valor.toFixed(2) + '%';
+            document.getElementById('dash-inflacion-mes').textContent = 'Reporte ' + (d.inflacion.mes || '');
+          }
+          if (d.tasa_banxico) {
+            document.getElementById('dash-tasa').textContent = d.tasa_banxico.valor.toFixed(2) + '%';
+          }
+          if (d.leyes_count !== undefined) {
+            document.getElementById('dash-leyes-count').textContent =
+              d.leyes_count + ' leyes federales indexadas con IA';
+          }
+        } catch (e) {
+          console.error('Dashboard data load failed:', e);
+          const fechaEl = document.getElementById('dash-fecha-hoy');
+          if (fechaEl) fechaEl.textContent = 'No pudimos cargar los datos en vivo';
+        }
+      })();
+    </script>
 
     <!-- ───── LEYES ───── -->
     <div id="page-leyes" class="page">
