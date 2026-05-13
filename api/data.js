@@ -111,6 +111,19 @@ export default async function handler(req, res) {
       return res.status(200).json({ estados: rows });
     }
 
+    if (vista === 'presas') {
+      // Trae histórico ordenado por fecha_corte DESC y deduplica al último por presa
+      const rows = await sb('presas_cuencas?order=fecha_corte.desc&select=fecha_corte,presa,estado,capacidad_total_hm3,almacenamiento_hm3,pct_almacenamiento&limit=2000');
+      const ultimasPorPresa = {};
+      for (const r of rows) {
+        if (!ultimasPorPresa[r.presa]) ultimasPorPresa[r.presa] = r;
+      }
+      const presas = Object.values(ultimasPorPresa)
+        .filter(p => p.almacenamiento_hm3 != null)
+        .sort((a, b) => (b.pct_almacenamiento ?? -1) - (a.pct_almacenamiento ?? -1));
+      return res.status(200).json({ presas });
+    }
+
     if (vista === 'despachos') {
       const area = (req.query.area || '').toLowerCase();
       const rows = await sb('despachos_verificados?activo=eq.true&verificado=eq.true&order=rating.desc.nullslast&select=id,nombre,responsable,especialidades,estados,telefono,whatsapp,email,sitio_web,rating,num_resenas,primera_consulta_gratis,plan');
@@ -152,7 +165,7 @@ export default async function handler(req, res) {
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
-      'dashboard','clima','alertas','sequia','despachos','crear_lead',
+      'dashboard','clima','alertas','sequia','presas','despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
     ]});
   } catch (e) {
