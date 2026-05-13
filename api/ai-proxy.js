@@ -8,7 +8,7 @@
 //   SUPABASE_ANON_KEY    – clave anon pública (con RLS read-only)
 //
 // Flujo:
-//   1) Genera embedding de la última pregunta del usuario (text-embedding-004, 768d)
+//   1) Genera embedding de la última pregunta del usuario (gemini-embedding-001 MRL 768d)
 //   2) Llama al RPC match_legal_documents en Supabase para top-5 leyes/jurisprudencias
 //   3) Inyecta esas fuentes como contexto adicional al system prompt
 //   4) Llama a Gemini generateContent
@@ -16,7 +16,7 @@
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const EMBED_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+const EMBED_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent';
 const RAG_TOP_K = 5;
 const RAG_MAX_CONTEXT_CHARS = 4000;
 
@@ -38,14 +38,15 @@ async function searchLegalContext(apiKey, queryText) {
   if (!supaUrl || !supaKey || !queryText) return [];
 
   try {
-    // 1) Generate embedding via Gemini text-embedding-004
+    // 1) Generate embedding via Gemini gemini-embedding-001 (text-embedding-004 deprecado)
     const embedRes = await fetch(`${EMBED_ENDPOINT}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'models/text-embedding-004',
+        model: 'models/gemini-embedding-001',
         content: { parts: [{ text: queryText.substring(0, 2000) }] },
         taskType: 'RETRIEVAL_QUERY',
+        outputDimensionality: 768,
       }),
     });
     if (!embedRes.ok) return [];
@@ -200,7 +201,7 @@ module.exports = async function handler(req, res) {
     // 2) Pull relevant legal docs (degrades silently if RAG unavailable)
     const docs = await searchLegalContext(apiKey, lastUserText);
 
-    // 3) Inyecta docs into the system prompt
+    // 3) Inject docs into the system prompt
     const enrichedSystem = buildRagSystem(body?.system, docs);
 
     // 4) Build Gemini request
@@ -232,4 +233,4 @@ module.exports = async function handler(req, res) {
       error: { type: 'internal_error', message: err?.message || 'Error desconocido' },
     });
   }
-}
+};
