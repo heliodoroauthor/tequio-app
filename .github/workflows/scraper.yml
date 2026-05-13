@@ -1,7 +1,6 @@
 name: Tequio Data Pipeline
 
 # Corre cada domingo a las 4am UTC (10pm CDMX domingo)
-# También se puede correr a mano desde la pestaña Actions
 on:
   schedule:
     - cron: '0 4 * * 1'
@@ -30,7 +29,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml openpyxl
 
-      # ── Legal: DOF + SCJN (con embeddings Gemini) ──
       - name: Legal scraper (DOF + SCJN)
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'legal' || github.event.inputs.modulo == '' }}
         env:
@@ -42,16 +40,15 @@ jobs:
         run: python scripts/scrape_to_supabase.py
         continue-on-error: true
 
-      # ── CONAGUA v3: HTML/CSV puro ──
-      - name: CONAGUA v3 scraper (HTML + Excel + JSON SINA)
+      # ── CONAGUA v4: Open-Meteo + boletín texto + XLSX real + SINA ──
+      - name: CONAGUA v4 scraper
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'conagua' || github.event.inputs.modulo == '' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python scripts/scrape_conagua_v3.py
+        run: python scripts/scrape_conagua_v4.py
         continue-on-error: true
 
-      # ── Banxico: tipo de cambio, salario mínimo, inflación ──
       - name: Banxico scraper (economía)
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'banxico' || github.event.inputs.modulo == '' }}
         env:
@@ -61,7 +58,6 @@ jobs:
         run: python scripts/scrape_banxico.py
         continue-on-error: true
 
-      # ── INEGI: población, pobreza, empleo, GDP ──
       - name: INEGI scraper (demográficos)
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'inegi' || github.event.inputs.modulo == '' }}
         env:
