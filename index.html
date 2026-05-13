@@ -1804,6 +1804,44 @@
       </div>
     </div>
 
+    <!-- ── GRUPO 0: DATOS EN VIVO (REAL DATA) ── -->
+    <div class="nav-section">
+      <div class="nav-label" style="color:#22c55e;letter-spacing:1.5px">📡 Datos en Vivo</div>
+
+      <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
+        <span class="icon">🆘</span> Pide Ayuda Legal
+        <span class="nav-badge green">Nuevo</span>
+      </div>
+      <div class="nav-item" data-page="economia" onclick="showPage('economia')">
+        <span class="icon">📈</span> Economía México
+        <span class="nav-badge green">Banxico</span>
+      </div>
+      <div class="nav-item" data-page="tu-estado" onclick="showPage('tu-estado')">
+        <span class="icon">🗺️</span> Tu Estado
+        <span class="nav-badge green">INEGI</span>
+      </div>
+      <div class="nav-item" data-page="clima" onclick="showPage('clima')">
+        <span class="icon">🌤️</span> Clima Hoy
+        <span class="nav-badge green">32 caps</span>
+      </div>
+      <div class="nav-item" data-page="alertas" onclick="showPage('alertas')">
+        <span class="icon">⛈️</span> Alertas Meteo
+        <span class="nav-badge" style="background:#dc2626;color:#fff">SMN</span>
+      </div>
+      <div class="nav-item" data-page="sequia" onclick="showPage('sequia')">
+        <span class="icon">🏜️</span> Monitor Sequía
+        <span class="nav-badge green">CONAGUA</span>
+      </div>
+      <div class="nav-item" data-page="jurisprudencia" onclick="showPage('jurisprudencia')">
+        <span class="icon">⚖️</span> Jurisprudencia SCJN
+        <span class="nav-badge" style="background:#f59e0b;color:#fff">Próx.</span>
+      </div>
+      <div class="nav-item" data-page="presas" onclick="showPage('presas')">
+        <span class="icon">💧</span> Presas y Cuencas
+        <span class="nav-badge green">CONAGUA</span>
+      </div>
+    </div>
+
     <!-- ── GRUPO 1: INFORMACIÓN PÚBLICA ── -->
     <div class="nav-section">
       <div class="nav-label" style="color:var(--accent3);letter-spacing:1.5px">📡 Información Pública</div>
@@ -2371,16 +2409,66 @@
       </div>
     </div>
 
-    <!-- ───── PRESAS Y CUENCAS (PLACEHOLDER) ───── -->
+    <!-- ───── PRESAS Y CUENCAS (DATOS REALES CONAGUA SIH) ───── -->
     <div id="page-presas" class="page" style="display:none">
       <div class="content">
         <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">💧 Presas y Cuencas</h1>
-        <div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;margin-top:16px">
-          <div style="font-size:64px;margin-bottom:12px">⏳</div>
-          <div style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Información en validación con fuente oficial</div>
-          <div style="color:var(--text2);font-size:15px;max-width:480px;margin:0 auto 20px;line-height:1.5">El <strong>SINA</strong> (Sistema Nacional de Información del Agua) cambió de endpoint. Estamos reconectando.</div>
-          <a href="https://sinaweb.conagua.gob.mx/" target="_blank" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:14px 24px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver fuente oficial →</a>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Nivel de almacenamiento de las principales presas del país. Fuente: <a href="https://sih.conagua.gob.mx/" target="_blank" style="color:var(--accent2)">CONAGUA SIH</a>.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+          <input id="presas-filtro" type="text" placeholder="🔍 Filtrar por presa o estado..."
+            oninput="presasFiltrar()"
+            style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+          <select id="presas-orden" onchange="presasFiltrar()"
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+            <option value="pct_desc">% llenado: alto → bajo</option>
+            <option value="pct_asc">% llenado: bajo → alto</option>
+            <option value="alm_desc">Almacenamiento: mayor → menor</option>
+            <option value="nombre">Alfabético</option>
+          </select>
         </div>
+        <div id="presas-stats" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+        <div id="presas-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"></div>
+      </div>
+    </div>
+
+    <!-- ───── TU ESTADO (DATOS REALES INEGI) ───── -->
+    <div id="page-tu-estado" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🗺️ Tu Estado</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Indicadores demográficos del INEGI por entidad federativa.</p>
+
+        <!-- Selector de estado -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center">
+          <label style="font-size:13px;color:var(--text2);font-weight:600">Estado:</label>
+          <select id="tu-estado-sel" onchange="cargarTuEstadoDatos()"
+            style="flex:1;min-width:220px;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none"></select>
+        </div>
+
+        <!-- Tabs vista -->
+        <div class="tab-bar" style="margin-bottom:16px">
+          <div class="tab active" id="tu-estado-tab-cards" onclick="tuEstadoSetVista('cards')">📊 Indicadores</div>
+          <div class="tab" id="tu-estado-tab-ranking" onclick="tuEstadoSetVista('ranking')">🏆 Ranking nacional</div>
+        </div>
+
+        <!-- Vista cards -->
+        <div id="tu-estado-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px"></div>
+
+        <!-- Vista ranking -->
+        <div id="tu-estado-ranking" style="display:none">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+            <label style="font-size:13px;color:var(--text2);font-weight:600">Comparar por:</label>
+            <select id="tu-estado-indicador-sel" onchange="cargarTuEstadoRanking()"
+              style="flex:1;min-width:220px;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
+              <option value="1002000001">👥 Población total</option>
+              <option value="1002000002">👩 Población femenina</option>
+              <option value="1002000003">👨 Población masculina</option>
+              <option value="6207019035">🎓 Promedio de escolaridad</option>
+            </select>
+          </div>
+          <div id="tu-estado-ranking-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"></div>
+        </div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://www.inegi.org.mx/" target="_blank" style="color:var(--accent2)">INEGI · Banco de Indicadores</a></div>
       </div>
     </div>
 
@@ -2575,6 +2663,190 @@
         } catch(e) { document.getElementById('sequia-tabla').innerHTML = '<div style="color:#ef4444;padding:20px">Error.</div>'; }
       }
 
+      // ── TU ESTADO (INEGI) ────────────────────────────────
+      // Lista oficial de las 32 entidades federativas (code, nombre)
+      const __ESTADOS_INEGI = [
+        ['01','Aguascalientes'],['02','Baja California'],['03','Baja California Sur'],
+        ['04','Campeche'],['05','Coahuila'],['06','Colima'],['07','Chiapas'],
+        ['08','Chihuahua'],['09','Ciudad de México'],['10','Durango'],
+        ['11','Guanajuato'],['12','Guerrero'],['13','Hidalgo'],['14','Jalisco'],
+        ['15','México (Estado de)'],['16','Michoacán'],['17','Morelos'],
+        ['18','Nayarit'],['19','Nuevo León'],['20','Oaxaca'],['21','Puebla'],
+        ['22','Querétaro'],['23','Quintana Roo'],['24','San Luis Potosí'],
+        ['25','Sinaloa'],['26','Sonora'],['27','Tabasco'],['28','Tamaulipas'],
+        ['29','Tlaxcala'],['30','Veracruz'],['31','Yucatán'],['32','Zacatecas'],
+      ];
+
+      const __INDICADORES_LABEL = {
+        '1002000001': { label: 'Población total',      icon: '👥', fmt: 'int', unit: 'personas' },
+        '1002000002': { label: 'Población femenina',   icon: '👩', fmt: 'int', unit: 'personas' },
+        '1002000003': { label: 'Población masculina',  icon: '👨', fmt: 'int', unit: 'personas' },
+        '6207019035': { label: 'Promedio escolaridad', icon: '🎓', fmt: 'dec', unit: 'años' },
+      };
+
+      function __fmtNumero(v, fmt) {
+        if (v == null || isNaN(v)) return '—';
+        if (fmt === 'int') return Math.round(v).toLocaleString('es-MX');
+        return (+v).toFixed(2);
+      }
+
+      function tuEstadoSetVista(vista) {
+        document.getElementById('tu-estado-tab-cards').classList.toggle('active', vista === 'cards');
+        document.getElementById('tu-estado-tab-ranking').classList.toggle('active', vista === 'ranking');
+        document.getElementById('tu-estado-cards').style.display = vista === 'cards' ? 'grid' : 'none';
+        document.getElementById('tu-estado-ranking').style.display = vista === 'ranking' ? 'block' : 'none';
+        if (vista === 'ranking' && !window.__rankingCargado) { cargarTuEstadoRanking(); }
+      }
+
+      async function cargarTuEstadoDatos() {
+        const codigo = document.getElementById('tu-estado-sel').value;
+        const cont = document.getElementById('tu-estado-cards');
+        cont.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text2)">Cargando…</div>';
+        try {
+          const r = await fetch('/api/data?vista=inegi_estado&estado=' + encodeURIComponent(codigo));
+          const j = await r.json();
+          const filas = j.indicadores || [];
+          // Filtrar al último valor por indicador
+          const ultimoPorInd = {};
+          filas.forEach(f => {
+            const id = f.indicador_id;
+            if (!ultimoPorInd[id] || (f.fecha || '') > (ultimoPorInd[id].fecha || '')) {
+              ultimoPorInd[id] = f;
+            }
+          });
+          const cards = [];
+          Object.keys(__INDICADORES_LABEL).forEach(id => {
+            const meta = __INDICADORES_LABEL[id];
+            const f = ultimoPorInd[id];
+            const valor = f ? __fmtNumero(f.valor, meta.fmt) : '—';
+            const fecha = f && f.fecha ? f.fecha.slice(0,4) : '';
+            cards.push(`
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+                <div style="font-size:11px;letter-spacing:1px;color:var(--text2)">${meta.icon} ${meta.label.toUpperCase()}</div>
+                <div style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:6px 0;color:var(--accent2)">${valor}</div>
+                <div style="font-size:12px;color:var(--text2)">${meta.unit}${fecha ? ' · ' + fecha : ''}</div>
+              </div>`);
+          });
+          cont.innerHTML = cards.join('') || '<div style="grid-column:1/-1;color:var(--text2);text-align:center;padding:24px">Sin datos para este estado.</div>';
+        } catch(e) {
+          cont.innerHTML = '<div style="grid-column:1/-1;color:#ef4444;text-align:center;padding:24px">Error al cargar.</div>';
+        }
+      }
+
+      async function cargarTuEstadoRanking() {
+        const indId = document.getElementById('tu-estado-indicador-sel').value;
+        const meta = __INDICADORES_LABEL[indId];
+        const cont = document.getElementById('tu-estado-ranking-tabla');
+        cont.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text2)">Cargando ranking…</div>';
+        try {
+          const r = await fetch('/api/data?vista=inegi_comparador&indicador=' + encodeURIComponent(indId));
+          const j = await r.json();
+          const filas = (j.estados || []).filter(f => f.valor != null);
+          if (!filas.length) { cont.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text2)">Sin datos.</div>'; return; }
+          const seleccionado = document.getElementById('tu-estado-sel').value;
+          const ubicSel = (__ESTADOS_INEGI.find(e => e[0] === seleccionado) || [])[1] || '';
+          const max = Math.max(...filas.map(f => +f.valor || 0));
+          let html = '<div style="display:grid;grid-template-columns:48px 1fr 110px 1fr;gap:0;font-size:11px;color:var(--text2);font-weight:700;letter-spacing:0.5px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2)"><div>#</div><div>ESTADO</div><div style="text-align:right">VALOR</div><div></div></div>';
+          filas.forEach((f, idx) => {
+            const pct = max ? Math.round((+f.valor / max) * 100) : 0;
+            const esSeleccionado = (f.ubicacion || '').toLowerCase().includes(ubicSel.toLowerCase().split(' (')[0].slice(0,8));
+            const bg = esSeleccionado ? 'background:linear-gradient(90deg,rgba(34,197,94,0.10),transparent);' : '';
+            html += `<div style="display:grid;grid-template-columns:48px 1fr 110px 1fr;gap:0;padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;align-items:center;${bg}">
+              <div style="font-weight:700;color:${idx < 3 ? '#fbbf24' : 'var(--text2)'}">${idx+1}</div>
+              <div${esSeleccionado ? ' style="font-weight:700"' : ''}>${f.ubicacion || '—'}</div>
+              <div style="text-align:right;font-family:var(--font-display);font-weight:700">${__fmtNumero(f.valor, meta.fmt)}</div>
+              <div style="padding-left:16px"><div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div></div>
+            </div>`;
+          });
+          cont.innerHTML = html;
+          window.__rankingCargado = true;
+        } catch(e) {
+          cont.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center">Error al cargar ranking.</div>';
+        }
+      }
+
+      function cargarTuEstadoInit() {
+        if (window.__loadedPages['tu-estado']) return;
+        const sel = document.getElementById('tu-estado-sel');
+        sel.innerHTML = __ESTADOS_INEGI.map(e => `<option value="${e[0]}">${e[1]}</option>`).join('');
+        sel.value = '09'; // Default CDMX
+        cargarTuEstadoDatos();
+        window.__loadedPages['tu-estado'] = true;
+      }
+
+      // ── PRESAS Y CUENCAS (CONAGUA SIH) ─────────────────────
+      window.__presasData = [];
+      function presasColorPct(pct) {
+        if (pct == null) return '#94a3b8';
+        if (pct >= 75) return '#22c55e';
+        if (pct >= 50) return '#84cc16';
+        if (pct >= 25) return '#f59e0b';
+        return '#ef4444';
+      }
+      function presasRenderTabla(filas) {
+        const cont = document.getElementById('presas-tabla');
+        if (!filas.length) {
+          cont.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text2)">Sin coincidencias.</div>';
+          return;
+        }
+        let html = '<div style="display:grid;grid-template-columns:3fr 1.6fr 1.3fr 1.3fr 1fr;gap:0;font-size:11px;color:var(--text2);font-weight:700;letter-spacing:0.5px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2)"><div>PRESA</div><div>ESTADO</div><div style="text-align:right">CAPACIDAD</div><div style="text-align:right">ALMACENADO</div><div style="text-align:right">% LLENO</div></div>';
+        filas.forEach(p => {
+          const color = presasColorPct(p.pct_almacenamiento);
+          const cap = p.capacidad_total_hm3 != null ? (+p.capacidad_total_hm3).toFixed(0) + ' hm³' : '—';
+          const alm = p.almacenamiento_hm3 != null ? (+p.almacenamiento_hm3).toFixed(0) + ' hm³' : '—';
+          const pct = p.pct_almacenamiento != null ? (+p.pct_almacenamiento).toFixed(0) + '%' : '—';
+          const pctNum = p.pct_almacenamiento != null ? Math.min(100, Math.max(0, +p.pct_almacenamiento)) : 0;
+          html += `<div style="display:grid;grid-template-columns:3fr 1.6fr 1.3fr 1.3fr 1fr;gap:0;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;align-items:center">
+            <div style="display:flex;align-items:center;gap:10px"><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:${color};flex:none"></span><div>${p.presa}<div style="font-size:10px;color:var(--text3);margin-top:2px">${p.fecha_corte || ''}</div></div></div>
+            <div style="color:var(--text2)">${p.estado || '—'}</div>
+            <div style="text-align:right;color:var(--text2)">${cap}</div>
+            <div style="text-align:right;font-family:var(--font-display);font-weight:700">${alm}</div>
+            <div style="text-align:right;font-weight:700;color:${color}">${pct}<div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:${pctNum}%;height:100%;background:${color}"></div></div></div>
+          </div>`;
+        });
+        cont.innerHTML = html;
+      }
+      function presasFiltrar() {
+        const q = (document.getElementById('presas-filtro').value || '').toLowerCase().trim();
+        const orden = document.getElementById('presas-orden').value;
+        let filas = window.__presasData.filter(p => {
+          if (!q) return true;
+          return (p.presa || '').toLowerCase().includes(q) || (p.estado || '').toLowerCase().includes(q);
+        });
+        const sorters = {
+          pct_desc: (a,b)=>(b.pct_almacenamiento??-1)-(a.pct_almacenamiento??-1),
+          pct_asc:  (a,b)=>(a.pct_almacenamiento??101)-(b.pct_almacenamiento??101),
+          alm_desc: (a,b)=>(b.almacenamiento_hm3??-1)-(a.almacenamiento_hm3??-1),
+          nombre:   (a,b)=>(a.presa||'').localeCompare(b.presa||''),
+        };
+        filas.sort(sorters[orden] || sorters.pct_desc);
+        presasRenderTabla(filas);
+        const total = window.__presasData.length;
+        const promedio = window.__presasData
+          .filter(p => p.pct_almacenamiento != null)
+          .reduce((s,p,_,a) => s + (+p.pct_almacenamiento)/a.length, 0);
+        document.getElementById('presas-stats').textContent =
+          `${filas.length} de ${total} presas · promedio nacional: ${promedio ? promedio.toFixed(1) + '%' : 'n/a'}`;
+      }
+      async function cargarPresas() {
+        if (window.__loadedPages['presas']) return;
+        const cont = document.getElementById('presas-tabla');
+        cont.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text2)">Cargando presas…</div>';
+        try {
+          const r = await fetch('/api/data?vista=presas');
+          const j = await r.json();
+          window.__presasData = j.presas || [];
+          if (!window.__presasData.length) {
+            cont.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text2)">Aún no hay datos. El scraper corre cada lunes.</div>';
+            return;
+          }
+          presasFiltrar();
+          window.__loadedPages['presas'] = true;
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center">Error al cargar.</div>';
+        }
+      }
+
       // Hook: cuando showPage cambia, carga la data específica
       (function() {
         const __origShowPage = window.showPage;
@@ -2585,6 +2857,8 @@
           if (p === 'clima') cargarClima();
           if (p === 'alertas') cargarAlertas();
           if (p === 'sequia') cargarSequia();
+          if (p === 'tu-estado') cargarTuEstadoInit();
+          if (p === 'presas') cargarPresas();
           if (p === 'pide-ayuda') leadPaso(1);
         };
       })();
