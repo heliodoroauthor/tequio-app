@@ -29,6 +29,42 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
+# ── Capacidades NAMO (hm³) de las ~50 presas más grandes de México ──
+# Fuente: CONAGUA · Inventario Nacional de Presas. Match por substring lowercase
+# Esta tabla actúa como fallback cuando el XLS-catalog no se parsea correctamente
+CAPACIDAD_FALLBACK = {
+    'angostura': 19737,        'malpaso': 12373,         'nezahualcoyotl': 12373,
+    'chicoasen': 1376,         'penitas': 1090,          'infiernillo': 12000,
+    'aguamilpa': 6960,         'cerro de oro': 2400,     'cerro prieto': 393,
+    'cuchillo': 1123,          'rodrigo gomez': 39,      'la boca': 39,
+    'vicente guerrero': 5340,  'falcon': 4080,           'amistad': 7069,
+    'marte r': 740,            'marte r. gomez': 740,    'solis': 800,
+    'allende': 178,            'begona': 60,             'capulin': 26,
+    'zimapan': 1070,           'lazaro cardenas': 4419,  'el palmito': 4419,
+    'huites': 4568,            'adolfo lopez mateos': 3386, 'humaya': 3386,
+    'sanalona': 845,           'bacurato': 1860,         'comedero': 3395,
+    'jose lopez portillo': 3395, 'plutarco elias calles': 339, 'cazadero': 50,
+    'la boquilla': 2894,       'lago toronto': 2894,     'francisco i. madero': 351,
+    'francisco i madero': 351, 'las virgenes': 388,      'luis l. leon': 326,
+    'luis l leon': 326,        'el granero': 326,        'caracol': 1190,
+    'la villita': 700,         'tepuxtepec': 370,        'don martin': 1329,
+    'venustiano carranza': 1329, 'trigomil': 309,        'calderon': 80,
+    'santa rosa': 366,         'yuriria': 188,           'necaxa': 47,
+    'la angostura, son': 921,  'el novillo': 2925,       'oviachic': 3023,
+    'alvaro obregon': 3023,    'el carrizo': 156,
+}
+
+
+def buscar_capacidad_fallback(nombre_presa):
+    """Si el XLS no dio capacidad, intenta match por nombre con dict hardcoded."""
+    if not nombre_presa:
+        return None
+    n = nombre_presa.lower().replace('é','e').replace('ó','o').replace('í','i').replace('á','a').replace('ú','u').replace('ñ','n')
+    for key, cap in CAPACIDAD_FALLBACK.items():
+        if key in n:
+            return cap
+    return None
+
 print("Tequio Presas Scraper — CONAGUA SIH")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE_URL: {'OK' if SUPABASE_URL else 'MISSING'}")
@@ -196,14 +232,20 @@ def main():
         if not fecha or vol is None:
             sin_dato += 1
             continue
+        # Usar capacidad del catálogo XLS si existe; sino fallback hardcoded
+        cap = p['capacidad']
+        if not cap:
+            cap = buscar_capacidad_fallback(p['presa'])
         pct = None
-        if p['capacidad'] and p['capacidad'] > 0:
-            pct = round((vol / p['capacidad']) * 100, 2)
+        if cap and cap > 0:
+            pct = round((vol / cap) * 100, 2)
+            if pct > 200:  # sanity: si vol es > 2× capacidad, descarta como dato erróneo
+                pct = None
         row = {
             'fecha_corte': fecha,
             'presa': (p['presa'] or p['clave'])[:120],
             'estado': (p['estado'][:80] if p['estado'] else None),
-            'capacidad_total_hm3': p['capacidad'],
+            'capacidad_total_hm3': cap,
             'almacenamiento_hm3': round(vol, 2),
             'pct_almacenamiento': pct,
             'fuente': 'CONAGUA SIH',
