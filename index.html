@@ -2847,10 +2847,14 @@
         }
       }
 
-      // Hook: cuando showPage cambia, carga la data específica
-      (function() {
+      // Hook: cuando showPage cambia, carga la data específica.
+      // showPage se define ~9000 líneas más abajo en el archivo, así que esperamos.
+      (function instalarHookShowPage() {
+        if (typeof window.showPage !== 'function') {
+          setTimeout(instalarHookShowPage, 50);
+          return;
+        }
         const __origShowPage = window.showPage;
-        if (typeof __origShowPage !== 'function') return;
         window.showPage = function(p) {
           __origShowPage.apply(this, arguments);
           if (p === 'economia') cargarEconomia();
