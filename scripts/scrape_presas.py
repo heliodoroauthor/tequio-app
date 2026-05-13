@@ -59,36 +59,49 @@ def cargar_catalogo():
 
     try:
         book = xlrd.open_workbook(file_contents=r.content)
+        print(f"  Hojas: {book.nsheets} → {book.sheet_names()}")
         sheet = book.sheet_by_index(0)
+        print(f"  Hoja[0]: {sheet.name}, filas={sheet.nrows}, cols={sheet.ncols}")
     except Exception as e:
         print(f"  EXC parse xls: {e}")
         return []
 
-    # Detectar encabezados en las primeras 6 filas
+    # Detectar encabezados en las primeras 8 filas. Imprimir todo lo que vemos.
     header_row = None
     col_map = {}
     for ri in range(min(8, sheet.nrows)):
         try:
-            row = [str(sheet.cell_value(ri, c)).strip().upper() for c in range(sheet.ncols)]
+            row_raw = [str(sheet.cell_value(ri, c)).strip() for c in range(sheet.ncols)]
+            row = [v.upper() for v in row_raw]
         except Exception:
             continue
-        if any('CLAVE' in v for v in row):
+        if any('CLAVE' in v for v in row) or any('ESTACI' in v for v in row):
             header_row = ri
+            print(f"  Fila encabezado [{ri}]: {row_raw[:14]}")
             for ci, v in enumerate(row):
-                if 'CLAVE' in v and 'clave' not in col_map:
+                v_clean = v.replace('.', '').replace(' ', '')
+                if ('CLAVE' in v or v == 'ESTACION' or v == 'ESTACIÓN') and 'clave' not in col_map:
                     col_map['clave'] = ci
-                elif ('NOMBRE' in v and 'OFICIAL' not in v) or 'COMUN' in v:
-                    col_map.setdefault('presa', ci)
-                elif 'ENTIDAD' in v or 'ESTADO' in v:
-                    col_map.setdefault('estado', ci)
-                elif 'NAMO' in v:
-                    col_map.setdefault('capacidad', ci)
+                elif (('NOMBRE' in v and 'OFICIAL' not in v) or 'COMUN' in v) and 'presa' not in col_map:
+                    col_map['presa'] = ci
+                elif ('ENTIDAD' in v or 'ESTADO' in v) and 'estado' not in col_map:
+                    col_map['estado'] = ci
+                elif ('NAMO' in v_clean or 'CAPACIDAD' in v or v_clean.startswith('CAP') or
+                      'VOLUMENALNAMO' in v_clean or 'CAPNAMO' in v_clean) and 'capacidad' not in col_map:
+                    col_map['capacidad'] = ci
             break
 
     if header_row is None or 'clave' not in col_map:
-        print(f"  ERR: encabezados no encontrados. cols vistas: {col_map}")
+        # Imprimir las primeras filas crudas para debug
+        print(f"  ERR: encabezados no encontrados. col_map: {col_map}")
+        for ri in range(min(6, sheet.nrows)):
+            print(f"    [{ri}] {[str(sheet.cell_value(ri,c))[:20] for c in range(min(sheet.ncols,12))]}")
         return []
     print(f"  Encabezados fila {header_row}, mapeo: {col_map}")
+    # Mostrar primera fila de datos como sanity check
+    if sheet.nrows > header_row + 1:
+        sample = {k: sheet.cell_value(header_row+1, ci) for k, ci in col_map.items()}
+        print(f"  Sample fila {header_row+1}: {sample}")
 
     presas = []
     for ri in range(header_row + 1, sheet.nrows):
