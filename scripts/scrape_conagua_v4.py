@@ -142,7 +142,7 @@ def scrape_clima_municipal():
                 'timezone':  'America/Mexico_City',
                 'forecast_days': 1,
             }
-            r = requests.get(base, params=params, headers=HEADERS, timeout=20)
+            r = requests.get(base, params=params, headers=HEADERS, timeout=35)
             if not r.ok:
                 print(f"   [WARN] {capital}: HTTP {r.status_code}")
                 continue
@@ -162,7 +162,7 @@ def scrape_clima_municipal():
             }
             rows.append({
                 'fecha_pronostico':  hoy,
-                'municipio_id':      f"capital_{estado[:3].upper()}",
+                'municipio_id':      f"capital_" + estado.upper().replace(' ', '_').replace('Á','A').replace('É','E').replace('Í','I').replace('Ó','O').replace('Ú','U').replace('Ñ','N')[:30],
                 'municipio':         capital,
                 'estado':            estado,
                 'temp_max':          _num(d['temperature_2m_max'][0]),
