@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       modulo:
-        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | backfill_embeddings)'
+        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | presas | backfill_embeddings)'
         required: false
         default: 'all'
 
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml openpyxl
+          pip install requests beautifulsoup4 lxml openpyxl xlrd==1.2.0
 
       - name: Legal scraper (DOF + SCJN)
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'legal' || github.event.inputs.modulo == '' }}
@@ -63,6 +63,15 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           INEGI_TOKEN: ${{ secrets.INEGI_TOKEN }}
         run: python scripts/scrape_inegi.py
+        continue-on-error: true
+
+      - name: Presas scraper (CONAGUA SIH)
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'presas' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MAX_PRESAS: '210'
+        run: python scripts/scrape_presas.py
         continue-on-error: true
 
       # ── Backfill embeddings (manual via workflow_dispatch) ──
