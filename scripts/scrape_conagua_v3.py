@@ -104,7 +104,7 @@ def scrape_clima_municipal():
     print("\n[CLIMA] Pronostico general por estado (HTML)...")
     url = "https://smn.conagua.gob.mx/es/pronostico-meteorologico-general"
     try:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT, verify=False)
         if not r.ok:
             print(f"   [WARN] HTTP {r.status_code} en {url}")
             return
@@ -177,7 +177,7 @@ def scrape_monitor_sequia():
     print("\n[SEQUIA] Monitor de Sequia (Excel quincenal)...")
     url = "https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico"
     try:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT, verify=False)
         if not r.ok:
             print(f"   [WARN] HTTP {r.status_code}")
             return
@@ -204,7 +204,7 @@ def scrape_monitor_sequia():
         candidatos.sort(key=lambda x: (-x[0],))
         _, archivo_url, archivo_nombre = candidatos[0]
         print(f"   Descargando: {archivo_nombre}")
-        r2 = requests.get(archivo_url, headers=HEADERS, timeout=TIMEOUT)
+        r2 = requests.get(archivo_url, headers=HEADERS, timeout=TIMEOUT, verify=False)
         if not r2.ok:
             print(f"   [WARN] HTTP {r2.status_code} al descargar")
             return
@@ -322,7 +322,7 @@ def scrape_alertas_meteo():
     print("\n[ALERTAS] Avisos meteorologicos vigentes...")
     url = "https://smn.conagua.gob.mx/es/avisos-tiempo"
     try:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT, verify=False)
         if not r.ok:
             print(f"   [WARN] HTTP {r.status_code}")
             return
