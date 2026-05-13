@@ -2133,6 +2133,337 @@
       })();
     </script>
 
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         NUEVAS PÁGINAS TEQUIO v2 — leads + datos reales + placeholders
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- ───── PIDE AYUDA LEGAL ───── -->
+    <div id="page-pide-ayuda" class="page" style="display:none">
+      <div class="content">
+        <div style="padding:24px 0 0">
+          <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin-bottom:4px">🤝 Pide ayuda legal</h1>
+          <p style="color:var(--text2);font-size:14px;margin-top:4px">Conectamos tu caso con un despacho verificado. La primera consulta suele ser gratis.</p>
+        </div>
+        <div style="padding:16px 0 0">
+          <div style="display:flex;gap:6px">
+            <div id="lead-dot-1" style="flex:1;height:6px;background:var(--accent);border-radius:3px"></div>
+            <div id="lead-dot-2" style="flex:1;height:6px;background:var(--surface);border-radius:3px"></div>
+            <div id="lead-dot-3" style="flex:1;height:6px;background:var(--surface);border-radius:3px"></div>
+          </div>
+        </div>
+
+        <div class="lead-paso" id="lead-paso-1" style="padding:24px 0;display:block">
+          <h2 style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:6px">Cuéntame qué te pasó</h2>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Usa tus palabras. No necesitas saber términos legales — yo te entiendo.</p>
+          <textarea id="lead-descripcion" placeholder="Por ejemplo: Mi patrón no me pagó el aguinaldo y cuando le reclamé me despidieron sin razón..." style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:16px;font-size:16px;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
+          <button onclick="leadPaso(2)" style="width:100%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:#fff;padding:18px;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:24px">Continuar →</button>
+        </div>
+
+        <div class="lead-paso" id="lead-paso-2" style="padding:24px 0;display:none">
+          <div id="lead-cargando" style="text-align:center;padding:60px 20px">
+            <div style="font-size:48px;margin-bottom:16px">🤔</div>
+            <div style="font-size:18px;color:var(--text);font-weight:600">Analizando tu caso…</div>
+            <div style="font-size:13px;color:var(--text2);margin-top:8px">Esto toma 2-3 segundos</div>
+          </div>
+          <div id="lead-resultado" style="display:none">
+            <h2 style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:6px">Esto es lo que detecté</h2>
+            <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Si no es exacto, no te preocupes — puedes corregir abajo.</p>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px">
+              <div style="font-size:11px;color:var(--text2);letter-spacing:1px;font-weight:600">TIPO DE CASO</div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent2);margin-top:4px" id="lead-tipo">—</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:24px">
+              <div style="font-size:11px;color:var(--text2);letter-spacing:1px;font-weight:600">ÁREA</div>
+              <div style="font-size:16px;font-weight:600;margin-top:4px" id="lead-area">—</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-direction:column">
+              <button onclick="leadPaso(3)" style="background:linear-gradient(135deg,#16a34a,#22c55e);border:none;color:#fff;padding:18px;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit">🔍 Buscar abogado especialista →</button>
+              <button onclick="showPage('ia')" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:16px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit">Solo quiero entenderlo mejor</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lead-paso" id="lead-paso-3" style="padding:24px 0;display:none">
+          <h2 style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:6px">Despachos especializados</h2>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Todos verificados por Tequio. Puedes contactar a varios sin compromiso.</p>
+          <div id="lead-despachos-list" style="display:flex;flex-direction:column;gap:12px"></div>
+          <div style="margin-top:24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:center;font-size:13px;color:var(--text2)">
+            💡 Tequio nunca te cobra. Los despachos verificados pagan membresía mensual.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── ECONOMÍA ───── -->
+    <div id="page-economia" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">📈 Economía México</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Datos del Banco de México actualizados cada semana.</p>
+        <div id="econ-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px"></div>
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://www.banxico.org.mx/" target="_blank" style="color:var(--accent2)">Banxico SIE</a></div>
+      </div>
+    </div>
+
+    <!-- ───── CLIMA (DATOS REALES) ───── -->
+    <div id="page-clima" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🌤️ Clima hoy</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Pronóstico para las capitales estatales · Fuente: <a href="https://open-meteo.com/" target="_blank" style="color:var(--accent2)">Open-Meteo</a></p>
+        <div id="clima-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"></div>
+      </div>
+    </div>
+
+    <!-- ───── ALERTAS METEO ───── -->
+    <div id="page-alertas" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">⛈️ Alertas Meteorológicas</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Boletín oficial del Servicio Meteorológico Nacional.</p>
+        <div id="alertas-list"></div>
+      </div>
+    </div>
+
+    <!-- ───── MONITOR SEQUÍA (DATOS REALES) ───── -->
+    <div id="page-sequia" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🏜️ Monitor de Sequía</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Porcentaje de municipios en cada nivel de sequía por estado. Fuente: <a href="https://smn.conagua.gob.mx/" target="_blank" style="color:var(--accent2)">CONAGUA SMN</a></p>
+        <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"></div>
+      </div>
+    </div>
+
+    <!-- ───── JURISPRUDENCIA SCJN (PLACEHOLDER) ───── -->
+    <div id="page-jurisprudencia" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">⚖️ Jurisprudencia SCJN</h1>
+        <div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;margin-top:16px">
+          <div style="font-size:64px;margin-bottom:12px">⏳</div>
+          <div style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Información en validación con fuente oficial</div>
+          <div style="color:var(--text2);font-size:15px;max-width:480px;margin:0 auto 20px;line-height:1.5">Estamos coordinando con la <strong>Suprema Corte de Justicia de la Nación</strong> para conectar las tesis y jurisprudencias en tiempo real.</div>
+          <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:14px 24px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver fuente oficial →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── PRESAS Y CUENCAS (PLACEHOLDER) ───── -->
+    <div id="page-presas" class="page" style="display:none">
+      <div class="content">
+        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">💧 Presas y Cuencas</h1>
+        <div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;margin-top:16px">
+          <div style="font-size:64px;margin-bottom:12px">⏳</div>
+          <div style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Información en validación con fuente oficial</div>
+          <div style="color:var(--text2);font-size:15px;max-width:480px;margin:0 auto 20px;line-height:1.5">El <strong>SINA</strong> (Sistema Nacional de Información del Agua) cambió de endpoint. Estamos reconectando.</div>
+          <a href="https://sinaweb.conagua.gob.mx/" target="_blank" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:14px 24px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver fuente oficial →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ JAVASCRIPT PARA LAS NUEVAS PÁGINAS ═══════════ -->
+    <script>
+      // ── Lead module ────────────────────────────────────
+      let __leadDatos = { descripcion:'', tipo:'', area:'' };
+
+      function leadPaso(n) {
+        document.querySelectorAll('.lead-paso').forEach(el => el.style.display='none');
+        document.getElementById('lead-paso-' + n).style.display = 'block';
+        for (let i=1;i<=3;i++) {
+          const dot = document.getElementById('lead-dot-' + i);
+          if (dot) dot.style.background = i <= n ? 'var(--accent)' : 'var(--surface)';
+        }
+        if (n === 2) clasificarCaso();
+        if (n === 3) cargarDespachos();
+      }
+
+      async function clasificarCaso() {
+        const desc = document.getElementById('lead-descripcion').value.trim();
+        if (!desc || desc.length < 20) {
+          alert('Cuéntame un poco más (mínimo 20 caracteres).');
+          leadPaso(1); return;
+        }
+        __leadDatos.descripcion = desc;
+        document.getElementById('lead-cargando').style.display = 'block';
+        document.getElementById('lead-resultado').style.display = 'none';
+        // Heurística simple en cliente para clasificar caso por keywords
+        // (se reemplaza por llamada a Gemini si /api/ai-proxy soporta 'clasificar_caso')
+        const low = desc.toLowerCase();
+        let tipo='General', area='Asesoría legal';
+        if (/aguinaldo|patron|patrón|despido|trabajo|salario|sueldo|jornada|imss/.test(low)) { tipo='LABORAL'; area='Derecho del trabajo'; }
+        else if (/divorcio|pension|alimentaria|hijos|custodia|matrimonio|herencia/.test(low)) { tipo='FAMILIAR'; area='Derecho familiar'; }
+        else if (/contrato|renta|arrendamiento|alquiler|inmueble|propiedad/.test(low)) { tipo='CIVIL'; area='Derecho civil/inmobiliario'; }
+        else if (/robo|asalto|agresion|agresión|denuncia|fiscal|delito|carcel|cárcel/.test(low)) { tipo='PENAL'; area='Derecho penal'; }
+        else if (/factura|sat|hacienda|impuesto|iva|isr/.test(low)) { tipo='FISCAL'; area='Derecho fiscal'; }
+        else if (/empresa|sociedad|accionista|negocio/.test(low)) { tipo='MERCANTIL'; area='Derecho mercantil'; }
+        __leadDatos.tipo = tipo;
+        __leadDatos.area = area;
+        setTimeout(() => {
+          document.getElementById('lead-tipo').textContent = tipo;
+          document.getElementById('lead-area').textContent = area;
+          document.getElementById('lead-cargando').style.display = 'none';
+          document.getElementById('lead-resultado').style.display = 'block';
+        }, 1200);
+      }
+
+      async function cargarDespachos() {
+        const cont = document.getElementById('lead-despachos-list');
+        cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Buscando despachos…</div>';
+        try {
+          const r = await fetch('/api/data?vista=despachos&area=' + encodeURIComponent(__leadDatos.area));
+          const j = await r.json();
+          const despachos = j.despachos || [];
+          if (!despachos.length) {
+            cont.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center"><div style="font-size:36px;margin-bottom:8px">🔍</div><div style="font-weight:700;margin-bottom:6px">Aún no tenemos despachos en esta especialidad</div><div style="color:var(--text2);font-size:13px">Déjanos tu correo y te contactamos cuando tengamos uno disponible.</div></div>';
+            return;
+          }
+          cont.innerHTML = despachos.map(d => `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+                <div style="font-size:18px;font-weight:700">⚖️ ${d.nombre}</div>
+                <div style="font-size:13px;color:#fbbf24">⭐ ${(d.rating||0).toFixed(1)} (${d.num_resenas||0})</div>
+              </div>
+              <div style="font-size:13px;color:#22c55e;margin-bottom:6px">✓ Verificado por Tequio</div>
+              <div style="font-size:13px;color:var(--text2);margin-bottom:4px">📍 ${(d.estados||[]).join(', ')}</div>
+              ${d.primera_consulta_gratis ? '<div style="font-size:13px;color:#22c55e;margin-bottom:12px">💰 Primera consulta GRATIS</div>' : ''}
+              <div style="display:flex;gap:8px;margin-top:12px">
+                ${d.telefono ? `<a href="tel:${d.telefono}" onclick="registrarLead('${d.id}','llamada')" style="flex:1;background:var(--accent);color:#fff;text-decoration:none;padding:12px;border-radius:10px;text-align:center;font-weight:600;font-size:14px">📞 Llamar</a>` : ''}
+                ${d.whatsapp ? `<a href="https://wa.me/${d.whatsapp.replace(/\\D/g,'')}" target="_blank" onclick="registrarLead('${d.id}','whatsapp')" style="flex:1;background:#22c55e;color:#fff;text-decoration:none;padding:12px;border-radius:10px;text-align:center;font-weight:600;font-size:14px">💬 WhatsApp</a>` : ''}
+              </div>
+            </div>`).join('');
+        } catch(e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al cargar despachos. Intenta más tarde.</div>';
+        }
+      }
+
+      async function registrarLead(despachoId, canal) {
+        try {
+          await fetch('/api/data?vista=crear_lead', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ despacho_id: despachoId, canal, descripcion: __leadDatos.descripcion.slice(0,1000), area_legal: __leadDatos.area, tipo_caso: __leadDatos.tipo })
+          });
+        } catch(e) {}
+      }
+
+      // ── Cargadores diferidos por página (hook en showPage) ────
+      window.__loadedPages = window.__loadedPages || {};
+
+      async function cargarEconomia() {
+        if (window.__loadedPages['economia']) return;
+        try {
+          const r = await fetch('/api/data?vista=dashboard');
+          const d = await r.json();
+          const cards = [];
+          const cardStyle = 'background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px';
+          const valor = (v, sufijo='') => '<div style="font-size:32px;font-weight:800;font-family:var(--font-display);margin:4px 0">' + (v != null ? v.toFixed(2) + sufijo : '—') + '</div>';
+          if (d.dolar) cards.push('<div style="' + cardStyle + '"><div style="font-size:11px;letter-spacing:1px;color:var(--text2)">DÓLAR FIX</div>' + valor(d.dolar.valor, ' MXN') + '<div style="font-size:12px;color:var(--text2)">' + (d.dolar.fecha || '') + '</div></div>');
+          if (d.inflacion) cards.push('<div style="' + cardStyle + '"><div style="font-size:11px;letter-spacing:1px;color:var(--text2)">INFLACIÓN ANUAL</div>' + valor(d.inflacion.valor, '%') + '<div style="font-size:12px;color:var(--text2)">' + (d.inflacion.mes || '') + '</div></div>');
+          if (d.tasa_banxico) cards.push('<div style="' + cardStyle + '"><div style="font-size:11px;letter-spacing:1px;color:var(--text2)">TASA BANXICO</div>' + valor(d.tasa_banxico.valor, '%') + '<div style="font-size:12px;color:var(--text2)">' + (d.tasa_banxico.fecha || '') + '</div></div>');
+          document.getElementById('econ-cards').innerHTML = cards.join('') || '<div style="color:var(--text2)">Sin datos disponibles.</div>';
+          window.__loadedPages['economia'] = true;
+        } catch(e) { document.getElementById('econ-cards').innerHTML = '<div style="color:#ef4444">Error al cargar.</div>'; }
+      }
+
+      async function cargarClima() {
+        if (window.__loadedPages['clima']) return;
+        try {
+          const r = await fetch('/api/data?vista=clima');
+          const j = await r.json();
+          const cap = j.capitales || [];
+          if (!cap.length) {
+            document.getElementById('clima-grid').innerHTML = '<div style="color:var(--text2);padding:20px">Sin datos hoy.</div>';
+            return;
+          }
+          const iconForCielo = (c) => {
+            const x = (c||'').toLowerCase();
+            if (/tormenta/.test(x)) return '⛈️';
+            if (/lluvia|chubasco|llovizna/.test(x)) return '🌧️';
+            if (/nublado/.test(x)) return '☁️';
+            if (/despejado/.test(x)) return '☀️';
+            return '🌤️';
+          };
+          document.getElementById('clima-grid').innerHTML = cap.map(c => `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <div style="font-size:14px;font-weight:700">${c.estado}</div>
+                  <div style="font-size:11px;color:var(--text2)">${c.municipio}</div>
+                </div>
+                <div style="font-size:28px">${iconForCielo(c.desc_cielo)}</div>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px;margin-top:8px">
+                <div style="font-size:30px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${Math.round(c.temp_max)}°</div>
+                <div style="font-size:18px;color:var(--text2)">/ ${Math.round(c.temp_min)}°</div>
+              </div>
+              <div style="font-size:12px;color:var(--text2);margin-top:4px">${c.desc_cielo || ''}${c.prob_lluvia != null ? ' · 💧 ' + c.prob_lluvia + '%' : ''}</div>
+            </div>`).join('');
+          window.__loadedPages['clima'] = true;
+        } catch(e) { document.getElementById('clima-grid').innerHTML = '<div style="color:#ef4444">Error al cargar.</div>'; }
+      }
+
+      async function cargarAlertas() {
+        if (window.__loadedPages['alertas']) return;
+        try {
+          const r = await fetch('/api/data?vista=alertas');
+          const j = await r.json();
+          const alertas = j.alertas || [];
+          if (!alertas.length) {
+            document.getElementById('alertas-list').innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center"><div style="font-size:36px;margin-bottom:8px">✅</div><div style="font-weight:700">Sin alertas vigentes hoy</div></div>';
+            return;
+          }
+          const colors = { rojo:'#ef4444', naranja:'#f97316', amarillo:'#f59e0b', verde:'#22c55e' };
+          document.getElementById('alertas-list').innerHTML = alertas.map(a => `
+            <div style="background:var(--surface);border:1px solid var(--border);border-left:6px solid ${colors[a.nivel]||'#94a3b8'};border-radius:14px;padding:20px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+                <div style="font-size:16px;font-weight:700;flex:1">${a.nombre}</div>
+                <div style="font-size:11px;background:${colors[a.nivel]||'#94a3b8'};color:#fff;padding:4px 10px;border-radius:8px;text-transform:uppercase;font-weight:700">${a.nivel||'info'}</div>
+              </div>
+              <div style="font-size:14px;color:var(--text2);line-height:1.5;margin-top:8px">${(a.descripcion||'').slice(0,500)}${(a.descripcion||'').length > 500 ? '…' : ''}</div>
+              ${a.zona_afectada ? '<div style="font-size:12px;color:var(--accent2);margin-top:8px">📍 ' + a.zona_afectada + '</div>' : ''}
+            </div>`).join('');
+          window.__loadedPages['alertas'] = true;
+        } catch(e) { document.getElementById('alertas-list').innerHTML = '<div style="color:#ef4444">Error al cargar.</div>'; }
+      }
+
+      async function cargarSequia() {
+        if (window.__loadedPages['sequia']) return;
+        try {
+          const r = await fetch('/api/data?vista=sequia');
+          const j = await r.json();
+          const filas = j.estados || [];
+          if (!filas.length) {
+            document.getElementById('sequia-tabla').innerHTML = '<div style="padding:24px;text-align:center;color:var(--text2)">Sin datos.</div>';
+            return;
+          }
+          const niveles = ['Excepcional','Extrema','Severa','Moderada','Anormal','Sin sequia'];
+          const colorNivel = (n) => ({'Excepcional':'#7c2d12','Extrema':'#dc2626','Severa':'#ea580c','Moderada':'#f59e0b','Anormal':'#fde047','Sin sequia':'#22c55e'})[n] || '#94a3b8';
+          let html = '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:0;font-size:11px;color:var(--text2);font-weight:700;letter-spacing:0.5px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2)"><div>ESTADO</div><div style="text-align:right">D0</div><div style="text-align:right">D1</div><div style="text-align:right">D2</div><div style="text-align:right">D3</div><div style="text-align:right">D4</div></div>';
+          filas.forEach(f => {
+            html += '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:0;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;align-items:center"><div><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:' + colorNivel(f.nivel_sequia) + ';margin-right:8px"></span>' + f.estado + '</div>';
+            ['pct_anomalo_seco','pct_sequia_moderada','pct_sequia_severa','pct_sequia_extrema','pct_sequia_excepcional'].forEach(k => {
+              const v = f[k] || 0;
+              html += '<div style="text-align:right;color:' + (v > 25 ? '#fbbf24' : 'var(--text2)') + '">' + v.toFixed(0) + '%</div>';
+            });
+            html += '</div>';
+          });
+          document.getElementById('sequia-tabla').innerHTML = html;
+          window.__loadedPages['sequia'] = true;
+        } catch(e) { document.getElementById('sequia-tabla').innerHTML = '<div style="color:#ef4444;padding:20px">Error.</div>'; }
+      }
+
+      // Hook: cuando showPage cambia, carga la data específica
+      (function() {
+        const __origShowPage = window.showPage;
+        if (typeof __origShowPage !== 'function') return;
+        window.showPage = function(p) {
+          __origShowPage.apply(this, arguments);
+          if (p === 'economia') cargarEconomia();
+          if (p === 'clima') cargarClima();
+          if (p === 'alertas') cargarAlertas();
+          if (p === 'sequia') cargarSequia();
+          if (p === 'pide-ayuda') leadPaso(1);
+        };
+      })();
+    </script>
+
     <!-- ───── LEYES ───── -->
     <div id="page-leyes" class="page">
       <div class="content">
