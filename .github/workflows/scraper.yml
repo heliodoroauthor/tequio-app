@@ -1,25 +1,19 @@
-name: Tequio Legal Scraper
+name: Tequio Data Pipeline
 
-# Corre cada lunes a las 4am UTC (10pm hora CDMX domingo)
-# También se puede correr manualmente desde la pestaña Actions
 on:
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
-      fuente:
-        description: 'Fuente a scrapear (dof | scjn | diputados | all)'
+      modulo:
+        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi)'
         required: false
         default: 'all'
-      max_paginas:
-        description: 'Máximo de páginas a scrapear'
-        required: false
-        default: '5'
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,16 +22,45 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml
 
-      - name: Run scraper
+      - name: Legal scraper (DOF + SCJN)
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'legal' || github.event.inputs.modulo == '' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          FUENTE: ${{ github.event.inputs.fuente || 'all' }}
-          MAX_PAGINAS: ${{ github.event.inputs.max_paginas || '5' }}
+          FUENTE: 'all'
+          MAX_PAGINAS: '5'
         run: python scripts/scrape_to_supabase.py
+        continue-on-error: true
+
+      - name: CONAGUA scraper
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'conagua' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/scrape_conagua.py
+        continue-on-error: true
+
+      - name: Banxico scraper
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'banxico' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BANXICO_TOKEN: ${{ secrets.BANXICO_TOKEN }}
+        run: python scripts/scrape_banxico.py
+        continue-on-error: true
+
+      - name: INEGI scraper
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'inegi' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INEGI_TOKEN: ${{ secrets.INEGI_TOKEN }}
+        run: python scripts/scrape_inegi.py
+        continue-on-error: true
