@@ -1,13 +1,12 @@
 name: Tequio Data Pipeline
 
-# Corre cada domingo a las 4am UTC (10pm CDMX domingo)
 on:
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       modulo:
-        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi)'
+        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | backfill_embeddings)'
         required: false
         default: 'all'
 
@@ -40,7 +39,6 @@ jobs:
         run: python scripts/scrape_to_supabase.py
         continue-on-error: true
 
-      # ── CONAGUA v4: Open-Meteo + boletín texto + XLSX real + SINA ──
       - name: CONAGUA v4 scraper
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'conagua' || github.event.inputs.modulo == '' }}
         env:
@@ -66,3 +64,12 @@ jobs:
           INEGI_TOKEN: ${{ secrets.INEGI_TOKEN }}
         run: python scripts/scrape_inegi.py
         continue-on-error: true
+
+      # ── Backfill embeddings (manual via workflow_dispatch) ──
+      - name: Backfill embeddings (manual)
+        if: ${{ github.event.inputs.modulo == 'backfill_embeddings' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/backfill_embeddings.py
