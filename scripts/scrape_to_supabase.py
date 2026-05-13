@@ -32,12 +32,14 @@ def sanitize(s):
 
 
 def get_embedding(text):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={GEMINI_API_KEY}"
+    # gemini-embedding-001 reemplazó a text-embedding-004 (deprecado). MRL 768d.
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={GEMINI_API_KEY}"
     try:
         r = requests.post(url, json={
-            'model': 'models/text-embedding-004',
+            'model': 'models/gemini-embedding-001',
             'content': {'parts': [{'text': text[:2000]}]},
             'taskType': 'RETRIEVAL_DOCUMENT',
+            'outputDimensionality': 768,
         }, timeout=30)
         if not r.ok:
             print(f"   [WARN] Embed error {r.status_code}: {r.text[:120]}")
