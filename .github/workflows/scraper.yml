@@ -137,6 +137,16 @@ jobs:
         continue-on-error: true
         timeout-minutes: 15
 
+      - name: Noticias Cívicas (DOF + SCJN + SEGOB + Presidencia)
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'noticias' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MAX_PER_FUENTE: '40'
+        run: python scripts/scrape_noticias.py
+        continue-on-error: true
+        timeout-minutes: 10
+
       # ── Backfill embeddings (manual via workflow_dispatch) ──
       - name: Backfill embeddings (manual)
         if: ${{ github.event.inputs.modulo == 'backfill_embeddings' }}
