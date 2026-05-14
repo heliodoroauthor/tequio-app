@@ -16287,25 +16287,40 @@ async function cargarLeyesDesdeAPI() {
     if (!r.ok) throw new Error('http ' + r.status);
     const j = await r.json();
     if (!Array.isArray(j.leyes) || !j.leyes.length) return;
-    // Reemplazar leyesData con datos reales de Supabase, ordenados al final
-    const reales = j.leyes.map(l => ({
-      id: l.clave,
-      ambito: 'federal',
-      tema: l.materia || 'general',
-      titulo: l.nombre,
-      desc: l.descripcion || '',
-      estado: 'vigente',
-      etiquetas: [(l.materia || 'general').charAt(0).toUpperCase() + (l.materia || 'general').slice(1), 'Cám. Diputados'],
-      año: (l.fecha_publicacion || '').slice(0, 4) || 2024,
-      fuente: l.fuente || 'Cámara de Diputados · LeyesBiblio',
-      url: l.url,
-      db_id: l.id,
-    }));
-    // Fusionar: mantener las reformas/destacadas que ya están + agregar las reales
-    const conservar = leyesData.filter(l => l.ambito === 'reforma' || l.id.startsWith('REF-') || l.tema === 'constitucional');
+    // Mapear cada ley respetando su ámbito real (federal / estatal / municipal)
+    const reales = j.leyes.map(l => {
+      const ambitoReal = l.ambito || 'federal';
+      const etiquetas = [(l.materia || 'general').charAt(0).toUpperCase() + (l.materia || 'general').slice(1)];
+      if (l.entidad) etiquetas.push(l.entidad);
+      if (ambitoReal === 'federal') etiquetas.push('Cám. Diputados');
+      else if (ambitoReal === 'estatal') etiquetas.push('Congreso ' + (l.entidad || 'Estatal'));
+      return {
+        id: l.clave,
+        ambito: ambitoReal,
+        tema: l.materia || (l.tipo === 'constitucion' ? 'constitucional' : 'general'),
+        titulo: l.nombre,
+        desc: l.descripcion || (ambitoReal === 'estatal' ? 'Constitución vigente del estado de ' + (l.entidad || '') + '. Click para ver el texto oficial en el portal del Congreso local.' : ''),
+        estado: 'vigente',
+        etiquetas,
+        año: (l.fecha_publicacion || '').slice(0, 4) || 2024,
+        fuente: l.fuente || 'Cámara de Diputados · LeyesBiblio',
+        url: l.url,
+        entidad: l.entidad,
+        db_id: l.id,
+      };
+    });
+    // Fusionar: conservar reformas estáticas + agregar todas las reales
+    const conservar = leyesData.filter(l => l.ambito === 'reforma' || (l.id && l.id.startsWith && l.id.startsWith('REF-')));
     leyesData.length = 0;
     leyesData.push(...conservar, ...reales);
     leyesFiltrar();
+    // Actualizar el footer/contador con la info de ámbitos
+    if (j.por_ambito) {
+      const stats = document.getElementById('leyes-count-extra');
+      if (stats) {
+        stats.textContent = `${j.por_ambito.federal || 0} federales · ${j.por_ambito.estatal || 0} estatales · fuente oficial`;
+      }
+    }
   } catch (e) {
     console.warn('No se pudo cargar /api/data?vista=leyes, usando datos estáticos:', e);
   }
