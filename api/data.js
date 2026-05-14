@@ -680,6 +680,11 @@ export default async function handler(req, res) {
       const por_estado = rows.reduce((acc, z) => { acc[z.estado] = (acc[z.estado] || 0) + 1; return acc; }, {});
       return res.status(200).json({ zonas: rows, total: rows.length, por_estado });
     }
+    if (vista === 'unesco') {
+      const rows = await sb('unesco_mexico?select=*&order=anio_inscripcion.asc.nullslast,nombre.asc&limit=100');
+      const por_tipo = rows.reduce((acc, s) => { acc[s.tipo] = (acc[s.tipo] || 0) + 1; return acc; }, {});
+      return res.status(200).json({ sitios: rows, total: rows.length, por_tipo });
+    }
     if (vista === 'ombligo_museos') {
       const estado = (req.query.estado || '').trim();
       let path = 'inah_museos?select=*&order=estado.asc,nombre.asc&limit=300';
