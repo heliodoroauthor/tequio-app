@@ -841,6 +841,123 @@ export default async function handler(req, res) {
       return res.status(200).json({ leyes: rows });
     }
 
+    // ─────────────── CHAT COMUNITARIO ───────────────
+    // Helper: hash de IP para anti-flood (no se reversa, no identifica)
+    function ipHash(req) {
+      const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '0.0.0.0')
+        .split(',')[0].trim();
+      return nodeCrypto.createHash('sha256').update(ip + '|tequio-salt').digest('hex').slice(0, 32);
+    }
+
+    // Lista de palabras prohibidas (datos personales, doxxing, insultos extremos)
+    const PALABRAS_PROHIBIDAS = [
+      'puta','perra','maricon','pendejo','mamada','culero','verga','chinga tu madre',
+      'doxx','dirección de','teléfono de','rfc:','curp:','contraseña',
+    ];
+    function pasaFiltro(texto) {
+      const t = (texto || '').toLowerCase();
+      // Bloquea si contiene palabra prohibida
+      for (const p of PALABRAS_PROHIBIDAS) if (t.includes(p)) return { ok:false, motivo:'lenguaje no permitido o información personal' };
+      // Bloquea si parece teléfono mexicano (10 dígitos seguidos)
+      if (/\b\d{10}\b/.test(t)) return { ok:false, motivo:'no compartas números de teléfono' };
+      // Bloquea URLs sospechosas (solo permitir dominios .gob.mx o .org.mx)
+      const urls = t.match(/https?:\/\/[^\s]+/g) || [];
+      for (const u of urls) {
+        if (!/\.(gob\.mx|org\.mx|edu\.mx|unam\.mx|cdmx\.gob\.mx)\b/.test(u)) {
+          return { ok:false, motivo:'sólo se permiten enlaces a dominios oficiales (.gob.mx, .org.mx)' };
+        }
+      }
+      return { ok:true };
+    }
+
+    // GET listar mensajes
+    if (vista === 'chat') {
+      const estado = (req.query.estado || 'Nacional').trim();
+      const filtro = (req.query.filtro || '').trim();
+      let path = `mensajes_comunidad?select=id,nick,tipo,texto,estado,votos,created_at&oculto=eq.false&order=created_at.desc&limit=80`;
+      if (estado && estado !== 'todos') path += `&estado=eq.${encodeURIComponent(estado)}`;
+      if (filtro && filtro !== 'todos') path += `&tipo=eq.${encodeURIComponent(filtro)}`;
+      const rows = await sb(path);
+      // Conteo global hoy
+      const hoy = new Date(); hoy.setHours(0,0,0,0);
+      let total_hoy = 0;
+      try {
+        const cnt = await sb(`mensajes_comunidad?select=id&oculto=eq.false&created_at=gte.${hoy.toISOString()}&limit=1000`);
+        total_hoy = cnt.length;
+      } catch {}
+      return res.status(200).json({ mensajes: rows, total: rows.length, total_hoy });
+    }
+
+    // POST publicar
+    if (req.method === 'POST' && vista === 'chat_publicar') {
+      const body = req.body || {};
+      const texto = (body.texto || '').trim();
+      const tipo = (body.tipo || 'idea').trim();
+      const nick = (body.nick || '').trim() || ('Ciudadano_' + Math.floor(Math.random()*9000+1000));
+      const estado = (body.estado || 'Nacional').trim();
+      if (texto.length < 5 || texto.length > 500) return res.status(400).json({ error:'texto debe tener entre 5 y 500 caracteres' });
+      if (!['denuncia','idea','alerta','organizacion'].includes(tipo)) return res.status(400).json({ error:'tipo invalido' });
+      const filtro = pasaFiltro(texto);
+      if (!filtro.ok) return res.status(400).json({ error: filtro.motivo });
+      const hash = ipHash(req);
+      // Anti-flood: máximo 5 mensajes por hora desde misma IP
+      try {
+        const recientes = await sb(`mensajes_comunidad?select=id&ip_hash=eq.${hash}&created_at=gte.${new Date(Date.now()-3600000).toISOString()}&limit=10`);
+        if (recientes.length >= 5) return res.status(429).json({ error:'has publicado demasiado en la última hora. Inténtalo de nuevo más tarde.' });
+      } catch {}
+      await sbWrite('mensajes_comunidad', {
+        nick: nick.slice(0, 40),
+        tipo, texto: texto.slice(0, 500),
+        estado: estado.slice(0, 60),
+        ip_hash: hash,
+      });
+      return res.status(200).json({ ok:true });
+    }
+
+    // POST votar
+    if (req.method === 'POST' && vista === 'chat_votar') {
+      const id = (req.body?.id || '').trim();
+      if (!id) return res.status(400).json({ error:'id requerido' });
+      const key = SERVICE_KEY || ANON_KEY;
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/sql`, { method:'POST' }).catch(()=>null);
+      // PostgREST: incrementar votos vía PATCH
+      const patch = await fetch(`${SUPABASE_URL}/rest/v1/mensajes_comunidad?id=eq.${id}`, {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'apikey':key, 'Authorization':`Bearer ${key}`, 'Prefer':'return=representation' },
+        body: JSON.stringify({ votos: { increment: 1 } }),
+      });
+      // PostgREST no soporta increment nativo. Fallback: leer y escribir.
+      if (!patch.ok) {
+        const cur = await sb(`mensajes_comunidad?id=eq.${id}&select=votos&limit=1`);
+        const v = (cur[0]?.votos || 0) + 1;
+        const upd = await fetch(`${SUPABASE_URL}/rest/v1/mensajes_comunidad?id=eq.${id}`, {
+          method:'PATCH',
+          headers:{ 'Content-Type':'application/json', 'apikey':key, 'Authorization':`Bearer ${key}`, 'Prefer':'return=minimal' },
+          body: JSON.stringify({ votos: v }),
+        });
+        if (!upd.ok) return res.status(500).json({ error:'no se pudo votar' });
+      }
+      return res.status(200).json({ ok:true });
+    }
+
+    // POST reportar
+    if (req.method === 'POST' && vista === 'chat_reportar') {
+      const id = (req.body?.id || '').trim();
+      if (!id) return res.status(400).json({ error:'id requerido' });
+      const key = SERVICE_KEY || ANON_KEY;
+      const cur = await sb(`mensajes_comunidad?id=eq.${id}&select=reportes&limit=1`);
+      const r = (cur[0]?.reportes || 0) + 1;
+      const upd = await fetch(`${SUPABASE_URL}/rest/v1/mensajes_comunidad?id=eq.${id}`, {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'apikey':key, 'Authorization':`Bearer ${key}`, 'Prefer':'return=minimal' },
+        body: JSON.stringify({ reportes: r }),
+      });
+      if (!upd.ok) return res.status(500).json({ error:'no se pudo reportar' });
+      // El trigger SQL auto-oculta cuando reportes >= 3
+      return res.status(200).json({ ok:true, oculto: r >= 3 });
+    }
+    // ─────────────── FIN CHAT COMUNITARIO ───────────────
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
@@ -848,7 +965,8 @@ export default async function handler(req, res) {
       'quemones_ranking','quemon_detalle','mi_rep_vs_yo',
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
-      'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
+      'banxico_historico','inegi_estado','inegi_comparador','leyes_lista',
+      'chat','chat_publicar','chat_votar','chat_reportar'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
