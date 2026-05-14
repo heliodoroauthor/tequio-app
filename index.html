@@ -1923,8 +1923,12 @@
         <span class="nav-badge" title="Muestra representativa de leyes clave">Muestra</span>
       </div>
       <div class="nav-item" data-page="politicos" onclick="showPage('politicos')">
-        <span class="icon">🏛️</span> Políticos
+        <span class="icon">🏛️</span> Diputados
         <span class="nav-badge green">500 LXVI</span>
+      </div>
+      <div class="nav-item" data-page="senadores" onclick="showPage('senadores')">
+        <span class="icon">⚖️</span> Senadores
+        <span class="nav-badge green">128 LXVI</span>
       </div>
       <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
         <span class="icon">🗳️</span> Votaciones del Congreso
@@ -3025,6 +3029,178 @@
         }
       }
 
+      // ══════════════════════════════════════════════════════
+      // ── SENADORES LXVI — Fase 3.1.B ──────────────────────
+      // ══════════════════════════════════════════════════════
+      window.__senadoresData = [];
+      function senCard(s) {
+        const foto = s.foto_url || '';
+        const numComSec = Array.isArray(s.comisiones_secretario) ? s.comisiones_secretario.length : 0;
+        const numComInt = Array.isArray(s.comisiones_integrante) ? s.comisiones_integrante.length : 0;
+        const totalCom = numComSec + numComInt;
+        const sample = [
+          ...(s.comisiones_secretario || []).slice(0, 2).map(c => `★ ${c}`),
+          ...(s.comisiones_integrante || []).slice(0, 3),
+        ].slice(0, 4);
+        const cargoBadge = s.cargo_especial
+          ? `<div style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:10px;padding:3px 8px;border-radius:8px;font-weight:600;display:inline-block;margin-top:6px">⭐ ${s.cargo_especial.slice(0, 60)}${s.cargo_especial.length > 60 ? '…' : ''}</div>`
+          : '';
+        const fotoHTML = foto
+          ? `<img src="${foto}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);background:var(--surface2);flex-shrink:0">
+             <div style="width:64px;height:64px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:none;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">⚖️</div>`
+          : `<div style="width:64px;height:64px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">⚖️</div>`;
+        return `<div onclick="senOpenDetalle(${s.id})" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:transform 0.15s,border-color 0.15s" onmouseenter="this.style.transform='translateY(-2px)';this.style.borderColor='var(--accent2)'" onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--border)'">
+          <div style="display:flex;gap:12px;align-items:center">
+            ${fotoHTML}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;line-height:1.3;color:var(--text);margin-bottom:2px">${s.nombre_completo || '(sin nombre)'}</div>
+              ${s.partido ? `<div style="font-size:11px;color:var(--text2)">🏛️ ${s.partido}${s.entidad_federativa ? ' · ' + s.entidad_federativa : ''}</div>` : ''}
+              ${cargoBadge}
+            </div>
+          </div>
+          ${totalCom ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">📋 ${totalCom} comisión${totalCom !== 1 ? 'es' : ''}</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              ${sample.map(c => `<div style="font-size:11px;color:var(--text2);line-height:1.3">${c.length > 55 ? c.slice(0, 55) + '…' : c}</div>`).join('')}
+              ${totalCom > 4 ? `<div style="font-size:10px;color:var(--text3)">+ ${totalCom - 4} más…</div>` : ''}
+            </div>
+          </div>` : ''}
+        </div>`;
+      }
+      function senRenderGrid(filas) {
+        const grid = document.getElementById('sen-grid');
+        if (!filas.length) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Sin senadores que coincidan.</div>';
+          return;
+        }
+        grid.innerHTML = filas.map(senCard).join('');
+      }
+      function senFiltrar() {
+        const q = (document.getElementById('sen-search').value || '').toLowerCase().trim();
+        const filas = q
+          ? window.__senadoresData.filter(s =>
+              (s.nombre_completo || '').toLowerCase().includes(q) ||
+              (s.cargo_especial || '').toLowerCase().includes(q) ||
+              (s.entidad_federativa || '').toLowerCase().includes(q) ||
+              (s.partido || '').toLowerCase().includes(q)
+            )
+          : window.__senadoresData;
+        senRenderGrid(filas);
+        document.getElementById('sen-count').textContent = `${filas.length} de ${window.__senadoresData.length} senadores LXVI`;
+      }
+      async function senBuscarIA() {
+        const q = (document.getElementById('sen-search').value || '').trim();
+        if (!q) {
+          mostrarToast?.('Escribe un tema o palabra clave', 'info');
+          return;
+        }
+        const btn = document.getElementById('sen-ia-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span>⏳</span> Buscando con IA…';
+        btn.disabled = true;
+        try {
+          const r = await fetch(`/api/data?vista=senadores_busqueda&q=${encodeURIComponent(q)}&limit=20`);
+          const j = await r.json();
+          const filas = j.senadores || [];
+          senRenderGrid(filas);
+          const modo = j.modo === 'semantica' ? '🤖 IA semántica' : '🔤 texto';
+          document.getElementById('sen-count').textContent = `${filas.length} resultados · ${modo} · "${q}"`;
+        } catch (e) {
+          mostrarToast?.('Error en la búsqueda IA. Probando texto…', 'error');
+          senFiltrar();
+        } finally {
+          btn.innerHTML = original;
+          btn.disabled = false;
+        }
+      }
+      async function senOpenDetalle(id) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        overlay.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:24px">
+          <div style="text-align:center;padding:40px;color:var(--text2)">Cargando perfil…</div>
+        </div>`;
+        document.body.appendChild(overlay);
+        const box = overlay.firstElementChild;
+        try {
+          const r = await fetch(`/api/data?vista=senador_detalle&id=${id}`);
+          const j = await r.json();
+          const s = j.senador;
+          if (!s) { box.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text2)">No encontrado.</div>'; return; }
+          const fotoHTML = s.foto_url
+            ? `<img src="${s.foto_url}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--surface2)">
+               <div style="width:120px;height:120px;border-radius:50%;background:var(--surface2);border:3px solid var(--border);display:none;align-items:center;justify-content:center;font-size:48px">⚖️</div>`
+            : `<div style="width:120px;height:120px;border-radius:50%;background:var(--surface2);border:3px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:48px">⚖️</div>`;
+          const comSec = (s.comisiones_secretario || []);
+          const comInt = (s.comisiones_integrante || []);
+          box.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:18px">
+              <h2 style="margin:0;font-size:22px;font-weight:800;font-family:var(--font-display);line-height:1.2">⚖️ ${s.nombre_completo}</h2>
+              <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text2);font-size:14px;font-family:inherit">✕</button>
+            </div>
+            <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
+              ${fotoHTML}
+              <div style="flex:1;min-width:200px">
+                ${s.partido ? `<div style="margin-bottom:6px;font-size:13px"><strong>🏛️ Partido:</strong> ${s.partido}</div>` : ''}
+                ${s.entidad_federativa ? `<div style="margin-bottom:6px;font-size:13px"><strong>📍 Entidad:</strong> ${s.entidad_federativa}</div>` : ''}
+                ${s.tipo_eleccion ? `<div style="margin-bottom:6px;font-size:13px"><strong>🗳️ Elección:</strong> ${s.tipo_eleccion.replace(/_/g,' ')}</div>` : ''}
+                ${s.nombre_suplente ? `<div style="margin-bottom:6px;font-size:13px"><strong>👥 Suplente:</strong> ${s.nombre_suplente}</div>` : ''}
+                ${s.cargo_especial ? `<div style="margin-top:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:11px;padding:5px 10px;border-radius:8px;font-weight:600;display:inline-block">⭐ ${s.cargo_especial}</div>` : ''}
+              </div>
+            </div>
+            ${comSec.length ? `<div style="margin-bottom:14px">
+              <div style="font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">★ Secretario(a) de ${comSec.length} comisión${comSec.length !== 1 ? 'es' : ''}</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                ${comSec.map(c => `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid #fbbf24;padding:8px 12px;border-radius:8px;font-size:13px">${c}</div>`).join('')}
+              </div>
+            </div>` : ''}
+            ${comInt.length ? `<div style="margin-bottom:14px">
+              <div style="font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">📋 Integrante de ${comInt.length} comisión${comInt.length !== 1 ? 'es' : ''}</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                ${comInt.map(c => `<div style="background:var(--surface);border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:13px">${c}</div>`).join('')}
+              </div>
+            </div>` : ''}
+            ${s.email || s.telefono || s.direccion_oficina ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">
+              <div style="font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">📞 Contacto oficial</div>
+              ${s.email ? `<div style="font-size:12px;margin-bottom:4px"><strong>Email:</strong> <a href="mailto:${s.email}" style="color:var(--accent2)">${s.email}</a></div>` : ''}
+              ${s.telefono ? `<div style="font-size:12px;margin-bottom:4px"><strong>Tel:</strong> ${s.telefono}</div>` : ''}
+              ${s.direccion_oficina ? `<div style="font-size:12px"><strong>Oficina:</strong> ${s.direccion_oficina}</div>` : ''}
+            </div>` : ''}
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="${s.url || 'https://www.senado.gob.mx/66/senador/' + s.id}" target="_blank" rel="noopener" style="flex:1;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:11px 14px;border-radius:10px;text-align:center;text-decoration:none;font-size:13px;font-weight:600;min-width:160px">📂 Perfil oficial en Senado.gob.mx →</a>
+            </div>
+          `;
+        } catch (e) {
+          box.innerHTML = '<div style="padding:30px;text-align:center;color:#ef4444">Error al cargar el perfil.</div>';
+        }
+      }
+      async function cargarSenadores() {
+        if (window.__loadedPages['senadores']) return;
+        const grid = document.getElementById('sen-grid');
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Cargando 128 senadores LXVI…</div>';
+        try {
+          const r = await fetch('/api/data?vista=senadores');
+          const j = await r.json();
+          window.__senadoresData = j.senadores || [];
+          const total = window.__senadoresData.length;
+          const conFoto = window.__senadoresData.filter(s => s.foto_url).length;
+          const conCom = window.__senadoresData.filter(s => (s.comisiones_integrante || []).length || (s.comisiones_secretario || []).length).length;
+          document.getElementById('sen-stats').innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#a78bfa">${total}</div><div style="font-size:11px;color:var(--text2)">Senadores LXVI</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${conFoto}</div><div style="font-size:11px;color:var(--text2)">Con foto</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${conCom}</div><div style="font-size:11px;color:var(--text2)">Con comisiones</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total_comisiones || 0}</div><div style="font-size:11px;color:var(--text2)">Asignaciones</div></div>`;
+          senFiltrar();
+          window.__loadedPages['senadores'] = true;
+        } catch (e) {
+          grid.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;grid-column:1/-1">Error al cargar senadores.</div>';
+        }
+      }
+      window.cargarSenadores = cargarSenadores;
+      window.senFiltrar = senFiltrar;
+      window.senBuscarIA = senBuscarIA;
+      window.senOpenDetalle = senOpenDetalle;
+
       // ── VOTACIONES PLENO LXVI ──────────────────────────────
       window.__votacionesData = [];
       function votRenderLista(filas) {
@@ -3352,6 +3528,7 @@
           if (p === 'presas') cargarPresas();
           if (p === 'pide-ayuda') leadPaso(1);
           if (p === 'politicos') cargarPoliticos();
+          if (p === 'senadores') cargarSenadores();
           if (p === 'votaciones') cargarVotaciones();
           if (p === 'mi-rep') cargarMiRepInit();
           if (p === 'mapacontratos') cargarMapaContratos();
@@ -3578,6 +3755,48 @@
         <div id="mirep-contenido"></div>
 
         <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="color:var(--accent2)">SITL · Sistema de Información Legislativa</a> · Cámara de Diputados LXVI</div>
+      </div>
+    </div>
+
+    <!-- ───── SENADORES — Fase 3.1.B ───── -->
+    <div id="page-senadores" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#581c87 0%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(124,58,237,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">⚖️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Senado de la República LXVI</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Los <strong>128 senadores</strong> que representan a México en la Cámara Alta. Comisiones, perfiles y búsqueda con IA.</p>
+            </div>
+            <a href="https://www.senado.gob.mx/66/senadores/directorio_de_senadores" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Senado oficial →</a>
+          </div>
+        </div>
+
+        <!-- Stats globales -->
+        <div id="sen-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px"></div>
+
+        <!-- Búsqueda dual: texto + semántica IA -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px">
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+            <div style="flex:1;min-width:200px;position:relative">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+              <input id="sen-search" type="text" placeholder="Buscar senador por nombre o cargo..."
+                oninput="senFiltrar()"
+                style="width:100%;padding:10px 12px 10px 36px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
+            </div>
+            <button onclick="senBuscarIA()" id="sen-ia-btn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><span>🤖</span> Búsqueda con IA</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3)">💡 Texto = busca por nombre/cargo. IA = busca por <em>tema</em> (ej. "senador que trabaja en seguridad" o "comisión de energía").</div>
+        </div>
+
+        <div id="sen-count" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+
+        <!-- Grid de tarjetas -->
+        <div id="sen-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
+          Fuente: <a href="https://www.senado.gob.mx/66/" target="_blank" rel="noopener" style="color:var(--accent2)">Senado de la República · LXVI Legislatura</a> · Búsqueda semántica con Gemini embeddings 768d
+        </div>
       </div>
     </div>
 
