@@ -3908,6 +3908,14 @@
           style="flex:1;padding:13px 8px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
           🏔️ Zonas Arq.
         </button>
+        <button onclick="ombligoTab('unesco')" id="otab-unesco"
+          style="flex:1;padding:13px 8px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+          🌎 UNESCO
+        </button>
+        <button onclick="ombligoTab('lenguas')" id="otab-lenguas"
+          style="flex:1;padding:13px 8px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">
+          🗣️ Lenguas
+        </button>
       </div>
 
       <div class="content">
@@ -3934,6 +3942,24 @@
         <div id="opanel-zonas" style="display:none">
           <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text3);margin-bottom:14px">PATRIMONIO ARQUEOLÓGICO · MEXICO</div>
           <div id="ombligo-zonas" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+        <!-- ── TAB: UNESCO PATRIMONIO MUNDIAL ── -->
+        <div id="opanel-unesco" style="display:none">
+          <div style="background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(217,119,6,0.05));border:1px solid rgba(251,191,36,0.3);border-radius:14px;padding:14px 16px;margin-bottom:16px">
+            <div style="font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:2px;margin-bottom:6px">🌎 PATRIMONIO MUNDIAL · UNESCO</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.55">México tiene <strong>36 sitios reconocidos por la UNESCO</strong> como Patrimonio de la Humanidad — el sexto país con más en el mundo. 28 culturales, 6 naturales y 2 mixtos.</div>
+          </div>
+          <div id="ombligo-unesco" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+        <!-- ── TAB: LENGUAS INDÍGENAS INALI ── -->
+        <div id="opanel-lenguas" style="display:none">
+          <div style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(139,92,246,0.05));border:1px solid rgba(168,85,247,0.3);border-radius:14px;padding:14px 16px;margin-bottom:16px">
+            <div style="font-size:10px;font-weight:700;color:#c084fc;letter-spacing:2px;margin-bottom:6px">🗣️ LENGUAS INDÍGENAS · INALI</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.55">México reconoce <strong>68 agrupaciones lingüísticas</strong> agrupadas en 11 familias, con 364 variantes en total. Según INEGI 2020, 7.4 millones de personas hablan una lengua indígena.</div>
+          </div>
+          <div id="ombligo-lenguas" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
 
       </div>
@@ -24466,6 +24492,9 @@ const OMBLIGO_ZONAS = [
   }
 ];
 
+const OMBLIGO_UNESCO = [];
+const OMBLIGO_LENGUAS = [];
+
 let ombligoTabActual = 'timeline';
 let ombligoIniciado = false;
 
@@ -24497,12 +24526,28 @@ function initOmbligo() {
     }));
     if (reales.length) { OMBLIGO_MUSEOS.push(...reales); renderOmbligoMuseos(); }
   }).catch(() => {});
+  // Cargar 36 sitios UNESCO Patrimonio Mundial
+  fetch('/api/data?vista=unesco').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.unesco)) return;
+    OMBLIGO_UNESCO.push(...j.unesco);
+    renderOmbligoUnesco();
+  }).catch(() => {});
+  // Cargar 68 lenguas indígenas INALI
+  fetch('/api/data?vista=lenguas').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.lenguas)) return;
+    OMBLIGO_LENGUAS.push(...j.lenguas);
+    renderOmbligoLenguas();
+  }).catch(() => {});
 }
+
+function renderOmbligoUnesco(){const el=document.getElementById('ombligo-unesco');if(!el)return;if(!OMBLIGO_UNESCO.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Cargando sitios UNESCO…</div>';return;}const tipoIcon={cultural:'🏛️',natural:'🌿',mixto:'🌍'};const tipoColor={cultural:'#fbbf24',natural:'#22c55e',mixto:'#06b6d4'};el.innerHTML=OMBLIGO_UNESCO.map(u=>{const c=tipoColor[u.tipo]||'#fbbf24',ic=tipoIcon[u.tipo]||'🌎';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:22px">${ic}</span><span style="font-size:14px;font-weight:800;color:var(--text);flex:1">${u.nombre}</span><span style="background:${c}25;color:${c};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${u.tipo||'cultural'}</span></div>${u.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${u.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${u.estado?`<span>📍 ${u.estado}</span>`:''}${u.año_inscripcion?`<span>🗓️ Inscrito ${u.año_inscripcion}</span>`:''}</div></div>`;}).join('');}
+
+function renderOmbligoLenguas(){const el=document.getElementById('ombligo-lenguas');if(!el)return;if(!OMBLIGO_LENGUAS.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Cargando lenguas indígenas…</div>';return;}el.innerHTML=OMBLIGO_LENGUAS.map(l=>{const h=l.hablantes||0,hStr=h>=1000000?(h/1000000).toFixed(2)+' M':h>=1000?(h/1000).toFixed(0)+' mil':h.toString();return `<div style="background:var(--surface);border:1px solid rgba(168,85,247,0.3);border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:22px">🗣️</span><span style="font-size:14px;font-weight:800;color:var(--text);flex:1">${l.agrupacion||l.nombre}</span><span style="background:rgba(168,85,247,0.2);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${l.familia||''}</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text3);margin-top:4px">${h?`<span>👥 ${hStr} hablantes</span>`:''}${l.variantes?`<span>🔤 ${l.variantes} variantes</span>`:''}${l.estados?`<span>📍 ${l.estados}</span>`:''}</div></div>`;}).join('');}
 
 function ombligoTab(tab) {
   ombligoTabActual = tab;
-  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e' };
-  ['timeline','museos','zonas'].forEach(t => {
+  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e', unesco:'#fbbf24', lenguas:'#a855f7' };
+  ['timeline','museos','zonas','unesco','lenguas'].forEach(t => {
     const panel = document.getElementById('opanel-' + t);
     const btn   = document.getElementById('otab-' + t);
     if (panel) panel.style.display = t === tab ? '' : 'none';
