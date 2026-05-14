@@ -62,14 +62,35 @@ def normalizar_voto(s):
     return None
 
 
-def http_get(url, retries=2):
+# Session global con cookies persistentes (SITL valida cookie PHP y Referer)
+_SESSION = requests.Session()
+_SESSION.headers.update(HEADERS_WEB)
+_SESSION_INIT = False
+
+def _init_session():
+    """Visita la home del SITL para obtener cookie PHPSESSID antes de cualquier request profundo."""
+    global _SESSION_INIT
+    if _SESSION_INIT: return
+    try:
+        _SESSION.get(f'{BASE}/votaciones_por_periodonplxvi.php', timeout=TIMEOUT, verify=False)
+        _SESSION_INIT = True
+        print(f"  [SESSION] Inicializada. Cookies: {[c.name for c in _SESSION.cookies]}")
+    except Exception as e:
+        print(f"  [SESSION] EXC: {e}")
+
+def http_get(url, retries=2, referer=None):
+    """GET con session compartida + Referer + reintentos."""
+    _init_session()
     last = None
+    h = {}
+    if referer:
+        h['Referer'] = referer
     for i in range(retries + 1):
         try:
-            r = requests.get(url, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
-            if r.ok:
+            r = _SESSION.get(url, headers=h, timeout=TIMEOUT, verify=False)
+            if r.ok and r.text:
                 return r.text
-            last = f'HTTP {r.status_code}'
+            last = f'HTTP {r.status_code} len={len(r.text)}'
         except Exception as e:
             last = f'{type(e).__name__}: {e}'
         if i < retries:
@@ -113,7 +134,9 @@ def extraer_votos_partido(votacion_id, partidot, nombre_to_id):
     """Devuelve lista de (dipt_id, voto) para todos los diputados de un partido en una votación."""
     from bs4 import BeautifulSoup
     url = f"{BASE}/listados_votacionesnplxvi.php?partidot={partidot}&votaciont={votacion_id}"
-    html = http_get(url)
+    # Referer = página estadística parent (SITL valida)
+    referer = f"{BASE}/estadistico_votacionnplxvi.php?votaciont={votacion_id}"
+    html = http_get(url, referer=referer)
     if not html:
         return []
     soup = BeautifulSoup(html, 'lxml')
@@ -242,6 +265,9 @@ def main():
         votos_de_esta_votacion = []
         for partidot, nombre_p in PARTIDOS.items():
             votos = extraer_votos_partido(vot_id, partidot, nombre_to_id)
+            # Debug: log first attempt
+            if i == 1 and not votos:
+                print(f"  [DEBUG] vot={vot_id} partidot={partidot} ({nombre_p}) → 0 votos. Verificar HTML response.")
             for dipt_id, voto in votos:
                 votos_de_esta_votacion.append({
                     'votacion_id': vot_id,
