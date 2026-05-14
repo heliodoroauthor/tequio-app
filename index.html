@@ -24567,9 +24567,9 @@ let ombligoIniciado = false;
 function initOmbligo() {
   if (ombligoIniciado) return;
   ombligoIniciado = true;
-  renderOmbligoTimeline();
-  renderOmbligoMuseos();
-  renderOmbligoZonas();
+  try { renderOmbligoTimeline(); } catch(e) { console.error('renderOmbligoTimeline:', e); }
+  try { renderOmbligoMuseos(); }   catch(e) { console.error('renderOmbligoMuseos:', e); }
+  try { renderOmbligoZonas(); }    catch(e) { console.error('renderOmbligoZonas:', e); }
   // Cargar 195 zonas arqueológicas reales del INAH (Supabase)
   fetch('/api/data?vista=ombligo_zonas').then(r => r.ok ? r.json() : null).then(j => {
     if (!j || !Array.isArray(j.zonas)) return;
