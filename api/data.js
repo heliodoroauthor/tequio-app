@@ -1,3 +1,5 @@
+import nodeCrypto from 'node:crypto';
+
 // /api/data.js — endpoint Vercel para exponer Supabase al frontend
 //
 // Vistas soportadas:
@@ -226,12 +228,9 @@ export default async function handler(req, res) {
       const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim();
       const ua = (req.headers['user-agent'] || '');
       // Hash IP + UA con crypto.subtle (Edge runtime) o crypto si está en Node
-      const sha256 = async (s) => {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-      };
-      const ip_hash = await sha256(ip || 'unknown');
-      const ua_hash = await sha256(ua || 'unknown');
+      const sha256 = (s) => nodeCrypto.createHash('sha256').update(s || 'unknown').digest('hex');
+      const ip_hash = sha256(ip);
+      const ua_hash = sha256(ua);
       // UPSERT directo
       const url = `${SUPABASE_URL}/rest/v1/usuarios_ciudadanos?on_conflict=cookie_id`;
       const r = await fetch(url, {
@@ -417,12 +416,9 @@ export default async function handler(req, res) {
 
       const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim();
       const ua = (req.headers['user-agent'] || '');
-      const sha256 = async (s) => {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-      };
-      const ip_hash = await sha256(ip || 'unknown');
-      const ua_hash = await sha256(ua || 'unknown');
+      const sha256 = (s) => nodeCrypto.createHash('sha256').update(s || 'unknown').digest('hex');
+      const ip_hash = sha256(ip);
+      const ua_hash = sha256(ua);
 
       const url = `${SUPABASE_URL}/rest/v1/rpc/emitir_voto_ciudadano`;
       const r = await fetch(url, {
