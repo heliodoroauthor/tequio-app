@@ -154,6 +154,65 @@ export default async function handler(req, res) {
       return res.status(200).json({ votaciones: rows });
     }
 
+    if (vista === 'mi_representante') {
+      // Dado un dipt_id, devuelve el diputado + cómo votó en las últimas N votaciones
+      const dipt_id = parseInt(req.query.dipt_id || '0', 10);
+      if (!dipt_id) return res.status(400).json({ error: 'dipt_id requerido' });
+      const limit = Math.min(parseInt(req.query.limit || '40', 10), 100);
+
+      // 1) Info del diputado
+      const dipRows = await sb(`politicos_diputados?dipt_id=eq.${dipt_id}&select=dipt_id,nombre,partido,partido_codigo,entidad,distrito,principio_eleccion,curul,email,foto_url,curricula_url,comisiones,reelecto`);
+      const diputado = dipRows?.[0];
+      if (!diputado) return res.status(404).json({ error: 'Diputado no encontrado' });
+
+      // 2) Sus votos (últimas N votaciones)
+      const votos = await sb(`votos_individuales?dipt_id=eq.${dipt_id}&order=votacion_id.desc&select=votacion_id,voto&limit=${limit * 3}`);
+
+      // 3) Detalle de cada votación
+      const votIds = (votos || []).map(v => v.votacion_id).slice(0, limit);
+      const votacionesById = {};
+      if (votIds.length) {
+        const idsParam = votIds.join(',');
+        const detalles = await sb(`votaciones_diputados?votacion_id=in.(${idsParam})&select=votacion_id,fecha,asunto,tipo,total_si,total_no,total_abst,resultado,url_oficial`);
+        for (const d of (detalles || [])) votacionesById[d.votacion_id] = d;
+      }
+
+      // 4) Combinar: voto + detalles
+      const historial = votos
+        .filter(v => votacionesById[v.votacion_id])
+        .slice(0, limit)
+        .map(v => ({
+          ...votacionesById[v.votacion_id],
+          voto: v.voto,
+        }))
+        .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+      // 5) Stats agregados
+      const stats = { si: 0, no: 0, abst: 0, ausente: 0 };
+      for (const v of (votos || [])) {
+        if (stats[v.voto] !== undefined) stats[v.voto]++;
+      }
+      const total = stats.si + stats.no + stats.abst + stats.ausente;
+      const asistencia_pct = total ? Math.round(((stats.si + stats.no + stats.abst) / total) * 100) : 0;
+
+      return res.status(200).json({
+        diputado,
+        historial,
+        stats: { ...stats, total, asistencia_pct },
+      });
+    }
+
+    if (vista === 'buscar_diputado') {
+      // Busca diputados por estado y opcionalmente distrito
+      const entidad = req.query.entidad || '';
+      const distrito = req.query.distrito || '';
+      if (!entidad) return res.status(400).json({ error: 'entidad requerida' });
+      let query = `politicos_diputados?entidad=eq.${encodeURIComponent(entidad)}&order=distrito.asc&select=dipt_id,nombre,partido,distrito,principio_eleccion,foto_url`;
+      if (distrito) query += `&distrito=eq.${encodeURIComponent(distrito)}`;
+      const rows = await sb(query);
+      return res.status(200).json({ diputados: rows });
+    }
+
     if (vista === 'despachos') {
       const area = (req.query.area || '').toLowerCase();
       const rows = await sb('despachos_verificados?activo=eq.true&verificado=eq.true&order=rating.desc.nullslast&select=id,nombre,responsable,especialidades,estados,telefono,whatsapp,email,sitio_web,rating,num_resenas,primera_consulta_gratis,plan');
@@ -196,6 +255,7 @@ export default async function handler(req, res) {
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
+      'mi_representante','buscar_diputado',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
     ]});
