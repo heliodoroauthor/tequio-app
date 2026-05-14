@@ -27,8 +27,14 @@ DIRECTORIO_URL = 'https://www.senado.gob.mx/66/senadores/directorio_de_senadores
 SENADOR_URL    = 'https://www.senado.gob.mx/66/senador/{}'
 LEGISLATURA = 66
 
-UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
-HEADERS_WEB = {'User-Agent': UA, 'Accept': 'text/html'}
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+HEADERS_WEB = {
+    'User-Agent': UA,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8',
+    'Connection': 'keep-alive',
+}
+TIMEOUT_FETCH = 90  # senado.gob.mx es lento
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -80,16 +86,19 @@ def detectar_tipo_eleccion(texto):
     return None
 
 
+_session = requests.Session()
+_session.headers.update(HEADERS_WEB)
+
 def fetch(url, retries=3):
     for i in range(retries):
         try:
-            r = requests.get(url, headers=HEADERS_WEB, timeout=30, verify=False)
+            r = _session.get(url, timeout=TIMEOUT_FETCH, verify=False)
             if r.ok:
                 r.encoding = 'utf-8'
                 return r.text
         except Exception as e:
-            print(f"  [retry {i+1}] {url}: {e}")
-        time.sleep(2)
+            print(f"  [retry {i+1}] {url}: {type(e).__name__}: {str(e)[:120]}")
+        time.sleep(3 * (i + 1))  # exponential backoff
     return None
 
 
