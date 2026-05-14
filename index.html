@@ -1908,6 +1908,10 @@
         <span class="icon">🗳️</span> Votaciones del Congreso
         <span class="nav-badge green">Pleno</span>
       </div>
+      <div class="nav-item" data-page="mi-rep" onclick="showPage('mi-rep')">
+        <span class="icon">👤</span> Mi Representante
+        <span class="nav-badge" style="background:linear-gradient(135deg,#7c2d12,#dc2626);color:#fff">🔥 Real</span>
+      </div>
       <div class="nav-item" data-page="dinero" onclick="showPage('dinero')">
         <span class="icon">💰</span> Dinero Público
       </div>
@@ -3049,6 +3053,118 @@
         }
       }
 
+      // ── MI REPRESENTANTE — ¿Cómo votó TU diputado? ──────────
+      const VOTO_VISUAL = {
+        si:      { icon: '✅', label: 'A favor',   color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+        no:      { icon: '❌', label: 'En contra', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
+        abst:    { icon: '⊘',  label: 'Abstención',color: '#a78bfa', bg: 'rgba(167,139,250,0.15)' },
+        ausente: { icon: '🫥', label: 'Ausente',   color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
+      };
+
+      async function cargarMiRepInit() {
+        if (window.__loadedPages['mi-rep']) return;
+        const sel = document.getElementById('mirep-estado');
+        // Cargar lista de entidades únicas
+        try {
+          const r = await fetch('/api/data?vista=diputados');
+          const j = await r.json();
+          const entidades = Object.keys(j.por_entidad || {}).sort((a,b)=>a.localeCompare(b));
+          sel.innerHTML = '<option value="">-- Selecciona tu estado --</option>' +
+            entidades.map(e => `<option value="${e}">${e}</option>`).join('');
+          window.__loadedPages['mi-rep'] = true;
+        } catch (e) {
+          sel.innerHTML = '<option value="">Error al cargar</option>';
+        }
+      }
+
+      async function mirepCargarDistritos() {
+        const entidad = document.getElementById('mirep-estado').value;
+        const selDis = document.getElementById('mirep-distrito');
+        const cont = document.getElementById('mirep-contenido');
+        cont.innerHTML = '';
+        if (!entidad) {
+          selDis.innerHTML = '<option value="">Primero elige estado</option>';
+          selDis.disabled = true;
+          return;
+        }
+        selDis.disabled = true;
+        selDis.innerHTML = '<option value="">Cargando diputados…</option>';
+        try {
+          const r = await fetch('/api/data?vista=buscar_diputado&entidad=' + encodeURIComponent(entidad));
+          const j = await r.json();
+          const dips = j.diputados || [];
+          selDis.innerHTML = '<option value="">-- Elige tu distrito --</option>' +
+            dips.map(d => `<option value="${d.dipt_id}">${d.distrito || '?'} — ${d.nombre} (${d.partido || '?'})</option>`).join('');
+          selDis.disabled = false;
+        } catch (e) {
+          selDis.innerHTML = '<option value="">Error</option>';
+        }
+      }
+
+      async function mirepCargarRepresentante() {
+        const dipt_id = document.getElementById('mirep-distrito').value;
+        const cont = document.getElementById('mirep-contenido');
+        if (!dipt_id) { cont.innerHTML = ''; return; }
+        cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Cargando historial de votos…</div>';
+        try {
+          const r = await fetch('/api/data?vista=mi_representante&dipt_id=' + dipt_id + '&limit=50');
+          const j = await r.json();
+          if (!j.diputado) { cont.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Diputado no encontrado.</div>'; return; }
+          const d = j.diputado;
+          const stats = j.stats || {};
+          const historial = j.historial || [];
+          const fotoSrc = d.foto_url || '';
+          const fotoTag = fotoSrc ? `<img src="${fotoSrc}" loading="lazy" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #fff;flex-shrink:0" onerror="this.style.display='none'">` : '';
+
+          // Header card del diputado
+          let html = `<div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+            ${fotoTag}
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:22px;font-weight:800;font-family:var(--font-display);line-height:1.2">${d.nombre}</div>
+              <div style="font-size:13px;color:var(--text2);margin-top:6px">${d.partido || '—'} · ${d.entidad} · ${d.distrito}</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:4px">${d.principio_eleccion || ''}${d.curul ? ' · ' + d.curul : ''}</div>
+              ${d.email ? `<div style="margin-top:10px"><a href="mailto:${d.email}" style="background:var(--accent);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;text-decoration:none">✉ ${d.email}</a></div>` : ''}
+            </div>
+          </div>`;
+
+          // Stats globales
+          html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:800;font-family:var(--font-display);color:#22c55e">${stats.si||0}</div><div style="font-size:11px;color:var(--text2)">A favor ✅</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:800;font-family:var(--font-display);color:#ef4444">${stats.no||0}</div><div style="font-size:11px;color:var(--text2)">En contra ❌</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:800;font-family:var(--font-display);color:#a78bfa">${stats.abst||0}</div><div style="font-size:11px;color:var(--text2)">Abstención ⊘</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:800;font-family:var(--font-display);color:#94a3b8">${stats.ausente||0}</div><div style="font-size:11px;color:var(--text2)">Ausente 🫥</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${stats.asistencia_pct||0}%</div><div style="font-size:11px;color:var(--text2)">Asistencia</div></div>
+          </div>`;
+
+          // Historial
+          if (!historial.length) {
+            html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:30px;text-align:center;color:var(--text2)">Aún no hay registros de votación individual para este diputado. El scraper de votos individuales corre periódicamente.</div>';
+          } else {
+            html += '<div style="font-size:13px;color:var(--text2);font-weight:600;margin-bottom:10px">📜 Últimas ' + historial.length + ' votaciones del pleno</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:8px">';
+            const fmt = (s) => { if (!s) return '—'; const [y,m,d2] = s.split('-'); const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return d2 + ' ' + meses[parseInt(m,10)-1] + ' ' + y; };
+            for (const v of historial) {
+              const vis = VOTO_VISUAL[v.voto] || VOTO_VISUAL.ausente;
+              html += `<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${vis.color};border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:center">
+                <div style="background:${vis.bg};color:${vis.color};width:60px;text-align:center;padding:6px 4px;border-radius:8px;flex-shrink:0">
+                  <div style="font-size:18px">${vis.icon}</div>
+                  <div style="font-size:9px;font-weight:700;margin-top:1px;letter-spacing:0.3px">${vis.label.toUpperCase()}</div>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;color:var(--text2);margin-bottom:3px">${fmt(v.fecha)} · #${v.votacion_id}</div>
+                  <div style="font-size:13px;font-weight:600;line-height:1.35;color:var(--text)">${v.asunto || '—'}</div>
+                </div>
+                ${v.url_oficial ? `<a href="${v.url_oficial}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);text-decoration:none;flex-shrink:0">Acta →</a>` : ''}
+              </div>`;
+            }
+            html += '</div>';
+          }
+          cont.innerHTML = html;
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:30px">Error al cargar.</div>';
+        }
+      }
+
       // Hook: cuando showPage cambia, carga la data específica.
       // showPage se define ~9000 líneas más abajo en el archivo, así que esperamos.
       (function instalarHookShowPage() {
@@ -3068,6 +3184,7 @@
           if (p === 'pide-ayuda') leadPaso(1);
           if (p === 'politicos') cargarPoliticos();
           if (p === 'votaciones') cargarVotaciones();
+          if (p === 'mi-rep') cargarMiRepInit();
         };
       })();
 
@@ -3259,6 +3376,38 @@
         <div id="vot-lista" style="display:flex;flex-direction:column;gap:10px"></div>
 
         <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/votaciones_por_periodonplxvi.php" target="_blank" style="color:var(--accent2)">SITL · Sistema de Información Legislativa</a> · Cámara de Diputados</div>
+      </div>
+    </div>
+
+    <!-- ───── MI REPRESENTANTE — ¿Cómo votó TU diputado? ───── -->
+    <div id="page-mi-rep" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">👤</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">¿Cómo votó TU diputado?</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Elige tu <strong>estado y distrito</strong>. Te mostraremos el voto real de tu representante en cada votación de la LXVI Legislatura — sin filtros, sin opiniones.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">⚖️ Datos oficiales SITL</div>
+          </div>
+        </div>
+
+        <!-- Selector estado + distrito -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div style="flex:1;min-width:200px">
+            <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">📍 ENTIDAD</label>
+            <select id="mirep-estado" onchange="mirepCargarDistritos()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none"><option value="">-- Selecciona tu estado --</option></select>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">🪑 DISTRITO / DIPUTADO</label>
+            <select id="mirep-distrito" onchange="mirepCargarRepresentante()" disabled style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none"><option value="">Primero elige estado</option></select>
+          </div>
+        </div>
+
+        <div id="mirep-contenido"></div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="color:var(--accent2)">SITL · Sistema de Información Legislativa</a> · Cámara de Diputados LXVI</div>
       </div>
     </div>
 
