@@ -1917,7 +1917,7 @@
       </div>
       <div class="nav-item" data-page="mapacontratos" onclick="showPage('mapacontratos')">
         <span class="icon">🔥</span> Mapa de Contratos
-        <span class="nav-badge" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff">ASF</span>
+        <span class="nav-badge" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff">ComprasMX</span>
       </div>
       <div class="nav-item" data-page="redes" onclick="showPage('redes')">
         <span class="icon">🕸️</span> Redes de Influencia
@@ -3061,6 +3061,153 @@
         ausente: { icon: '🫥', label: 'Ausente',   color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' },
       };
 
+      // ── COMPRANET / MAPA DE CONTRATOS ──────────────────
+      window.__cmpDebounceTimer = null;
+      function cmpDebounceBuscar() {
+        clearTimeout(window.__cmpDebounceTimer);
+        window.__cmpDebounceTimer = setTimeout(() => cmpBuscar(), 400);
+      }
+      function cmpSugerencia(btn, q) {
+        document.getElementById('cmp-search').value = q;
+        cmpBuscar();
+      }
+      function cmpSetTab(t) {
+        document.getElementById('cmp-tab-contratos').classList.toggle('active', t === 'contratos');
+        document.getElementById('cmp-tab-proveedores').classList.toggle('active', t === 'proveedores');
+        document.getElementById('cmp-vista-contratos').style.display = t === 'contratos' ? 'block' : 'none';
+        document.getElementById('cmp-vista-proveedores').style.display = t === 'proveedores' ? 'block' : 'none';
+        if (t === 'proveedores' && !window.__cmpProveedoresCargados) {
+          cmpCargarProveedores();
+        }
+      }
+      function cmpFmtMonto(v) {
+        if (v == null || isNaN(v)) return '—';
+        const n = parseFloat(v);
+        if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + ' mil M';
+        if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + ' M';
+        if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + ' K';
+        return '$' + n.toLocaleString('es-MX', {maximumFractionDigits: 0});
+      }
+      function cmpFmtFecha(s) {
+        if (!s) return '—';
+        const [y,m,d] = s.split('-');
+        const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        return d + ' ' + meses[parseInt(m,10)-1] + ' ' + y;
+      }
+      const TIPO_PROC_LABEL = {
+        licitacion_publica:   { txt: 'Licitación pública',   color: '#22c55e', icon: '🟢' },
+        invitacion_tres:      { txt: 'Invitación a tres',    color: '#f59e0b', icon: '🟡' },
+        adjudicacion_directa: { txt: 'Adjudicación directa', color: '#ef4444', icon: '🔴' },
+      };
+      function cmpRenderContratos(contratos) {
+        const cont = document.getElementById('cmp-lista');
+        if (!contratos.length) {
+          cont.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--text2)">Sin contratos que coincidan. Prueba otra búsqueda.</div>';
+          return;
+        }
+        cont.innerHTML = contratos.map(c => {
+          const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start">
+            <div style="min-width:0">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+                <span style="background:${tp.color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px">${tp.icon} ${tp.txt}</span>
+                ${c.flag_adjudicacion_directa_alta ? '<span style="background:linear-gradient(135deg,#7c2d12,#dc2626);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">🚩 AD ALTA</span>' : ''}
+                ${c.tipo_contrato ? `<span style="background:var(--surface2);border:1px solid var(--border);font-size:10px;padding:2px 8px;border-radius:8px;color:var(--text2)">${c.tipo_contrato}</span>` : ''}
+              </div>
+              <div style="font-size:14px;font-weight:700;line-height:1.35;margin-bottom:6px">${c.titulo || '—'}</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.4">
+                <div>🏛️ <strong>${c.dependencia || '—'}</strong>${c.unidad_compradora ? ' · ' + c.unidad_compradora : ''}</div>
+                <div>🏢 ${c.proveedor_nombre || '—'}${c.proveedor_rfc ? ' (' + c.proveedor_rfc + ')' : ''}</div>
+                <div>📅 ${cmpFmtFecha(c.fecha_firma)}${c.entidad_federativa ? ' · 📍 ' + c.entidad_federativa : ''}</div>
+              </div>
+              ${c.fuente_url ? `<div style="margin-top:8px"><a href="${c.fuente_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);text-decoration:none">Ver expediente oficial →</a></div>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:${tp.color};line-height:1">${cmpFmtMonto(c.monto_mxn)}</div>
+              <div style="font-size:10px;color:var(--text3);letter-spacing:0.5px;margin-top:4px">MXN</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      async function cmpBuscar() {
+        const q = document.getElementById('cmp-search').value.trim();
+        const tipoProc = document.getElementById('cmp-tipoproc').value;
+        const orden = document.getElementById('cmp-orden').value;
+        const params = new URLSearchParams();
+        if (q) params.set('q', q);
+        if (tipoProc) params.set('tipo_proc', tipoProc);
+        params.set('orden', orden);
+        params.set('limit', '50');
+        const cont = document.getElementById('cmp-lista');
+        cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Buscando…</div>';
+        try {
+          const r = await fetch('/api/data?vista=contratos&' + params.toString());
+          const j = await r.json();
+          const total = j.total_resultados || 0;
+          const monto = cmpFmtMonto(j.monto_total);
+          document.getElementById('cmp-results-info').innerHTML = `<strong>${total.toLocaleString('es-MX')}</strong> contratos · <strong>${monto}</strong> MXN total adjudicado` + (total > 50 ? ' · mostrando los 50 más relevantes' : '');
+          cmpRenderContratos(j.contratos || []);
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al buscar.</div>';
+        }
+      }
+      async function cmpCargarStats() {
+        try {
+          const r = await fetch('/api/data?vista=compranet_stats');
+          const j = await r.json();
+          if (!j.total) {
+            document.getElementById('cmp-stats').innerHTML = '<div style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;color:var(--text2)">Aún sin datos cargados. El scraper de Compranet corre cada lunes.</div>';
+            return;
+          }
+          document.getElementById('cmp-stats').innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">Contratos federales</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#22c55e">${cmpFmtMonto(j.monto_total)}</div><div style="font-size:11px;color:var(--text2)">Monto total adjudicado</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#ef4444">${j.adjudicacion_directa.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">Adjudicaciones directas</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${j.flags_rojos.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">🚩 AD &gt; $10M MXN</div></div>`;
+        } catch (e) {
+          document.getElementById('cmp-stats').innerHTML = '';
+        }
+      }
+      async function cmpCargarProveedores() {
+        const orden = document.getElementById('cmp-prov-orden').value;
+        const cont = document.getElementById('cmp-proveedores-lista');
+        cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Cargando proveedores…</div>';
+        try {
+          const r = await fetch('/api/data?vista=proveedores_top&limit=50&orden=' + orden);
+          const j = await r.json();
+          const provs = j.proveedores || [];
+          if (!provs.length) {
+            cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Aún sin datos. El scraper de Compranet corre cada lunes.</div>';
+            return;
+          }
+          cont.innerHTML = provs.map((p, i) => {
+            const adPct = p.num_contratos ? Math.round((p.contratos_ad_directa / p.num_contratos) * 100) : 0;
+            const adColor = adPct >= 70 ? '#ef4444' : adPct >= 40 ? '#f59e0b' : '#22c55e';
+            return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center">
+              <div style="background:linear-gradient(135deg,${i<3?'#fbbf24':'var(--surface2)'},${i<3?'#f59e0b':'var(--surface)'});color:${i<3?'#fff':'var(--text2)'};border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display)">${i+1}</div>
+              <div style="min-width:0">
+                <div style="font-size:14px;font-weight:700;line-height:1.3">${p.proveedor_nombre || '—'}</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px">${p.proveedor_rfc || 'Sin RFC'}</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:6px">📋 ${p.num_contratos} contrato${p.num_contratos>1?'s':''} · 🏛️ ${p.num_dependencias} dependencia${p.num_dependencias>1?'s':''} · <span style="color:${adColor};font-weight:700">${adPct}% AD</span></div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:18px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${cmpFmtMonto(p.monto_total)}</div>
+                <div style="font-size:9px;color:var(--text3);letter-spacing:0.5px;margin-top:2px">MXN TOTAL</div>
+              </div>
+            </div>`;
+          }).join('');
+          window.__cmpProveedoresCargados = true;
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al cargar proveedores.</div>';
+        }
+      }
+      async function cargarMapaContratos() {
+        if (window.__loadedPages['mapacontratos']) return;
+        cmpCargarStats();
+        cmpBuscar(); // primera búsqueda vacía = todos los contratos top por monto
+        window.__loadedPages['mapacontratos'] = true;
+      }
+
       async function cargarMiRepInit() {
         if (window.__loadedPages['mi-rep']) return;
         const sel = document.getElementById('mirep-estado');
@@ -3185,6 +3332,7 @@
           if (p === 'politicos') cargarPoliticos();
           if (p === 'votaciones') cargarVotaciones();
           if (p === 'mi-rep') cargarMiRepInit();
+          if (p === 'mapacontratos') cargarMapaContratos();
         };
       })();
 
@@ -3744,157 +3892,86 @@
     </div>
 
     <!-- ───── MAPA DE CALOR — CONTRATOS OBSERVADOS ───── -->
+    <!-- ───── MAPA DE CONTRATOS — Compranet/ComprasMX REAL ───── -->
     <div id="page-mapacontratos" class="page">
-
-      <!-- HEADER -->
-      <div style="background:linear-gradient(160deg,#0f0505 0%,#1f0808 45%,#0f0a00 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(220,38,38,0.3);position:relative;overflow:hidden">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(220,38,38,0.15),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(234,88,12,0.1),transparent 55%);pointer-events:none"></div>
-        <div style="position:relative">
-          <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:#f87171;text-transform:uppercase;margin-bottom:8px">🔥 MAPA DE CALOR · CONTRATOS OBSERVADOS ASF</div>
-          <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px">¿Dónde va —y dónde se pierde— el dinero público?</div>
-          <div style="font-size:12px;color:#9ca3af;line-height:1.6;max-width:560px">Contratos observados, sobrecostos y adjudicaciones directas documentadas por la <strong style="color:#fca5a5">ASF</strong>, <strong style="color:#fca5a5">SFP</strong> y <strong style="color:#fca5a5">CompraNet</strong>. Haz click en cualquier punto para ver el detalle completo.</div>
-          <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:4px 10px">
-            <span style="font-size:11px">⚠️</span>
-            <span style="font-size:10px;color:#fbbf24;font-weight:600">Muestra representativa · Datos públicos documentados · No exhaustivo</span>
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#dc2626 50%,#ea580c 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(234,88,12,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🔥</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Mapa de Contratos Federales</h1>
+              <p style="margin:8px 0 0;opacity:0.95;font-size:15px;line-height:1.4">Cada peso que el <strong>gobierno federal mexicano</strong> gasta en contratos públicos. Busca por dependencia, empresa o palabra clave.</p>
+            </div>
+            <a href="https://api.datos.gob.mx/v2/contratacionesabiertas" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.3)">ComprasMX OCDS →</a>
           </div>
         </div>
-      </div>
 
-      <!-- STATS BAR -->
-      <div id="mc-stats-bar" style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);background:var(--bg2)" class="mc-stats-bar-grid"></div>
+        <!-- Stats globales -->
+        <div id="cmp-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:18px"></div>
 
-      <!-- CONTROLS -->
-      <div style="padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <!-- Filtro estatus -->
-        <div style="display:flex;gap:5px;flex-wrap:wrap" id="mc-filtros">
-          <button onclick="mcFiltro('todos',this)" id="mcf-todos"
-            style="padding:5px 12px;border-radius:20px;border:1px solid rgba(220,38,38,0.5);background:rgba(220,38,38,0.15);color:#f87171;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.5px">
-            🔥 TODOS
-          </button>
-          <button onclick="mcFiltro('observado',this)" id="mcf-observado"
-            style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
-            🚨 Observado ASF
-          </button>
-          <button onclick="mcFiltro('sobrecosto',this)" id="mcf-sobrecosto"
-            style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
-            📈 Sobrecosto
-          </button>
-          <button onclick="mcFiltro('directa',this)" id="mcf-directa"
-            style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
-            ⚡ Sin licitación
-          </button>
-          <button onclick="mcFiltro('litigio',this)" id="mcf-litigio"
-            style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">
-            ⚖️ Litigio
-          </button>
+        <!-- Tabs Contratos / Proveedores (Lupita Diconsa) -->
+        <div class="tab-bar" style="margin-bottom:14px">
+          <div class="tab active" id="cmp-tab-contratos" onclick="cmpSetTab('contratos')">📋 Contratos</div>
+          <div class="tab" id="cmp-tab-proveedores" onclick="cmpSetTab('proveedores')">🏢 Lupita Diconsa: Top proveedores</div>
         </div>
-        <!-- Filtro por era -->
-        <div style="display:flex;gap:5px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--border);width:100%" id="mc-filtros-era">
-          <span style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1px;align-self:center;white-space:nowrap">POR SEXENIO:</span>
-          <button onclick="mcFiltroEra('todos')"    class="mc-era-btn" data-era="todos"    style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">Todos</button>
-          <button onclick="mcFiltroEra('calderon')" class="mc-era-btn" data-era="calderon" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">Calderón 06–12</button>
-          <button onclick="mcFiltroEra('epn')"      class="mc-era-btn" data-era="epn"      style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">EPN 12–18</button>
-          <button onclick="mcFiltroEra('amlo')"     class="mc-era-btn" data-era="amlo"     style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">AMLO 18–24</button>
-        </div>
-        <!-- Leyenda -->
-        <div style="margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span style="font-size:9px;color:var(--text3);font-weight:700;letter-spacing:1px">TAMAÑO = MONTO</span>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:block;opacity:0.85"></span><span style="font-size:9px;color:var(--text3)">Observado</span>
-            <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:block;opacity:0.85"></span><span style="font-size:9px;color:var(--text3)">Sobrecosto</span>
-            <span style="width:10px;height:10px;border-radius:50%;background:#8b5cf6;display:block;opacity:0.85"></span><span style="font-size:9px;color:var(--text3)">Sin licitar</span>
-            <span style="width:10px;height:10px;border-radius:50%;background:#06b6d4;display:block;opacity:0.85"></span><span style="font-size:9px;color:var(--text3)">Litigio</span>
+
+        <!-- VISTA: Contratos -->
+        <div id="cmp-vista-contratos">
+          <!-- Buscador principal -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+            <div style="flex:1;min-width:240px;position:relative">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+              <input id="cmp-search" type="text" placeholder="Busca por dependencia, empresa, palabra clave..."
+                oninput="cmpDebounceBuscar()"
+                style="width:100%;padding:11px 12px 11px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;outline:none;box-sizing:border-box">
+            </div>
+            <select id="cmp-tipoproc" onchange="cmpBuscar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+              <option value="">Todos los procedimientos</option>
+              <option value="licitacion_publica">🟢 Licitación pública</option>
+              <option value="invitacion_tres">🟡 Invitación a tres</option>
+              <option value="adjudicacion_directa">🔴 Adjudicación directa</option>
+            </select>
+            <select id="cmp-orden" onchange="cmpBuscar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+              <option value="monto">Mayor monto</option>
+              <option value="fecha">Más recientes</option>
+            </select>
           </div>
-        </div>
-      </div>
 
-      <!-- LINEA DE TIEMPO SLIDER -->
-      <div id="mc-timeline-wrap" style="padding:12px 16px 10px;background:rgba(220,38,38,0.04);border-bottom:1px solid rgba(220,38,38,0.15)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1.5px">LINEA DE TIEMPO</span>
-            <span id="mc-slider-label" style="font-size:12px;font-weight:800;color:#f87171;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);padding:2px 10px;border-radius:20px">2006 - 2024</span>
+          <!-- Sugerencias rápidas -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+            <button class="tema-chip" onclick="cmpSugerencia(this,'PEMEX')">PEMEX</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'SEDENA')">SEDENA</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'IMSS')">IMSS</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'CFE')">CFE</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'consultor')">Consultoría</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'obra')">Obras</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'medicament')">Medicamentos</button>
+            <button class="tema-chip" onclick="cmpSugerencia(this,'tren maya')">Tren Maya</button>
           </div>
-          <button onclick="mcSliderReset()" style="font-size:9px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline">Resetear</button>
+
+          <div id="cmp-results-info" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+          <div id="cmp-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
-        <div style="position:relative;height:28px;display:flex;align-items:center">
-          <div style="position:absolute;left:0;right:0;height:4px;background:var(--border);border-radius:4px">
-            <div id="mc-slider-fill" style="position:absolute;height:100%;background:linear-gradient(90deg,#dc2626,#ef4444);border-radius:4px;left:0%;right:0%"></div>
+
+        <!-- VISTA: Proveedores (Lupita Diconsa) -->
+        <div id="cmp-vista-proveedores" style="display:none">
+          <div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px">
+            <div style="font-size:13px;color:var(--text2)">🏢 <strong>Lupita Diconsa</strong>: las empresas que más facturan al gobierno federal. Ordenadas por monto total adjudicado.</div>
           </div>
-          <input type="range" id="mc-slider-min" min="2006" max="2024" value="2006" step="1" oninput="mcSliderInput()" style="position:absolute;width:100%;pointer-events:none;-webkit-appearance:none;background:transparent;outline:none;z-index:3">
-          <input type="range" id="mc-slider-max" min="2006" max="2024" value="2024" step="1" oninput="mcSliderInput()" style="position:absolute;width:100%;pointer-events:none;-webkit-appearance:none;background:transparent;outline:none;z-index:4">
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <span style="font-size:8px;color:var(--text3)">2006</span>
-          <span style="font-size:8px;color:rgba(220,38,38,0.6)">Calderon</span>
-          <span style="font-size:8px;color:var(--text3)">2012</span>
-          <span style="font-size:8px;color:rgba(0,104,71,0.7)">EPN</span>
-          <span style="font-size:8px;color:var(--text3)">2018</span>
-          <span style="font-size:8px;color:rgba(139,0,0,0.7)">AMLO</span>
-          <span style="font-size:8px;color:var(--text3)">2024</span>
-        </div>
-        <div style="margin-top:10px">
-          <div style="font-size:8px;color:var(--text3);letter-spacing:1px;margin-bottom:4px">CONTRATOS POR ANO</div>
-          <div id="mc-sparkline" style="display:flex;align-items:flex-end;gap:2px;height:32px"></div>
-        </div>
-      </div>
-      <style>
-        #mc-slider-min::-webkit-slider-thumb, #mc-slider-max::-webkit-slider-thumb {
-          -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
-          background:#ef4444; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.4);
-          pointer-events:all; cursor:pointer;
-        }
-      </style>
-
-      <!-- MAP -->
-      <div style="position:relative">
-        <div id="mc-leaflet-map" style="height:420px;width:100%;background:#0d1117" class="mc-leaflet-map"></div>
-        <!-- Loading overlay -->
-        <div id="mc-map-loading" style="position:absolute;inset:0;background:rgba(13,17,23,0.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;pointer-events:none">
-          <div style="font-size:28px">🔥</div>
-          <div style="font-size:13px;color:#fff;font-weight:600">Cargando mapa de contratos…</div>
-        </div>
-      </div>
-
-      <!-- DETAIL PANEL (shows when a point is clicked) -->
-      <div id="mc-detalle" style="display:none;margin:0;border-top:1px solid var(--border)"></div>
-
-      <!-- GRÁFICO DE BARRAS POR ESTADO -->
-      <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text3)">📊 MONTO TOTAL OBSERVADO POR ESTADO</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">Se actualiza al filtrar · Click en barra para ver contratos del estado</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <select id="cmp-prov-orden" onchange="cmpCargarProveedores()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+              <option value="monto">Por monto total</option>
+              <option value="contratos">Por número de contratos</option>
+              <option value="dependencias">Por número de dependencias</option>
+            </select>
           </div>
-          <div style="display:flex;gap:6px">
-            <button onclick="mcBarraMetrica('monto',this)" id="mc-bar-btn-monto"
-              style="padding:4px 10px;border-radius:20px;border:1px solid rgba(239,68,68,0.5);background:rgba(239,68,68,0.15);color:#f87171;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">
-              💰 Monto
-            </button>
-            <button onclick="mcBarraMetrica('casos',this)" id="mc-bar-btn-casos"
-              style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit">
-              🔢 Casos
-            </button>
-          </div>
+          <div id="cmp-proveedores-lista" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
-        <div id="mc-barras-estado" style="display:flex;flex-direction:column;gap:5px;max-height:340px;overflow-y:auto;padding-right:4px"></div>
-      </div>
 
-      <!-- TABLE LIST -->
-      <div class="content" style="padding-top:18px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text3)">TODOS LOS CONTRATOS OBSERVADOS</div>
-          <div style="font-size:11px;color:var(--text3)" id="mc-count-label"></div>
-        </div>
-        <div id="mc-lista" style="display:flex;flex-direction:column;gap:8px"></div>
-
-        <div style="margin-top:16px;background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--text3);line-height:1.65">
-          📚 <strong style="color:var(--text2)">Fuentes:</strong> Auditoría Superior de la Federación (ASF) · Secretaría de la Función Pública (SFP) · CompraNet · DOF · INAI · Informes de resultados de fiscalización 2018–2024. Todos los datos son públicos y verificables. El tamaño del círculo es proporcional al logaritmo del monto para mejorar la visualización.
-        </div>
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://www.datos.gob.mx/dataset/api-de-contrataciones-abiertas-de-la-apf" target="_blank" style="color:var(--accent2)">ComprasMX / datos.gob.mx · Contrataciones Abiertas APF (OCDS v1.1)</a></div>
       </div>
     </div>
 
-    <!-- ───── REDES DE INFLUENCIA ───── -->
     <div id="page-redes" class="page">
       <div class="content" style="max-width:900px">
 
@@ -25362,353 +25439,4 @@ function renderOmbligoMuseos() {
           </div>
         </div>
         <!-- Why it matters -->
-        <div style="margin:14px 18px;background:${d.color}12;border-left:3px solid ${d.color};border-radius:0 10px 10px 0;padding:10px 14px">
-          <div style="font-size:9px;font-weight:800;color:${d.color};letter-spacing:1.5px;margin-bottom:4px">¿POR QUÉ IMPORTA?</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55">${d.porQueImporta}</div>
-        </div>
-        <!-- Info row -->
-        <div style="display:flex;border-top:1px solid ${d.color}25;flex-wrap:wrap">
-          <div style="flex:1;padding:10px 18px;border-right:1px solid ${d.color}20;min-width:120px">
-            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">📍 UBICACIÓN</div>
-            <div style="font-size:11px;color:var(--text)">${d.ubicacion}</div>
-          </div>
-          <div style="flex:1;padding:10px 18px;border-right:1px solid ${d.color}20;min-width:100px">
-            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">💰 COSTO</div>
-            <div style="font-size:11px;color:var(--text)">${d.costo}</div>
-          </div>
-          <div style="flex:1;padding:10px 18px;min-width:120px">
-            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">🕐 HORARIO</div>
-            <div style="font-size:11px;color:var(--text)">${d.horario}</div>
-          </div>
-        </div>
-        <!-- Salas -->
-        <div style="padding:10px 18px 16px">
-          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:6px;letter-spacing:1px">SALAS PRINCIPALES</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px">
-            ${d.salas.map(s=>`<span style="background:${d.color}12;border:1px solid ${d.color}25;color:var(--text2);font-size:10px;padding:3px 9px;border-radius:6px">${s}</span>`).join('')}
-          </div>
-        </div>
-      </div>`;
-  }
-
-  // Resto en grid 2×N — cards compactas expandibles
-  gridEl.innerHTML = resto.map(m => {
-    const safeId = 'om-' + m.nombre.replace(/[\s\(\)—·]/g,'_');
-    return `
-    <div style="border-radius:14px;overflow:hidden;border:1px solid ${m.color}30;background:var(--surface);cursor:pointer" onclick="ombligoMuseoToggle('${safeId}',this)">
-      <!-- Card face -->
-      <div style="padding:12px 14px">
-        <div style="font-size:22px;margin-bottom:6px">${m.emoji}</div>
-        <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px">${m.nombre}</div>
-        <div style="font-size:10px;color:${m.color};line-height:1.4;margin-bottom:8px">${m.subtitulo}</div>
-        <div style="font-size:9px;color:var(--text3)">📍 ${m.ubicacion.split(',')[0]}</div>
-        <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
-          <span style="background:var(--bg3);font-size:9px;color:var(--text3);padding:2px 7px;border-radius:5px">${m.costo.split('·')[0].trim()}</span>
-        </div>
-      </div>
-      <!-- Expand indicator -->
-      <div style="background:${m.color}10;padding:6px 14px;border-top:1px solid ${m.color}20;font-size:9px;font-weight:700;color:${m.color};letter-spacing:1px">VER MÁS ▼</div>
-      <!-- Detail panel -->
-      <div id="${safeId}" style="display:none;padding:12px 14px;border-top:1px solid ${m.color}20;font-size:12px;color:var(--text2);line-height:1.6;background:${m.color}06">
-        ${m.descripcion}
-        <div style="margin-top:10px;background:${m.color}10;border-left:2px solid ${m.color};padding:8px 10px;border-radius:0 8px 8px 0;font-size:11px;color:var(--text2)">
-          <strong style="color:${m.color};font-size:9px;font-weight:800;display:block;margin-bottom:3px">¿POR QUÉ IMPORTA?</strong>
-          ${m.porQueImporta}
-        </div>
-        <div style="margin-top:8px">
-          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:1px">HORARIO</div>
-          <div style="font-size:11px">${m.horario}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function ombligoMuseoToggle(id, card) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  // Update indicator text
-  const indicator = card?.querySelector('[style*="VER MÁS"]');
-  if (indicator) indicator.textContent = isOpen ? 'VER MÁS ▼' : 'CERRAR ▲';
-}
-
-function renderOmbligoZonas() {
-  const el = document.getElementById('ombligo-zonas');
-  if (!el) return;
-  el.innerHTML = OMBLIGO_ZONAS.map(z => {
-    const safeId = 'oz-' + z.nombre.replace(/[\s\(\)]/g,'_');
-    return `
-    <div style="border-radius:16px;overflow:hidden;border:1px solid ${z.color}35;background:var(--surface)">
-      <!-- Header clickeable -->
-      <div onclick="ombligoZonaToggle('${safeId}', this.parentElement)" style="display:flex;gap:14px;padding:14px 16px;cursor:pointer;align-items:flex-start">
-        <!-- Icono + era strip -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-          <div style="width:48px;height:48px;border-radius:12px;background:${z.color}15;border:1px solid ${z.color}35;display:flex;align-items:center;justify-content:center;font-size:24px">${z.emoji}</div>
-          <div style="font-size:8px;font-weight:700;color:${z.color};text-align:center;letter-spacing:0.5px;max-width:48px;line-height:1.2">${z.estado}</div>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">
-            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>
-            ${z.patrimonio ? `<span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:8px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:0.5px">UNESCO</span>` : ''}
-          </div>
-          <div style="font-size:11px;color:${z.color};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>
-          <!-- Mini data row -->
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <span style="font-size:10px;color:var(--text3)">🏛️ ${z.periodo}</span>
-            <span style="font-size:10px;color:var(--text3)">💰 ${z.costo.split('·')[0].trim()}</span>
-          </div>
-        </div>
-        <span id="zarrow-${safeId}" style="color:${z.color};font-size:13px;flex-shrink:0;transition:transform 0.2s">▼</span>
-      </div>
-
-      <!-- Expanded detail -->
-      <div id="${safeId}" style="display:none;border-top:1px solid ${z.color}25">
-        <!-- Descripción -->
-        <div style="padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.65">${z.descripcion}</div>
-
-        <!-- No te pierdas highlight -->
-        <div style="margin:0 16px 14px;background:${z.color}10;border-radius:10px;padding:12px 14px;border:1px solid ${z.color}20">
-          <div style="font-size:9px;font-weight:800;color:${z.color};letter-spacing:2px;margin-bottom:6px">🌟 NO TE PIERDAS</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55">${z.destacado}</div>
-        </div>
-
-        <!-- Info grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid ${z.color}20">
-          <div style="padding:10px 16px;border-right:1px solid ${z.color}20">
-            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">💰 COSTO</div>
-            <div style="font-size:11px;color:var(--text);line-height:1.4">${z.costo}</div>
-          </div>
-          <div style="padding:10px 16px">
-            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">🕐 HORARIO</div>
-            <div style="font-size:11px;color:var(--text);line-height:1.4">${z.horario}</div>
-          </div>
-        </div>
-        <div style="padding:10px 16px 14px;border-top:1px solid ${z.color}20">
-          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">🚌 CÓMO LLEGAR</div>
-          <div style="font-size:12px;color:var(--text)">${z.distancia}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function ombligoZonaToggle(id, card) {
-  const el    = document.getElementById(id);
-  const arrow = document.getElementById('zarrow-' + id);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
-}
-
-  </script>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- SOS FLOATING BUTTON                                         -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <style>
-    #sos-fab {
-      position: fixed;
-      bottom: 88px; /* above bottom nav on mobile */
-      right: 18px;
-      z-index: 9000;
-    }
-    @media (min-width: 769px) {
-      #sos-fab { bottom: 28px; }
-    }
-    #sos-btn {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #dc2626, #991b1b);
-      border: none;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      font-family: var(--font-display);
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0.4);
-      animation: sos-pulse 2.5s infinite;
-      transition: transform 0.2s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    #sos-btn:hover { transform: scale(1.08); }
-    @keyframes sos-pulse {
-      0%   { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0.4); }
-      70%  { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 14px rgba(220,38,38,0); }
-      100% { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0); }
-    }
-
-    #sos-menu {
-      display: none;
-      position: absolute;
-      bottom: 68px;
-      right: 0;
-      background: var(--bg2);
-      border: 1px solid rgba(220,38,38,0.35);
-      border-radius: 16px;
-      overflow: hidden;
-      min-width: 220px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      animation: fadeUp 0.2s ease;
-    }
-    #sos-menu.open { display: block; }
-
-    .sos-menu-header {
-      padding: 10px 14px 8px;
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #f87171;
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(220,38,38,0.2);
-      background: rgba(220,38,38,0.06);
-    }
-    .sos-menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      font-family: var(--font-body);
-    }
-    .sos-menu-item:last-child { border-bottom: none; }
-    .sos-menu-item:hover { background: rgba(220,38,38,0.08); }
-    .sos-menu-item .sos-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
-    .sos-menu-item .sos-desc { font-size: 10px; color: var(--text3); font-weight: 400; margin-top: 1px; }
-  </style>
-
-  <div id="sos-fab">
-    <!-- Dropdown menu -->
-    <div id="sos-menu">
-      <div class="sos-menu-header">🆘 Ayuda de emergencia</div>
-      <div class="sos-menu-item" onclick="sosGo('derechos')" role="button" aria-label="Ir a Mis Derechos — conoce tus derechos ciudadanos">
-        <span class="sos-icon" aria-hidden="true">⚖️</span>
-        <div>
-          <div>Mis Derechos</div>
-          <div class="sos-desc">Conoce tus derechos ciudadanos</div>
-        </div>
-      </div>
-      <div class="sos-menu-item" onclick="sosGo('emergencia')" role="button" aria-label="Ir a Modo Emergencia 24/7 — líneas de crisis y ayuda inmediata">
-        <span class="sos-icon" aria-hidden="true">🚨</span>
-        <div>
-          <div>Modo Emergencia 24/7</div>
-          <div class="sos-desc">Líneas de crisis y ayuda inmediata</div>
-        </div>
-      </div>
-      <div class="sos-menu-item" onclick="sosGo('offline')" role="button" aria-label="Ir a Información sin conexión — disponible sin internet">
-        <span class="sos-icon" aria-hidden="true">📵</span>
-        <div>
-          <div>Info sin conexión</div>
-          <div class="sos-desc">Información disponible sin internet</div>
-        </div>
-      </div>
-      <div class="sos-menu-item" onclick="sosGo('directorio')" role="button" aria-label="Ir al Directorio de Servicios — números y contactos de emergencia">
-        <span class="sos-icon" aria-hidden="true">📋</span>
-        <div>
-          <div>Directorio de Servicios</div>
-          <div class="sos-desc">Números y contactos de emergencia</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- The button -->
-    <button id="sos-btn" onclick="toggleSosMenu()" aria-label="SOS - Ayuda de emergencia">SOS</button>
-  </div>
-
-  <script>
-    function toggleSosMenu() {
-      const menu = document.getElementById('sos-menu');
-      menu.classList.toggle('open');
-      // Close when clicking outside
-      if (menu.classList.contains('open')) {
-        setTimeout(() => {
-          document.addEventListener('click', closeSosOnOutside, { once: true });
-        }, 10);
-      }
-    }
-
-    function closeSosOnOutside(e) {
-      const fab = document.getElementById('sos-fab');
-      if (!fab.contains(e.target)) {
-        document.getElementById('sos-menu').classList.remove('open');
-      }
-    }
-
-    function sosGo(section) {
-      document.getElementById('sos-menu').classList.remove('open');
-      if (typeof showPage !== 'function') return;
-      switch(section) {
-        case 'derechos':
-          showPage('derechos');
-          break;
-        case 'emergencia':
-          showPage('emergencia');
-          break;
-        case 'offline':
-          showPage('offline');
-          break;
-        case 'directorio':
-          showPage('directorio');
-          break;
-      }
-    }
-  </script>
-
-  <script>
-// ═══════════════════════════════════════════════════════════
-// MÓDULO MUNICIPAL
-// ═══════════════════════════════════════════════════════════
-const munData = {
-  aguascalientes:   { municipios:['Aguascalientes','Asientos','Calvillo','Cosío','El Llano','Jesús María','Pabellón de Arteaga','Rincón de Romos','San Francisco de los Romo','San José de Gracia','Tepezalá'] },
-  bajacalifornia:   { municipios:['Tijuana','Mexicali','Ensenada','Tecate','Playas de Rosarito','San Quintín','Valle de Guadalupe','Punta Banda'] },
-  bajacaliforniasur:{ municipios:['La Paz','Los Cabos','Comondú','Loreto','Mulegé','Ciudad Constitución','Guerrero Negro'] },
-  campeche:         { municipios:['Campeche','Ciudad del Carmen','Calkiní','Escárcega','Candelaria','Champotón','Hecelchakán','Hopelchén','Palizada','Tenabo','Calakmul','Seybaplaya'] },
-  cdmx:             { municipios:['Álvaro Obregón','Azcapotzalco','Benito Juárez','Coyoacán','Cuajimalpa','Cuauhtémoc','Gustavo A. Madero','Iztacalco','Iztapalapa','Magdalena Contreras','Miguel Hidalgo','Milpa Alta','Tláhuac','Tlalpan','Venustiano Carranza','Xochimilco'] },
-  chiapas:          { municipios:['Tuxtla Gutiérrez','San Cristóbal de las Casas','Tapachula','Comitán de Domínguez','Palenque','Ocosingo','Tonalá','Chiapa de Corzo','Villaflores','Huixtla','Arriaga','Cintalapa','Las Margaritas','Motozintla','Pichucalco','Reforma','Salto de Agua','Yajalón'] },
-  chihuahua:        { municipios:['Chihuahua','Ciudad Juárez','Delicias','Cuauhtémoc','Parral','Camargo','Jiménez','Meoqui','Ojinaga','Bocoyna','Casas Grandes','Guerrero','Nuevo Casas Grandes','Saucillo'] },
-  coahuila:         { municipios:['Saltillo','Torreón','Monclova','Piedras Negras','Acuña','Ramos Arizpe','San Pedro','Frontera','Sabinas','Múzquiz','Castaños','Nava','Palau','San Buenaventura'] },
-  colima:           { municipios:['Colima','Manzanillo','Tecomán','Villa de Álvarez','Armería','Comala','Coquimatlán','Cuauhtémoc','Ixtlahuacán','Minatitlán'] },
-  durango:          { municipios:['Durango','Gómez Palacio','Lerdo','Santiago Papasquiaro','Guanaceví','El Salto','Tlahualilo','Canatlán','Poanas','Súchil','Pueblo Nuevo','Tepehuanes','Vicente Guerrero'] },
-  guanajuato:       { municipios:['León','Irapuato','Celaya','Salamanca','Guanajuato','Silao','San Luis de la Paz','Dolores Hidalgo','Pénjamo','Acámbaro','Cortázar','San Miguel de Allende','Salvatierra','Uriangato','Valle de Santiago'] },
-  guerrero:         { municipios:['Acapulco','Chilpancingo','Zihuatanejo','Iguala','Taxco','Chilapa de Álvarez','Teloloapan','Arcelia','San Marcos','Coyuca de Benítez','Ayutla de los Libres','Cuajinicuilapa','Ometepec','Petatlán','Técpan de Galeana'] },
-  hidalgo:          { municipios:['Pachuca','Tulancingo','Tula de Allende','Ixmiquilpan','Actopan','Huejutla de Reyes','Atitalaquia','Tepeapulco','Zimapán','Mixquiahuala','Ajacuba','Apan','Cuautepec de Hinojosa','Tizayuca','Tlahuelilpan'] },
-  jalisco:          { municipios:['Guadalajara','Zapopan','Tlaquepaque','Tonalá','Tlajomulco de Zúñiga','Puerto Vallarta','Lagos de Moreno','Tepatitlán de Morelos','Ocotlán','La Barca','El Salto','Ameca','Autlán de Navarro','Chapala','Ciudad Guzmán','Tequila','Zapotlán el Grande'] },
-  edomex:           { municipios:['Ecatepec de Morelos','Toluca','Naucalpan de Juárez','Nezahualcóyotl','Chimalhuacán','Tlalnepantla de Baz','Ixtapaluca','Tultitlán','Texcoco','Cuautitlán Izcalli','Atizapán de Zaragoza','Coacalco de Berriozábal','Chalco','Valle de México','Metepec','Nicolás Romero','Huixquilucan','Tecámac','Valle de Chalco Solidaridad','Zinacantepec'] },
-  michoacan:        { municipios:['Morelia','Lázaro Cárdenas','Apatzingán','Uruapan','Zamora','Zitácuaro','Sahuayo','La Piedad','Pátzcuaro','Hidalgo','Jacona','Jiquilpan','Los Reyes','Maravatío','Puruarán','Tacámbaro','Taretan','Tingambato'] },
-  morelos:          { municipios:['Cuernavaca','Jiutepec','Cuautla','Temixco','Yautepec','Xochitepec','Ayala','Jojutla','Puente de Ixtla','Emiliano Zapata','Axochiapan','Mazatepec','Tepalcingo','Tlaltizapán','Tlaquiltenango'] },
-  nayarit:          { municipios:['Tepic','Bahía de Banderas','Santiago Ixcuintla','Acaponeta','Compostela','Tuxpan','Xalisco','Ixtlán del Río','Tecuala','Del Nayar','Huajicori','Rosamorada','Ruiz','San Blas','Santa María del Oro'] },
-  nuevoleon:        { municipios:['Monterrey','Guadalupe','San Nicolás de los Garza','Apodaca','General Escobedo','Santa Catarina','San Pedro Garza García','Juárez','Linares','Montemorelos','Cadereyta Jiménez','García','Salinas Victoria','Santiago','Zuazua'] },
-  oaxaca:           { municipios:['Oaxaca de Juárez','Salina Cruz','San Juan Bautista Tuxtepec','Juchitán de Zaragoza','Heroica Ciudad de Huajuapan de León','Loma Bonita','Miahuatlán de Porfirio Díaz','Pinotepa Nacional','Santa Cruz Xoxocotlán','Tlaxiaco','Heroica Ciudad de Tlaxiaco','Matías Romero','Puerto Escondido','San Pablo Villa de Mitla','Santo Domingo Tehuantepec','Zimatlán de Álvarez'] },
-  puebla:           { municipios:['Puebla','Tehuacán','San Andrés Cholula','San Martín Texmelucan','Atlixco','Huauchinango','Izúcar de Matamoros','Acatzingo','Amozoc','Chignahuapan','Ajalpan','Cuetzalan del Progreso','Huejotzingo','Libres','San Pedro Cholula','Tecamachalco','Teziutlán','Tlatlauquitepec'] },
-  queretaro:        { municipios:['Querétaro','San Juan del Río','El Marqués','Corregidora','Huimilpan','Pedro Escobedo','Ezequiel Montes','Tequisquiapan','Cadereyta de Montes','Amealco','Colón','Jalpan de Serra','Landa de Matamoros','Pinal de Amoles','San Joaquín'] },
-  quintanaroo:      { municipios:['Benito Juárez (Cancún)','Solidaridad (Playa del Carmen)','Othón P. Blanco (Chetumal)','Cozumel','Tulum','Puerto Morelos','Isla Mujeres','Bacalar','Lázaro Cárdenas (Mahahual)','Felipe Carrillo Puerto','José María Morelos','Kosambé'] },
-  sanluispotosi:    { municipios:['San Luis Potosí','Soledad de Graciano Sánchez','Ciudad Valles','Matehuala','Tamazunchale','Rioverde','Ébano','Cerritos','Cárdenas','Ciudad Fernández','Ahualulco','Alaquines','Aquismón','Charcas','Mexquitic de Carmona','Salinas','Tancanhuitz','Xilitla'] },
-  sinaloa:          { municipios:['Culiacán','Mazatlán','Los Mochis','Guasave','Navolato','Salvador Alvarado','Guamúchil','El Fuerte','Escuinapa','Mocorito','Angostura','Badiraguato','Choix','Concordia','Cosalá','El Rosario','Sinaloa'] },
-  sonora:           { municipios:['Hermosillo','Ciudad Obregón','Nogales','San Luis Río Colorado','Navojoa','Guaymas','Agua Prieta','Caborca','Empalme','Puerto Peñasco','Álamos','Bácum','Cajeme','Cananea','Magdalena','Nacozari de García','Pitiquito','Ures'] },
-  tabasco:          { municipios:['Villahermosa','Cárdenas','Comalcalco','Macuspana','Huimanguillo','Jalpa de Méndez','Jonuta','Nacajuca','Paraíso','Tenosique','Balancán','Centro','Centla','Cunduacán','Emiliano Zapata','Tacotalpa'] },
-  tamaulipas:       { municipios:['Reynosa','Matamoros','Tampico','Ciudad Victoria','Nuevo Laredo','Altamira','Madero','Río Bravo','Mante','Laredo','Camargo','Güémez','Miguel Alemán','Soto la Marina','Valle Hermoso'] },
-  tlaxcala:         { municipios:['Tlaxcala','Apizaco','Chiautempan','Tlaxco','Huamantla','Santa Ana Chiautempan','Zacatelco','Calpulalpan','Papalotla de Xicohténcatl','Xaloztoc','Apetatitlán','Contla de Juan Cuamatzi','Cuaxomulco','La Magdalena Tlaltelulco','Tepetitla de Lardizábal','Tzompantepec'] },
-  veracruz:         { municipios:['Veracruz','Xalapa','Coatzacoalcos','Córdoba','Orizaba','Poza Rica','Tuxpan','Minatitlán','Boca del Río','Coatepec','Agua Dulce','Álamo Temapache','Catemaco','Cosoleacaque','Martínez de la Torre','Papantla','Perote','San Andrés Tuxtla','Santiago Tuxtla','Tierra Blanca'] },
-  yucatan:          { municipios:['Mérida','Valladolid','Tizimín','Progreso','Kanasín','Motul','Ticul','Hunucmá','Umán','Tekax','Acanceh','Calkiní','Celestún','Chemax','Dzilam de Bravo','Espita','Izamal','Maxcanú','Oxkutzcab','Temozón','Tzucacab'] },
-  zacatecas:        { municipios:['Zacatecas','Guadalupe','Fresnillo','Calera','Jerez','Loreto','Sombrerete','Juan Aldama','Ojocaliente','Valparaíso','Apozol','Cañitas de Felipe Pescador','Chalchihuites','Concepción del Oro','El Plateado','Mazapil','Pánuco','Río Grande','Sain Alto','Villa García'] }
-};
-
-function munCambiarEstado() {
-  const estado = document.getElementById('mun-selector-estado')?.value;
-  const munSel = document.getElementById('mun-selector-mun');
-  if (!estado || !munSel || !munData[estado]) return;
-  munSel.innerHTML = munData[estado].municipios.map(m=>`<option>${m}</option>`).join('');
-  munCambiarMunicipio();
-}
-
-function munCambiarMunicipio() {
-  const estad = document.getElementById('mun-selector-estado');
-  const mun   = document.getE
+        <div style="margin:14px 18px;background:${d.color}12;border-left:3px solid
