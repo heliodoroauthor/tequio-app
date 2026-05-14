@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 """
-scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v5)
-=========================================================
-v4 logró cargar 400 contratos (LICONSA, ALEN DEL NORTE para "Alimentación
-para el Bienestar"). Pero el resto (91,450 filas) NO se cargó.
+scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v6 — sin retry individual)
+================================================================================
+v5 cargó 8,032 de 91,850 filas en 30 min porque cuando un batch fallaba reintentaba
+fila por fila (200 requests por batch malo). Eso era 200x más lento.
 
-Diagnóstico v4 → v5:
-  - 1ros 2 batches OK; del 3ro en adelante falló todo. Sospecha: NaN/Infinity
-    en monto_mxn (json.dumps falla) o fechas raras.
-  - fecha_firma siempre NULL → el CSV no trae fecha_firma, usar fecha_inicio.
-  - Log truncado por debug excesivo → reducir verbosidad.
-
-v5 fixes:
-  - parse_monto rechaza NaN/Infinity
-  - fecha_firma = COALESCE(fecha_firma_real, fecha_inicio)
-  - Si un batch falla con HTTP 4xx, reintentar fila por fila para identificar bad row
-  - Cap de errores impresos (top 5) → log no se trunca
-  - Resumen compacto de columnas mapeadas vs ignoradas
+v6 estrategia:
+  - NO retry por fila. Si batch falla → log primera muestra + skip + continúa.
+  - Batches pequeños (50) → si falla, perdemos solo 50 filas, no 200.
+  - En la PRIMERA falla, imprimir JSON completo de la fila para diagnosticar.
+  - Pre-validación agresiva: nada de NaN/Inf, strings ASCII printable, longitud cap.
+  - Progress log cada 10k filas.
+  - Objetivo: cargar todo el CSV en <5 minutos.
 """
-import os, sys, csv, io, re, time, math, json, requests
+import os, sys, csv, io, re, math, json, requests
 from datetime import datetime
 
 import urllib3
@@ -36,10 +31,10 @@ UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
 HEADERS_WEB = {'User-Agent': UA}
 TIMEOUT_DOWNLOAD = 300
 
-BATCH_INSERT = int(os.environ.get('BATCH_INSERT', '100'))
+BATCH_INSERT = int(os.environ.get('BATCH_INSERT', '50'))
 MAX_CONTRATOS = int(os.environ.get('MAX_CONTRATOS', '250000'))
 UMBRAL_AD_ALTA_MXN = float(os.environ.get('UMBRAL_AD_ALTA_MXN', '10000000'))
-MAX_BAD_ROW_PRINTS = 5
+MAX_DEBUG_PRINTS = 3
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -47,7 +42,7 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-print("Tequio · Scraper Compranet (v5)")
+print("Tequio · Scraper Compranet (v6 — sin retry individual)")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE: {'OK' if SUPABASE_URL and SERVICE_KEY else 'MISSING'}")
 print(f"  BATCH={BATCH_INSERT}  MAX={MAX_CONTRATOS}")
@@ -56,7 +51,11 @@ if not (SUPABASE_URL and SERVICE_KEY):
     sys.exit(1)
 
 
-_stats = {'http_errs': 0, 'bad_rows_printed': 0, 'no_ocid': 0, 'no_titulo': 0}
+_stats = {
+    'http_errs': 0, 'http_debugs': 0,
+    'no_ocid': 0, 'no_titulo': 0, 'no_proveedor': 0,
+    'batches_ok': 0, 'batches_failed': 0
+}
 
 
 def norm_col(s):
@@ -68,6 +67,23 @@ def norm_col(s):
         s = s.replace(k, v)
     s = re.sub(r'[^a-z0-9]+', '_', s).strip('_')
     return s
+
+
+def clean_str(s, maxlen=500):
+    """Limpia string: strip, control chars out, longitud cap."""
+    if s is None:
+        return None
+    if not isinstance(s, str):
+        s = str(s)
+    s = s.strip()
+    if not s:
+        return None
+    # Remove control characters except tab/newline (which we'll also strip)
+    s = ''.join(ch for ch in s if ch == ' ' or (ord(ch) >= 32 and ch.isprintable()))
+    s = re.sub(r'\s+', ' ', s).strip()
+    if not s or s.lower() in ('null', 'none', 'n/a'):
+        return None
+    return s[:maxlen]
 
 
 def descargar_csv(url):
@@ -137,14 +153,16 @@ def parse_fecha(s):
         return None
     for fmt in ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%Y/%m/%d', '%m/%d/%Y']:
         try:
-            return datetime.strptime(s[:19], fmt).date().isoformat()
+            d = datetime.strptime(s[:19], fmt).date()
+            # Sanity: solo fechas razonables (2000-2030)
+            if 2000 <= d.year <= 2030:
+                return d.isoformat()
         except Exception:
             continue
     return None
 
 
 def parse_monto(s):
-    """Devuelve float válido o None. Rechaza NaN/Infinity (rompen JSON)."""
     if s is None:
         return None
     s = str(s).strip().replace(',', '').replace('$', '').replace(' ', '')
@@ -154,24 +172,20 @@ def parse_monto(s):
         v = float(s)
         if math.isnan(v) or math.isinf(v):
             return None
-        # PostgreSQL numeric(20,2) max ~ 10^18; rechazar excesos
-        if abs(v) > 1e15:
+        if abs(v) > 1e15 or v < 0:
             return None
         return round(v, 2)
     except Exception:
         return None
 
 
-# ─── COL_MAP (con variantes de nombre normalizado) ────────────────────────
 COL_MAP = {
-    # IDs
     'codigo_del_expediente':         'ocid_origen',
     'codigo_expediente':             'ocid_origen',
     'referencia_del_expediente':     'numero_proc',
     'numero_de_procedimiento':       'numero_proc',
     'codigo_del_contrato':           'codigo_contrato',
     'codigo_contrato':               'codigo_contrato',
-    # Títulos / descripción
     'titulo_del_expediente':         'titulo',
     'titulo_del_contrato':           'titulo',
     'titulo_expediente':             'titulo',
@@ -180,7 +194,6 @@ COL_MAP = {
     'descripcion_del_expediente':    'descripcion',
     'descripcion_contrato':          'descripcion',
     'descripcion_expediente':        'descripcion',
-    # Dependencia
     'institucion':                   'dependencia',
     'nombre_de_la_institucion':      'dependencia',
     'dependencia':                   'dependencia',
@@ -193,7 +206,6 @@ COL_MAP = {
     'nombre_uc':                     'unidad_compradora',
     'descripcion_ramo':              'ramo',
     'ramo':                          'ramo',
-    # Procedimiento
     'tipo_procedimiento':            'tipo_procedimiento',
     'tipo_de_procedimiento':         'tipo_procedimiento',
     'caracter':                      'caracter',
@@ -201,7 +213,6 @@ COL_MAP = {
     'caracter_procedimiento':        'caracter',
     'tipo_de_contratacion':          'tipo_contrato',
     'tipo_contratacion':             'tipo_contrato',
-    # Proveedor
     'proveedor_o_contratista':       'proveedor_nombre',
     'proveedor_contratista':         'proveedor_nombre',
     'nombre_del_proveedor_o_contratista': 'proveedor_nombre',
@@ -215,7 +226,6 @@ COL_MAP = {
     'siglas_del_pais':               'proveedor_pais',
     'siglas_pais':                   'proveedor_pais',
     'pais_de_origen':                'proveedor_pais',
-    # Montos
     'importe_del_contrato':          'monto_mxn',
     'importe_contrato':              'monto_mxn',
     'importe_total':                 'monto_mxn',
@@ -224,7 +234,6 @@ COL_MAP = {
     'monto_total':                   'monto_mxn',
     'moneda':                        'moneda',
     'tipo_de_moneda':                'moneda',
-    # Fechas
     'fecha_de_firma':                'fecha_firma',
     'fecha_firma':                   'fecha_firma',
     'fecha_inicio':                  'fecha_inicio',
@@ -236,7 +245,6 @@ COL_MAP = {
     'fecha_de_fin_del_contrato':     'fecha_fin',
     'fecha_de_fin':                  'fecha_fin',
     'fecha_termino':                 'fecha_fin',
-    # Geográfico
     'entidad_federativa':            'entidad_federativa',
     'estado':                        'entidad_federativa',
     'municipio':                     'municipio',
@@ -244,13 +252,11 @@ COL_MAP = {
 
 
 def map_columns(headers):
-    """Devuelve dict {col_csv: campo_destino_o_None} y resumen."""
     mapping = {}
     mapped, unmapped = 0, 0
     for col in headers:
         norm = norm_col(col)
         key = COL_MAP.get(norm)
-        # Fallback substring
         if not key:
             if 'titulo' in norm and ('expediente' in norm or 'contrato' in norm):
                 key = 'titulo'
@@ -284,78 +290,87 @@ def map_columns(headers):
 
 
 def parse_csv_row(row, col_mapping):
-    out = {}
+    raw = {}
     for col, valor in row.items():
         key = col_mapping.get(col)
         if not key:
             continue
         if valor in (None, '', 'NULL'):
             continue
-        if key not in out:
-            out[key] = valor.strip() if isinstance(valor, str) else valor
+        if key not in raw:
+            raw[key] = valor.strip() if isinstance(valor, str) else valor
 
-    # OCID
-    ocid = out.get('ocid_origen') or out.get('codigo_contrato') or out.get('numero_proc')
+    ocid = raw.get('ocid_origen') or raw.get('codigo_contrato') or raw.get('numero_proc')
     if not ocid:
         _stats['no_ocid'] += 1
         return None
-    out['ocid'] = f"CN-MX-{str(ocid).strip()}"
+    ocid_clean = clean_str(str(ocid), 100)
+    if not ocid_clean:
+        return None
 
-    # Limpiar tipos
-    monto = parse_monto(out.get('monto_mxn'))
+    out = {'ocid': f"CN-MX-{ocid_clean}"}
+
+    # Strings sanitizados
+    out['titulo']             = clean_str(raw.get('titulo') or raw.get('descripcion'), 500)
+    out['descripcion']        = clean_str(raw.get('descripcion'), 2000)
+    out['dependencia']        = clean_str(raw.get('dependencia'), 255)
+    out['dependencia_codigo'] = clean_str(raw.get('dependencia_codigo'), 100)
+    out['unidad_compradora']  = clean_str(raw.get('unidad_compradora'), 500)
+    out['ramo']               = clean_str(raw.get('ramo'), 255)
+    out['proveedor_nombre']   = clean_str(raw.get('proveedor_nombre'), 500)
+    out['proveedor_rfc']      = clean_str(raw.get('proveedor_rfc'), 50)
+    out['proveedor_pais']     = clean_str(raw.get('proveedor_pais'), 10)
+    out['moneda']             = clean_str(raw.get('moneda'), 10)
+    out['entidad_federativa'] = clean_str(raw.get('entidad_federativa'), 100)
+    out['municipio']          = clean_str(raw.get('municipio'), 200)
+
+    # Requisitos mínimos
+    if not out['titulo']:
+        _stats['no_titulo'] += 1
+        return None
+    if not out['proveedor_nombre']:
+        _stats['no_proveedor'] += 1
+        return None
+
+    # Tipos enumerados
+    out['tipo_procedimiento'] = normalizar_procedimiento(raw.get('tipo_procedimiento'))
+    out['caracter']           = normalizar_caracter(raw.get('caracter'))
+    out['tipo_contrato']      = normalizar_categoria(raw.get('tipo_contrato'))
+
+    # Montos
+    monto = parse_monto(raw.get('monto_mxn'))
     out['monto_mxn'] = monto
-    out['fecha_firma']  = parse_fecha(out.get('fecha_firma'))
-    out['fecha_inicio'] = parse_fecha(out.get('fecha_inicio'))
-    out['fecha_fin']    = parse_fecha(out.get('fecha_fin'))
 
-    # Fallback: si no hay fecha_firma, usar fecha_inicio
-    if not out.get('fecha_firma') and out.get('fecha_inicio'):
-        out['fecha_firma'] = out['fecha_inicio']
+    # Fechas
+    f_inicio = parse_fecha(raw.get('fecha_inicio'))
+    f_fin    = parse_fecha(raw.get('fecha_fin'))
+    f_firma  = parse_fecha(raw.get('fecha_firma')) or f_inicio
+    out['fecha_firma']  = f_firma
+    out['fecha_inicio'] = f_inicio
+    out['fecha_fin']    = f_fin
 
-    if out.get('fecha_inicio') and out.get('fecha_fin'):
+    if f_inicio and f_fin:
         try:
-            d1 = datetime.strptime(out['fecha_inicio'], '%Y-%m-%d').date()
-            d2 = datetime.strptime(out['fecha_fin'], '%Y-%m-%d').date()
+            d1 = datetime.strptime(f_inicio, '%Y-%m-%d').date()
+            d2 = datetime.strptime(f_fin, '%Y-%m-%d').date()
             dd = (d2 - d1).days
-            if -3650 < dd < 36500:  # sanity check
+            if -3650 < dd < 36500:
                 out['duracion_dias'] = dd
         except Exception:
             pass
 
-    out['tipo_procedimiento'] = normalizar_procedimiento(out.get('tipo_procedimiento'))
-    out['caracter']           = normalizar_caracter(out.get('caracter'))
-    out['tipo_contrato']      = normalizar_categoria(out.get('tipo_contrato'))
-
-    titulo = out.get('titulo') or out.get('descripcion') or ''
-    titulo = titulo.strip() if isinstance(titulo, str) else str(titulo)
-    if not titulo:
-        _stats['no_titulo'] += 1
-        return None
-    out['titulo'] = titulo[:500]
-    if out.get('descripcion'):
-        out['descripcion'] = out['descripcion'][:2000]
-
+    # Flags
     out['flag_adjudicacion_directa_alta'] = bool(
-        out.get('tipo_procedimiento') == 'adjudicacion_directa' and
-        monto is not None and monto > UMBRAL_AD_ALTA_MXN
+        out.get('tipo_procedimiento') == 'adjudicacion_directa'
+        and monto is not None
+        and monto > UMBRAL_AD_ALTA_MXN
     )
 
-    # Limpiar campos extra que no van en la tabla
-    for k in ['ocid_origen', 'numero_proc', 'codigo_contrato']:
-        out.pop(k, None)
-
-    # Sanitizar strings (truncar a longitudes razonables)
-    for k in ['dependencia', 'dependencia_codigo', 'unidad_compradora', 'ramo',
-              'proveedor_rfc', 'proveedor_nombre', 'proveedor_pais',
-              'tipo_contrato', 'entidad_federativa', 'municipio', 'moneda']:
-        if k in out and isinstance(out[k], str):
-            out[k] = out[k][:255]
-
-    return out
+    # Drop None values to keep JSON small and avoid type confusion
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def bulk_upsert(rows):
-    """Intenta upsert del batch entero; si falla, intenta fila por fila."""
     if not rows:
         return 0
     url = f"{SUPABASE_URL}/rest/v1/contratos_publicos?on_conflict=ocid"
@@ -363,39 +378,27 @@ def bulk_upsert(rows):
     try:
         r = requests.post(url, json=rows, headers=h, timeout=60)
         if r.ok:
+            _stats['batches_ok'] += 1
             return len(rows)
-        # Falló batch: log y reintentar individual
-        if _stats['http_errs'] < MAX_BAD_ROW_PRINTS:
-            _stats['http_errs'] += 1
-            print(f"  [HTTP {r.status_code}] batch falló: {r.text[:300]}")
+        _stats['batches_failed'] += 1
+        if _stats['http_debugs'] < MAX_DEBUG_PRINTS:
+            _stats['http_debugs'] += 1
+            print(f"\n  [HTTP {r.status_code}] {r.text[:400]}")
+            # Dump the first row of the failed batch for diagnosis
+            print(f"  [BAD ROW SAMPLE] {json.dumps(rows[0], ensure_ascii=False, default=str)[:600]}")
+        return 0
     except Exception as e:
-        if _stats['http_errs'] < MAX_BAD_ROW_PRINTS:
-            _stats['http_errs'] += 1
-            print(f"  [EXC] batch: {e}")
-
-    # Reintentar fila por fila
-    ok_count = 0
-    for row in rows:
-        try:
-            rr = requests.post(url, json=[row], headers=h, timeout=30)
-            if rr.ok:
-                ok_count += 1
-            else:
-                if _stats['bad_rows_printed'] < MAX_BAD_ROW_PRINTS:
-                    _stats['bad_rows_printed'] += 1
-                    snippet = json.dumps(row, default=str)[:400]
-                    print(f"  [BAD {rr.status_code}] {rr.text[:200]} | row={snippet}")
-        except Exception as e:
-            if _stats['bad_rows_printed'] < MAX_BAD_ROW_PRINTS:
-                _stats['bad_rows_printed'] += 1
-                print(f"  [EXC indiv] {e}")
-    return ok_count
+        _stats['batches_failed'] += 1
+        if _stats['http_debugs'] < MAX_DEBUG_PRINTS:
+            _stats['http_debugs'] += 1
+            print(f"\n  [EXC batch] {e}")
+        return 0
 
 
 def refresh_view():
     try:
         r = requests.post(f"{SUPABASE_URL}/rest/v1/rpc/refresh_proveedores_agregados",
-                          headers=HEADERS_SB, json={}, timeout=60)
+                          headers=HEADERS_SB, json={}, timeout=120)
         return r.ok
     except Exception:
         return False
@@ -408,21 +411,18 @@ def procesar_csv(text):
     reader = csv.DictReader(io.StringIO(text), delimiter=delim)
     headers = reader.fieldnames or []
     col_mapping, n_mapped, n_unmapped = map_columns(headers)
-    print(f"  Cols total: {len(headers)}  |  Mapeadas: {n_mapped}  |  Ignoradas: {n_unmapped}")
-    print(f"  Cols mapeadas:")
-    for col, key in col_mapping.items():
-        if key:
-            print(f"    {col!r} → {key}")
+    print(f"  Cols: {len(headers)} ({n_mapped} mapeadas, {n_unmapped} ignoradas)")
 
     batch = []
     total_filas = 0
     total_inserted = 0
     total_skipped = 0
+    t0 = datetime.now()
 
     for row in reader:
         total_filas += 1
         if total_filas > MAX_CONTRATOS:
-            print(f"  [CAP] Alcanzado MAX_CONTRATOS={MAX_CONTRATOS}")
+            print(f"  [CAP] MAX_CONTRATOS={MAX_CONTRATOS}")
             break
         parsed = parse_csv_row(row, col_mapping)
         if not parsed:
@@ -430,21 +430,27 @@ def procesar_csv(text):
             continue
         batch.append(parsed)
         if len(batch) >= BATCH_INSERT:
-            ok = bulk_upsert(batch)
-            total_inserted += ok
+            total_inserted += bulk_upsert(batch)
             batch = []
         if total_filas % 10000 == 0:
-            print(f"  [{total_filas}] inserted={total_inserted}, skipped={total_skipped}")
+            elapsed = (datetime.now() - t0).total_seconds()
+            rate = total_filas / max(elapsed, 1)
+            print(f"  [{total_filas}] inserted={total_inserted} skipped={total_skipped}"
+                  f" rate={rate:.0f}r/s batches_ok={_stats['batches_ok']} batches_fail={_stats['batches_failed']}")
 
     if batch:
         total_inserted += bulk_upsert(batch)
 
-    print(f"\n  Filas procesadas: {total_filas}")
-    print(f"  Insertados:       {total_inserted}")
-    print(f"  Skipped:          {total_skipped}")
-    print(f"  Skip por no_ocid: {_stats['no_ocid']}")
-    print(f"  Skip por no_tit:  {_stats['no_titulo']}")
-    print(f"  HTTP errors:      {_stats['http_errs']}")
+    elapsed = (datetime.now() - t0).total_seconds()
+    print(f"\n  ── Resumen ({elapsed:.0f}s) ──")
+    print(f"  Filas procesadas:   {total_filas}")
+    print(f"  Insertados:         {total_inserted}")
+    print(f"  Skipped (parseo):   {total_skipped}")
+    print(f"    · sin ocid:       {_stats['no_ocid']}")
+    print(f"    · sin titulo:     {_stats['no_titulo']}")
+    print(f"    · sin proveedor:  {_stats['no_proveedor']}")
+    print(f"  Batches OK:         {_stats['batches_ok']}")
+    print(f"  Batches fallidos:   {_stats['batches_failed']}")
     return total_inserted
 
 
@@ -457,8 +463,8 @@ def main():
             continue
         inserted = procesar_csv(text)
         inserted_total += inserted
-        if inserted_total >= 50000:
-            print(f"  [STOP] {inserted_total} contratos cargados, basta.")
+        if inserted_total >= 100000:
+            print(f"  [STOP] {inserted_total} contratos cargados.")
             break
 
     print(f"\nTotal insertado: {inserted_total}")
