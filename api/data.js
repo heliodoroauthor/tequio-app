@@ -305,6 +305,105 @@ export default async function handler(req, res) {
       return res.status(200).json({ votaciones: rows || [], resultados, mi_voto });
     }
 
+    if (vista === 'quemones_ranking') {
+      // Top diputados con más quemones
+      const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      const partido = req.query.partido || '';
+      const entidad = req.query.entidad || '';
+      let q = `quemones_ranking?order=num_quemones.desc,pct_quemones.desc&select=dipt_id,nombre,partido,entidad,distrito,foto_url,num_quemones,total_votaciones_evaluadas,pct_quemones&limit=${limit}`;
+      if (partido) q += `&partido=eq.${encodeURIComponent(partido)}`;
+      if (entidad) q += `&entidad=eq.${encodeURIComponent(entidad)}`;
+      // Solo mostrar diputados con al menos 1 evaluación
+      q += `&total_votaciones_evaluadas=gt.0`;
+      const rows = await sb(q);
+      // Stats globales
+      const stats = await sb('quemones?select=es_quemon');
+      const totalIncidentes = (stats || []).length;
+      const totalQuemones = (stats || []).filter(r => r.es_quemon).length;
+      return res.status(200).json({
+        ranking: rows || [],
+        total_diputados_evaluados: (rows || []).length,
+        total_incidentes: totalIncidentes,
+        total_quemones: totalQuemones,
+      });
+    }
+
+    if (vista === 'quemon_detalle') {
+      // Detalle de incidentes para un diputado
+      const dipt_id = parseInt(req.query.dipt_id || '0', 10);
+      if (!dipt_id) return res.status(400).json({ error: 'dipt_id requerido' });
+      const rows = await sb(`quemones?dipt_id=eq.${dipt_id}&order=created_at.desc&select=*,votaciones_pendientes(asunto_corto,titulo,materia,fecha_propuesta),votaciones_diputados(asunto,fecha,resultado)`);
+      // Info del diputado
+      const dipRows = await sb(`politicos_diputados?dipt_id=eq.${dipt_id}&select=dipt_id,nombre,partido,entidad,distrito,foto_url`);
+      return res.status(200).json({
+        diputado: dipRows?.[0] || null,
+        incidentes: rows || [],
+      });
+    }
+
+    if (vista === 'mi_rep_vs_yo') {
+      // Cruce: cómo voté yo (votos_ciudadanos) vs cómo votó mi diputado (votos_individuales)
+      const cookie_id = req.query.cookie_id || '';
+      if (!cookie_id || !/^[0-9a-f-]{36}$/i.test(cookie_id)) return res.status(400).json({ error: 'cookie_id requerido' });
+      // 1) Usuario
+      const userRows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito`);
+      const u = userRows?.[0];
+      if (!u) return res.status(200).json({ logueado: false });
+      // 2) Mi diputado (por entidad+distrito)
+      const dipRows = await sb(`politicos_diputados?entidad=eq.${encodeURIComponent(u.entidad)}&distrito=eq.${u.distrito}&select=dipt_id,nombre,partido,foto_url&limit=1`);
+      const dip = dipRows?.[0];
+      if (!dip) return res.status(200).json({ logueado: true, sin_diputado: true, usuario: u });
+      // 3) Mis votos ciudadanos
+      const misVotos = await sb(`votos_ciudadanos?usuario_id=eq.${u.id}&select=votacion_pendiente_id,voto`);
+      if (!misVotos || !misVotos.length) {
+        return res.status(200).json({ logueado: true, usuario: u, diputado: dip, comparaciones: [], stats: { total: 0, coincide: 0, contra: 0, pct: 0 } });
+      }
+      // 4) Para cada voto mío, busco la votación pendiente → votacion_id → voto de mi diputado
+      const pendienteIds = misVotos.map(v => v.votacion_pendiente_id).join(',');
+      const pendientes = await sb(`votaciones_pendientes?id=in.(${pendienteIds})&select=id,asunto_corto,titulo,materia,votacion_id`);
+      const pendientesById = {};
+      for (const p of pendientes || []) pendientesById[p.id] = p;
+      const votacionesIds = (pendientes || []).map(p => p.votacion_id).filter(Boolean).join(',');
+      const votosDip = votacionesIds ? await sb(`votos_individuales?dipt_id=eq.${dip.dipt_id}&votacion_id=in.(${votacionesIds})&select=votacion_id,voto`) : [];
+      const votoDipPorVotId = {};
+      for (const v of votosDip || []) votoDipPorVotId[v.votacion_id] = v.voto;
+      // 5) Build comparaciones
+      const comparaciones = [];
+      let coincide = 0, contra = 0;
+      for (const mv of misVotos) {
+        const p = pendientesById[mv.votacion_pendiente_id];
+        if (!p) continue;
+        const voto_dip = p.votacion_id ? votoDipPorVotId[p.votacion_id] : null;
+        const yo = mv.voto;
+        let estado = 'pendiente';
+        if (voto_dip === yo) { estado = 'coincide'; coincide++; }
+        else if (voto_dip && voto_dip !== yo && voto_dip !== 'ausente') { estado = 'contra'; contra++; }
+        else if (voto_dip === 'ausente') { estado = 'ausente'; }
+        comparaciones.push({
+          votacion_pendiente_id: p.id,
+          asunto: p.asunto_corto || p.titulo,
+          materia: p.materia,
+          mi_voto: yo,
+          voto_diputado: voto_dip,
+          estado,
+        });
+      }
+      const total = coincide + contra;
+      return res.status(200).json({
+        logueado: true,
+        usuario: u,
+        diputado: dip,
+        comparaciones,
+        stats: {
+          total_votos_emitidos: misVotos.length,
+          comparables: total,
+          coincide,
+          contra,
+          pct_coincide: total ? Math.round(100 * coincide / total) : 0,
+        },
+      });
+    }
+
     if (vista === 'emitir_voto') {
       if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
       let body = req.body;
@@ -618,6 +717,7 @@ export default async function handler(req, res) {
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
       'votaciones_pendientes','emitir_voto','registrar_ciudadano','me',
+      'quemones_ranking','quemon_detalle','mi_rep_vs_yo',
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
