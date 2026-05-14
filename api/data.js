@@ -124,6 +124,36 @@ export default async function handler(req, res) {
       return res.status(200).json({ presas });
     }
 
+    if (vista === 'diputados') {
+      // Lista de los 500 diputados con filtros opcionales por estado y partido
+      const filtroEntidad = req.query.entidad || '';
+      const filtroPartido = req.query.partido || '';
+      let query = 'politicos_diputados?order=entidad.asc,distrito.asc&select=dipt_id,nombre,partido,partido_codigo,entidad,distrito,principio_eleccion,email,foto_url,curricula_url,curul,reelecto,suplente,comisiones&limit=600';
+      if (filtroEntidad) query += `&entidad=eq.${encodeURIComponent(filtroEntidad)}`;
+      if (filtroPartido) query += `&partido=eq.${encodeURIComponent(filtroPartido)}`;
+      const rows = await sb(query);
+      // Calcular agregados rápidos
+      const porPartido = {};
+      const porEntidad = {};
+      for (const d of rows) {
+        if (d.partido) porPartido[d.partido] = (porPartido[d.partido] || 0) + 1;
+        if (d.entidad) porEntidad[d.entidad] = (porEntidad[d.entidad] || 0) + 1;
+      }
+      return res.status(200).json({
+        diputados: rows,
+        total: rows.length,
+        por_partido: porPartido,
+        por_entidad: porEntidad,
+      });
+    }
+
+    if (vista === 'votaciones') {
+      // Votaciones nominales del pleno, más recientes primero
+      const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      const rows = await sb(`votaciones_diputados?order=fecha.desc,votacion_id.desc&select=votacion_id,fecha,periodo,asunto,tipo,total_si,total_no,total_abst,total_ausente,resultado,url_oficial&limit=${limit}`);
+      return res.status(200).json({ votaciones: rows });
+    }
+
     if (vista === 'despachos') {
       const area = (req.query.area || '').toLowerCase();
       const rows = await sb('despachos_verificados?activo=eq.true&verificado=eq.true&order=rating.desc.nullslast&select=id,nombre,responsable,especialidades,estados,telefono,whatsapp,email,sitio_web,rating,num_resenas,primera_consulta_gratis,plan');
@@ -165,7 +195,8 @@ export default async function handler(req, res) {
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
-      'dashboard','clima','alertas','sequia','presas','despachos','crear_lead',
+      'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
+      'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
     ]});
   } catch (e) {
