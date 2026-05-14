@@ -25599,252 +25599,487 @@ const DIRECTORIO_ESTADOS = {
     { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Tlaxcala',                    tel:'246 462 0040', web:'diftlaxcala.gob.mx',   desc:'Asistencia social a familias y comunidades tlaxcaltecas.',                   horario:'Lun–Vie 8–16h' },
     { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Tlaxcala',        tel:'246 462 0080', web:'tlaxcala.gob.mx',       desc:'Emergencias por sismos, lluvias e incendios forestales.',                    horario:'24/7' },
   ]},
-  'Veracruz': { capital:'Xalapa', abrev:'VER', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'228 842 0600', web:'fgeveracruz.gob.mx',   desc:'Denuncia delitos. Oficinas en Xalapa, Veracruz puerto y región.',           horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Veracruz',                  tel:'228 841 0028', web:'cedhveracruz.org.mx',   desc:'Comisión Estatal de Derechos Humanos de Veracruz.',                          horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IVM — Instituto Veracruzano de las Mujeres',tel:'228 814 1200',web:'veracruz.gob.mx/ivm',desc:'Atención a mujeres en violencia y programas de igualdad.',           horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (SESVER)',     tel:'228 841 9090', web:'ssaver.gob.mx',         desc:'Red hospitalaria en el estado más largo de México.',                         horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Veracruz',                    tel:'228 840 6200', web:'difveracruz.gob.mx',   desc:'Asistencia a familias y comunidades indígenas veracruzanas.',               horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Veracruz',        tel:'228 812 8400', web:'veracruz.gob.mx',      desc:'Emergencias por huracanes, lluvias e inundaciones costeras.',                horario:'24/7' },
-  ]},
-  'Yucatán': { capital:'Mérida', abrev:'YUC', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'999 930 1590', web:'fiscaliayucatan.gob.mx', desc:'Denuncia delitos y solicita atención del Ministerio Público.',              horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CODHEY — Com. DDHH de Yucatán',   tel:'999 930 0660', web:'codhey.org',             desc:'Quejas por violaciones a derechos humanos en Yucatán.',                      horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto para la Equidad de Género',tel:'999 930 3860',web:'yucatan.gob.mx',        desc:'Atención a mujeres en situación de violencia en Yucatán.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de Yucatán (SSY)',tel:'999 930 3200',web:'saludyucatan.gob.mx',  desc:'Hospital O\'Horán, hospitales regionales y centros de salud.',               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Yucatán',                     tel:'999 930 3500', web:'difyucatan.gob.mx',    desc:'Asistencia a familias mayas y personas vulnerables.',                        horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Yucatán',         tel:'999 930 3700', web:'yucatan.gob.mx',        desc:'Protocolo avanzado de ciclones y huracanes en la Península.',               horario:'24/7' },
-  ]},
-  'Zacatecas': { capital:'Zacatecas', abrev:'ZAC', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'492 922 6901', web:'fiscaliazacatecas.gob.mx',desc:'Denuncia delitos y solicita atención ministerial.',                         horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Zacatecas',                  tel:'492 922 6090', web:'cedhzac.org',            desc:'Comisión Estatal de Derechos Humanos de Zacatecas.',                         horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMZ — Instituto de la Mujer Zacatecana',tel:'492 922 3800',web:'zacatecas.gob.mx',  desc:'Atención a mujeres en violencia de género.',                                 horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Zacatecas',    tel:'492 922 3000', web:'ssaz.gob.mx',           desc:'Hospitales y centros de salud del estado.',                                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Zacatecas',                   tel:'492 922 6045', web:'difzacatecas.gob.mx',  desc:'Asistencia social a familias y personas vulnerables.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Zacatecas',       tel:'492 922 3510', web:'zacatecas.gob.mx',     desc:'Emergencias por granizo, nevadas e incendios forestales.',                   horario:'24/7' },
-  ]},
+  'Veracruz': { polId:'sn', nombre:'Rocío Nahle García', cargo:'Gobernadora · Veracruz', partido:'MORENA', color:'#b45309', avatarBg:'linear-gradient(135deg,#b45309,#92400e)', iniciales:'RN',
+    votos:[{tema:'⛽ Refinería Dos Bocas',voto:'A favor',color:'var(--green2)'},{tema:'🌿 Manglares',voto:'En contra',color:'var(--red2)'},{tema:'💼 Empleo industrial',voto:'A favor',color:'var(--green2)'}] },
+  'Oaxaca': { polId:'eo', nombre:'Salomón Jara Cruz', cargo:'Gobernador · Oaxaca', partido:'MORENA', color:'#b45309', avatarBg:'linear-gradient(135deg,#78350f,#92400e)', iniciales:'SJ',
+    votos:[{tema:'🪶 Derechos indígenas',voto:'A favor',color:'var(--green2)'},{tema:'🌬️ Energía eólica',voto:'En proceso',color:'var(--yellow2)'},{tema:'🏥 Hospitales rurales',voto:'A favor',color:'var(--green2)'}] },
+  'default': { polId:'mb', nombre:'Ricardo Mora H.', cargo:'Diputado Federal · MC · Nuevo León', partido:'MC', color:'#ea580c', avatarBg:'linear-gradient(135deg,#ea580c,#f97316)', iniciales:'RM',
+    votos:[{tema:'💧 Ley de Agua',voto:'A favor',color:'var(--green2)'},{tema:'💰 Reforma Fiscal',voto:'A favor',color:'var(--green2)'},{tema:'⚖️ Paridad Salarial',voto:'A favor',color:'var(--green2)'}] },
 };
 
-// ── DIRECTORIO STATE ──
-let dirEstadoActual = null;
-let dirCatActual    = 'todos';
-let dirIniciado     = false;
-
-function initDirectorio() {
-  // Always re-render if grid is empty (defensive against timing issues)
-  const grid = document.getElementById('dir-states-grid');
-  if (grid && grid.children.length > 0) {
-    // Already rendered — just invalidate size if needed
-    return;
+const OMBLIGO_TIMELINE = [
+  {
+    id:'prehispanico',
+    era:'Era Prehispánica',
+    rango:'~2500 a.C. – 1521',
+    emoji:'🏺',
+    color:'#d97706',
+    resumen:'Civilizaciones que dominaron astronomía, agricultura, arquitectura y sistemas de gobierno antes de que Europa "descubriera" América.',
+    cuerpo:`<strong>Las grandes civilizaciones:</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Olmecas</strong> (~1500–400 a.C.) — La "cultura madre". Primeras ciudades, escritura y calendario mesoamericano.</li>
+  <li><strong style="color:var(--text)">Teotihuacanos</strong> (~100–650 d.C.) — Ciudad de los dioses. Pirámides del Sol y la Luna. Primera metrópolis de América con ~125,000 habitantes.</li>
+  <li><strong style="color:var(--text)">Mayas</strong> (~250–900 d.C.) — Sistema de escritura completo, matemáticas, calendario más preciso del mundo antiguo, observatorios astronómicos.</li>
+  <li><strong style="color:var(--text)">Toltecas</strong> (~900–1150 d.C.) — Tula como capital. Quetzalcóatl como figura mítica que adoptarían los mexicas.</li>
+  <li><strong style="color:var(--text)">Mexicas / Aztecas</strong> (~1300–1521) — Imperio que llegó a dominar 38 millones de km² y 5–6 millones de personas. Tenochtitlan: la ciudad más grande del mundo en 1500.</li>
+</ul>
+<div style="margin-top:14px;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.25);border-radius:10px;padding:12px">
+<strong style="color:#fbbf24;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">El artículo 2 de la Constitución reconoce a los pueblos indígenas como sujetos de derecho. 68 lenguas nacionales. El INPI (Instituto Nacional de los Pueblos Indígenas) administra políticas derivadas de esta historia. La disputa por tierras comunales (ejidos) viene directamente de este periodo.</span>
+</div>`,
+    fuente:'INAH · UNAM · Arqueología Mexicana'
+  },
+  {
+    id:'conquista',
+    era:'La Conquista',
+    rango:'1519 – 1521',
+    emoji:'⚔️',
+    color:'#ef4444',
+    resumen:'En dos años, el Imperio Mexica colapsó. No solo por las armas españolas — sino por alianzas con pueblos sometidos, epidemias y la caída de Cuauhtémoc.',
+    cuerpo:`<strong>Lo que realmente pasó:</strong>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">📅 <strong style="color:var(--text)">Feb 1519</strong> — Hernán Cortés desembarca en Veracruz con 530 hombres y 16 caballos.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🤝 <strong style="color:var(--text)">Alianzas clave</strong> — Tlaxcaltecos, totonacas y otros 200,000 guerreros indígenas aliados fueron decisivos. No fue "españoles vs. mexicanos".</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">☠️ <strong style="color:var(--text)">1520 — La Noche Triste</strong> — Los españoles son expulsados de Tenochtitlan. 900 españoles muertos.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🦠 <strong style="color:var(--text)">La verdadera arma</strong> — Epidemia de viruela mata al 30–50% de la población mexica entre 1519–1521.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🏳️ <strong style="color:var(--text)">13 Ago 1521</strong> — Caída de Tenochtitlan. Cuauhtémoc rendido. Fin del Imperio Mexica.</div>
+</div>
+<div style="margin-top:14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:12px">
+<strong style="color:#f87171;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">El debate sobre el "Día de la Raza" vs "Día de la Resistencia Indígena" (12 oct) es herencia directa de cómo México interpreta la Conquista. López Obrador pidió disculpas a España y el Vaticano. La "deuda histórica" con pueblos indígenas sigue siendo debate constitucional activo.</span>
+</div>`,
+    fuente:'Hugh Thomas — La Conquista de México · INAH'
+  },
+  {
+    id:'virreinato',
+    era:'El Virreinato',
+    rango:'1521 – 1821',
+    emoji:'🕍',
+    color:'#8b5cf6',
+    resumen:'300 años de colonia española. Extractivismo, evangelización y una sociedad de castas que dejó cicatrices estructurales que México aún procesa.',
+    cuerpo:`<strong>El sistema colonial en síntesis:</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Economía extractiva</strong> — La plata de Zacatecas y Guanajuato financió la corona española. México aportó el 35% del PIB mundial de plata en el siglo XVIII.</li>
+  <li><strong style="color:var(--text)">Sociedad de castas</strong> — Españoles peninsulares → Criollos → Mestizos → Indígenas → Africanos esclavizados. Sistema legal de 16 categorías raciales.</li>
+  <li><strong style="color:var(--text)">La Inquisición</strong> — Tribunal activo 1571–1820. Censura, persecución, control ideológico total.</li>
+  <li><strong style="color:var(--text)">Evangelización</strong> — Destrucción sistemática de códices, templos y conocimiento indígena. También: primeras universidades de América (UNAM, 1551).</li>
+  <li><strong style="color:var(--text)">Ilustración criolla</strong> — Finales s. XVIII: criollos educados en Francia e Inglaterra empiezan a cuestionar el orden colonial. Semilla de la Independencia.</li>
+</ul>
+<div style="margin-top:14px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:10px;padding:12px">
+<strong style="color:#c084fc;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">La desigualdad económica actual de México tiene raíces directas en la estructura colonial. Los estados más pobres (Chiapas, Guerrero, Oaxaca) coinciden con las regiones de mayor población indígena y menor inversión colonial. El sistema de haciendas se transformó en latifundios que la Revolución intentó desmantelar.</span>
+</div>`,
+    fuente:'El Colegio de México · Enrique Florescano'
+  },
+  {
+    id:'independencia',
+    era:'Independencia',
+    rango:'1810 – 1821',
+    emoji:'🔔',
+    color:'#22c55e',
+    resumen:'Once años de guerra. El Grito de Dolores, la muerte de Hidalgo y Morelos, y finalmente un criollo conservador — Iturbide — consumando una independencia que no cambió la estructura de poder.',
+    cuerpo:`<strong>Hitos de la Independencia:</strong>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🔔 <strong style="color:var(--text)">16 Sep 1810</strong> — El Grito de Dolores. Hidalgo convoca a indígenas y mestizos contra el orden colonial. Ejército popular de 80,000.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">✍️ <strong style="color:var(--text)">Morelos — Sentimientos de la Nación (1813)</strong> — Proclama soberanía popular, abolición de esclavitud y reforma agraria. Primer proyecto constitucional real.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">☠️ <strong style="color:var(--text)">1811 y 1815</strong> — Hidalgo y Morelos ejecutados. La guerra continúa con Vicente Guerrero.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🤝 <strong style="color:var(--text)">Plan de Iguala (1821)</strong> — Iturbide y Guerrero se unen. Independencia consumada: tres garantías.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">⚠️ <strong style="color:var(--text)">La trampa</strong> — La estructura social y económica del virreinato quedó casi intacta. Los criollos reemplazaron a los peninsulares en el poder.</div>
+</div>
+<div style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px">
+<strong style="color:#4ade80;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">La Constitución de 1824 (primera de México) estableció el federalismo que aún hoy define la tensión entre estados y federación. La deuda independentista con Inglaterra fue el origen de un ciclo de endeudamiento externo que se repetiría a lo largo del s. XX.</span>
+</div>`,
+    fuente:'Lucas Alamán · Lorenzo de Zavala · UNAM Historia'
+  },
+  {
+    id:'reforma',
+    era:'Reforma e Intervención Francesa',
+    rango:'1855 – 1867',
+    emoji:'⚖️',
+    color:'#3b82f6',
+    resumen:'Benito Juárez y las Leyes de Reforma separaron Iglesia y Estado. Francia intentó imponer un Imperio. México ganó — y eso definió la soberanía nacional como valor central.',
+    cuerpo:`<strong>El momento más crítico de la soberanía mexicana:</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Leyes de Reforma (1859)</strong> — Benito Juárez nacionaliza bienes de la Iglesia, separa Iglesia-Estado, Registro Civil, matrimonio civil, cementerios laicos.</li>
+  <li><strong style="color:var(--text)">Intervención francesa (1862–1867)</strong> — Napoleón III aprovecha deudas de México para imponer a Maximiliano de Habsburgo como emperador. 35,000 soldados franceses.</li>
+  <li><strong style="color:var(--text)">5 de mayo de 1862</strong> — Victoria mexicana en Puebla. Símbolo de resistencia (no del fin de la intervención).</li>
+  <li><strong style="color:var(--text)">1867</strong> — Juárez gana. Maximiliano ejecutado en Querétaro. República restaurada.</li>
+</ul>
+<div style="margin-top:14px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:12px">
+<strong style="color:#60a5fa;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">El artículo 130 constitucional (laicidad del Estado) es hijo directo de las Leyes de Reforma. La separación Iglesia-Estado es ley vigente. La soberanía nacional como principio irrenunciable (art. 89 frac. X) tiene raíz en la resistencia a Francia.</span>
+</div>`,
+    fuente:'Museo Nacional de las Intervenciones · Justo Sierra'
+  },
+  {
+    id:'porfiriato',
+    era:'El Porfiriato',
+    rango:'1876 – 1911',
+    emoji:'🎩',
+    color:'#f59e0b',
+    resumen:'35 años de Porfirio Díaz. Modernización, inversión extranjera, ferrocarriles — y concentración brutal de la tierra, represión política y miseria rural que detonó la Revolución.',
+    cuerpo:`<strong>Orden y progreso... ¿para quién?</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Modernización selectiva</strong> — 26,000 km de vías de ferrocarril. CDMX con electricidad y arquitectura europea. Para el 5% criollo.</li>
+  <li><strong style="color:var(--text)">Haciendas y peonaje</strong> — El 1% de la población poseía el 97% de la tierra. Los campesinos en deuda perpetua, sin derechos.</li>
+  <li><strong style="color:var(--text)">Los Científicos</strong> — Tecnocracia que justificó el orden con "ciencia". Intelectuales al servicio del régimen.</li>
+  <li><strong style="color:var(--text)">Represión</strong> — Huelgas de Cananea (1906) y Río Blanco (1907) reprimidas con ejército. "Mátalos en caliente."</li>
+</ul>
+<div style="margin-top:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px">
+<strong style="color:#fbbf24;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">El miedo a la "reelección indefinida" y la concentración de poder viene del Porfiriato. El principio de "Sufragio Efectivo, No Reelección" sigue siendo referencia en debates electorales. El INEGI mide concentración de riqueza (Gini) — en muchos estados sigue siendo parecida a 1910.</span>
+</div>`,
+    fuente:'Friedrich Katz — Porfirio Díaz · El Colegio de México'
+  },
+  {
+    id:'revolucion',
+    era:'La Revolución Mexicana',
+    rango:'1910 – 1920',
+    emoji:'🌵',
+    color:'#dc2626',
+    resumen:'La primera revolución social del siglo XX. Zapata por la tierra, Villa por el norte, Madero por la democracia — y una Constitución de 1917 que aún nos rige.',
+    cuerpo:`<strong>La revolución más compleja de América Latina:</strong>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🗳️ <strong style="color:var(--text)">Madero (1910)</strong> — Plan de San Luis Potosí. Díaz huye. Madero presidente. Asesinado por Huerta en 1913.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🌾 <strong style="color:var(--text)">Zapata</strong> — Plan de Ayala. "La tierra es de quien la trabaja." Morelos como laboratorio de reforma agraria. Asesinado en 1919.</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🐴 <strong style="color:var(--text)">Villa</strong> — División del Norte. El único líder que atacó territorio estadounidense en el s. XX (Columbus, 1916).</div>
+  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">📜 <strong style="color:var(--text)">Constitución 1917</strong> — La más progresista del mundo en su momento: derechos laborales (art. 123), reforma agraria (art. 27), laicidad, derechos sociales.</div>
+</div>
+<div style="margin-top:14px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:10px;padding:12px">
+<strong style="color:#f87171;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">La Constitución vigente es la de 1917. El artículo 27 (reforma agraria) y 123 (derechos laborales) son hijos directos de la Revolución. La LFT que protege tus derechos como trabajador hoy proviene de este artículo. Los ejidos que aún existen son herencia de Zapata.</span>
+</div>`,
+    fuente:'Adolfo Gilly — La Revolución Interrumpida · John Womack — Zapata'
+  },
+  {
+    id:'posrevolucion',
+    era:'México Post-Revolución y el PRI',
+    rango:'1920 – 2000',
+    emoji:'🦅',
+    color:'#a855f7',
+    resumen:'80 años de partido único (PRI). Industrialización, "Milagro Mexicano", Tlatelolco 1968, crisis del 94 — y una transición democrática que llegó en el año 2000.',
+    cuerpo:`<strong>El siglo del partido-Estado:</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Fundación del PNR/PRI (1929)</strong> — Plutarco Elías Calles crea el partido para institucionalizar el poder. Fin de los caudillos militares.</li>
+  <li><strong style="color:var(--text)">Cárdenas (1934–1940)</strong> — Reforma agraria masiva. Expropiación petrolera 1938. Creación de PEMEX. El presidente más popular del s. XX.</li>
+  <li><strong style="color:var(--text)">Milagro Mexicano (1950–1970)</strong> — Crecimiento del 6% anual. Clase media. Modernización — a costa del campo y de deuda.</li>
+  <li><strong style="color:var(--text)">Tlatelolco 2 Oct 1968</strong> — Masacre de estudiantes. El Estado asesina manifestantes 10 días antes de los JJ.OO. Herida abierta.</li>
+  <li><strong style="color:var(--text)">Crisis del 94</strong> — EZLN en Chiapas, asesinato de Colosio, devaluación. El "Error de diciembre".</li>
+  <li><strong style="color:var(--text)">2000</strong> — Fox (PAN) gana presidencia. Fin de 71 años de hegemonía priista.</li>
+</ul>
+<div style="margin-top:14px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:12px">
+<strong style="color:#c084fc;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">PEMEX, CFE, IMSS, ISSSTE — todas instituciones creadas en este periodo. La "cultura del PRI" (clientelismo, corporativismo, control mediático) que analistas ven reproducida en gobiernos posteriores. El INE nació en 1990 de la presión ciudadana post-fraude de 1988.</span>
+</div>`,
+    fuente:'Lorenzo Meyer · Enrique Krauze · UNAM'
+  },
+  {
+    id:'presente',
+    era:'México Contemporáneo',
+    rango:'2000 – Presente',
+    emoji:'🌐',
+    color:'#22c55e',
+    resumen:'Democracia electoral, pero crimen organizado, desigualdad, feminicidios y corrupción sistémica. El México de hoy exige ciudadanos informados.',
+    cuerpo:`<strong>Los retos del México de hoy:</strong>
+<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
+  <li><strong style="color:var(--text)">Alternancia democrática</strong> — PAN (2000–2012), PRI (2012–2018), MORENA (2018–presente). Primera mujer presidenta en 2024.</li>
+  <li><strong style="color:var(--text)">Crimen organizado</strong> — 40,000+ homicidios/año en pico (2018). Carteles con presencia en 32 estados.</li>
+  <li><strong style="color:var(--text)">Desigualdad</strong> — 10% más rico tiene 37% del ingreso nacional. 36% de la población en pobreza (CONEVAL 2022).</li>
+  <li><strong style="color:var(--text)">Movimiento feminista</strong> — 8M masivos desde 2020. La agenda feminista como fuerza política transformadora.</li>
+  <li><strong style="color:var(--text)">Reforma constitucional 2024</strong> — Elección popular de jueces. Debate sobre independencia judicial más intenso desde 1917.</li>
+</ul>
+<div style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px">
+<strong style="color:#4ade80;font-size:11px">⚡ TEQUIO Y ESTE MOMENTO</strong><br>
+<span style="font-size:12px;color:var(--text2);line-height:1.5">Esta app existe porque la ciudadanía activa es la única respuesta al México de hoy. Conocer la historia no es nostalgia — es entender por qué las instituciones funcionan (o no funcionan) como funcionan, y qué herramientas tienes para cambiarlas.</span>
+</div>`,
+    fuente:'INEGI · CONEVAL · UNAM · Animal Político'
   }
-  dirIniciado = true;
-  renderDirStatesGrid();
-  renderDirFederales();
+];
+
+let ombligoIniciado = false;
+
+function initOmbligo() {
+  if (ombligoIniciado) return;
+  ombligoIniciado = true;
+  renderOmbligoTimeline();
+  renderOmbligoMuseos();
+  renderOmbligoZonas();
 }
 
-function renderDirStatesGrid() {
-  const grid = document.getElementById('dir-states-grid');
-  if (!grid) return;
-
-  const EMOJIS = {
-    AGS:'🌹', BC:'🌊', BCS:'🐢', CAM:'🦀', CHIS:'🌿', CHIH:'🏜️',
-    CDMX:'🏙️', COAH:'🏭', COL:'🌺', DGO:'⛰️', EDOMEX:'🏔️', GTO:'⛪',
-    GRO:'🌴', HGO:'🏛️', JAL:'🥃', MICH:'🦋', MOR:'🌸', NAY:'🌊',
-    NL:'🏔️', OAX:'🏺', PUE:'🎭', QRO:'🏰', QROO:'🤿', SLP:'🌵',
-    SIN:'🎣', SON:'☀️', TAB:'🌳', TAMS:'🌊', TLAX:'🦅', VER:'☕',
-    YUC:'🦩', ZAC:'⛏️',
-  };
-
-  const estados = Object.keys(DIRECTORIO_ESTADOS);
-
-  grid.innerHTML = estados.map(nombre => {
-    const d    = DIRECTORIO_ESTADOS[nombre];
-    const emoji = EMOJIS[d.abrev] || '📍';
-    // Use data-estado attribute — avoids ALL escaping issues with accented chars
-    return `<button
-        class="dir-state-btn"
-        data-estado="${nombre.replace(/"/g,'&quot;')}"
-        style="padding:8px 4px;border-radius:9px;border:1px solid var(--border);
-               background:var(--surface);color:var(--text2);font-size:10px;
-               font-weight:700;cursor:pointer;font-family:inherit;line-height:1.3;
-               text-align:center;transition:all 0.15s;letter-spacing:0.2px;
-               display:flex;flex-direction:column;align-items:center;gap:1px">
-        <span style="font-size:15px">${emoji}</span>
-        <span>${d.abrev}</span>
-      </button>`;
-  }).join('');
-
-  // Single event listener — no inline onclick strings
-  grid.addEventListener('click', function(ev) {
-    const btn = ev.target.closest('.dir-state-btn');
-    if (!btn) return;
-    const estado = btn.dataset.estado;
-    if (!estado || !DIRECTORIO_ESTADOS[estado]) return;
-    dirSelEstado(estado, btn);
-  });
-}
-
-function renderDirFederales() {
-  const el = document.getElementById('dir-federales');
-  if (!el) return;
-  el.innerHTML = DIRECTORIO_FEDERAL.map(s => {
-    const c = DIR_CAT_COLORS[s.cat] || DIR_CAT_COLORS.justicia;
-    return `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
-      <div style="font-size:16px;margin-bottom:2px">${s.emoji}</div>
-      <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3">${s.nombre}</div>
-      <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:6px">${s.desc}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto">
-        <a href="tel:${s.tel.replace(/\s/g,'')}" style="background:${c.dark};color:#fff;font-size:11px;font-weight:800;padding:5px 10px;border-radius:7px;text-decoration:none;display:flex;align-items:center;gap:4px">
-          📞 ${s.tel}
-        </a>
-        ${s.web ? `<a href="https://${s.web}" target="_blank" rel="noopener" style="color:${c.text};font-size:10px;text-decoration:none;font-weight:600">${s.web} ↗</a>` : ''}
-      </div>
-      <div style="font-size:9px;color:var(--text3);margin-top:3px">⏰ ${s.horario}</div>
-    </div>`;
-  }).join('');
-}
-
-function directorioBuscarEstado(q) {
-  const lower = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  document.querySelectorAll('#dir-states-grid .dir-state-btn').forEach(btn => {
-    const nombre = btn.dataset.estado || '';
-    const match  = nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(lower);
-    btn.style.display = (!q || match) ? '' : 'none';
-  });
-}
-
-function dirSelEstado(estado, btn) {
-  if (!DIRECTORIO_ESTADOS[estado]) return;   // guard: unknown state
-
-  // Deactivate all state buttons
-  document.querySelectorAll('#dir-states-grid .dir-state-btn').forEach(b => {
-    b.classList.remove('active');
-    b.style.background  = 'var(--surface)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color       = 'var(--text2)';
-  });
-
-  // Activate the clicked button
-  if (btn) {
-    btn.classList.add('active');
-    btn.style.background  = 'rgba(59,130,246,0.18)';
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color       = 'var(--text)';
-  }
-
-  dirEstadoActual = estado;
-  dirCatActual    = 'todos';
-  dirActualizarCatBtns();
-  renderDirEstadoHeader(estado);
-  renderDirServicios();
-
-  const panel = document.getElementById('dir-estado-panel');
-  if (panel) {
-    panel.style.display = '';
-    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-  }
-}
-
-function renderDirEstadoHeader(estado) {
-  const el = document.getElementById('dir-estado-header');
-  if (!el) return;
-  const d = DIRECTORIO_ESTADOS[estado];
-  if (!d) return;
-  const total = d.servicios.length;
-  el.innerHTML = `
-    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(99,102,241,0.06));border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div>
-        <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text)">${estado}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">📍 Capital: ${d.capital} · ${total} servicios disponibles</div>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:6px">
-        <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
-          <div style="font-size:16px;font-weight:800;color:var(--accent)">${total}</div>
-          <div style="font-size:8px;color:var(--text3);font-weight:600">SERVICIOS</div>
-        </div>
-        <div style="text-align:center;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:6px 10px">
-          <a href="tel:911" style="text-decoration:none">
-            <div style="font-size:16px;font-weight:800;color:#f87171">911</div>
-            <div style="font-size:8px;color:#f87171;font-weight:600">EMERGENCIAS</div>
-          </a>
-        </div>
-      </div>
-    </div>`;
-}
-
-function dirFiltroCat(cat) {
-  dirCatActual = cat;
-  dirActualizarCatBtns();
-  renderDirServicios();
-}
-
-function dirActualizarCatBtns() {
-  const cats = ['todos','justicia','derechos','mujer','salud','familia','proteccion'];
-  cats.forEach(c => {
-    const btn = document.getElementById('dcat-' + c);
-    if (!btn) return;
-    const isActive = c === dirCatActual;
-    if (c === 'todos') {
-      btn.style.background  = isActive ? 'var(--accent)' : 'var(--surface)';
-      btn.style.borderColor = isActive ? 'var(--accent)' : 'var(--border)';
-      btn.style.color       = isActive ? '#fff' : 'var(--text2)';
-    } else {
-      const col = DIR_CAT_COLORS[c];
-      btn.style.background  = isActive ? col.dark  : col.bg;
-      btn.style.borderColor = isActive ? col.dark  : col.border;
-      btn.style.color       = isActive ? '#fff'    : col.text;
+function ombligoTab(tab) {
+  ombligoTabActual = tab;
+  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e' };
+  ['timeline','museos','zonas'].forEach(t => {
+    const panel = document.getElementById('opanel-' + t);
+    const btn   = document.getElementById('otab-' + t);
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      const isActive = t === tab;
+      btn.style.color = isActive ? 'var(--text)' : 'var(--text2)';
+      btn.style.fontWeight = isActive ? '700' : '600';
+      btn.style.borderBottom = isActive ? `2px solid ${colorMap[t]}` : '2px solid transparent';
     }
   });
 }
 
-function renderDirServicios() {
-  const el = document.getElementById('dir-servicios-list');
-  if (!el || !dirEstadoActual) return;
-  const d    = DIRECTORIO_ESTADOS[dirEstadoActual];
-  const list = dirCatActual === 'todos'
-    ? d.servicios
-    : d.servicios.filter(s => s.cat === dirCatActual);
+function renderOmbligoTimeline() {
+  const el = document.getElementById('ombligo-timeline');
+  const nav = document.getElementById('ombligo-era-nav');
+  if (!el) return;
 
-  if (list.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Sin servicios en esta categoría para ${dirEstadoActual}</div>`;
-    return;
+  // Era mini-nav
+  if (nav) {
+    nav.innerHTML = OMBLIGO_TIMELINE.map(era => `
+      <button onclick="ombligoJumpEra('oera-${era.id}')" title="${era.rango}"
+        style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid ${era.color}40;background:${era.color}12;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s"
+        onmouseover="this.style.background='${era.color}28';this.style.color='var(--text)'"
+        onmouseout="this.style.background='${era.color}12';this.style.color='var(--text2)'">
+        <span style="font-size:12px">${era.emoji}</span>
+        <span style="white-space:nowrap">${era.era.split(' ')[0]} ${era.era.split(' ')[1] || ''}</span>
+      </button>`).join('');
   }
 
-  el.innerHTML = list.map(s => {
-    const c = DIR_CAT_COLORS[s.cat] || DIR_CAT_COLORS.justicia;
+  el.innerHTML = OMBLIGO_TIMELINE.map((era, i) => `
+    <div style="display:flex;gap:0;position:relative" id="era-wrap-${era.id}">
+      <!-- Columna izq: nodo + línea -->
+      <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0">
+        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
+          style="width:40px;height:40px;border-radius:50%;background:${era.color}18;border:2px solid ${era.color}70;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;z-index:1;transition:all 0.2s;outline:none"
+          onmouseover="this.style.background='${era.color}35';this.style.borderColor='${era.color}'"
+          onmouseout="this.style.background='${era.color}18';this.style.borderColor='${era.color}70'"
+          id="era-btn-${era.id}">${era.emoji}</button>
+        ${i < OMBLIGO_TIMELINE.length - 1
+          ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,${era.color}50,${OMBLIGO_TIMELINE[i+1].color}30);margin:2px 0"></div>`
+          : ''}
+      </div>
+
+      <!-- Contenido -->
+      <div style="flex:1;padding:2px 0 24px 16px;min-width:0">
+
+        <!-- Header siempre visible -->
+        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
+          style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${era.era}</span>
+            <span style="font-size:9px;font-weight:700;color:${era.color};background:${era.color}15;border:1px solid ${era.color}30;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap">${era.rango}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">${era.resumen}</div>
+        </button>
+
+        <!-- Expanded card -->
+        <div id="oera-${era.id}" style="display:none;margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid ${era.color}30">
+          <!-- Color header strip -->
+          <div style="background:linear-gradient(135deg,${era.color}25,${era.color}10);padding:12px 16px;border-bottom:1px solid ${era.color}20">
+            <div style="font-size:10px;font-weight:700;color:${era.color};letter-spacing:2px;text-transform:uppercase">${era.emoji} ${era.era} · ${era.rango}</div>
+          </div>
+          <!-- Body -->
+          <div style="background:var(--surface);padding:16px;font-size:13px;line-height:1.65;color:var(--text)">
+            ${era.cuerpo}
+            <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px">
+              📚 <span>${era.fuente}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>`).join('');
+}
+
+function ombligoEraToggle(id, wrapId) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Scroll into view when opening
+  if (!isOpen && wrapId) {
+    setTimeout(() => {
+      const wrap = document.getElementById(wrapId);
+      if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }, 50);
+  }
+}
+
+function ombligoJumpEra(id) {
+  // Open and scroll to era
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+  setTimeout(() => {
+    const eraId = id.replace('oera-','era-wrap-');
+    const wrap = document.getElementById(eraId);
+    if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 80);
+}
+
+function renderOmbligoMuseos() {
+  const destacadoEl = document.getElementById('ombligo-museo-destacado');
+  const gridEl      = document.getElementById('ombligo-museos');
+  if (!gridEl) return;
+
+  const destacado = OMBLIGO_MUSEOS.find(m => m.destaca);
+  const resto     = OMBLIGO_MUSEOS.filter(m => !m.destaca);
+
+  // Featured banner
+  if (destacadoEl && destacado) {
+    const d = destacado;
+    const safeId = 'om-feat-' + d.nombre.replace(/[\s\(\)—·]/g,'_');
+    destacadoEl.innerHTML = `
+      <div style="border-radius:18px;overflow:hidden;border:2px solid ${d.color}50;background:linear-gradient(135deg,${d.color}15 0%,rgba(0,0,0,0) 60%),var(--surface)">
+        <div style="padding:16px 18px 0;display:flex;align-items:flex-start;gap:14px">
+          <div style="width:54px;height:54px;border-radius:14px;background:${d.color}20;border:2px solid ${d.color}40;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${d.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--text)">${d.nombre}</span>
+              <span style="background:${d.color};color:#fff;font-size:8px;font-weight:800;padding:2px 8px;border-radius:10px;letter-spacing:0.5px">⭐ DESTACADO</span>
+            </div>
+            <div style="font-size:12px;color:${d.color};font-weight:600;margin-bottom:6px">${d.subtitulo}</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">${d.descripcion}</div>
+          </div>
+        </div>
+        <!-- Why it matters -->
+        <div style="margin:14px 18px;background:${d.color}12;border-left:3px solid ${d.color};border-radius:0 10px 10px 0;padding:10px 14px">
+          <div style="font-size:9px;font-weight:800;color:${d.color};letter-spacing:1.5px;margin-bottom:4px">¿POR QUÉ IMPORTA?</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">${d.porQueImporta}</div>
+        </div>
+        <!-- Info row -->
+        <div style="display:flex;border-top:1px solid ${d.color}25;flex-wrap:wrap">
+          <div style="flex:1;padding:10px 18px;border-right:1px solid ${d.color}20;min-width:120px">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">📍 UBICACIÓN</div>
+            <div style="font-size:11px;color:var(--text)">${d.ubicacion}</div>
+          </div>
+          <div style="flex:1;padding:10px 18px;border-right:1px solid ${d.color}20;min-width:100px">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">💰 COSTO</div>
+            <div style="font-size:11px;color:var(--text)">${d.costo}</div>
+          </div>
+          <div style="flex:1;padding:10px 18px;min-width:120px">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:2px">🕐 HORARIO</div>
+            <div style="font-size:11px;color:var(--text)">${d.horario}</div>
+          </div>
+        </div>
+        <!-- Salas -->
+        <div style="padding:10px 18px 16px">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:6px;letter-spacing:1px">SALAS PRINCIPALES</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            ${d.salas.map(s=>`<span style="background:${d.color}12;border:1px solid ${d.color}25;color:var(--text2);font-size:10px;padding:3px 9px;border-radius:6px">${s}</span>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Resto en grid 2×N — cards compactas expandibles
+  gridEl.innerHTML = resto.map(m => {
+    const safeId = 'om-' + m.nombre.replace(/[\s\(\)—·]/g,'_');
     return `
-    <div style="background:var(--surface);border:1px solid ${c.border};border-radius:14px;overflow:hidden;transition:border-color 0.15s">
-      <div style="display:flex;gap:12px;padding:14px 16px;align-items:flex-start">
-        <!-- Icon -->
-        <div style="width:42px;height:42px;border-radius:10px;background:${c.bg};border:1px solid ${c.border};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${s.emoji}</div>
-        <!-- Info -->
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-            <span style="font-size:13px;font-weight:700;color:var(--text)">${s.nombre}</span>
-            <span style="background:${c.bg};border:1px solid ${c.border};color:${c.text};font-size:8px;font-weight:800;padding:1px 6px;border-radius:6px;letter-spacing:0.5px;text-transform:uppercase">${s.cat}</span>
-          </div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px">${s.desc}</div>
-          <!-- Actions -->
-          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-            <a href="tel:${s.tel.replace(/\s/g,'')}" style="background:${c.dark};color:#fff;font-size:12px;font-weight:700;padding:7px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;gap:5px;flex-shrink:0">
-              📞 ${s.tel}
-            </a>
-            ${s.web ? `<a href="https://${s.web}" target="_blank" rel="noopener" style="font-size:10px;color:${c.text};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px">${s.web} ↗</a>` : ''}
-            <span style="margin-left:auto;font-size:9px;color:var(--text3);white-space:nowrap">⏰ ${s.horario}</span>
-          </div>
+    <div style="border-radius:14px;overflow:hidden;border:1px solid ${m.color}30;background:var(--surface);cursor:pointer" onclick="ombligoMuseoToggle('${safeId}',this)">
+      <!-- Card face -->
+      <div style="padding:12px 14px">
+        <div style="font-size:22px;margin-bottom:6px">${m.emoji}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px">${m.nombre}</div>
+        <div style="font-size:10px;color:${m.color};line-height:1.4;margin-bottom:8px">${m.subtitulo}</div>
+        <div style="font-size:9px;color:var(--text3)">📍 ${m.ubicacion.split(',')[0]}</div>
+        <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
+          <span style="background:var(--bg3);font-size:9px;color:var(--text3);padding:2px 7px;border-radius:5px">${m.costo.split('·')[0].trim()}</span>
+        </div>
+      </div>
+      <!-- Expand indicator -->
+      <div style="background:${m.color}10;padding:6px 14px;border-top:1px solid ${m.color}20;font-size:9px;font-weight:700;color:${m.color};letter-spacing:1px">VER MÁS ▼</div>
+      <!-- Detail panel -->
+      <div id="${safeId}" style="display:none;padding:12px 14px;border-top:1px solid ${m.color}20;font-size:12px;color:var(--text2);line-height:1.6;background:${m.color}06">
+        ${m.descripcion}
+        <div style="margin-top:10px;background:${m.color}10;border-left:2px solid ${m.color};padding:8px 10px;border-radius:0 8px 8px 0;font-size:11px;color:var(--text2)">
+          <strong style="color:${m.color};font-size:9px;font-weight:800;display:block;margin-bottom:3px">¿POR QUÉ IMPORTA?</strong>
+          ${m.porQueImporta}
+        </div>
+        <div style="margin-top:8px">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:1px">HORARIO</div>
+          <div style="font-size:11px">${m.horario}</div>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-window.initDirectorio = initDirectorio;
-window.dirSelEstado = dirSelEstado;
-window.dirFiltroCat = dirFiltroCat;
-window.directorioBuscarEstado = directorioBuscarEstado;
-document.addEventListener("DOMContentLoaded", initDirectorio);
+function ombligoMuseoToggle(id, card) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Update indicator text
+  const indicator = card?.querySelector('[style*="VER MÁS"]');
+  if (indicator) indicator.textContent = isOpen ? 'VER MÁS ▼' : 'CERRAR ▲';
+}
 
-const OMBLIGO_TIMELINE = [];
+function renderOmbligoZonas() {
+  const el = document.getElementById('ombligo-zonas');
+  if (!el) return;
+  el.innerHTML = OMBLIGO_ZONAS.map(z => {
+    const safeId = 'oz-' + z.nombre.replace(/[\s\(\)]/g,'_');
+    return `
+    <div style="border-radius:16px;overflow:hidden;border:1px solid ${z.color}35;background:var(--surface)">
+      <!-- Header clickeable -->
+      <div onclick="ombligoZonaToggle('${safeId}', this.parentElement)" style="display:flex;gap:14px;padding:14px 16px;cursor:pointer;align-items:flex-start">
+        <!-- Icono + era strip -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+          <div style="width:48px;height:48px;border-radius:12px;background:${z.color}15;border:1px solid ${z.color}35;display:flex;align-items:center;justify-content:center;font-size:24px">${z.emoji}</div>
+          <div style="font-size:8px;font-weight:700;color:${z.color};text-align:center;letter-spacing:0.5px;max-width:48px;line-height:1.2">${z.estado}</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px">
+            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>
+            ${z.patrimonio ? `<span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:8px;font-weight:800;padding:2px 6px;border-radius:8px;letter-spacing:0.5px">UNESCO</span>` : ''}
+          </div>
+          <div style="font-size:11px;color:${z.color};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>
+          <!-- Mini data row -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--text3)">🏛️ ${z.periodo}</span>
+            <span style="font-size:10px;color:var(--text3)">💰 ${z.costo.split('·')[0].trim()}</span>
+          </div>
+        </div>
+        <span id="zarrow-${safeId}" style="color:${z.color};font-size:13px;flex-shrink:0;transition:transform 0.2s">▼</span>
+      </div>
+
+      <!-- Expanded detail -->
+      <div id="${safeId}" style="display:none;border-top:1px solid ${z.color}25">
+        <!-- Descripción -->
+        <div style="padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.65">${z.descripcion}</div>
+
+        <!-- No te pierdas highlight -->
+        <div style="margin:0 16px 14px;background:${z.color}10;border-radius:10px;padding:12px 14px;border:1px solid ${z.color}20">
+          <div style="font-size:9px;font-weight:800;color:${z.color};letter-spacing:2px;margin-bottom:6px">🌟 NO TE PIERDAS</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">${z.destacado}</div>
+        </div>
+
+        <!-- Info grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid ${z.color}20">
+          <div style="padding:10px 16px;border-right:1px solid ${z.color}20">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">💰 COSTO</div>
+            <div style="font-size:11px;color:var(--text);line-height:1.4">${z.costo}</div>
+          </div>
+          <div style="padding:10px 16px">
+            <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">🕐 HORARIO</div>
+            <div style="font-size:11px;color:var(--text);line-height:1.4">${z.horario}</div>
+          </div>
+        </div>
+        <div style="padding:10px 16px 14px;border-top:1px solid ${z.color}20">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);margin-bottom:3px;letter-spacing:1px">🚌 CÓMO LLEGAR</div>
+          <div style="font-size:12px;color:var(--text)">${z.distancia}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function ombligoZonaToggle(id, card) {
+  const el    = document.getElementById(id);
+  const arrow = document.getElementById('zarrow-' + id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+window.initOmbligo = initOmbligo;
+window.ombligoTab = ombligoTab;
 
 </script>
 </body>
