@@ -4123,6 +4123,7 @@
           if (p === 'quemones') cargarQuemones();
           if (p === 'jurisprudencia') cargarJurisprudencia();
           if (p === 'leyes' && typeof cargarLeyesDesdeAPI === 'function') cargarLeyesDesdeAPI();
+          if (p === 'directorio' && typeof _initDirectorio === 'function') _initDirectorio();
           // Mi Rep: refrescar sección "¿Votó como tú?" si existe
           if (p === 'mi-rep') {
             setTimeout(() => {
@@ -25448,10 +25449,212 @@ function testigoDescargarFoto() {
 // ═══════════════════════════════════════════════════════════
 
 
-// Stubs por sync truncation
-const DIR_CAT_COLORS = {};
-const DIRECTORIO_FEDERAL = [];
+// ── Colores por categoría ──
+const DIR_CAT_COLORS = {
+  emergencia: { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.45)', fg: '#fca5a5' },
+  justicia:   { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.45)', fg: '#93c5fd' },
+  derechos:   { bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.45)', fg: '#c4b5fd' },
+  mujer:      { bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.45)', fg: '#f9a8d4' },
+  salud:      { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.45)', fg: '#6ee7b7' },
+  familia:    { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.45)', fg: '#fcd34d' },
+  proteccion: { bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.35)', fg: '#fca5a5' },
+  consumidor: { bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.45)', fg: '#a5b4fc' },
+  fiscal:     { bg: 'rgba(20,184,166,0.12)', border: 'rgba(20,184,166,0.45)', fg: '#5eead4' },
+  laboral:    { bg: 'rgba(234,88,12,0.12)', border: 'rgba(234,88,12,0.45)', fg: '#fdba74' },
+};
+
+// ── Servicios FEDERALES (aplican en todo México) — números verificados ──
+const DIRECTORIO_FEDERAL = [
+  { nombre: '911 — Emergencias', cat: 'emergencia', tel: '911', icon: '🚨', desc: 'Policía, bomberos, ambulancias. 24/7 en todo México.' },
+  { nombre: '089 — Denuncia Anónima', cat: 'justicia', tel: '089', icon: '🕵️', desc: 'Reporta delitos sin identificarte. 24/7.' },
+  { nombre: 'INMUJERES — Línea Mujeres', cat: 'mujer', tel: '8001084053', icon: '💜', desc: 'Atención psicológica, legal y orientación a mujeres víctimas de violencia.' },
+  { nombre: 'CNDH — Derechos Humanos', cat: 'derechos', tel: '8007152000', icon: '🛡️', desc: 'Comisión Nacional de Derechos Humanos. Quejas contra autoridades.' },
+  { nombre: 'PROFECO — Consumidor', cat: 'consumidor', tel: '8004688722', icon: '🛒', desc: 'Quejas contra negocios, productos, garantías y publicidad engañosa.' },
+  { nombre: 'CONDUSEF — Financiero', cat: 'consumidor', tel: '8009998080', icon: '💳', desc: 'Quejas contra bancos, AFOREs, seguros y servicios financieros.' },
+  { nombre: 'IMSS — Atención', cat: 'salud', tel: '8006232323', icon: '🏥', desc: 'Citas médicas, afiliación, pensiones, incapacidades.' },
+  { nombre: 'ISSSTE — Telefonema', cat: 'salud', tel: '8000069000', icon: '🩺', desc: 'Atención para trabajadores del Estado y sus familias.' },
+  { nombre: 'INFONAVIT', cat: 'familia', tel: '8000083900', icon: '🏠', desc: 'Crédito, ahorro y vivienda para trabajadores.' },
+  { nombre: 'INE — Atención Ciudadana', cat: 'justicia', tel: '8004332000', icon: '🪪', desc: 'Credencial para votar, trámites electorales.' },
+  { nombre: 'SAT — MarcaSAT', cat: 'fiscal', tel: '5562722728', icon: '📑', desc: 'Trámites fiscales, RFC, facturación.' },
+  { nombre: 'CONAPRED — No Discriminación', cat: 'derechos', tel: '8005430033', icon: '⚖️', desc: 'Quejas por discriminación. Protege a grupos vulnerables.' },
+  { nombre: 'COFEPRIS — Riesgos Sanitarios', cat: 'salud', tel: '8000335050', icon: '💊', desc: 'Denuncia productos peligrosos, medicamentos falsos, alimentos contaminados.' },
+  { nombre: 'PROFEPA — Medio Ambiente', cat: 'proteccion', tel: '8007703372', icon: '🌳', desc: 'Denuncias ambientales, tala ilegal, contaminación.' },
+  { nombre: 'FGR — Fiscalía Federal', cat: 'justicia', tel: '8000085400', icon: '🏛️', desc: 'Delitos federales (secuestro, narcotráfico, electorales).' },
+  { nombre: 'STPS — Línea Laboral', cat: 'laboral', tel: '8007172942', icon: '👷', desc: 'Asesoría sobre derechos laborales y conflictos con tu patrón.' },
+];
+
+// ── Servicios por ESTADO — links a portales oficiales ──
+// Cada servicio estatal usa el formato { nombre, cat, portal, icon, desc }
+// El "portal" es la URL oficial donde encontrar teléfonos locales actualizados
+// Para emergencias estatales, el 911 universal aplica en todos
+function _servEstandar(entidad) {
+  return [
+    { nombre: 'Emergencia Estatal · 911', cat: 'emergencia', tel: '911', icon: '🚨', desc: 'Activa en todo ' + entidad + '. Policía, bomberos, ambulancia.' },
+    { nombre: 'Denuncia Anónima · 089', cat: 'justicia', tel: '089', icon: '🕵️', desc: 'Reporta delitos en ' + entidad + ' de forma anónima.' },
+    { nombre: 'Línea Mujeres', cat: 'mujer', tel: '8001084053', icon: '💜', desc: 'INMUJERES nacional, atiende también casos de ' + entidad + '.' },
+  ];
+}
+
+// Mapping: portales oficiales por estado (gobierno + fiscalía + DDHH + IM + DIF + protección civil)
+const _PORTALES_ESTATALES = {
+  'Aguascalientes':       { gob: 'https://www.aguascalientes.gob.mx', fiscalia: 'https://www.fiscalia-aguascalientes.gob.mx', ddhh: 'https://www.dhags.org', salud: 'https://www.aguascalientes.gob.mx/issea', proteccion: 'https://proteccioncivil.aguascalientes.gob.mx' },
+  'Baja California':      { gob: 'https://www.bajacalifornia.gob.mx', fiscalia: 'https://www.fgebc.gob.mx', ddhh: 'https://www.derechoshumanosbc.org', salud: 'https://saludbc.gob.mx', proteccion: 'https://www.proteccioncivil.bajacalifornia.gob.mx' },
+  'Baja California Sur':  { gob: 'https://www.bcs.gob.mx', fiscalia: 'https://www.pgjebcs.gob.mx', ddhh: 'https://www.cedhbcs.org.mx', salud: 'https://saludbcs.gob.mx', proteccion: 'https://proteccioncivil.bcs.gob.mx' },
+  'Campeche':             { gob: 'https://www.campeche.gob.mx', fiscalia: 'https://fiscaliacampeche.gob.mx', ddhh: 'https://www.codhecam.org.mx', salud: 'https://saludcampeche.gob.mx', proteccion: 'https://proteccioncivil.campeche.gob.mx' },
+  'Chiapas':              { gob: 'https://www.chiapas.gob.mx', fiscalia: 'https://www.fge.chiapas.gob.mx', ddhh: 'https://www.cedh-chiapas.org', salud: 'https://saludchiapas.gob.mx', proteccion: 'https://proteccioncivil.chiapas.gob.mx' },
+  'Chihuahua':            { gob: 'https://www.chihuahua.gob.mx', fiscalia: 'https://fiscalia.chihuahua.gob.mx', ddhh: 'https://www.cedhchihuahua.org.mx', salud: 'https://saludchihuahua.gob.mx', proteccion: 'https://proteccioncivil.chihuahua.gob.mx' },
+  'Ciudad de México':     { gob: 'https://www.cdmx.gob.mx', fiscalia: 'https://www.fgjcdmx.gob.mx', ddhh: 'https://cdhdf.org.mx', salud: 'https://www.salud.cdmx.gob.mx', proteccion: 'https://www.proteccioncivil.cdmx.gob.mx' },
+  'Coahuila':             { gob: 'https://www.coahuila.gob.mx', fiscalia: 'https://fiscaliacoahuila.gob.mx', ddhh: 'https://www.cdhec.org.mx', salud: 'https://www.saludcoahuila.gob.mx', proteccion: 'https://proteccioncivil.coahuila.gob.mx' },
+  'Colima':               { gob: 'https://www.col.gob.mx', fiscalia: 'https://fge.col.gob.mx', ddhh: 'https://www.cdhcolima.org.mx', salud: 'https://saludcolima.gob.mx', proteccion: 'https://proteccioncivil.col.gob.mx' },
+  'Durango':              { gob: 'https://www.durango.gob.mx', fiscalia: 'https://fge.durango.gob.mx', ddhh: 'https://www.cedh-durango.org.mx', salud: 'https://saluddurango.gob.mx', proteccion: 'https://proteccioncivil.durango.gob.mx' },
+  'Estado de México':     { gob: 'https://edomex.gob.mx', fiscalia: 'https://fgjem.edomex.gob.mx', ddhh: 'https://www.codhem.org.mx', salud: 'https://salud.edomex.gob.mx', proteccion: 'https://proteccioncivil.edomex.gob.mx' },
+  'Guanajuato':           { gob: 'https://www.guanajuato.gob.mx', fiscalia: 'https://portal.fge.guanajuato.gob.mx', ddhh: 'https://derechoshumanosgto.org.mx', salud: 'https://salud.guanajuato.gob.mx', proteccion: 'https://proteccioncivil.guanajuato.gob.mx' },
+  'Guerrero':             { gob: 'https://guerrero.gob.mx', fiscalia: 'https://www.fge-guerrero.gob.mx', ddhh: 'https://www.codheg.org', salud: 'https://saludguerrero.gob.mx', proteccion: 'https://proteccioncivil.guerrero.gob.mx' },
+  'Hidalgo':              { gob: 'https://www.hidalgo.gob.mx', fiscalia: 'https://fge.hidalgo.gob.mx', ddhh: 'https://www.cdhhgo.org', salud: 'https://saludhidalgo.gob.mx', proteccion: 'https://proteccioncivil.hidalgo.gob.mx' },
+  'Jalisco':              { gob: 'https://www.jalisco.gob.mx', fiscalia: 'https://fiscaliaestatal.jalisco.gob.mx', ddhh: 'https://cedhj.org.mx', salud: 'https://ssj.jalisco.gob.mx', proteccion: 'https://proteccioncivil.jalisco.gob.mx' },
+  'Michoacán':            { gob: 'https://michoacan.gob.mx', fiscalia: 'https://fge.michoacan.gob.mx', ddhh: 'https://www.cedhmichoacan.org.mx', salud: 'https://salud.michoacan.gob.mx', proteccion: 'https://proteccioncivil.michoacan.gob.mx' },
+  'Morelos':              { gob: 'https://www.morelos.gob.mx', fiscalia: 'https://fiscalia.morelos.gob.mx', ddhh: 'https://www.cdhmorelos.org.mx', salud: 'https://salud.morelos.gob.mx', proteccion: 'https://proteccioncivil.morelos.gob.mx' },
+  'Nayarit':              { gob: 'https://www.nayarit.gob.mx', fiscalia: 'https://www.fge-nayarit.gob.mx', ddhh: 'https://www.cdh-nayarit.org', salud: 'https://saludnayarit.gob.mx', proteccion: 'https://proteccioncivil.nayarit.gob.mx' },
+  'Nuevo León':           { gob: 'https://www.nl.gob.mx', fiscalia: 'https://fiscalianl.gob.mx', ddhh: 'https://www.cedhnl.org.mx', salud: 'https://www.saludnl.gob.mx', proteccion: 'https://proteccioncivilnl.gob.mx' },
+  'Oaxaca':               { gob: 'https://www.oaxaca.gob.mx', fiscalia: 'https://www.fiscaliaoaxaca.gob.mx', ddhh: 'https://www.derechoshumanosoaxaca.org', salud: 'https://saludoaxaca.gob.mx', proteccion: 'https://proteccioncivil.oaxaca.gob.mx' },
+  'Puebla':               { gob: 'https://puebla.gob.mx', fiscalia: 'https://www.fiscalia.puebla.gob.mx', ddhh: 'https://www.cdhpuebla.org.mx', salud: 'https://salud.puebla.gob.mx', proteccion: 'https://proteccioncivil.puebla.gob.mx' },
+  'Querétaro':            { gob: 'https://www.queretaro.gob.mx', fiscalia: 'https://www.fiscaliageneralqro.gob.mx', ddhh: 'https://www.dhqueretaro.org.mx', salud: 'https://www.salud.queretaro.gob.mx', proteccion: 'https://proteccioncivil.queretaro.gob.mx' },
+  'Quintana Roo':         { gob: 'https://qroo.gob.mx', fiscalia: 'https://fgeqroo.gob.mx', ddhh: 'https://www.cdheqroo.org.mx', salud: 'https://salud.qroo.gob.mx', proteccion: 'https://proteccioncivil.qroo.gob.mx' },
+  'San Luis Potosí':      { gob: 'https://www.slp.gob.mx', fiscalia: 'https://fgeslp.gob.mx', ddhh: 'https://www.cedhslp.org.mx', salud: 'https://saludslp.gob.mx', proteccion: 'https://proteccioncivil.slp.gob.mx' },
+  'Sinaloa':              { gob: 'https://www.sinaloa.gob.mx', fiscalia: 'https://www.fiscaliasinaloa.gob.mx', ddhh: 'https://www.cedhsinaloa.org.mx', salud: 'https://saludsinaloa.gob.mx', proteccion: 'https://proteccioncivil.sinaloa.gob.mx' },
+  'Sonora':               { gob: 'https://www.sonora.gob.mx', fiscalia: 'https://fgjesonora.gob.mx', ddhh: 'https://www.cedhsonora.org.mx', salud: 'https://saludsonora.gob.mx', proteccion: 'https://proteccioncivil.sonora.gob.mx' },
+  'Tabasco':              { gob: 'https://tabasco.gob.mx', fiscalia: 'https://fiscaliatabasco.gob.mx', ddhh: 'https://www.cedhtabasco.org.mx', salud: 'https://saludtabasco.gob.mx', proteccion: 'https://proteccioncivil.tabasco.gob.mx' },
+  'Tamaulipas':           { gob: 'https://www.tamaulipas.gob.mx', fiscalia: 'https://fgjtam.gob.mx', ddhh: 'https://www.codhet.org.mx', salud: 'https://www.tamaulipas.gob.mx/salud', proteccion: 'https://proteccioncivil.tamaulipas.gob.mx' },
+  'Tlaxcala':             { gob: 'https://www.tlaxcala.gob.mx', fiscalia: 'https://www.pgjtlx.gob.mx', ddhh: 'https://www.cedhtlax.org.mx', salud: 'https://saludtlaxcala.gob.mx', proteccion: 'https://proteccioncivil.tlaxcala.gob.mx' },
+  'Veracruz':             { gob: 'https://www.veracruz.gob.mx', fiscalia: 'https://www.fiscaliaveracruz.gob.mx', ddhh: 'https://www.cedhveracruz.org', salud: 'https://www.ssaver.gob.mx', proteccion: 'https://proteccioncivil.veracruz.gob.mx' },
+  'Yucatán':              { gob: 'https://www.yucatan.gob.mx', fiscalia: 'https://www.fiscaliayucatan.gob.mx', ddhh: 'https://codhey.org', salud: 'https://salud.yucatan.gob.mx', proteccion: 'https://proteccioncivil.yucatan.gob.mx' },
+  'Zacatecas':            { gob: 'https://www.zacatecas.gob.mx', fiscalia: 'https://www.fiscaliazacatecas.gob.mx', ddhh: 'https://www.cdhezac.org.mx', salud: 'https://saludzac.gob.mx', proteccion: 'https://proteccioncivil.zacatecas.gob.mx' },
+};
+
+// Construir DIRECTORIO_ESTADOS programáticamente
 const DIRECTORIO_ESTADOS = {};
+for (const entidad of Object.keys(_PORTALES_ESTATALES)) {
+  const p = _PORTALES_ESTATALES[entidad];
+  DIRECTORIO_ESTADOS[entidad] = [
+    ..._servEstandar(entidad),
+    { nombre: 'Fiscalía Estatal', cat: 'justicia', portal: p.fiscalia, icon: '⚖️', desc: 'Denuncias de delitos del fuero común en ' + entidad + '. Ver portal para teléfono y oficinas locales.' },
+    { nombre: 'Comisión Estatal de Derechos Humanos', cat: 'derechos', portal: p.ddhh, icon: '🛡️', desc: 'Quejas contra autoridades de ' + entidad + '. Asesoría y acompañamiento jurídico.' },
+    { nombre: 'Secretaría de Salud Estatal', cat: 'salud', portal: p.salud, icon: '🏥', desc: 'Servicios de salud pública en ' + entidad + '. Centros de salud, hospitales y campañas.' },
+    { nombre: 'Protección Civil Estatal', cat: 'proteccion', portal: p.proteccion, icon: '🔒', desc: 'Alertas, evacuaciones y atención de emergencias mayores en ' + entidad + '.' },
+    { nombre: 'Gobierno del Estado', cat: 'familia', portal: p.gob, icon: '🏛️', desc: 'Portal oficial del Gobierno de ' + entidad + '. Trámites y atención ciudadana.' },
+  ];
+}
+
+// ── Funciones de render ──
+const _ESTADOS_LISTA = Object.keys(_PORTALES_ESTATALES).sort((a,b) => a.localeCompare(b, 'es'));
+let _dirEstadoActual = null;
+let _dirCatActual = 'todos';
+
+function _dirRenderCard(s) {
+  const c = DIR_CAT_COLORS[s.cat] || DIR_CAT_COLORS.familia;
+  const accion = s.tel
+    ? `<a href="tel:${s.tel}" style="background:${c.fg};color:#0a0f1e;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;font-size:12px;flex-shrink:0">📞 ${s.tel.startsWith('800') || s.tel.length<=3 ? s.tel : s.tel.replace(/(\d{2,3})(\d{3,4})(\d{4})/, '$1-$2-$3')}</a>`
+    : (s.portal ? `<a href="${s.portal}" target="_blank" rel="noopener" style="background:${c.fg};color:#0a0f1e;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;font-size:11px;flex-shrink:0">🌐 Ver portal</a>` : '');
+  return `<div data-cat="${s.cat}" style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;padding:12px;display:flex;align-items:flex-start;gap:10px">
+    <div style="font-size:22px;flex-shrink:0;width:28px;text-align:center">${s.icon || '📞'}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:800;color:${c.fg};margin-bottom:3px;line-height:1.3">${s.nombre}</div>
+      <div style="font-size:10px;color:var(--text3);line-height:1.4">${s.desc || ''}</div>
+    </div>
+    ${accion}
+  </div>`;
+}
+
+function _dirRenderFederales() {
+  const cont = document.getElementById('dir-federales');
+  if (!cont) return;
+  cont.innerHTML = DIRECTORIO_FEDERAL.map(_dirRenderCard).join('');
+}
+
+function _dirRenderEstadosGrid() {
+  const grid = document.getElementById('dir-states-grid');
+  if (!grid) return;
+  grid.innerHTML = _ESTADOS_LISTA.map(e => `<button onclick="dirSelectEstado('${e.replace(/'/g, "\\'")}')" style="padding:8px 6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:8px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;line-height:1.2;transition:all 0.15s" onmouseover="this.style.background='rgba(59,130,246,0.12)';this.style.borderColor='#60a5fa'" onmouseout="this.style.background='var(--surface)';this.style.borderColor='var(--border)'">${e}</button>`).join('');
+}
+
+function dirSelectEstado(entidad) {
+  _dirEstadoActual = entidad;
+  _dirCatActual = 'todos';
+  const panel = document.getElementById('dir-estado-panel');
+  const header = document.getElementById('dir-estado-header');
+  const list = document.getElementById('dir-servicios-list');
+  if (!panel || !header || !list) return;
+  panel.style.display = 'block';
+  const p = _PORTALES_ESTATALES[entidad] || {};
+  header.innerHTML = `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05));border:1px solid rgba(59,130,246,0.35);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-size:32px">📍</div>
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:10px;color:#60a5fa;font-weight:700;letter-spacing:1.5px">ESTADO SELECCIONADO</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);font-family:var(--font-display)">${entidad}</div>
+    </div>
+    ${p.gob ? `<a href="${p.gob}" target="_blank" rel="noopener" style="background:#3b82f6;color:#fff;padding:8px 14px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none">Portal del Gobierno →</a>` : ''}
+  </div>`;
+  _dirRenderServiciosEstado();
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+window.dirSelectEstado = dirSelectEstado;
+
+function _dirRenderServiciosEstado() {
+  const list = document.getElementById('dir-servicios-list');
+  if (!list || !_dirEstadoActual) return;
+  const servicios = DIRECTORIO_ESTADOS[_dirEstadoActual] || [];
+  const filtrados = _dirCatActual === 'todos' ? servicios : servicios.filter(s => s.cat === _dirCatActual);
+  if (!filtrados.length) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">Sin servicios en esta categoría para ' + _dirEstadoActual + '.</div>';
+    return;
+  }
+  list.innerHTML = filtrados.map(_dirRenderCard).join('');
+}
+
+function dirFiltroCat(cat) {
+  _dirCatActual = cat;
+  // Actualizar estilos de botones de categoría
+  ['todos','justicia','derechos','mujer','salud','familia','proteccion'].forEach(c => {
+    const btn = document.getElementById('dcat-' + c);
+    if (!btn) return;
+    if (c === cat) {
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--accent)';
+    } else {
+      const colors = DIR_CAT_COLORS[c] || { bg: 'var(--surface)', border: 'var(--border)', fg: 'var(--text2)' };
+      btn.style.background = c === 'todos' ? 'var(--surface)' : colors.bg;
+      btn.style.color = c === 'todos' ? 'var(--text2)' : colors.fg;
+      btn.style.borderColor = c === 'todos' ? 'var(--border)' : colors.border;
+    }
+  });
+  _dirRenderServiciosEstado();
+}
+window.dirFiltroCat = dirFiltroCat;
+
+function directorioBuscarEstado(q) {
+  const norm = (q || '').toLowerCase().trim();
+  const grid = document.getElementById('dir-states-grid');
+  if (!grid) return;
+  if (!norm) {
+    Array.from(grid.children).forEach(c => c.style.display = '');
+    return;
+  }
+  Array.from(grid.children).forEach(c => {
+    c.style.display = (c.textContent || '').toLowerCase().includes(norm) ? '' : 'none';
+  });
+}
+window.directorioBuscarEstado = directorioBuscarEstado;
+
+// Inicializar el directorio al abrir la página
+function _initDirectorio() {
+  if (!document.getElementById('dir-federales')) return;
+  _dirRenderFederales();
+  _dirRenderEstadosGrid();
+}
+document.addEventListener('DOMContentLoaded', _initDirectorio);
+window._initDirectorio = _initDirectorio;
+
 const OMBLIGO_TIMELINE = [];
 
 </script>
