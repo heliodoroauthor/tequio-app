@@ -2033,7 +2033,7 @@
 
       <div class="nav-item" data-page="ombligo" onclick="showPage('ombligo')">
         <span class="icon">🌀</span> Ombligo · Raíces
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ INAH 195</span>
       </div>
     </div>
 
@@ -4124,6 +4124,10 @@
           if (p === 'jurisprudencia') cargarJurisprudencia();
           if (p === 'leyes' && typeof cargarLeyesDesdeAPI === 'function') cargarLeyesDesdeAPI();
           if (p === 'directorio' && typeof initDirectorio === 'function') initDirectorio();
+          if (p === 'ombligo') {
+            if (typeof initOmbligo === 'function') initOmbligo();
+            if (typeof cargarOmbligoZonasINAH === 'function') cargarOmbligoZonasINAH();
+          }
           if ((p === 'noticias' || p === 'diariocivico') && typeof cargarNoticiasDesdeAPI === 'function') cargarNoticiasDesdeAPI();
           // Mi Rep: refrescar sección "¿Votó como tú?" si existe
           if (p === 'mi-rep') {
@@ -5679,7 +5683,7 @@
             </div>
             <div style="width:1px;background:rgba(180,83,9,0.3)"></div>
             <div style="text-align:center">
-              <div style="font-family:var(--font-display);font-size:22px;font-weight:900;color:#60a5fa">6</div>
+              <div id="ombligo-zonas-count" style="font-family:var(--font-display);font-size:22px;font-weight:900;color:#60a5fa">195+</div>
               <div style="font-size:9px;color:#92400e;font-weight:700;letter-spacing:1px">ZONAS ARQ.</div>
             </div>
           </div>
@@ -26008,6 +26012,48 @@ function ombligoMuseoToggle(id, card) {
   const indicator = card?.querySelector('[style*="VER MÁS"]');
   if (indicator) indicator.textContent = isOpen ? 'VER MÁS ▼' : 'CERRAR ▲';
 }
+
+// Cargar 195 zonas arqueológicas reales del INAH (Supabase) y mezclar con las 6 curadas
+async function cargarOmbligoZonasINAH() {
+  try {
+    const r = await fetch('/api/data?vista=ombligo_zonas');
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.zonas) || !j.zonas.length) return;
+    const yaEnLista = new Set(OMBLIGO_ZONAS.map(z => (z.nombre || '').toLowerCase()));
+    const colorPorEstado = (e) => {
+      const map = {'Chiapas':'#16a34a','Yucatán':'#dc2626','Quintana Roo':'#0891b2','Oaxaca':'#7c3aed','Puebla':'#ea580c','Veracruz':'#15803d','Estado de México':'#7c2d12','Morelos':'#b45309','Hidalgo':'#0891b2','Guerrero':'#a16207','Nayarit':'#0d9488','Tlaxcala':'#7c2d12','Tabasco':'#15803d','Campeche':'#16a34a','Ciudad de México':'#dc2626'};
+      return map[e] || '#d97706';
+    };
+    const inahReales = j.zonas
+      .filter(z => !yaEnLista.has((z.nombre || '').toLowerCase()))
+      .map(z => ({
+        nombre: z.nombre,
+        estado: z.estado,
+        subtitulo: 'Zona Arqueológica INAH',
+        emoji: '🏛️',
+        color: colorPorEstado(z.estado),
+        periodo: 'Prehispánico',
+        costo: 'Consultar inah.gob.mx',
+        horario: z.condicion === 'Cerrada' ? 'Cerrada al público' : (z.condicion === 'Temporalmente cerrada' ? 'Temp. cerrada' : 'Consultar INAH'),
+        distancia: z.ubicacion_fisica || z.estado,
+        descripcion: `Sitio arqueológico bajo resguardo del ${z.responsable}. ` + (z.museo_sitio ? 'Cuenta con museo de sitio. ' : '') + (z.sala_introductoria ? 'Sala introductoria disponible. ' : ''),
+        destacado: 'Consulta horarios y tarifas actualizadas en el portal oficial del INAH antes de visitar.',
+        patrimonio: false,
+        fuenteINAH: true,
+      }));
+    if (inahReales.length) {
+      OMBLIGO_ZONAS.push(...inahReales);
+      renderOmbligoZonas();
+    }
+    // Actualizar contador del header
+    const cont = document.getElementById('ombligo-zonas-count');
+    if (cont) cont.textContent = OMBLIGO_ZONAS.length + '+';
+  } catch (e) {
+    console.warn('Ombligo zonas INAH:', e);
+  }
+}
+window.cargarOmbligoZonasINAH = cargarOmbligoZonasINAH;
 
 function renderOmbligoZonas() {
   const el = document.getElementById('ombligo-zonas');
