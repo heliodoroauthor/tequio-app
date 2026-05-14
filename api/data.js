@@ -231,13 +231,14 @@ export default async function handler(req, res) {
       const sha256 = (s) => nodeCrypto.createHash('sha256').update(s || 'unknown').digest('hex');
       const ip_hash = sha256(ip);
       const ua_hash = sha256(ua);
-      // UPSERT directo
+      // UPSERT directo — usar ANON_KEY (Vercel) con RLS permisivo para registro
+      const KEY = SERVICE_KEY || ANON_KEY;
       const url = `${SUPABASE_URL}/rest/v1/usuarios_ciudadanos?on_conflict=cookie_id`;
       const r = await fetch(url, {
         method: 'POST',
         headers: {
-          'apikey': SERVICE_KEY,
-          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'apikey': KEY,
+          'Authorization': `Bearer ${KEY}`,
           'Content-Type': 'application/json',
           'Prefer': 'resolution=merge-duplicates,return=representation',
         },
@@ -420,12 +421,13 @@ export default async function handler(req, res) {
       const ip_hash = sha256(ip);
       const ua_hash = sha256(ua);
 
+      const KEY_VOTO = SERVICE_KEY || ANON_KEY;
       const url = `${SUPABASE_URL}/rest/v1/rpc/emitir_voto_ciudadano`;
       const r = await fetch(url, {
         method: 'POST',
         headers: {
-          'apikey': SERVICE_KEY,
-          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'apikey': KEY_VOTO,
+          'Authorization': `Bearer ${KEY_VOTO}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
