@@ -14481,7 +14481,11 @@ function polSetFiltro(btn, filtro) {
   polFiltrar();
 }
 
-function polFiltrar() {
+function polFiltrarLegacy_DEPRECATED() {
+  // [DEPRECATED] Esta función fue reemplazada por la nueva polFiltrar (línea ~2956)
+  // que consume /api/data?vista=diputados con 500 diputados reales LXVI.
+  // Se mantiene como código muerto para no romper otras referencias del bundle viejo.
+  return;
   const q = (document.getElementById('pol-search')?.value || '').toLowerCase().trim();
   const sort = document.getElementById('pol-sort')?.value || 'promesas';
   const f = polFiltroActivo;
