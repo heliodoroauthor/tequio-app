@@ -4127,6 +4127,7 @@
           if (p === 'ombligo') {
             if (typeof initOmbligo === 'function') initOmbligo();
             if (typeof cargarOmbligoZonasINAH === 'function') cargarOmbligoZonasINAH();
+            if (typeof cargarOmbligoMuseosINAH === 'function') cargarOmbligoMuseosINAH();
           }
           if ((p === 'noticias' || p === 'diariocivico') && typeof cargarNoticiasDesdeAPI === 'function') cargarNoticiasDesdeAPI();
           // Mi Rep: refrescar sección "¿Votó como tú?" si existe
@@ -5678,7 +5679,7 @@
             </div>
             <div style="width:1px;background:rgba(180,83,9,0.3)"></div>
             <div style="text-align:center">
-              <div style="font-family:var(--font-display);font-size:22px;font-weight:900;color:#4ade80">6</div>
+              <div id="ombligo-museos-count" style="font-family:var(--font-display);font-size:22px;font-weight:900;color:#4ade80">165+</div>
               <div style="font-size:9px;color:#92400e;font-weight:700;letter-spacing:1px">MUSEOS</div>
             </div>
             <div style="width:1px;background:rgba(180,83,9,0.3)"></div>
@@ -26012,6 +26013,49 @@ function ombligoMuseoToggle(id, card) {
   const indicator = card?.querySelector('[style*="VER MÁS"]');
   if (indicator) indicator.textContent = isOpen ? 'VER MÁS ▼' : 'CERRAR ▲';
 }
+
+// Cargar 165 museos reales del INAH (Supabase) y mezclar con los 6 curados
+async function cargarOmbligoMuseosINAH() {
+  try {
+    const r = await fetch('/api/data?vista=ombligo_museos');
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.museos) || !j.museos.length) return;
+    const yaEnLista = new Set(OMBLIGO_MUSEOS.map(m => (m.nombre || '').toLowerCase()));
+    const colorPorEstado = (e) => {
+      const map = {'Chiapas':'#16a34a','Yucatán':'#dc2626','Quintana Roo':'#0891b2','Oaxaca':'#7c3aed','Puebla':'#ea580c','Veracruz':'#15803d','Estado de México':'#7c2d12','Morelos':'#b45309','Hidalgo':'#0891b2','Guerrero':'#a16207','Nayarit':'#0d9488','Tlaxcala':'#7c2d12','Tabasco':'#15803d','Campeche':'#16a34a','Ciudad de México':'#dc2626'};
+      return map[e] || '#92400e';
+    };
+    const inahReales = j.museos
+      .filter(m => !yaEnLista.has((m.nombre || '').toLowerCase()))
+      .map(m => ({
+        nombre: m.nombre,
+        ciudad: m.estado,
+        tipo: m.responsable || 'Museo INAH',
+        emoji: '🏛️',
+        color: colorPorEstado(m.estado),
+        subtitulo: m.responsable || 'Museo del INAH',
+        anio: 'INAH',
+        importancia: m.condicion === 'Cerrado' ? 'Cerrado temporalmente' : 'Abierto al público',
+        descripcion: 'Recinto bajo resguardo del Instituto Nacional de Antropología e Historia. ' + (m.ubicacion_fisica || ''),
+        coleccion: 'Acervo INAH. Consulta horarios y costos en inah.gob.mx',
+        imperdible: 'Verifica horarios actualizados en el portal oficial del INAH antes de visitar.',
+        horario: m.condicion === 'Cerrado' ? 'Cerrado al público' : 'Consultar INAH',
+        costo: 'Consultar inah.gob.mx',
+        direccion: m.ubicacion_fisica || m.estado,
+        fuenteINAH: true,
+      }));
+    if (inahReales.length) {
+      OMBLIGO_MUSEOS.push(...inahReales);
+      if (typeof renderOmbligoMuseos === 'function') renderOmbligoMuseos();
+    }
+    const cont = document.getElementById('ombligo-museos-count');
+    if (cont) cont.textContent = OMBLIGO_MUSEOS.length + '+';
+  } catch (e) {
+    console.warn('Ombligo museos INAH:', e);
+  }
+}
+window.cargarOmbligoMuseosINAH = cargarOmbligoMuseosINAH;
 
 // Cargar 195 zonas arqueológicas reales del INAH (Supabase) y mezclar con las 6 curadas
 async function cargarOmbligoZonasINAH() {
