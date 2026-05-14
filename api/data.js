@@ -671,6 +671,27 @@ export default async function handler(req, res) {
       return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
     }
 
+    // ── Jurisprudencia SCJN — Tesis del Semanario Judicial ──
+    if (vista === 'jurisprudencia') {
+      const q = (req.query.q || '').trim();
+      const materia = req.query.materia || '';
+      const instancia = req.query.instancia || '';
+      let path = 'jurisprudencia_scjn?select=id,registro_digital,tipo,rubro,materia,instancia,epoca,tesis_clave,fecha_publicacion,importancia,resumen_ciudadano,url_oficial&order=importancia.desc,fecha_publicacion.desc&limit=200';
+      if (materia) path += `&materia=eq.${encodeURIComponent(materia)}`;
+      if (instancia) path += `&instancia=eq.${encodeURIComponent(instancia)}`;
+      if (q && q.length > 2) path += `&or=(rubro.ilike.*${encodeURIComponent(q)}*,resumen_ciudadano.ilike.*${encodeURIComponent(q)}*,tesis_clave.ilike.*${encodeURIComponent(q)}*)`;
+      const tesis = await sb(path);
+      return res.status(200).json({ tesis, total: tesis.length });
+    }
+
+    if (vista === 'jurisprudencia_detalle') {
+      const id = req.query.id;
+      if (!id) return res.status(400).json({ error: 'falta id' });
+      const rows = await sb(`jurisprudencia_scjn?id=eq.${id}&select=*`);
+      if (!rows.length) return res.status(404).json({ error: 'no encontrada' });
+      return res.status(200).json(rows[0]);
+    }
+
     if (vista === 'despachos') {
       const area = (req.query.area || '').toLowerCase();
       const rows = await sb('despachos_verificados?activo=eq.true&verificado=eq.true&order=rating.desc.nullslast&select=id,nombre,responsable,especialidades,estados,telefono,whatsapp,email,sitio_web,rating,num_resenas,primera_consulta_gratis,plan');
