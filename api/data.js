@@ -213,6 +213,130 @@ export default async function handler(req, res) {
       return res.status(200).json({ diputados: rows });
     }
 
+    // ────────── COMPRANET / CONTRATOS PÚBLICOS ──────────
+    if (vista === 'contratos') {
+      // Filtros: q, dependencia, proveedor, entidad, tipo_proc, monto_min, monto_max, limit
+      const q = (req.query.q || '').trim();
+      const dependencia = req.query.dependencia || '';
+      const proveedor = req.query.proveedor || '';
+      const entidad = req.query.entidad || '';
+      const tipoProc = req.query.tipo_proc || '';
+      const montoMin = req.query.monto_min ? parseFloat(req.query.monto_min) : null;
+      const montoMax = req.query.monto_max ? parseFloat(req.query.monto_max) : null;
+      const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      const orden = req.query.orden || 'monto'; // monto | fecha | dependencia
+
+      let query = 'contratos_publicos?select=ocid,dependencia,unidad_compradora,proveedor_rfc,proveedor_nombre,titulo,monto_mxn,fecha_firma,tipo_procedimiento,tipo_contrato,entidad_federativa,fuente_url,flag_adjudicacion_directa_alta';
+
+      const conditions = [];
+      if (q) conditions.push(`or=(titulo.ilike.*${encodeURIComponent(q)}*,descripcion.ilike.*${encodeURIComponent(q)}*,proveedor_nombre.ilike.*${encodeURIComponent(q)}*,dependencia.ilike.*${encodeURIComponent(q)}*)`);
+      if (dependencia) conditions.push(`dependencia=ilike.*${encodeURIComponent(dependencia)}*`);
+      if (proveedor) conditions.push(`or=(proveedor_nombre.ilike.*${encodeURIComponent(proveedor)}*,proveedor_rfc.ilike.*${encodeURIComponent(proveedor)}*)`);
+      if (entidad) conditions.push(`entidad_federativa=eq.${encodeURIComponent(entidad)}`);
+      if (tipoProc) conditions.push(`tipo_procedimiento=eq.${encodeURIComponent(tipoProc)}`);
+      if (montoMin !== null) conditions.push(`monto_mxn=gte.${montoMin}`);
+      if (montoMax !== null) conditions.push(`monto_mxn=lte.${montoMax}`);
+
+      if (conditions.length) query += '&' + conditions.join('&');
+
+      const orderMap = {
+        monto: 'monto_mxn.desc.nullslast',
+        fecha: 'fecha_firma.desc.nullslast',
+        dependencia: 'dependencia.asc',
+      };
+      query += `&order=${orderMap[orden] || orderMap.monto}&limit=${limit}`;
+
+      const rows = await sb(query);
+
+      // Stats agregados separados (count + sum)
+      let statsQuery = 'contratos_publicos?select=monto_mxn,tipo_procedimiento,dependencia';
+      if (conditions.length) {
+        // mismo conditions pero sin select de columnas pesadas
+        statsQuery = 'contratos_publicos?select=monto_mxn,tipo_procedimiento,dependencia&' + conditions.join('&') + '&limit=10000';
+      } else {
+        statsQuery += '&limit=10000';
+      }
+      const statsRows = await sb(statsQuery);
+      const monto_total = statsRows.reduce((s, r) => s + (parseFloat(r.monto_mxn) || 0), 0);
+      const por_tipo = {};
+      const por_dependencia = {};
+      for (const r of statsRows) {
+        if (r.tipo_procedimiento) por_tipo[r.tipo_procedimiento] = (por_tipo[r.tipo_procedimiento] || 0) + 1;
+        if (r.dependencia) por_dependencia[r.dependencia] = (por_dependencia[r.dependencia] || 0) + 1;
+      }
+
+      return res.status(200).json({
+        contratos: rows,
+        total_resultados: statsRows.length,
+        monto_total,
+        por_tipo,
+        top_dependencias: Object.entries(por_dependencia).sort((a,b)=>b[1]-a[1]).slice(0,10),
+      });
+    }
+
+    if (vista === 'contrato_detalle') {
+      const ocid = req.query.ocid;
+      if (!ocid) return res.status(400).json({ error: 'ocid requerido' });
+      const rows = await sb(`contratos_publicos?ocid=eq.${encodeURIComponent(ocid)}`);
+      const contrato = rows?.[0];
+      if (!contrato) return res.status(404).json({ error: 'No encontrado' });
+
+      // Otros contratos del mismo proveedor
+      let relacionados = [];
+      if (contrato.proveedor_rfc) {
+        relacionados = await sb(`contratos_publicos?proveedor_rfc=eq.${encodeURIComponent(contrato.proveedor_rfc)}&ocid=neq.${encodeURIComponent(ocid)}&order=monto_mxn.desc.nullslast&limit=10&select=ocid,dependencia,titulo,monto_mxn,fecha_firma,tipo_procedimiento`);
+      }
+      return res.status(200).json({ contrato, relacionados });
+    }
+
+    if (vista === 'proveedores_top') {
+      // Lupita Diconsa: top proveedores agregados
+      const limit = Math.min(parseInt(req.query.limit || '30', 10), 100);
+      const dependencia = req.query.dependencia || '';
+      const orden = req.query.orden || 'monto'; // monto | contratos | dependencias
+
+      let query = 'proveedores_agregados?select=proveedor_rfc,proveedor_nombre,num_contratos,monto_total,num_dependencias,monto_promedio,contratos_ad_directa,flags_ad_alta,dependencias';
+      const orderMap = {
+        monto: 'monto_total.desc.nullslast',
+        contratos: 'num_contratos.desc',
+        dependencias: 'num_dependencias.desc',
+      };
+      query += `&order=${orderMap[orden] || orderMap.monto}&limit=${limit}`;
+      // Filtro por dependencia (string array contains)
+      if (dependencia) query += `&dependencias=cs.{${encodeURIComponent(dependencia)}}`;
+
+      const rows = await sb(query);
+      return res.status(200).json({ proveedores: rows });
+    }
+
+    if (vista === 'proveedor_detalle') {
+      const rfc = req.query.rfc || '';
+      const nombre = req.query.nombre || '';
+      if (!rfc && !nombre) return res.status(400).json({ error: 'rfc o nombre requerido' });
+
+      let condicion = '';
+      if (rfc) condicion = `proveedor_rfc=eq.${encodeURIComponent(rfc)}`;
+      else condicion = `proveedor_nombre=ilike.*${encodeURIComponent(nombre)}*`;
+
+      const contratos = await sb(`contratos_publicos?${condicion}&order=monto_mxn.desc.nullslast&limit=50&select=ocid,dependencia,titulo,monto_mxn,fecha_firma,tipo_procedimiento,tipo_contrato`);
+      const agg = await sb(`proveedores_agregados?${condicion}&limit=1`);
+
+      return res.status(200).json({
+        agregado: agg?.[0] || null,
+        contratos,
+      });
+    }
+
+    if (vista === 'compranet_stats') {
+      // Resumen global para hero
+      const rows = await sb('contratos_publicos?select=monto_mxn,tipo_procedimiento,flag_adjudicacion_directa_alta&limit=300000');
+      const total = rows.length;
+      const monto_total = rows.reduce((s, r) => s + (parseFloat(r.monto_mxn) || 0), 0);
+      const adjudicacion_directa = rows.filter(r => r.tipo_procedimiento === 'adjudicacion_directa').length;
+      const flags_rojos = rows.filter(r => r.flag_adjudicacion_directa_alta).length;
+      return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
+    }
+
     if (vista === 'despachos') {
       const area = (req.query.area || '').toLowerCase();
       const rows = await sb('despachos_verificados?activo=eq.true&verificado=eq.true&order=rating.desc.nullslast&select=id,nombre,responsable,especialidades,estados,telefono,whatsapp,email,sitio_web,rating,num_resenas,primera_consulta_gratis,plan');
@@ -256,6 +380,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado',
+      'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
     ]});
