@@ -202,6 +202,97 @@ export default async function handler(req, res) {
       });
     }
 
+    // ────────── SENADORES — Fase 3.1.B ──────────
+    if (vista === 'senadores') {
+      // Lista de los 128 senadores con filtros
+      const filtroPartido = req.query.partido || '';
+      const filtroEntidad = req.query.entidad || '';
+      let query = 'politicos_senadores?order=nombre_completo.asc&select=id,nombre_completo,url,partido,entidad_federativa,tipo_eleccion,nombre_suplente,foto_url,email,telefono,direccion_oficina,cargo_especial,comisiones_secretario,comisiones_integrante&limit=200';
+      if (filtroPartido) query += `&partido=eq.${encodeURIComponent(filtroPartido)}`;
+      if (filtroEntidad) query += `&entidad_federativa=eq.${encodeURIComponent(filtroEntidad)}`;
+      const rows = await sb(query);
+      const porPartido = {};
+      const porEntidad = {};
+      let totalComisiones = 0;
+      for (const s of (rows || [])) {
+        if (s.partido) porPartido[s.partido] = (porPartido[s.partido] || 0) + 1;
+        if (s.entidad_federativa) porEntidad[s.entidad_federativa] = (porEntidad[s.entidad_federativa] || 0) + 1;
+        if (Array.isArray(s.comisiones_integrante)) totalComisiones += s.comisiones_integrante.length;
+        if (Array.isArray(s.comisiones_secretario)) totalComisiones += s.comisiones_secretario.length;
+      }
+      return res.status(200).json({
+        senadores: rows || [],
+        total: (rows || []).length,
+        por_partido: porPartido,
+        por_entidad: porEntidad,
+        total_comisiones: totalComisiones,
+      });
+    }
+
+    if (vista === 'senador_detalle') {
+      const id = parseInt(req.query.id || '0', 10);
+      if (!id) return res.status(400).json({ error: 'id requerido' });
+      const rows = await sb(`politicos_senadores?id=eq.${id}&select=*`);
+      const senador = rows?.[0];
+      if (!senador) return res.status(404).json({ error: 'Senador no encontrado' });
+      // No mandar el embedding al cliente (768 floats = ~3KB)
+      delete senador.embedding;
+      return res.status(200).json({ senador });
+    }
+
+    if (vista === 'senadores_busqueda') {
+      // Búsqueda semántica con embeddings vía Gemini
+      const q = (req.query.q || '').trim();
+      if (!q) return res.status(400).json({ error: 'query requerida' });
+      const limit = Math.min(parseInt(req.query.limit || '20', 10), 50);
+      // 1) Generar embedding del query con Gemini
+      const GEMINI_KEY = process.env.GEMINI_API_KEY;
+      if (!GEMINI_KEY) {
+        // Fallback: búsqueda texto trigram
+        const safeQ = encodeURIComponent(q);
+        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
+        return res.status(200).json({ senadores: rows || [], modo: 'texto', query: q });
+      }
+      try {
+        const er = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'models/gemini-embedding-001',
+            content: { parts: [{ text: q }] },
+            outputDimensionality: 768,
+          }),
+        });
+        if (!er.ok) throw new Error('embed failed');
+        const ej = await er.json();
+        const emb = ej?.embedding?.values;
+        if (!emb || emb.length !== 768) throw new Error('embed bad shape');
+        // 2) RPC contra Supabase (vector search). Si no existe la RPC, fallback a texto.
+        const url = `${process.env.SUPABASE_URL}/rest/v1/rpc/match_senadores`;
+        const rr = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query_embedding: emb, match_count: limit }),
+        });
+        if (rr.ok) {
+          const rows = await rr.json();
+          return res.status(200).json({ senadores: rows || [], modo: 'semantica', query: q });
+        }
+        // RPC no existe → fallback texto
+        const safeQ = encodeURIComponent(q);
+        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
+        return res.status(200).json({ senadores: rows || [], modo: 'texto_fallback', query: q });
+      } catch (e) {
+        const safeQ = encodeURIComponent(q);
+        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
+        return res.status(200).json({ senadores: rows || [], modo: 'texto_err', query: q, err: String(e).slice(0, 100) });
+      }
+    }
+
     if (vista === 'buscar_diputado') {
       // Busca diputados por estado y opcionalmente distrito
       const entidad = req.query.entidad || '';
@@ -379,7 +470,7 @@ export default async function handler(req, res) {
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
-      'mi_representante','buscar_diputado',
+      'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
