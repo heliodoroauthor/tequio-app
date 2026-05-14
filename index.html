@@ -1842,9 +1842,59 @@
       </div>
     </div>
 
-    <!-- ── GRUPO 1: INFORMACIÓN PÚBLICA ── -->
+    <!-- ── GRUPO 1: ACCIÓN CÍVICA ── -->
     <div class="nav-section">
-      <div class="nav-label" style="color:var(--accent3);letter-spacing:1.5px">📡 Información Pública</div>
+      <div class="nav-label" style="color:var(--red2);letter-spacing:1.5px">✊ Acción Cívica</div>
+
+      <div class="nav-item" data-page="emergencia" onclick="showPage('emergencia')">
+        <span class="icon">🚨</span> Modo Emergencia
+        <span class="nav-badge red">24/7</span>
+      </div>
+      <div class="nav-item" data-page="derechos" onclick="showPage('derechos')">
+        <span class="icon">🛡️</span> Mis Derechos
+      </div>
+      <div class="nav-item" data-page="directorio" onclick="showPage('directorio')">
+        <span class="icon">📋</span> Directorio de Servicios
+        <span class="nav-badge green">32 estados</span>
+      </div>
+      <div class="nav-item" data-page="offline" onclick="showPage('offline')">
+        <span class="icon">📵</span> Info sin conexión
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
+
+      <div class="nav-item" data-page="iniciativas" onclick="showPage('iniciativas')">
+        <span class="icon">✊</span> Iniciativas Ciudadanas
+        <span class="nav-badge green">12 nuevas</span>
+      </div>
+      <div class="nav-item" data-page="acciones" onclick="showPage('acciones')">
+        <span class="icon">⚡</span> Generador de Acciones
+        <span class="nav-badge green">Nuevo</span>
+      </div>
+      <div class="nav-item" data-page="organizacion" onclick="showPage('organizacion')">
+        <span class="icon">🤝</span> Organízate
+        <span class="nav-badge green">Nuevo</span>
+      </div>
+      <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
+        <span class="icon">💬</span> Chat Comunitario
+        <span class="nav-badge green">Nuevo</span>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
+
+      <div class="nav-item" data-page="verificacion" onclick="showPage('verificacion')">
+        <span class="icon">✅</span> Verificación Ciudadana
+        <span class="nav-badge" style="background:linear-gradient(135deg,#065f46,#047857);color:#a7f3d0">Beta</span>
+      </div>
+      <div class="nav-item" data-page="testigo" onclick="showPage('testigo')">
+        <span class="icon">📸</span> Testigo Cívico
+        <span class="nav-badge" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#bfdbfe">Legal</span>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 2: INFORMACIÓN PÚBLICA ── -->
+    <div class="nav-section">
+      <div class="nav-label" style="color:var(--accent3);letter-spacing:1.5px">📜 Información Pública</div>
 
       <div class="nav-item" data-page="leyes" onclick="showPage('leyes')">
         <span class="icon">📜</span> Leyes y Decretos
@@ -1908,7 +1958,7 @@
       </div>
     </div>
 
-    <!-- ── GRUPO 2: HERRAMIENTAS IA ── -->
+    <!-- ── GRUPO 3: HERRAMIENTAS IA ── -->
     <div class="nav-section">
       <div class="nav-label" style="color:#a78bfa;letter-spacing:1.5px">🧠 Herramientas IA</div>
 
@@ -1925,65 +1975,15 @@
         <span class="icon">🗳️</span> Simulador de Voto
         <span class="nav-badge" style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff">2027</span>
       </div>
-
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-      <div class="nav-item" data-page="iniciativas" onclick="showPage('iniciativas')">
-        <span class="icon">✊</span> Iniciativas Ciudadanas
-        <span class="nav-badge green">12 nuevas</span>
-      </div>
-      <div class="nav-item" data-page="acciones" onclick="showPage('acciones')">
-        <span class="icon">⚡</span> Generador de Acciones
-        <span class="nav-badge green">Nuevo</span>
-      </div>
       <div class="nav-item" data-page="debates" onclick="showPage('debates')">
         <span class="icon">💬</span> Debates Estructurados
       </div>
     </div>
 
-    <!-- ── GRUPO 3: DERECHOS Y EMERGENCIAS ── -->
+    <!-- ── GRUPO 4: MEMORIA ── -->
     <div class="nav-section">
-      <div class="nav-label" style="color:var(--red2);letter-spacing:1.5px">🛡️ Derechos y Emergencias</div>
+      <div class="nav-label" style="color:var(--green2);letter-spacing:1.5px">🌀 Memoria</div>
 
-      <div class="nav-item" data-page="derechos" onclick="showPage('derechos')">
-        <span class="icon">🛡️</span> Mis Derechos
-      </div>
-      <div class="nav-item" data-page="emergencia" onclick="showPage('emergencia')">
-        <span class="icon">🚨</span> Modo Emergencia
-        <span class="nav-badge red">24/7</span>
-      </div>
-      <div class="nav-item" data-page="offline" onclick="showPage('offline')">
-        <span class="icon">📵</span> Info sin conexión
-      </div>
-      <div class="nav-item" data-page="directorio" onclick="showPage('directorio')">
-        <span class="icon">📋</span> Directorio de Servicios
-        <span class="nav-badge green">32 estados</span>
-      </div>
-
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-      <div class="nav-item" data-page="verificacion" onclick="showPage('verificacion')">
-        <span class="icon">✅</span> Verificación Ciudadana
-        <span class="nav-badge" style="background:linear-gradient(135deg,#065f46,#047857);color:#a7f3d0">Beta</span>
-      </div>
-      <div class="nav-item" data-page="testigo" onclick="showPage('testigo')">
-        <span class="icon">📸</span> Testigo Cívico
-        <span class="nav-badge" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#bfdbfe">Legal</span>
-      </div>
-    </div>
-
-    <!-- ── GRUPO 4: COMUNIDAD Y MEMORIA ── -->
-    <div class="nav-section">
-      <div class="nav-label" style="color:var(--green2);letter-spacing:1.5px">🌱 Comunidad y Memoria</div>
-
-      <div class="nav-item" data-page="organizacion" onclick="showPage('organizacion')">
-        <span class="icon">✊</span> Organízate
-        <span class="nav-badge green">Nuevo</span>
-      </div>
-      <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
-        <span class="icon">💬</span> Chat Comunitario
-        <span class="nav-badge green">Nuevo</span>
-      </div>
       <div class="nav-item" data-page="ombligo" onclick="showPage('ombligo')">
         <span class="icon">🌀</span> Ombligo · Raíces
         <span class="nav-badge" style="background:linear-gradient(135deg,#92400e,#b45309);color:#fef3c7">Memoria</span>
@@ -2305,9 +2305,15 @@
     <!-- ───── PIDE AYUDA LEGAL ───── -->
     <div id="page-pide-ayuda" class="page">
       <div class="content">
-        <div style="padding:24px 0 0">
-          <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin-bottom:4px">🤝 Pide ayuda legal</h1>
-          <p style="color:var(--text2);font-size:14px;margin-top:4px">Conectamos tu caso con un despacho verificado. La primera consulta suele ser gratis.</p>
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🤝</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Pide ayuda legal</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Conectamos tu caso con un despacho verificado de Tequio. <strong>Primera consulta gratis</strong> en la mayoría.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">⚡ 24/7</div>
+          </div>
         </div>
         <div style="padding:16px 0 0">
           <div style="display:flex;gap:6px">
@@ -2362,18 +2368,33 @@
     <!-- ───── ECONOMÍA ───── -->
     <div id="page-economia" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">📈 Economía México</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Datos del Banco de México actualizados cada semana.</p>
-        <div id="econ-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px"></div>
-        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://www.banxico.org.mx/" target="_blank" style="color:var(--accent2)">Banxico SIE</a></div>
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(59,130,246,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">📈</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Economía México</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Indicadores macro del <strong>Banco de México</strong>. Tipo de cambio, inflación y tasa de referencia.</p>
+            </div>
+            <a href="https://www.banxico.org.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Banxico SIE →</a>
+          </div>
+        </div>
+        <div id="econ-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px"></div>
       </div>
     </div>
 
     <!-- ───── CLIMA (DATOS REALES) ───── -->
     <div id="page-clima" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🌤️ Clima hoy</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Pronóstico para las capitales estatales · Fuente: <a href="https://open-meteo.com/" target="_blank" style="color:var(--accent2)">Open-Meteo</a></p>
+        <div style="background:linear-gradient(135deg,#f59e0b 0%,#ef4444 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(245,158,11,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🌤️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Clima hoy</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Pronóstico para las <strong>32 capitales</strong> del país. Temperaturas, lluvia y vientos.</p>
+            </div>
+            <a href="https://open-meteo.com/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Open-Meteo →</a>
+          </div>
+        </div>
         <div id="clima-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px"></div>
       </div>
     </div>
@@ -2381,8 +2402,16 @@
     <!-- ───── ALERTAS METEO ───── -->
     <div id="page-alertas" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">⛈️ Alertas Meteorológicas</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Boletín oficial del Servicio Meteorológico Nacional.</p>
+        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">⛈️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Alertas Meteorológicas</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Avisos vigentes del <strong>Servicio Meteorológico Nacional</strong> (CONAGUA). Huracanes, lluvias intensas, frentes fríos.</p>
+            </div>
+            <a href="https://smn.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SMN →</a>
+          </div>
+        </div>
         <div id="alertas-list"></div>
       </div>
     </div>
@@ -2390,21 +2419,38 @@
     <!-- ───── MONITOR SEQUÍA (DATOS REALES) ───── -->
     <div id="page-sequia" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🏜️ Monitor de Sequía</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Porcentaje de municipios en cada nivel de sequía por estado. Fuente: <a href="https://smn.conagua.gob.mx/" target="_blank" style="color:var(--accent2)">CONAGUA SMN</a></p>
-        <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"></div>
+        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🏜️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Monitor de Sequía</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Porcentaje de municipios en cada nivel <strong>D0–D4</strong> por estado, según el Monitor de Sequía de México.</p>
+            </div>
+            <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA →</a>
+          </div>
+        </div>
+        <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></div>
       </div>
     </div>
 
     <!-- ───── JURISPRUDENCIA SCJN (PLACEHOLDER) ───── -->
     <div id="page-jurisprudencia" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">⚖️ Jurisprudencia SCJN</h1>
-        <div style="background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;margin-top:16px">
-          <div style="font-size:64px;margin-bottom:12px">⏳</div>
-          <div style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Información en validación con fuente oficial</div>
-          <div style="color:var(--text2);font-size:15px;max-width:480px;margin:0 auto 20px;line-height:1.5">Estamos coordinando con la <strong>Suprema Corte de Justicia de la Nación</strong> para conectar las tesis y jurisprudencias en tiempo real.</div>
-          <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:14px 24px;border-radius:14px;font-size:15px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver fuente oficial →</a>
+        <div style="background:linear-gradient(135deg,#6d28d9 0%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">⚖️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Jurisprudencia SCJN</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Tesis y criterios obligatorios de la <strong>Suprema Corte de Justicia de la Nación</strong>.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">🔜 Próximamente</div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+          <div style="font-size:48px;margin-bottom:12px">⏳</div>
+          <div style="font-size:18px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Conexión técnica en proceso</div>
+          <div style="color:var(--text2);font-size:14px;max-width:480px;margin:0 auto 20px;line-height:1.5">El sistema oficial SJF2 requiere renderizado JavaScript. Estamos implementando un cliente que extraiga las tesis en background.</div>
+          <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:var(--accent);color:#fff;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver SJF2 oficial →</a>
         </div>
       </div>
     </div>
@@ -2412,8 +2458,16 @@
     <!-- ───── PRESAS Y CUENCAS (DATOS REALES CONAGUA SIH) ───── -->
     <div id="page-presas" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">💧 Presas y Cuencas</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Nivel de almacenamiento de las principales presas del país. Fuente: <a href="https://sih.conagua.gob.mx/" target="_blank" style="color:var(--accent2)">CONAGUA SIH</a>.</p>
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">💧</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presas y Cuencas</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Nivel diario de las <strong>210 presas</strong> monitoreadas por CONAGUA. Importante para entender la seguridad hídrica nacional.</p>
+            </div>
+            <a href="https://sih.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA SIH →</a>
+          </div>
+        </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
           <input id="presas-filtro" type="text" placeholder="🔍 Filtrar por presa o estado..."
             oninput="presasFiltrar()"
@@ -2434,8 +2488,16 @@
     <!-- ───── TU ESTADO (DATOS REALES INEGI) ───── -->
     <div id="page-tu-estado" class="page">
       <div class="content">
-        <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);padding:24px 0 4px">🗺️ Tu Estado</h1>
-        <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Indicadores demográficos del INEGI por entidad federativa.</p>
+        <div style="background:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🗺️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tu Estado</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Población, género y escolaridad de las <strong>32 entidades federativas</strong>. Datos del INEGI con ranking nacional.</p>
+            </div>
+            <a href="https://www.inegi.org.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">INEGI →</a>
+          </div>
+        </div>
 
         <!-- Selector de estado -->
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center">
