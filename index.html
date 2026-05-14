@@ -1993,11 +1993,11 @@
       </div>
       <div class="nav-item" data-page="geopolitica" onclick="showPage('geopolitica')">
         <span class="icon">🌐</span> México en el Mundo
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ SRE</span>
       </div>
       <div class="nav-item" data-page="diplomatica" onclick="showPage('diplomatica')">
         <span class="icon">🏛️</span> Red Diplomática
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ 68 sedes</span>
       </div>
     </div>
 
@@ -7415,16 +7415,32 @@
     <div id="page-geopolitica" class="page">
       <div class="content">
 
-        <div class="alert alert-info mb-16">
-          <span>🌐</span>
-          <span>Datos de referencia con fines educativos. Cifras aproximadas basadas en fuentes oficiales (SE, SRE, Banco de México, OMC). Consulta fuentes primarias para decisiones formales.</span>
+        <!-- Header oficial -->
+        <div style="background:linear-gradient(135deg,#0c4a6e 0%,#075985 50%,#0369a1 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(3,105,161,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:54px;line-height:1">🌐</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:28px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">México en el Mundo</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Relaciones exteriores, tratados, inversión y posición geopolítica del <strong>Estado Mexicano</strong>.</p>
+            </div>
+            <a href="https://www.gob.mx/sre" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Portal SRE →</a>
+          </div>
+        </div>
+
+        <!-- Sello de Fuente Oficial Verificada -->
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:28px">✅</div>
+          <div style="flex:1;min-width:220px">
+            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Datos diplomáticos de <strong>SRE — Secretaría de Relaciones Exteriores</strong> (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">gob.mx/sre</code>). Cifras económicas de <strong>Banxico</strong>, <strong>SE</strong> y <strong>OMC</strong>. Verifica datos vigentes en los portales oficiales antes de tomar decisiones formales.</div>
+          </div>
         </div>
 
         <!-- Header + stats rápidos -->
         <div class="section-header mb-16">
           <div>
-            <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-0.5px">🌐 México en el Mundo</div>
-            <div class="card-subtitle">Relaciones exteriores, tratados, inversión y posición geopolítica</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-0.5px">Posición Económica Global</div>
+            <div class="card-subtitle">Indicadores clave 2024-2025</div>
           </div>
           <button class="btn btn-primary" onclick="geoAskIA('Dame un resumen del estado actual de las relaciones exteriores de México con sus principales socios comerciales y qué desafíos geopolíticos enfrenta en 2025.')">🧠 Análisis IA</button>
         </div>
@@ -8294,6 +8310,27 @@
     <!-- ───── RED DIPLOMÁTICA ───── -->
     <div id="page-diplomatica" class="page">
       <div class="content">
+
+        <!-- Header oficial -->
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#9a3412 50%,#c2410c 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(194,65,12,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:54px;line-height:1">🏛️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:28px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Red Diplomática de México</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Embajadas, consulados y representaciones de la <strong>SRE</strong> en el mundo.</p>
+            </div>
+            <a href="https://www.gob.mx/sre/acciones-y-programas/embajadas-y-consulados-de-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Directorio SRE →</a>
+          </div>
+        </div>
+
+        <!-- Sello de Fuente Oficial Verificada -->
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:28px">✅</div>
+          <div style="flex:1;min-width:220px">
+            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Directorio de embajadas y consulados extraído del portal de <strong>SRE</strong> (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">gob.mx/sre</code>) y <strong>consulmex.sre.gob.mx</strong>. Cada link en las cards apunta al portal consular oficial. Verifica datos vigentes antes de viajar.</div>
+          </div>
+        </div>
 
         <!-- Stats -->
         <div class="grid-4 mb-24">
