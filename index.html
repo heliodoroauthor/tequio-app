@@ -1934,6 +1934,10 @@
         <span class="icon">🗳️</span> Vota tú primero
         <span class="nav-badge" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff">🔥 Nuevo</span>
       </div>
+      <div class="nav-item" data-page="quemones" onclick="showPage('quemones')">
+        <span class="icon">🔥</span> Muro de Quemones
+        <span class="nav-badge" style="background:linear-gradient(135deg,#000,#7c2d12);color:#fbbf24">Traidores</span>
+      </div>
       <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
         <span class="icon">🗳️</span> Votaciones del Congreso
         <span class="nav-badge green">Pleno</span>
@@ -3443,6 +3447,193 @@
       window.vcVotar = vcVotar;
       window.vcLogout = vcLogout;
 
+      // ══════════════════════════════════════════════════════
+      // ── QUEMONES — Fase 4.1.D ────────────────────────────
+      // ══════════════════════════════════════════════════════
+      async function cargarQuemones() {
+        const grid = document.getElementById('qm-grid');
+        const partido = document.getElementById('qm-partido').value;
+        const entidad = document.getElementById('qm-entidad').value;
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Cargando muro de quemones…</div>';
+        try {
+          const params = new URLSearchParams({ vista: 'quemones_ranking', limit: '50' });
+          if (partido) params.set('partido', partido);
+          if (entidad) params.set('entidad', entidad);
+          const r = await fetch('/api/data?' + params.toString());
+          const j = await r.json();
+          const ranking = j.ranking || [];
+          // Stats
+          document.getElementById('qm-stats').innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#ef4444">${j.total_quemones || 0}</div><div style="font-size:11px;color:var(--text2)">🔥 Quemones totales</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total_diputados_evaluados || 0}</div><div style="font-size:11px;color:var(--text2)">Diputados evaluados</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${j.total_incidentes || 0}</div><div style="font-size:11px;color:var(--text2)">Incidentes evaluados</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${ranking.length}</div><div style="font-size:11px;color:var(--text2)">En muro actual</div></div>
+          `;
+          // Filtros: poblar dropdowns la primera vez
+          if (!window.__qmFiltrosLoaded) {
+            const allRanking = await fetch('/api/data?vista=quemones_ranking&limit=200').then(r => r.json());
+            const partidosUnq = [...new Set((allRanking.ranking || []).map(r => r.partido).filter(Boolean))].sort();
+            const entidadesUnq = [...new Set((allRanking.ranking || []).map(r => r.entidad).filter(Boolean))].sort();
+            const partSel = document.getElementById('qm-partido');
+            partSel.innerHTML = '<option value="">Todos los partidos</option>' + partidosUnq.map(p => `<option value="${p}">${p}</option>`).join('');
+            const entSel = document.getElementById('qm-entidad');
+            entSel.innerHTML = '<option value="">Todas las entidades</option>' + entidadesUnq.map(e => `<option value="${e}">${e}</option>`).join('');
+            window.__qmFiltrosLoaded = true;
+          }
+          if (!ranking.length) {
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Aún no hay datos suficientes para evaluar quemones. El cron corre cada lunes después de que cierran las votaciones ciudadanas.</div>';
+            document.getElementById('qm-count').textContent = '0 diputados';
+            return;
+          }
+          document.getElementById('qm-count').textContent = `${ranking.length} diputados con datos`;
+          grid.innerHTML = ranking.map(d => {
+            const fotoHTML = d.foto_url
+              ? `<img src="${d.foto_url}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #ef4444;background:var(--surface2);flex-shrink:0"><div style="width:60px;height:60px;border-radius:50%;background:var(--surface2);border:2px solid #ef4444;display:none;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏛️</div>`
+              : `<div style="width:60px;height:60px;border-radius:50%;background:var(--surface2);border:2px solid #ef4444;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏛️</div>`;
+            const intensidad = d.num_quemones >= 10 ? 'rgba(220,38,38,0.20)' : d.num_quemones >= 5 ? 'rgba(220,38,38,0.12)' : 'rgba(220,38,38,0.06)';
+            return `<div onclick="qmAbrirDetalle(${d.dipt_id})" style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #ef4444;border-radius:14px;padding:14px;cursor:pointer;transition:transform 0.15s;background-image:radial-gradient(circle at 90% 10%,${intensidad},transparent 70%)" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='translateY(0)'">
+              <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+                ${fotoHTML}
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:700;line-height:1.3;color:var(--text);margin-bottom:2px">${d.nombre}</div>
+                  <div style="font-size:11px;color:var(--text2)">${d.partido || '—'} · ${d.entidad || '—'} D${d.distrito || '?'}</div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:end;padding-top:10px;border-top:1px solid var(--border)">
+                <div>
+                  <div style="font-size:30px;font-weight:800;font-family:var(--font-display);color:#ef4444;line-height:1">🔥 ${d.num_quemones || 0}</div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">de ${d.total_votaciones_evaluadas || 0} votaciones</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:18px;font-weight:800;color:#fbbf24">${d.pct_quemones || 0}%</div>
+                  <div style="font-size:10px;color:var(--text3)">contra distrito</div>
+                </div>
+              </div>
+            </div>`;
+          }).join('');
+        } catch (e) {
+          grid.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;grid-column:1/-1">Error al cargar quemones.</div>';
+        }
+      }
+
+      async function qmAbrirDetalle(dipt_id) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        overlay.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:24px"><div style="text-align:center;padding:40px;color:var(--text2)">Cargando incidentes…</div></div>';
+        document.body.appendChild(overlay);
+        const box = overlay.firstElementChild;
+        try {
+          const r = await fetch(`/api/data?vista=quemon_detalle&dipt_id=${dipt_id}`);
+          const j = await r.json();
+          const d = j.diputado;
+          const inc = j.incidentes || [];
+          if (!d) { box.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text2)">No encontrado.</div>'; return; }
+          const fotoHTML = d.foto_url
+            ? `<img src="${d.foto_url}" alt="" onerror="this.style.display='none'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #ef4444">`
+            : `<div style="width:80px;height:80px;border-radius:50%;background:var(--surface2);border:3px solid #ef4444;display:flex;align-items:center;justify-content:center;font-size:30px">🏛️</div>`;
+          box.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:18px">
+              <div style="display:flex;gap:14px;align-items:center">
+                ${fotoHTML}
+                <div>
+                  <h2 style="margin:0;font-size:20px;font-weight:800;font-family:var(--font-display);line-height:1.2">${d.nombre}</h2>
+                  <div style="font-size:12px;color:var(--text2);margin-top:4px">${d.partido} · ${d.entidad} Distrito ${d.distrito}</div>
+                </div>
+              </div>
+              <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text2);font-size:14px;font-family:inherit">✕</button>
+            </div>
+            <div style="background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;margin-bottom:18px">
+              <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🔥 Historial de quemones</div>
+              <div style="font-size:14px;color:var(--text)">${(inc || []).filter(i => i.es_quemon).length} votaciones contra su distrito · ${inc.length} evaluadas</div>
+            </div>
+            ${(inc || []).length ? `<div style="display:flex;flex-direction:column;gap:10px">
+              ${inc.map(i => {
+                const pendiente = i.votaciones_pendientes;
+                const real = i.votaciones_diputados;
+                const asunto = pendiente?.asunto_corto || pendiente?.titulo || real?.asunto || '(sin título)';
+                const fecha = pendiente?.fecha_propuesta || real?.fecha || '';
+                const votoIcon = { si:'🟢 SÍ', no:'🔴 NO', abst:'⊘ Abstención', ausente:'🫥 Ausente' };
+                return `<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${i.es_quemon ? '#ef4444' : '#22c55e'};border-radius:10px;padding:12px">
+                  <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.4">${asunto}</div>
+                  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:11px">
+                    <span style="color:var(--text3)">📅 ${fecha}</span>
+                    <span><strong>Diputado:</strong> ${votoIcon[i.voto_diputado] || '—'}</span>
+                    <span><strong>Distrito:</strong> ${votoIcon[i.voto_distrito_mayoritario] || '—'} (${i.votos_ciudadanos_total || 0} votos · ${i.margen_pct || 0}%)</span>
+                    <span style="background:${i.es_quemon ? '#ef4444' : '#22c55e'};color:#fff;padding:2px 8px;border-radius:6px;font-weight:700">${i.es_quemon ? '🔥 QUEMÓN' : '✓ CUMPLIÓ'}</span>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>` : '<div style="text-align:center;padding:20px;color:var(--text2)">Sin incidentes evaluados aún.</div>'}
+          `;
+        } catch (e) {
+          box.innerHTML = '<div style="padding:30px;text-align:center;color:#ef4444">Error al cargar.</div>';
+        }
+      }
+
+      window.cargarQuemones = cargarQuemones;
+      window.qmAbrirDetalle = qmAbrirDetalle;
+
+      // ── Integración con Mi Representante: ¿Votó como tú? ──
+      async function miRepVsYo(containerSelector) {
+        const cont = document.querySelector(containerSelector);
+        if (!cont) return;
+        const cookie_id = vcGetCookieId();
+        try {
+          const r = await fetch(`/api/data?vista=mi_rep_vs_yo&cookie_id=${encodeURIComponent(cookie_id)}`);
+          const j = await r.json();
+          if (!j.logueado) {
+            cont.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center">
+              <div style="font-size:14px;color:var(--text2);margin-bottom:10px">Vota tú primero en <strong>"🗳️ Vota tú primero"</strong> para ver si tu diputado coincide contigo.</div>
+              <button onclick="showPage('votar')" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">🗳️ Ir a votar</button>
+            </div>`;
+            return;
+          }
+          if (j.sin_diputado) {
+            cont.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;color:var(--text2)">No tenemos diputado registrado para ${j.usuario.entidad} D${j.usuario.distrito}.</div>`;
+            return;
+          }
+          const dip = j.diputado;
+          const stats = j.stats || {};
+          const comp = j.comparaciones || [];
+          const pctCoinc = stats.pct_coincide || 0;
+          const color = pctCoinc >= 70 ? '#22c55e' : pctCoinc >= 40 ? '#fbbf24' : '#ef4444';
+          const msg = pctCoinc >= 70 ? 'Te representa bien' : pctCoinc >= 40 ? 'Te representa a medias' : 'Te traiciona seguido';
+          cont.innerHTML = `
+            <div style="background:linear-gradient(135deg,#1f1d2b 0%,#2a1f2e 100%);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:16px">
+              <h3 style="margin:0 0 12px;font-size:18px;font-weight:800;font-family:var(--font-display)">🎯 ¿Votó como tú?</h3>
+              <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+                ${dip.foto_url ? `<img src="${dip.foto_url}" style="width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">` : ''}
+                <div style="flex:1;min-width:160px">
+                  <div style="font-size:14px;font-weight:700;color:var(--text)">${dip.nombre}</div>
+                  <div style="font-size:11px;color:var(--text2)">${dip.partido}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-size:32px;font-weight:800;font-family:var(--font-display);color:${color};line-height:1">${pctCoinc}%</div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:600">coincide contigo</div>
+                </div>
+              </div>
+              <div style="background:rgba(0,0,0,0.18);border-radius:10px;padding:10px;margin-bottom:14px;font-size:12px;color:${color};font-weight:600">${msg} · ${stats.coincide || 0} coincidencias · ${stats.contra || 0} traiciones · ${stats.comparables || 0} comparaciones (de ${stats.total_votos_emitidos || 0} votos tuyos)</div>
+              ${comp.length ? `<div style="display:flex;flex-direction:column;gap:6px">
+                ${comp.slice(0, 8).map(c => {
+                  const iconVoto = { si:'🟢', no:'🔴', abst:'⊘', ausente:'🫥' };
+                  const estBg = c.estado === 'coincide' ? 'rgba(34,197,94,0.10)' : c.estado === 'contra' ? 'rgba(239,68,68,0.10)' : c.estado === 'ausente' ? 'rgba(148,163,184,0.10)' : 'rgba(148,163,184,0.05)';
+                  const estIcon = c.estado === 'coincide' ? '✅' : c.estado === 'contra' ? '🔴' : c.estado === 'ausente' ? '🫥' : '⏳';
+                  const estTxt = c.estado === 'coincide' ? 'Coincidió' : c.estado === 'contra' ? 'Te traicionó' : c.estado === 'ausente' ? 'Se ausentó' : 'Sin voto real aún';
+                  return `<div style="background:${estBg};border-radius:8px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:160px;font-size:12px;color:var(--text);line-height:1.3">${c.asunto.slice(0, 90)}${c.asunto.length > 90 ? '…' : ''}</div>
+                    <div style="font-size:11px;color:var(--text2);white-space:nowrap"><span title="Tú">${iconVoto[c.mi_voto] || '?'}</span> vs <span title="Diputado">${c.voto_diputado ? iconVoto[c.voto_diputado] : '⏳'}</span> · ${estIcon} ${estTxt}</div>
+                  </div>`;
+                }).join('')}
+              </div>` : '<div style="font-size:12px;color:var(--text3);text-align:center;padding:10px">Vota en más propuestas para ver coincidencias.</div>'}
+            </div>
+          `;
+        } catch (e) {
+          cont.innerHTML = '<div style="font-size:12px;color:#ef4444">Error.</div>';
+        }
+      }
+      window.miRepVsYo = miRepVsYo;
+
       // ── VOTACIONES PLENO LXVI ──────────────────────────────
       window.__votacionesData = [];
       function votRenderLista(filas) {
@@ -3775,6 +3966,19 @@
           if (p === 'mi-rep') cargarMiRepInit();
           if (p === 'mapacontratos') cargarMapaContratos();
           if (p === 'votar') cargarVotar();
+          if (p === 'quemones') cargarQuemones();
+          // Mi Rep: refrescar sección "¿Votó como tú?" si existe
+          if (p === 'mi-rep') {
+            setTimeout(() => {
+              const cont = document.getElementById('mirep-contenido');
+              if (cont && !document.getElementById('mirep-vs-yo')) {
+                const div = document.createElement('div');
+                div.id = 'mirep-vs-yo';
+                cont.appendChild(div);
+              }
+              if (typeof miRepVsYo === 'function') miRepVsYo('#mirep-vs-yo');
+            }, 800);
+          }
         };
       })();
 
@@ -4019,6 +4223,43 @@
 
         <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
           Fuente: <a href="https://gaceta.diputados.gob.mx/" target="_blank" rel="noopener" style="color:var(--accent2)">Gaceta Parlamentaria · Cámara de Diputados LXVI</a> · Beta: identidad ligera por cookie · Sin OTP
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── MURO DE QUEMONES — Fase 4.1.D ───── -->
+    <div id="page-quemones" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#000 0%,#7c2d12 50%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.4);position:relative;overflow:hidden">
+          <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:0.18;line-height:1">🔥</div>
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative">
+            <div style="font-size:60px;line-height:1">🔥</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">El Muro de la Traición</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Diputados que votaron <strong>contra la voluntad de su propio distrito</strong>. Datos cruzados entre voto ciudadano (Tequio) y voto real en el pleno.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats globales -->
+        <div id="qm-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px"></div>
+
+        <!-- Filtros -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <select id="qm-partido" onchange="cargarQuemones()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+            <option value="">Todos los partidos</option>
+          </select>
+          <select id="qm-entidad" onchange="cargarQuemones()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+            <option value="">Todas las entidades</option>
+          </select>
+        </div>
+
+        <div id="qm-count" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+
+        <div id="qm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
+          Quemón = voto del diputado distinto al de la mayoría de su distrito en Tequio · Solo se genera cuando hay ≥1 voto ciudadano del distrito y voto del diputado registrado en SITL.
         </div>
       </div>
     </div>
@@ -24983,486 +25224,8 @@ const DIRECTORIO_FEDERAL = [
   { cat:'justicia', emoji:'⚖️', nombre:'FGR — Fiscalía General de la República', tel:'800 000 4000', web:'fgr.org.mx', desc:'Delitos federales: tráfico de personas, narcotráfico, corrupción de servidores públicos.', horario:'24/7' },
 ];
 
-const DIRECTORIO_ESTADOS = {
-  'Aguascalientes': { capital:'Aguascalientes', abrev:'AGS', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'449 910 9800', web:'fge.aguascalientes.gob.mx',    desc:'Denuncia delitos, solicita apoyo legal, reporta abusos de autoridad.',        horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHIAG — Com. Derechos Humanos',    tel:'449 996 8029', web:'cdhiag.org.mx',               desc:'Quejas por violaciones a derechos humanos por parte de autoridades.',         horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto de la Mujer (IMAJ)',       tel:'449 910 2000', web:'aguascalientes.gob.mx',        desc:'Atención a víctimas de violencia de género, asesoría legal y psicológica.',  horario:'Lun–Vie 9–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud',               tel:'449 994 3450', web:'aguascalientes.gob.mx/salud',  desc:'Red de hospitales públicos, centros de salud y programas de salud pública.', horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Aguascalientes',               tel:'449 910 2400', web:'dif.aguascalientes.gob.mx',   desc:'Asistencia social, atención a menores, adultos mayores y vulnerables.',       horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil del Estado',        tel:'449 910 9940', web:'aguascalientes.gob.mx',        desc:'Emergencias no policiales: inundaciones, sismos, incendios.',                horario:'24/7' },
-  ]},
-  'Baja California': { capital:'Mexicali', abrev:'BC', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'686 558 0900', web:'fgebc.gob.mx',          desc:'Denuncia delitos y solicita atención del Ministerio Público.',               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDHBC — Com. Estatal DDHH',       tel:'686 557 2970', web:'cedhbc.gob.mx',         desc:'Quejas por violaciones a derechos humanos por autoridades.',                  horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMMUJER — Instituto de la Mujer',   tel:'686 559 8200', web:'immujer.bc.gob.mx',     desc:'Atención a mujeres en violencia, asesoría jurídica gratuita.',               horario:'Lun–Vie 8–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (ISESALUD)',    tel:'686 558 1001', web:'saludbc.gob.mx',         desc:'Hospitales, centros de salud, programas de vacunación.',                     horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Baja California',              tel:'686 566 4000', web:'difbc.gob.mx',          desc:'Asistencia social, niñez, adultos mayores y discapacidad.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil BC',               tel:'686 558 0900', web:'bc.gob.mx',             desc:'Emergencias ambientales y desastres naturales en BC.',                       horario:'24/7' },
-  ]},
-  'Baja California Sur': { capital:'La Paz', abrev:'BCS', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'612 122 6024', web:'fiscaliabcs.gob.mx',    desc:'Denuncia delitos y recibe atención del Ministerio Público.',                 horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDDH BCS',                         tel:'612 122 5593', web:'bcs.gob.mx',            desc:'Comisión de Defensa de los Derechos Humanos de BCS.',                        horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto Sudcaliforniano de la Mujer',tel:'612 129 7000',web:'bcs.gob.mx',           desc:'Atención a mujeres víctimas de violencia, empoderamiento.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de BCS',         tel:'612 122 5959', web:'bcs.gob.mx/salud',      desc:'Red hospitalaria y centros de salud del estado.',                            horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF BCS',                          tel:'612 122 9220', web:'bcs.gob.mx',            desc:'Asistencia social a familias, menores y adultos mayores.',                   horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil BCS',              tel:'612 122 0080', web:'bcs.gob.mx',            desc:'Emergencias por huracanes, sismos y desastres en BCS.',                      horario:'24/7' },
-  ]},
-  'Campeche': { capital:'Campeche', abrev:'CAM', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'981 816 2870', web:'fiscaliacampeche.gob.mx',desc:'Denuncia y atención ministerial en Campeche.',                               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Campeche',                     tel:'981 816 2400', web:'campeche.gob.mx',       desc:'Comisión de Derechos Humanos del Estado de Campeche.',                       horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'ICAM — Instituto Campechano de la Mujer',tel:'981 811 8990',web:'icam.campeche.gob.mx',desc:'Violencia de género, asesoría legal y psicológica.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Campeche',      tel:'981 811 1570', web:'salud.campeche.gob.mx', desc:'Red de hospitales y centros de salud del estado.',                           horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Campeche',                     tel:'981 816 5700', web:'campeche.gob.mx',       desc:'Asistencia y desarrollo integral de la familia.',                            horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Campeche',         tel:'981 816 2244', web:'campeche.gob.mx',       desc:'Emergencias por huracanes e inundaciones en Campeche.',                      horario:'24/7' },
-  ]},
-  'Chiapas': { capital:'Tuxtla Gutiérrez', abrev:'CHIS', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'961 615 0300', web:'fge.chiapas.gob.mx',    desc:'Denuncia delitos y recibe atención ministerial.',                            horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Chiapas',                     tel:'961 615 5000', web:'chiapas.gob.mx',        desc:'Comisión Estatal de Derechos Humanos de Chiapas.',                           horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMM Chiapas — Instituto de la Mujer',tel:'961 602 0600', web:'chiapas.gob.mx',       desc:'Atención a mujeres en situación de violencia y vulnerabilidad.',             horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Chiapas',       tel:'961 615 3300', web:'salud.chiapas.gob.mx',  desc:'Hospitales y centros de salud. Atención en zonas indígenas.',               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Chiapas',                      tel:'961 602 5700', web:'dif.chiapas.gob.mx',   desc:'Asistencia social a familias y comunidades indígenas.',                      horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Chiapas',          tel:'961 615 0590', web:'chiapas.gob.mx',        desc:'Emergencias por lluvias, deslaves e inundaciones.',                          horario:'24/7' },
-  ]},
-  'Chihuahua': { capital:'Chihuahua', abrev:'CHIH', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',       tel:'614 442 2200', web:'fiscalia.chihuahua.gob.mx',desc:'Denuncia delitos, solicita atención del Ministerio Público.',              horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Chihuahua',                   tel:'614 415 0404', web:'cedh.chihuahua.gob.mx', desc:'Comisión Estatal de Derechos Humanos de Chihuahua.',                         horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'ICHIMU — Instituto Chihuahuense de la Mujer',tel:'614 437 0200',web:'ichimu.chihuahua.gob.mx',desc:'Atención a mujeres víctimas de violencia de género y feminicidio.',  horario:'Lun–Vie 8–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud Chihuahua',      tel:'614 429 3000', web:'saludchihuahua.gob.mx', desc:'Hospitales, centros de salud y brigadas médicas del estado.',                horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Chihuahua',                    tel:'614 437 7800', web:'dif.chihuahua.gob.mx', desc:'Asistencia a familias, menores, discapacitados y adultos mayores.',          horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Chihuahua',        tel:'614 429 3200', web:'chihuahua.gob.mx',      desc:'Emergencias por tormentas, nevadas e incendios forestales.',                 horario:'24/7' },
-  ]},
-  'Ciudad de México': { capital:'Ciudad de México', abrev:'CDMX', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia CDMX', tel:'55 5345 5000', web:'fgjcdmx.gob.mx',       desc:'Denuncia delitos, Ministerio Público 24/7, atención a víctimas.',            horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHCM — Com. Derechos Humanos',    tel:'55 5229 5600', web:'cdhcm.org.mx',          desc:'Quejas por violaciones a DDHH por autoridades capitalinas.',                 horario:'Lun–Vie 9–18h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Línea Mujeres CDMX',               tel:'55 5658 1111', web:'inmujeres.cdmx.gob.mx', desc:'Atención 24/7 a mujeres víctimas de violencia. Asesoría legal y psicológica.',horario:'24/7' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud CDMX (SEDESA)', tel:'55 5484 0127', web:'salud.cdmx.gob.mx',     desc:'Red de 29 hospitales generales públicos de la CDMX.',                       horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF CDMX',                        tel:'55 5604 0127', web:'dif.cdmx.gob.mx',       desc:'Asistencia a familias, menores, discapacitados y adultos mayores.',          horario:'Lun–Vie 8–20h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'SGIRPC — Protección Civil CDMX',   tel:'55 5683 2222', web:'sgirpc.cdmx.gob.mx',    desc:'Emergencias por sismos, inundaciones e incendios en la capital.',            horario:'24/7' },
-    { cat:'trabajo',   emoji:'💼', nombre:'STYFE — Empleo y Trabajo CDMX',    tel:'55 5709 1508', web:'styfe.cdmx.gob.mx',     desc:'Bolsa de trabajo, defensa de derechos laborales, capacitación.',            horario:'Lun–Vie 9–17h' },
-  ]},
-  'Coahuila': { capital:'Saltillo', abrev:'COAH', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Coahuila',     tel:'844 411 3500', web:'fiscaliacoahuila.gob.mx',desc:'Denuncia delitos y solicita atención ministerial.',                          horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHEC Coahuila',                  tel:'844 412 8282', web:'cdhec.org.mx',           desc:'Comisión de Derechos Humanos del Estado de Coahuila.',                       horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto Coahuilense de las Mujeres',tel:'844 411 0700',web:'icm.coahuila.gob.mx',  desc:'Atención a mujeres víctimas de violencia, asesoría y refugios.',             horario:'Lun–Vie 8–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Coahuila',     tel:'844 410 4580', web:'saludcoahuila.gob.mx',  desc:'Hospitales y centros de salud del estado.',                                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Coahuila',                    tel:'844 486 0800', web:'difcoahuila.gob.mx',    desc:'Asistencia social integral a familias y personas vulnerables.',              horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Coahuila',        tel:'844 410 4700', web:'coahuila.gob.mx',        desc:'Emergencias por heladas, incendios forestales y sismos.',                    horario:'24/7' },
-  ]},
-  'Colima': { capital:'Colima', abrev:'COL', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'312 313 2800', web:'fiscaliacolima.gob.mx', desc:'Denuncia delitos y recibe atención del Ministerio Público.',                 horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDHCOL — Com. Estatal DDHH',     tel:'312 313 5509', web:'cedhcolima.org.mx',     desc:'Comisión Estatal de Derechos Humanos de Colima.',                            horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMUCOLIMA — Instituto de la Mujer', tel:'312 316 0700', web:'imucolima.gob.mx',     desc:'Atención y prevención de violencia de género.',                              horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Colima',       tel:'312 316 0600', web:'saludcolima.gob.mx',    desc:'Red hospitalaria y servicios de salud del estado.',                          horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Colima',                      tel:'312 314 4800', web:'difcolima.gob.mx',     desc:'Asistencia social a familias y personas vulnerables.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Colima',          tel:'312 313 2825', web:'colima.gob.mx',         desc:'Emergencias por volcán, sismos y ciclones en Colima.',                       horario:'24/7' },
-  ]},
-  'Durango': { capital:'Victoria de Durango', abrev:'DGO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'618 826 1100', web:'fge.durango.gob.mx',    desc:'Denuncia delitos y atención del Ministerio Público.',                        horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Durango',                     tel:'618 825 0039', web:'cdhgo.org',             desc:'Comisión de Derechos Humanos del Estado de Durango.',                        horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMDM — Instituto de la Mujer Duranguense',tel:'618 827 0520',web:'durango.gob.mx',  desc:'Atención a mujeres en situación de violencia y vulnerabilidad.',             horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Durango',      tel:'618 825 2727', web:'ssaludgob.durango.gob.mx',desc:'Hospitales y centros de salud de Durango.',                                horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Durango',                     tel:'618 826 6060', web:'dif.durango.gob.mx',   desc:'Asistencia social, alimentación y protección a la infancia.',               horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Durango',         tel:'618 827 4500', web:'durango.gob.mx',        desc:'Emergencias por incendios forestales, inundaciones y sismos.',               horario:'24/7' },
-  ]},
-  'Estado de México': { capital:'Toluca', abrev:'EDOMEX', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia',    tel:'722 215 0222', web:'fiscaliaedomex.gob.mx', desc:'Denuncia delitos, solicita apoyo ministerial en el Edomex.',                 horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CODHEM — Com. DDHH Edomex',       tel:'800 999 4000', web:'codhem.org.mx',         desc:'Atención gratuita por violaciones a derechos humanos.',                      horario:'Lun–Vie 9–18h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMEM — Inst. Mexiquense de la Mujer',tel:'800 108 4053',web:'edomex.gob.mx/imem',   desc:'Línea de atención 24/7 para mujeres en situación de violencia.',             horario:'24/7' },
-    { cat:'salud',     emoji:'🏥', nombre:'ISEM — Instituto de Salud',        tel:'722 213 0840', web:'salud.edomex.gob.mx',   desc:'Hospitales generales y centros de salud del Estado de México.',              horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Edomex',                      tel:'722 213 4200', web:'difem.gob.mx',          desc:'Asistencia a familias, personas con discapacidad y adultos mayores.',         horario:'Lun–Vie 8–18h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Edomex',          tel:'800 290 0024', web:'edomex.gob.mx',         desc:'Emergencias por sismos, lluvias e inundaciones.',                            horario:'24/7' },
-  ]},
-  'Guanajuato': { capital:'Guanajuato', abrev:'GTO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'800 890 5550', web:'fgeguanajuato.gob.mx', desc:'Línea gratuita. Denuncia delitos, solicita apoyo ministerial.',              horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDHG — Com. Estatal DDHH',       tel:'473 735 4505', web:'cedhg.org.mx',         desc:'Quejas por violaciones a derechos humanos por autoridades.',                 horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IEG — Inst. para las Mujeres Guanajuatenses',tel:'473 735 2020',web:'iem.guanajuato.gob.mx',desc:'Atención a mujeres en violencia, asesoría legal y acompañamiento.',  horario:'Lun–Vie 8–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (SSAG)',       tel:'473 735 3500', web:'saludguanajuato.gob.mx',desc:'Red hospitalaria y salud pública del estado.',                               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Guanajuato',                  tel:'473 735 2010', web:'difgto.org.mx',         desc:'Asistencia y desarrollo de las familias guanajuatenses.',                    horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Guanajuato',      tel:'800 711 5100', web:'guanajuato.gob.mx',     desc:'Emergencias por lluvias, inundaciones e incidentes industriales.',           horario:'24/7' },
-  ]},
-  'Guerrero': { capital:'Chilpancingo', abrev:'GRO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'747 472 0060', web:'fiscaliaguerrero.gob.mx',desc:'Denuncia delitos. Atención especial a violencia e inseguridad.',            horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CODDEHUM Guerrero',               tel:'747 471 0140', web:'coddehum.org',           desc:'Comisión de Defensa y Protección de DDHH de Guerrero.',                      horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMM Guerrero — Instituto de la Mujer',tel:'747 472 2400',web:'guerrero.gob.mx',      desc:'Atención a mujeres víctimas de violencia en el estado.',                     horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Guerrero',     tel:'747 471 2500', web:'ssagro.gob.mx',          desc:'Hospitales y centros de salud. Atención en zonas indígenas y marginadas.',  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Guerrero',                    tel:'747 471 6000', web:'difguerrero.gob.mx',    desc:'Asistencia a comunidades vulnerables, niños y adultos mayores.',             horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Guerrero',        tel:'747 472 5050', web:'guerrero.gob.mx',        desc:'Emergencias por huracanes, lluvias e inundaciones costeras.',                horario:'24/7' },
-  ]},
-  'Hidalgo': { capital:'Pachuca', abrev:'HGO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'771 717 0900', web:'fgehi.gob.mx',          desc:'Denuncia delitos y solicita atención ministerial.',                          horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHEH — Com. Derechos Humanos',   tel:'771 718 9640', web:'cdhhidalgo.org',         desc:'Quejas contra autoridades estatales y municipales de Hidalgo.',             horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IEHM — Inst. Hidalguense de las Mujeres',tel:'771 717 7100',web:'hidalgo.gob.mx/iehm',desc:'Atención a mujeres en situación de violencia y vulnerabilidad.',           horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Hidalgo',      tel:'771 717 0900', web:'salud.hidalgo.gob.mx',  desc:'Red hospitalaria pública del estado de Hidalgo.',                           horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Hidalgo',                     tel:'771 717 5600', web:'dif.hidalgo.gob.mx',   desc:'Asistencia social integral para familias y personas vulnerables.',           horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Hidalgo',         tel:'771 717 0900', web:'hidalgo.gob.mx',         desc:'Emergencias por lluvias, sismos y accidentes industriales.',                 horario:'24/7' },
-  ]},
-  'Jalisco': { capital:'Guadalajara', abrev:'JAL', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía del Estado de Jalisco',   tel:'33 3030 0000', web:'fiscaliajalisco.gob.mx', desc:'Denuncia delitos. Agencia del Ministerio Público 24/7.',                    horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDHJ — Com. Estatal DDHH Jalisco',tel:'33 3669 1101',web:'cedhj.org.mx',           desc:'Quejas por violaciones a DDHH por autoridades de Jalisco.',                 horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'SEIGUALDAD — Igualdad Sustantiva', tel:'33 3030 0000', web:'jalisco.gob.mx',          desc:'Atención a mujeres en situación de violencia en Jalisco.',                  horario:'Lun–Vie 8–17h' },
-    { cat:'salud',     emoji:'🏥', nombre:'SSJ — Secretaría de Salud Jalisco', tel:'33 3823 3220', web:'ssj.jalisco.gob.mx',    desc:'Hospitales regionales, civiles y centros de salud de Jalisco.',             horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Jalisco',                     tel:'33 3030 5800', web:'difjalisco.gob.mx',     desc:'Asistencia social, pensión adultos mayores y atención a la niñez.',         horario:'Lun–Vie 8–18h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'UEPCBJ — Protección Civil Jalisco', tel:'800 000 2929',web:'jalisco.gob.mx',         desc:'Emergencias por sismos, incendios forestales y lluvias.',                    horario:'24/7' },
-  ]},
-  'Michoacán': { capital:'Morelia', abrev:'MICH', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'443 113 0500', web:'fiscaliamichoacan.gob.mx',desc:'Denuncia delitos y solicita apoyo del Ministerio Público.',                 horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHM — Com. Derechos Humanos',    tel:'443 113 0120', web:'cdhm.org.mx',            desc:'Quejas por violaciones a derechos humanos en el estado.',                    horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMM Michoacán — Instituto de la Mujer',tel:'443 113 0600',web:'michoacan.gob.mx',    desc:'Atención a mujeres víctimas de violencia de género.',                        horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (SESA)',       tel:'443 113 1600', web:'saludmichoacan.gob.mx', desc:'Red hospitalaria y centros de salud del estado.',                            horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Michoacán',                   tel:'443 113 0700', web:'difmichoacan.gob.mx',  desc:'Asistencia y desarrollo de la familia michoacana.',                          horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Michoacán',       tel:'443 113 0710', web:'michoacan.gob.mx',       desc:'Emergencias por volcán Paricutín, lluvias e incendios forestales.',           horario:'24/7' },
-  ]},
-  'Morelos': { capital:'Cuernavaca', abrev:'MOR', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'777 318 0200', web:'fiscaliamorelos.gob.mx', desc:'Denuncia delitos y solicita atención ministerial en Morelos.',               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHMOR — Com. DDHH Morelos',      tel:'777 318 0020', web:'cdhmor.org.mx',          desc:'Quejas por violaciones a DDHH por autoridades de Morelos.',                  horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMM Morelos — Instituto de la Mujer',tel:'777 318 5200',web:'morelos.gob.mx',         desc:'Atención a mujeres en situación de violencia y vulnerabilidad.',             horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Morelos',      tel:'777 329 0700', web:'saludmorelos.gob.mx',    desc:'Hospitales y centros de salud del estado de Morelos.',                       horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Morelos',                     tel:'777 329 1800', web:'morelos.gob.mx/dif',    desc:'Asistencia social, alimentación y protección a la infancia.',               horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Morelos',         tel:'777 318 1200', web:'morelos.gob.mx',         desc:'Emergencias por sismos, lluvias e inundaciones.',                            horario:'24/7' },
-  ]},
-  'Nayarit': { capital:'Tepic', abrev:'NAY', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'311 214 0600', web:'fgenayarit.gob.mx',     desc:'Denuncia delitos y solicita atención del Ministerio Público.',               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Nayarit',                     tel:'311 214 2024', web:'nayarit.gob.mx',         desc:'Comisión de Derechos Humanos del Estado de Nayarit.',                        horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto de la Mujer Nayarit',    tel:'311 214 1600', web:'nayarit.gob.mx',         desc:'Atención a mujeres en violencia, asesoría jurídica y psicológica.',          horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Nayarit',      tel:'311 214 0600', web:'salud.nayarit.gob.mx',  desc:'Hospitales y centros de salud del estado de Nayarit.',                       horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Nayarit',                     tel:'311 214 4900', web:'difnayarit.gob.mx',     desc:'Asistencia a familias y personas en situación vulnerable.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Nayarit',         tel:'311 214 0700', web:'nayarit.gob.mx',         desc:'Emergencias por huracanes, sismos y derrumbes en Nayarit.',                  horario:'24/7' },
-  ]},
-  'Nuevo León': { capital:'Monterrey', abrev:'NL', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia NL',  tel:'81 2020 6400', web:'fiscalianl.gob.mx',     desc:'Denuncia delitos. Incluye Unidad Antisecuestro 24/7.',                       horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Nuevo León',                 tel:'81 8344 5100', web:'cedhnl.org.mx',          desc:'Quejas por violaciones a DDHH por autoridades de NL.',                      horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMAS — Inst. Mujeres de Nuevo León',tel:'81 2033 3000', web:'nl.gob.mx/mujer',       desc:'Atención 24/7. Centros CAIM, asesoría legal y refugios.',                    horario:'24/7 emergencias' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud NL',           tel:'81 8374 1234', web:'saludnl.gob.mx',         desc:'Hospitales metropolitanos, regionales y centros de salud.',                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Nuevo León',                  tel:'81 8372 2300', web:'difnl.gob.mx',          desc:'Asistencia social, adultos mayores, niñez y discapacidad.',                  horario:'Lun–Vie 8–18h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil NL',              tel:'81 8345 0803', web:'nl.gob.mx',              desc:'Emergencias por lluvias torrenciales e inundaciones en el AMM.',             horario:'24/7' },
-    { cat:'trabajo',   emoji:'💼', nombre:'SEDECO / Empleo NL',               tel:'81 8150 0000', web:'nl.gob.mx',              desc:'Empleo, capacitación laboral y asesoría para trabajadores.',                 horario:'Lun–Vie 8–16h' },
-  ]},
-  'Oaxaca': { capital:'Oaxaca de Juárez', abrev:'OAX', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'951 501 0800', web:'fiscaliaoaxaca.gob.mx', desc:'Denuncia delitos. Atención especial a comunidades indígenas.',              horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDDHO — Com. Derechos Humanos',   tel:'951 501 0900', web:'cddho.org',             desc:'Quejas por DDHH. Atención en lenguas indígenas disponible.',                horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMO — Instituto de la Mujer Oaxaqueña',tel:'951 501 1100',web:'oaxaca.gob.mx/imo',  desc:'Atención a mujeres indígenas y en violencia de género.',                     horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de Oaxaca (SSO)',tel:'951 502 0200',web:'ssoa.gob.mx',            desc:'Hospitales, centros de salud y brigadas en zonas indígenas.',               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Oaxaca',                      tel:'951 502 0000', web:'difoaxaca.gob.mx',     desc:'Asistencia a familias y comunidades indígenas vulnerables.',                 horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Oaxaca',          tel:'951 501 2600', web:'oaxaca.gob.mx',         desc:'Emergencias por sismos, huracanes e inundaciones.',                          horario:'24/7' },
-  ]},
-  'Puebla': { capital:'Puebla de Zaragoza', abrev:'PUE', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'222 261 3000', web:'fiscaliapuebla.gob.mx', desc:'Denuncia delitos y solicita atención ministerial.',                          horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Puebla',                      tel:'222 232 0477', web:'cdhpuebla.org.mx',      desc:'Comisión de Derechos Humanos del Estado de Puebla.',                         horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IPM — Instituto Poblano de las Mujeres',tel:'222 229 2000',web:'puebla.gob.mx/ipm', desc:'Atención a mujeres en situación de violencia y vulnerabilidad.',             horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Puebla (SSEP)', tel:'222 229 5700',web:'ss.puebla.gob.mx',       desc:'Hospitales regionales y centros de salud del estado.',                       horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Puebla',                      tel:'222 229 8000', web:'dif.puebla.gob.mx',    desc:'Asistencia social y atención a niñez y adultos mayores.',                    horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Puebla',          tel:'222 229 7900', web:'puebla.gob.mx',         desc:'Emergencias por sismos, lluvias e inundaciones.',                            horario:'24/7' },
-  ]},
-  'Querétaro': { capital:'Santiago de Querétaro', abrev:'QRO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'442 238 5280', web:'fiscaliaqro.gob.mx',   desc:'Denuncia delitos y solicita atención del Ministerio Público.',               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Querétaro',                   tel:'442 214 8585', web:'cdhq.org.mx',           desc:'Comisión de Derechos Humanos del Estado de Querétaro.',                      horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMUQRO — Instituto de la Mujer',   tel:'442 238 5310', web:'queretaro.gob.mx',      desc:'Atención a mujeres en violencia, asesoría legal y refugio.',                 horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Querétaro',    tel:'442 238 5500', web:'saludqro.gob.mx',       desc:'Hospitales y centros de salud del estado.',                                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Querétaro',                  tel:'442 238 5440', web:'difqueretaro.gob.mx',   desc:'Asistencia social y atención a familias queretanas.',                        horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Querétaro',       tel:'800 711 1990', web:'queretaro.gob.mx',      desc:'Emergencias por lluvias e incidentes en zonas industriales.',                horario:'24/7' },
-  ]},
-  'Quintana Roo': { capital:'Chetumal', abrev:'QROO', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'983 835 0415', web:'fiscaliaqroo.gob.mx',  desc:'Denuncia delitos. Oficinas en Cancún, Playa del Carmen y Chetumal.',         horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHQROO',                        tel:'983 832 0600', web:'cdhqroo.org.mx',         desc:'Comisión de Derechos Humanos de Quintana Roo.',                              horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMQROO — Instituto de la Mujer',   tel:'983 835 1115', web:'qroo.gob.mx',           desc:'Atención a mujeres víctimas de violencia, incluye turistas.',                horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (SESA)',      tel:'983 835 0060', web:'saludqroo.gob.mx',       desc:'Hospitales y centros de salud de Quintana Roo.',                             horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Quintana Roo',               tel:'983 835 0200', web:'difqroo.gob.mx',        desc:'Asistencia social a familias y comunidades mayas.',                          horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Quintana Roo',   tel:'983 835 0630', web:'qroo.gob.mx',           desc:'Emergencias por huracanes e inundaciones en zonas turísticas.',              horario:'24/7' },
-  ]},
-  'San Luis Potosí': { capital:'San Luis Potosí', abrev:'SLP', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'444 811 9555', web:'fiscaliaslp.gob.mx',   desc:'Denuncia delitos y solicita atención del Ministerio Público.',               horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHSLP — Com. DDHH de SLP',       tel:'444 812 3200', web:'cdhslp.org.mx',         desc:'Quejas por violaciones a derechos humanos en San Luis Potosí.',             horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMES — Instituto de las Mujeres de SLP',tel:'444 812 4400',web:'slp.gob.mx/imes',  desc:'Atención a mujeres en violencia y vulnerabilidad.',                          horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud de SLP',       tel:'444 834 0990', web:'salud.slp.gob.mx',      desc:'Hospitales y centros de salud del estado de San Luis Potosí.',              horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF San Luis Potosí',             tel:'444 813 3900', web:'difslp.gob.mx',         desc:'Asistencia social integral a familias potosinas.',                           horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil SLP',             tel:'444 812 9898', web:'slp.gob.mx',            desc:'Emergencias por inundaciones e incidentes industriales.',                    horario:'24/7' },
-  ]},
-  'Sinaloa': { capital:'Culiacán', abrev:'SIN', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'667 758 7800', web:'fgesinaloa.gob.mx',    desc:'Denuncia delitos y solicita apoyo ministerial.',                             horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHSINALOA',                     tel:'667 759 5500', web:'cdhsinaloa.org.mx',      desc:'Comisión de Derechos Humanos del Estado de Sinaloa.',                        horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'ISM — Instituto Sinaloense de las Mujeres',tel:'667 758 5200',web:'ism.sinaloa.gob.mx',desc:'Atención a mujeres en violencia de género y asesoría.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Sinaloa',      tel:'667 758 0000', web:'saludsinaloa.gob.mx',   desc:'Red hospitalaria y centros de salud del estado.',                            horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Sinaloa',                     tel:'667 759 9400', web:'difsinaloa.gob.mx',    desc:'Asistencia y desarrollo de las familias sinaloenses.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Sinaloa',         tel:'667 758 3900', web:'sinaloa.gob.mx',        desc:'Emergencias por lluvias, ciclones e inundaciones.',                          horario:'24/7' },
-  ]},
-  'Sonora': { capital:'Hermosillo', abrev:'SON', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia',     tel:'662 289 0700', web:'fiscaliadejusticia.sonora.gob.mx',desc:'Denuncia delitos y solicita atención del Ministerio Público.',        horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Sonora',                     tel:'662 212 2800', web:'cedhsonora.org',         desc:'Comisión Estatal de Derechos Humanos de Sonora.',                            horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'ISM — Instituto Sonorense de la Mujer',tel:'662 212 5700',web:'ism.sonora.gob.mx',  desc:'Atención a mujeres en violencia de género, asesoría legal.',                horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Sonora',       tel:'662 289 1000', web:'salud.sonora.gob.mx',   desc:'Hospitales regionales. Atención a zonas fronterizas.',                       horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Sonora',                      tel:'662 212 3400', web:'difsonora.gob.mx',     desc:'Asistencia a familias, niñez y adultos mayores de Sonora.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Sonora',          tel:'662 212 0090', web:'sonora.gob.mx',         desc:'Emergencias por calor extremo, inundaciones e incidentes industriales.',      horario:'24/7' },
-  ]},
-  'Tabasco': { capital:'Villahermosa', abrev:'TAB', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'993 358 0101', web:'fiscaliatab.gob.mx',   desc:'Denuncia delitos y solicita apoyo ministerial.',                             horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Tabasco',                     tel:'993 312 5555', web:'cdhb.org.mx',           desc:'Comisión de Derechos Humanos del Estado de Tabasco.',                        horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMTE — Instituto de la Mujer de Tabasco',tel:'993 358 1700',web:'tabasco.gob.mx',  desc:'Atención a mujeres víctimas de violencia.',                                  horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Tabasco',      tel:'993 315 2255', web:'saludtab.gob.mx',      desc:'Hospitales y centros de salud de Tabasco.',                                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Tabasco',                     tel:'993 358 3700', web:'diftabasco.gob.mx',   desc:'Asistencia y protección a las familias tabasqueñas.',                        horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Tabasco',         tel:'993 316 3500', web:'tabasco.gob.mx',       desc:'Uno de los estados más propensos a inundaciones. Atención 24/7.',             horario:'24/7' },
-  ]},
-  'Tamaulipas': { capital:'Ciudad Victoria', abrev:'TAMS', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia',     tel:'834 312 7400', web:'fiscaliatamaulipas.gob.mx',desc:'Denuncia delitos. Unidades especializadas en secuestro y extorsión.',    horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDHCT Tamaulipas',                tel:'834 318 0185', web:'cdhct.org.mx',          desc:'Comisión de Derechos Humanos del Estado de Tamaulipas.',                     horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMM Tamaulipas — Instituto de la Mujer',tel:'834 312 0490',web:'tamaulipas.gob.mx', desc:'Atención a mujeres víctimas de violencia en el estado.',                     horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Tamaulipas',   tel:'834 316 7900', web:'tamaulipas.gob.mx/salud',desc:'Red hospitalaria y centros de salud de Tamaulipas.',                        horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Tamaulipas',                  tel:'834 312 5545', web:'diftamaulipas.gob.mx', desc:'Asistencia a familias y personas en situación vulnerable.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Tamaulipas',      tel:'834 312 9500', web:'tamaulipas.gob.mx',    desc:'Emergencias por huracanes, lluvias e inundaciones costeras.',                horario:'24/7' },
-  ]},
-  'Tlaxcala': { capital:'Tlaxcala de Xicohténcatl', abrev:'TLAX', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia',     tel:'246 462 0160', web:'fiscaliatgje.tlaxcala.gob.mx',desc:'Denuncia delitos y solicita atención ministerial.',                    horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CDH Tlaxcala',                    tel:'246 462 1046', web:'cdhtlaxcala.org',        desc:'Comisión de Derechos Humanos del Estado de Tlaxcala.',                       horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto de la Mujer de Tlaxcala', tel:'246 462 0180',web:'tlaxcala.gob.mx',        desc:'Atención a mujeres en violencia y asesoría jurídica.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Tlaxcala',     tel:'246 462 0020', web:'saludtlaxcala.gob.mx',  desc:'Hospitales y centros de salud. Estado más pequeño de México.',               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Tlaxcala',                    tel:'246 462 0040', web:'diftlaxcala.gob.mx',   desc:'Asistencia social a familias y comunidades tlaxcaltecas.',                   horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Tlaxcala',        tel:'246 462 0080', web:'tlaxcala.gob.mx',       desc:'Emergencias por sismos, lluvias e incendios forestales.',                    horario:'24/7' },
-  ]},
-  'Veracruz': { capital:'Xalapa', abrev:'VER', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'228 842 0600', web:'fgeveracruz.gob.mx',   desc:'Denuncia delitos. Oficinas en Xalapa, Veracruz puerto y región.',           horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Veracruz',                  tel:'228 841 0028', web:'cedhveracruz.org.mx',   desc:'Comisión Estatal de Derechos Humanos de Veracruz.',                          horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IVM — Instituto Veracruzano de las Mujeres',tel:'228 814 1200',web:'veracruz.gob.mx/ivm',desc:'Atención a mujeres en violencia y programas de igualdad.',           horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud (SESVER)',     tel:'228 841 9090', web:'ssaver.gob.mx',         desc:'Red hospitalaria en el estado más largo de México.',                         horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Veracruz',                    tel:'228 840 6200', web:'difveracruz.gob.mx',   desc:'Asistencia a familias y comunidades indígenas veracruzanas.',               horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Veracruz',        tel:'228 812 8400', web:'veracruz.gob.mx',      desc:'Emergencias por huracanes, lluvias e inundaciones costeras.',                horario:'24/7' },
-  ]},
-  'Yucatán': { capital:'Mérida', abrev:'YUC', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'999 930 1590', web:'fiscaliayucatan.gob.mx', desc:'Denuncia delitos y solicita atención del Ministerio Público.',              horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CODHEY — Com. DDHH de Yucatán',   tel:'999 930 0660', web:'codhey.org',             desc:'Quejas por violaciones a derechos humanos en Yucatán.',                      horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'Instituto para la Equidad de Género',tel:'999 930 3860',web:'yucatan.gob.mx',        desc:'Atención a mujeres en situación de violencia en Yucatán.',                  horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de Yucatán (SSY)',tel:'999 930 3200',web:'saludyucatan.gob.mx',  desc:'Hospital O\'Horán, hospitales regionales y centros de salud.',               horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Yucatán',                     tel:'999 930 3500', web:'difyucatan.gob.mx',    desc:'Asistencia a familias mayas y personas vulnerables.',                        horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Yucatán',         tel:'999 930 3700', web:'yucatan.gob.mx',        desc:'Protocolo avanzado de ciclones y huracanes en la Península.',               horario:'24/7' },
-  ]},
-  'Zacatecas': { capital:'Zacatecas', abrev:'ZAC', servicios:[
-    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado',      tel:'492 922 6901', web:'fiscaliazacatecas.gob.mx',desc:'Denuncia delitos y solicita atención ministerial.',                         horario:'24/7' },
-    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Zacatecas',                  tel:'492 922 6090', web:'cedhzac.org',            desc:'Comisión Estatal de Derechos Humanos de Zacatecas.',                         horario:'Lun–Vie 9–15h' },
-    { cat:'mujer',     emoji:'💜', nombre:'IMZ — Instituto de la Mujer Zacatecana',tel:'492 922 3800',web:'zacatecas.gob.mx',  desc:'Atención a mujeres en violencia de género.',                                 horario:'Lun–Vie 8–16h' },
-    { cat:'salud',     emoji:'🏥', nombre:'Secretaría de Salud Zacatecas',    tel:'492 922 3000', web:'ssaz.gob.mx',           desc:'Hospitales y centros de salud del estado.',                                  horario:'24/7 urgencias' },
-    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Zacatecas',                   tel:'492 922 6045', web:'difzacatecas.gob.mx',  desc:'Asistencia social a familias y personas vulnerables.',                       horario:'Lun–Vie 8–16h' },
-    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Zacatecas',       tel:'492 922 3510', web:'zacatecas.gob.mx',     desc:'Emergencias por granizo, nevadas e incendios forestales.',                   horario:'24/7' },
-  ]},
-};
-
-// ── DIRECTORIO STATE ──
-let dirEstadoActual = null;
-let dirCatActual    = 'todos';
-let dirIniciado     = false;
-
-function initDirectorio() {
-  // Always re-render if grid is empty (defensive against timing issues)
-  const grid = document.getElementById('dir-states-grid');
-  if (grid && grid.children.length > 0) {
-    // Already rendered — just invalidate size if needed
-    return;
-  }
-  dirIniciado = true;
-  renderDirStatesGrid();
-  renderDirFederales();
-}
-
-function renderDirStatesGrid() {
-  const grid = document.getElementById('dir-states-grid');
-  if (!grid) return;
-
-  const EMOJIS = {
-    AGS:'🌹', BC:'🌊', BCS:'🐢', CAM:'🦀', CHIS:'🌿', CHIH:'🏜️',
-    CDMX:'🏙️', COAH:'🏭', COL:'🌺', DGO:'⛰️', EDOMEX:'🏔️', GTO:'⛪',
-    GRO:'🌴', HGO:'🏛️', JAL:'🥃', MICH:'🦋', MOR:'🌸', NAY:'🌊',
-    NL:'🏔️', OAX:'🏺', PUE:'🎭', QRO:'🏰', QROO:'🤿', SLP:'🌵',
-    SIN:'🎣', SON:'☀️', TAB:'🌳', TAMS:'🌊', TLAX:'🦅', VER:'☕',
-    YUC:'🦩', ZAC:'⛏️',
-  };
-
-  const estados = Object.keys(DIRECTORIO_ESTADOS);
-
-  grid.innerHTML = estados.map(nombre => {
-    const d    = DIRECTORIO_ESTADOS[nombre];
-    const emoji = EMOJIS[d.abrev] || '📍';
-    // Use data-estado attribute — avoids ALL escaping issues with accented chars
-    return `<button
-        class="dir-state-btn"
-        data-estado="${nombre.replace(/"/g,'&quot;')}"
-        style="padding:8px 4px;border-radius:9px;border:1px solid var(--border);
-               background:var(--surface);color:var(--text2);font-size:10px;
-               font-weight:700;cursor:pointer;font-family:inherit;line-height:1.3;
-               text-align:center;transition:all 0.15s;letter-spacing:0.2px;
-               display:flex;flex-direction:column;align-items:center;gap:1px">
-        <span style="font-size:15px">${emoji}</span>
-        <span>${d.abrev}</span>
-      </button>`;
-  }).join('');
-
-  // Single event listener — no inline onclick strings
-  grid.addEventListener('click', function(ev) {
-    const btn = ev.target.closest('.dir-state-btn');
-    if (!btn) return;
-    const estado = btn.dataset.estado;
-    if (!estado || !DIRECTORIO_ESTADOS[estado]) return;
-    dirSelEstado(estado, btn);
-  });
-}
-
-function renderDirFederales() {
-  const el = document.getElementById('dir-federales');
-  if (!el) return;
-  el.innerHTML = DIRECTORIO_FEDERAL.map(s => {
-    const c = DIR_CAT_COLORS[s.cat] || DIR_CAT_COLORS.justicia;
-    return `<div style="background:${c.bg};border:1px solid ${c.border};border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
-      <div style="font-size:16px;margin-bottom:2px">${s.emoji}</div>
-      <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3">${s.nombre}</div>
-      <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:6px">${s.desc}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto">
-        <a href="tel:${s.tel.replace(/\s/g,'')}" style="background:${c.dark};color:#fff;font-size:11px;font-weight:800;padding:5px 10px;border-radius:7px;text-decoration:none;display:flex;align-items:center;gap:4px">
-          📞 ${s.tel}
-        </a>
-        ${s.web ? `<a href="https://${s.web}" target="_blank" rel="noopener" style="color:${c.text};font-size:10px;text-decoration:none;font-weight:600">${s.web} ↗</a>` : ''}
-      </div>
-      <div style="font-size:9px;color:var(--text3);margin-top:3px">⏰ ${s.horario}</div>
-    </div>`;
-  }).join('');
-}
-
-function directorioBuscarEstado(q) {
-  const lower = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  document.querySelectorAll('#dir-states-grid .dir-state-btn').forEach(btn => {
-    const nombre = btn.dataset.estado || '';
-    const match  = nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(lower);
-    btn.style.display = (!q || match) ? '' : 'none';
-  });
-}
-
-function dirSelEstado(estado, btn) {
-  if (!DIRECTORIO_ESTADOS[estado]) return;   // guard: unknown state
-
-  // Deactivate all state buttons
-  document.querySelectorAll('#dir-states-grid .dir-state-btn').forEach(b => {
-    b.classList.remove('active');
-    b.style.background  = 'var(--surface)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color       = 'var(--text2)';
-  });
-
-  // Activate the clicked button
-  if (btn) {
-    btn.classList.add('active');
-    btn.style.background  = 'rgba(59,130,246,0.18)';
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color       = 'var(--text)';
-  }
-
-  dirEstadoActual = estado;
-  dirCatActual    = 'todos';
-  dirActualizarCatBtns();
-  renderDirEstadoHeader(estado);
-  renderDirServicios();
-
-  const panel = document.getElementById('dir-estado-panel');
-  if (panel) {
-    panel.style.display = '';
-    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-  }
-}
-
-function renderDirEstadoHeader(estado) {
-  const el = document.getElementById('dir-estado-header');
-  if (!el) return;
-  const d = DIRECTORIO_ESTADOS[estado];
-  if (!d) return;
-  const total = d.servicios.length;
-  el.innerHTML = `
-    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(99,102,241,0.06));border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div>
-        <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text)">${estado}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">📍 Capital: ${d.capital} · ${total} servicios disponibles</div>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:6px">
-        <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
-          <div style="font-size:16px;font-weight:800;color:var(--accent)">${total}</div>
-          <div style="font-size:8px;color:var(--text3);font-weight:600">SERVICIOS</div>
-        </div>
-        <div style="text-align:center;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:6px 10px">
-          <a href="tel:911" style="text-decoration:none">
-            <div style="font-size:16px;font-weight:800;color:#f87171">911</div>
-            <div style="font-size:8px;color:#f87171;font-weight:600">EMERGENCIAS</div>
-          </a>
-        </div>
-      </div>
-    </div>`;
-}
-
-function dirFiltroCat(cat) {
-  dirCatActual = cat;
-  dirActualizarCatBtns();
-  renderDirServicios();
-}
-
-function dirActualizarCatBtns() {
-  const cats = ['todos','justicia','derechos','mujer','salud','familia','proteccion'];
-  cats.forEach(c => {
-    const btn = document.getElementById('dcat-' + c);
-    if (!btn) return;
-    const isActive = c === dirCatActual;
-    if (c === 'todos') {
-      btn.style.background  = isActive ? 'var(--accent)' : 'var(--surface)';
-      btn.style.borderColor = isActive ? 'var(--accent)' : 'var(--border)';
-      btn.style.color       = isActive ? '#fff' : 'var(--text2)';
-    } else {
-      const col = DIR_CAT_COLORS[c];
-      btn.style.background  = isActive ? col.dark  : col.bg;
-      btn.style.borderColor = isActive ? col.dark  : col.border;
-      btn.style.color       = isActive ? '#fff'    : col.text;
-    }
-  });
-}
-
-function renderDirServicios() {
-  const el = document.getElementById('dir-servicios-list');
-  if (!el || !dirEstadoActual) return;
-  const d    = DIRECTORIO_ESTADOS[dirEstadoActual];
-  const list = dirCatActual === 'todos'
-    ? d.servicios
-    : d.servicios.filter(s => s.cat === dirCatActual);
-
-  if (list.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Sin servicios en esta categoría para ${dirEstadoActual}</div>`;
-    return;
-  }
-
-  el.innerHTML = list.map(s => {
-    const c = DIR_CAT_COLORS[s.cat] || DIR_CAT_COLORS.justicia;
-    return `
-    <div style="background:var(--surface);border:1px solid ${c.border};border-radius:14px;overflow:hidden;transition:border-color 0.15s">
-      <div style="display:flex;gap:12px;padding:14px 16px;align-items:flex-start">
-        <!-- Icon -->
-        <div style="width:42px;height:42px;border-radius:10px;background:${c.bg};border:1px solid ${c.border};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${s.emoji}</div>
-        <!-- Info -->
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-            <span style="font-size:13px;font-weight:700;color:var(--text)">${s.nombre}</span>
-            <span style="background:${c.bg};border:1px solid ${c.border};color:${c.text};font-size:8px;font-weight:800;padding:1px 6px;border-radius:6px;letter-spacing:0.5px;text-transform:uppercase">${s.cat}</span>
-          </div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:8px">${s.desc}</div>
-          <!-- Actions -->
-          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
-            <a href="tel:${s.tel.replace(/\s/g,'')}" style="background:${c.dark};color:#fff;font-size:12px;font-weight:700;padding:7px 12px;border-radius:8px;text-decoration:none;display:flex;align-items:center;gap:5px;flex-shrink:0">
-              📞 ${s.tel}
-            </a>
-            ${s.web ? `<a href="https://${s.web}" target="_blank" rel="noopener" style="font-size:10px;color:${c.text};font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px">${s.web} ↗</a>` : ''}
-            <span style="margin-left:auto;font-size:9px;color:var(--text3);white-space:nowrap">⏰ ${s.horario}</span>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════
-// OMBLIGO — MEMORIA HISTÓRICA DE MÉXICO
-// ═══════════════════════════════════════════════════════════
-
-
-// OMBLIGO_TIMELINE incomplete — stubbed by emergency fix to keep JS valid
+// DIRECTORIO_ESTADOS stubbed by emergency fix (file sync truncated this object)
+const DIRECTORIO_ESTADOS = {};
 const OMBLIGO_TIMELINE = [];
 
 </script>
