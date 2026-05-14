@@ -671,6 +671,28 @@ export default async function handler(req, res) {
       return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
     }
 
+    // ── Noticias Cívicas (DOF + SCJN + SEGOB + Presidencia + Diputados) ──
+    if (vista === 'noticias') {
+      const q = (req.query.q || '').trim();
+      const fuente = (req.query.fuente || '').trim();
+      const tema = (req.query.tema || '').trim();
+      const ambito = (req.query.ambito || '').trim();
+      let path = 'noticias_civicas?select=id,titulo,resumen,url_oficial,fuente,fuente_url,ambito,tema,fecha_publicacion&order=fecha_publicacion.desc.nullslast&limit=200';
+      if (fuente) path += `&fuente=eq.${encodeURIComponent(fuente)}`;
+      if (tema) path += `&tema=eq.${encodeURIComponent(tema)}`;
+      if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
+      if (q && q.length > 2) path += `&or=(titulo.ilike.*${encodeURIComponent(q)}*,resumen.ilike.*${encodeURIComponent(q)}*)`;
+      const rows = await sb(path);
+      return res.status(200).json({
+        noticias: rows,
+        total: rows.length,
+        por_fuente: rows.reduce((acc, n) => {
+          acc[n.fuente] = (acc[n.fuente] || 0) + 1;
+          return acc;
+        }, {}),
+      });
+    }
+
     // ── Leyes (Federales + Estatales) ──
     if (vista === 'leyes') {
       const q = (req.query.q || '').trim();
