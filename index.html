@@ -26220,16 +26220,54 @@ function ombligoJumpEra(id) {
 }
 
 function renderOmbligoMuseos() {
-  const destacadoEl = document.getElementById('ombligo-museo-destacado');
-  const gridEl      = document.getElementById('ombligo-museos');
-  if (!gridEl) return;
+  const el = document.getElementById('ombligo-museos');
+  if (!el) return;
+  el.innerHTML = OMBLIGO_MUSEOS.map(m => {
+    const color = m.color || '#3b82f6';
+    return `<div style="background:var(--surface);border:1px solid ${color}40;border-radius:14px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+        <span style="font-size:24px">${m.emoji || '🏛️'}</span>
+        <span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>
+        ${m.fuenteINAH ? '<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>' : ''}
+        <span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad || m.ubicacion || ''}</span>
+      </div>
+      ${m.subtitulo ? `<div style="font-size:12px;color:${color};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>` : ''}
+      ${m.descripcion ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>` : ''}
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">
+        ${m.horario ? `<span>🕐 ${m.horario}</span>` : ''}
+        ${m.costo ? `<span>💰 ${m.costo}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  const destacado = OMBLIGO_MUSEOS.find(m => m.destaca);
-  const resto     = OMBLIGO_MUSEOS.filter(m => !m.destaca);
+function renderOmbligoZonas() {
+  const el = document.getElementById('ombligo-zonas');
+  if (!el) return;
+  el.innerHTML = OMBLIGO_ZONAS.map(z => {
+    const color = z.color || '#22c55e';
+    return `<div style="background:var(--surface);border:1px solid ${color}40;border-radius:14px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+        <span style="font-size:24px">${z.emoji || '🏔️'}</span>
+        <span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>
+        ${z.patrimonio ? '<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>' : ''}
+        ${z.fuenteINAH ? '<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>' : ''}
+        <span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado || ''}</span>
+      </div>
+      ${z.subtitulo ? `<div style="font-size:12px;color:${color};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>` : ''}
+      ${z.descripcion ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>` : ''}
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">
+        ${z.periodo ? `<span>🗿 ${z.periodo}</span>` : ''}
+        ${z.horario ? `<span>🕐 ${z.horario}</span>` : ''}
+        ${z.costo ? `<span>💰 ${z.costo}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  // Featured banner
-  if (destacadoEl && destacado) {
-    const d = destacado;
-    const safeId = 'om-feat-' + d.nombre.replace(/[\s\(\)—·]/g,'_');
-    destacadoEl.innerHTML = `
-      <div style="border-radius:18px;overflow:hidden;bo
+window.initOmbligo = initOmbligo;
+window.ombligoTab = ombligoTab;
+
+</script>
+</body>
+</html>
