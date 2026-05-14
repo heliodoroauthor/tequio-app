@@ -1902,9 +1902,11 @@
       </div>
       <div class="nav-item" data-page="politicos" onclick="showPage('politicos')">
         <span class="icon">🏛️</span> Políticos
+        <span class="nav-badge green">500 LXVI</span>
       </div>
       <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
         <span class="icon">🗳️</span> Votaciones del Congreso
+        <span class="nav-badge green">Pleno</span>
       </div>
       <div class="nav-item" data-page="dinero" onclick="showPage('dinero')">
         <span class="icon">💰</span> Dinero Público
@@ -2909,6 +2911,144 @@
         }
       }
 
+      // ── POLÍTICOS · 500 DIPUTADOS LXVI ─────────────────────
+      window.__diputadosData = [];
+      const PARTIDO_COLOR = {
+        'MORENA':'#7f1d1d','PAN':'#1d4ed8','PRI':'#15803d',
+        'Partido Verde Ecologista de México':'#65a30d',
+        'Partido del Trabajo':'#dc2626','Movimiento Ciudadano':'#ea580c',
+        'PRD':'#facc15','Nueva Alianza':'#06b6d4',
+        'Encuentro Solidario':'#a855f7','Independiente':'#94a3b8',
+        'Sin Grupo Parlamentario':'#71717a'
+      };
+      function polRenderCards(filas) {
+        const grid = document.getElementById('pol-grid');
+        if (!filas.length) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Sin diputados que coincidan con tu búsqueda.</div>';
+          return;
+        }
+        grid.innerHTML = filas.map(d => {
+          const color = PARTIDO_COLOR[d.partido] || '#64748b';
+          const fotoSrc = d.foto_url || '';
+          const fotoTag = fotoSrc ? `<img src="${fotoSrc}" loading="lazy" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid ${color};flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:64px;height:64px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0">${(d.nombre||'?').split(' ').slice(0,2).map(s=>s[0]).join('')}</div>`;
+          const numCom = Array.isArray(d.comisiones) ? d.comisiones.length : 0;
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:transform 0.15s" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='translateY(0)'">
+            <div style="display:flex;gap:10px;align-items:center">
+              ${fotoTag}
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${d.nombre||'—'}</div>
+                <div style="display:inline-block;background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;margin-top:4px">${d.partido||'—'}</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.4">
+              <div>📍 <strong>${d.entidad||'—'}</strong> · ${d.distrito||'—'}</div>
+              <div>🪑 ${d.principio_eleccion||'—'}${d.curul ? ' · ' + d.curul : ''}</div>
+              ${d.reelecto ? '<div>🔁 Reelecto: <strong>' + d.reelecto + '</strong></div>' : ''}
+              ${numCom ? '<div>🤝 ' + numCom + ' comisión' + (numCom > 1 ? 'es' : '') + '</div>' : ''}
+            </div>
+            <div style="display:flex;gap:6px;margin-top:auto">
+              ${d.email ? `<a href="mailto:${d.email}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);text-decoration:none;padding:7px;border-radius:8px;text-align:center;font-size:11px;font-weight:600">✉ Email</a>` : ''}
+              ${d.curricula_url ? `<a href="${d.curricula_url}" target="_blank" rel="noopener" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);text-decoration:none;padding:7px;border-radius:8px;text-align:center;font-size:11px;font-weight:600">📄 Currícula</a>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      }
+      function polFiltrar() {
+        const q = (document.getElementById('pol-search').value || '').toLowerCase().trim();
+        const entSel = document.getElementById('pol-entidad').value;
+        const partSel = document.getElementById('pol-partido').value;
+        let filas = window.__diputadosData.filter(d => {
+          if (entSel && d.entidad !== entSel) return false;
+          if (partSel && d.partido !== partSel) return false;
+          if (!q) return true;
+          return (d.nombre||'').toLowerCase().includes(q) ||
+                 (d.entidad||'').toLowerCase().includes(q) ||
+                 (d.partido||'').toLowerCase().includes(q) ||
+                 (d.distrito||'').toLowerCase().includes(q);
+        });
+        polRenderCards(filas);
+        document.getElementById('pol-count').textContent = `Mostrando ${filas.length} de ${window.__diputadosData.length} diputados`;
+      }
+      async function cargarPoliticos() {
+        if (window.__loadedPages['politicos']) return;
+        const grid = document.getElementById('pol-grid');
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Cargando 500 diputados…</div>';
+        try {
+          const r = await fetch('/api/data?vista=diputados');
+          const j = await r.json();
+          window.__diputadosData = j.diputados || [];
+          const total = window.__diputadosData.length;
+          const partidos = j.por_partido || {};
+          const entidades = Object.keys(j.por_entidad || {}).length;
+          const sumComisiones = window.__diputadosData.reduce((s,d) => s + (Array.isArray(d.comisiones) ? d.comisiones.length : 0), 0);
+          document.getElementById('pol-stats').innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${total}</div><div style="font-size:11px;color:var(--text2)">Diputados</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${Object.keys(partidos).length}</div><div style="font-size:11px;color:var(--text2)">Partidos / GP</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${entidades}</div><div style="font-size:11px;color:var(--text2)">Entidades</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#a78bfa">${sumComisiones}</div><div style="font-size:11px;color:var(--text2)">Asignaciones a comisiones</div></div>`;
+          const entSel = document.getElementById('pol-entidad');
+          const sortedEnt = Object.entries(j.por_entidad || {}).sort((a,b) => a[0].localeCompare(b[0]));
+          entSel.innerHTML = '<option value="">Todas las entidades</option>' + sortedEnt.map(([e,n]) => `<option value="${e}">${e} (${n})</option>`).join('');
+          const partSel = document.getElementById('pol-partido');
+          const sortedPart = Object.entries(partidos).sort((a,b) => b[1]-a[1]);
+          partSel.innerHTML = '<option value="">Todos los partidos</option>' + sortedPart.map(([p,n]) => `<option value="${p}">${p} (${n})</option>`).join('');
+          polFiltrar();
+          window.__loadedPages['politicos'] = true;
+        } catch (e) {
+          grid.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;grid-column:1/-1">Error al cargar diputados.</div>';
+        }
+      }
+
+      // ── VOTACIONES PLENO LXVI ──────────────────────────────
+      window.__votacionesData = [];
+      function votRenderLista(filas) {
+        const cont = document.getElementById('vot-lista');
+        if (!filas.length) {
+          cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Sin votaciones que coincidan.</div>';
+          return;
+        }
+        const fmt = (s) => { if (!s) return '—'; const [y,m,d] = s.split('-'); const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return d + ' ' + meses[parseInt(m,10)-1] + ' ' + y; };
+        cont.innerHTML = filas.map(v => {
+          const total = (v.total_si||0) + (v.total_no||0) + (v.total_abst||0);
+          const tieneTotales = total > 0;
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;transition:transform 0.15s" onmouseenter="this.style.transform='translateY(-1px)'" onmouseleave="this.style.transform='translateY(0)'">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:start;margin-bottom:8px;flex-wrap:wrap">
+              <div style="font-size:11px;color:var(--text2);font-weight:600">📅 ${fmt(v.fecha)} · Votación #${v.votacion_id}</div>
+              ${v.tipo ? `<div style="background:var(--surface2);border:1px solid var(--border);font-size:10px;padding:3px 8px;border-radius:8px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">${v.tipo.replace('_',' / ')}</div>` : ''}
+            </div>
+            <div style="font-size:13px;font-weight:600;line-height:1.4;margin-bottom:10px">${v.asunto}</div>
+            ${tieneTotales ? `<div style="display:flex;gap:10px;font-size:12px"><span style="color:#22c55e">✓ ${v.total_si} sí</span><span style="color:#ef4444">✗ ${v.total_no} no</span><span style="color:var(--text2)">⊘ ${v.total_abst} abst</span></div>` : ''}
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+              <a href="${v.url_oficial}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);text-decoration:none">Ver acta oficial →</a>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      function votFiltrar() {
+        const q = (document.getElementById('vot-search').value || '').toLowerCase().trim();
+        const filas = q ? window.__votacionesData.filter(v => (v.asunto||'').toLowerCase().includes(q)) : window.__votacionesData;
+        votRenderLista(filas);
+        document.getElementById('vot-stats').textContent = `${filas.length} de ${window.__votacionesData.length} votaciones nominales del pleno (LXVI Legislatura)`;
+      }
+      async function cargarVotaciones() {
+        if (window.__loadedPages['votaciones']) return;
+        const cont = document.getElementById('vot-lista');
+        cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Cargando votaciones del pleno…</div>';
+        try {
+          const r = await fetch('/api/data?vista=votaciones&limit=150');
+          const j = await r.json();
+          window.__votacionesData = j.votaciones || [];
+          if (!window.__votacionesData.length) {
+            cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Aún sin datos. El scraper de Diputados corre cada lunes.</div>';
+            return;
+          }
+          votFiltrar();
+          window.__loadedPages['votaciones'] = true;
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al cargar.</div>';
+        }
+      }
+
       // Hook: cuando showPage cambia, carga la data específica.
       // showPage se define ~9000 líneas más abajo en el archivo, así que esperamos.
       (function instalarHookShowPage() {
@@ -2926,6 +3066,8 @@
           if (p === 'tu-estado') cargarTuEstadoInit();
           if (p === 'presas') cargarPresas();
           if (p === 'pide-ayuda') leadPaso(1);
+          if (p === 'politicos') cargarPoliticos();
+          if (p === 'votaciones') cargarVotaciones();
         };
       })();
 
@@ -3052,368 +3194,71 @@
 
       </div>
     </div>
-    <!-- ───── POLÍTICOS ───── -->
+    <!-- ───── POLÍTICOS — 500 DIPUTADOS LXVI REAL ───── -->
     <div id="page-politicos" class="page">
-      <div class="content" style="max-width:900px">
-
-        <!-- Header -->
-        <div style="margin-bottom:16px">
-          <div style="font-size:22px;font-weight:800;margin-bottom:4px">🏛️ Políticos de México</div>
-          <div style="font-size:13px;color:var(--text3)">Seguimiento de promesas, votaciones y desempeño · Datos de fuentes públicas oficiales</div>
-        </div>
-
-        <!-- [FIX] Banner de datos ilustrativos -->
-        <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:11px 14px;margin-bottom:14px">
-          <span style="font-size:16px;flex-shrink:0;margin-top:1px">🧪</span>
-          <div>
-            <div style="font-size:12px;font-weight:700;color:var(--yellow2);margin-bottom:2px">Perfiles ilustrativos — no son personas reales</div>
-            <div style="font-size:11px;color:var(--text3);line-height:1.5">Los políticos mostrados son <strong style="color:var(--text2)">arquetipos representativos</strong> construidos a partir de patrones de desempeño legislativo público. No corresponden a individuos reales ni implican acusación alguna. Para datos oficiales, consulta <a href="https://www.diputados.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">diputados.gob.mx</a> o <a href="https://www.senado.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">senado.gob.mx</a>.</div>
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(29,78,216,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🏛️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Cámara de Diputados LXVI</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Los <strong>500 diputados federales</strong> que te representan. 300 por mayoría relativa, 200 por representación proporcional.</p>
+            </div>
+            <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SITL oficial →</a>
           </div>
-        </div>
-
-        <div class="alert alert-info mb-14">
-          <span>📊</span>
-          <span>Datos basados en <strong>registros públicos</strong>: Gaceta del Senado, Cámara de Diputados, DOF, SESNSP, SFP. No implica posicionamiento político.</span>
-        </div>
-
-        <!-- Búsqueda y filtros -->
-        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-          <div style="flex:1;min-width:180px;position:relative">
-            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
-            <input id="pol-search" type="text" placeholder="Buscar político, estado, partido..."
-              oninput="polFiltrar()"
-              style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-          <select id="pol-sort" onchange="polFiltrar()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
-            <option value="promesas">Mayor cumplimiento</option>
-            <option value="asistencia">Mayor asistencia</option>
-            <option value="iniciativas">Más iniciativas</option>
-            <option value="nombre">A → Z</option>
-          </select>
-        </div>
-
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="pol-filtros">
-          <button class="tema-chip active" onclick="polSetFiltro(this,'todos')">Todos</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'presidencia')">🏛️ Presidencia</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'senado')">🏛️ Senado</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'diputados')">🏛️ Diputados</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'gobernadores')">🗺️ Gobernadores</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'MORENA')">🟤 MORENA</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'PAN')">🔵 PAN</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'PRI')">🟢 PRI</button>
-          <button class="tema-chip" onclick="polSetFiltro(this,'MC')">🟠 MC</button>
         </div>
 
         <!-- Stats globales -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center">
-            <div style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--green2)" id="pol-stat-prom">—</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px">Promedio cumplimiento</div>
+        <div id="pol-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px"></div>
+
+        <!-- Búsqueda y filtros -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+          <div style="flex:1;min-width:200px;position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+            <input id="pol-search" type="text" placeholder="Buscar diputado, estado, partido..."
+              oninput="polFiltrar()"
+              style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
           </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center">
-            <div style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--accent2)" id="pol-stat-inic">—</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px">Total iniciativas</div>
-          </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center">
-            <div style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--yellow2)" id="pol-stat-vis">—</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px">Mostrados</div>
-          </div>
+          <select id="pol-entidad" onchange="polFiltrar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:160px">
+            <option value="">Todas las entidades</option>
+          </select>
+          <select id="pol-partido" onchange="polFiltrar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:140px">
+            <option value="">Todos los partidos</option>
+          </select>
         </div>
+
+        <div id="pol-count" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
 
         <!-- Grid de tarjetas -->
         <div id="pol-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
 
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="color:var(--accent2)">SITL · Cámara de Diputados LXVI Legislatura</a> · Actualizado semanalmente</div>
       </div>
     </div>
+    <!-- ───── VOTACIONES — PLENO DIPUTADOS LXVI REAL ───── -->
     <div id="page-votaciones" class="page">
       <div class="content">
-
-        <!-- ¿CÓMO VOTÓ MI DIPUTADO? -->
-        <div class="card mb-16" style="border-color:var(--accent2);background:linear-gradient(135deg,rgba(99,179,237,0.08),rgba(139,92,246,0.05))">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <span style="font-size:28px">🗺️</span>
-            <div>
-              <div style="font-size:15px;font-weight:800">¿Cómo votó TU representante?</div>
-              <div style="font-size:12px;color:var(--text3)">Encuéntralo usando tu ubicación o estado</div>
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🗳️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Votaciones del Pleno</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Cada votación nominal de la <strong>LXVI Legislatura</strong>. Tema, fecha, resultado oficial.</p>
             </div>
-          </div>
-          <div id="mi-diputado-resultado" style="display:none;margin-bottom:12px"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-primary" style="flex:1;justify-content:center;min-width:140px" onclick="localizarMiDiputado()">
-              📍 Usar mi ubicación
-            </button>
-            <select id="mi-diputado-estado" onchange="buscarDiputadoPorEstado(this.value)"
-              style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text2);font-size:13px;font-family:inherit">
-              <option value="">O elige tu estado...</option>
-              <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
-              <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option>
-              <option>Ciudad de México</option><option>Coahuila</option><option>Colima</option>
-              <option>Durango</option><option>Estado de México</option><option>Guanajuato</option>
-              <option>Guerrero</option><option>Hidalgo</option><option>Jalisco</option>
-              <option>Michoacán</option><option>Morelos</option><option>Nayarit</option>
-              <option>Nuevo León</option><option>Oaxaca</option><option>Puebla</option>
-              <option>Querétaro</option><option>Quintana Roo</option><option>San Luis Potosí</option>
-              <option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
-              <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option>
-              <option>Yucatán</option><option>Zacatecas</option>
-            </select>
+            <a href="https://sitl.diputados.gob.mx/LXVI_leg/votaciones_por_periodonplxvi.php" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SITL oficial →</a>
           </div>
         </div>
 
-        <!-- Panel IA Votaciones en vivo -->
-        <div class="card mb-16" style="border-color:rgba(59,130,246,0.4);background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(99,102,241,0.04))">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:16px">🔴</div>
-              <div>
-                <div style="font-size:14px;font-weight:800">Votaciones recientes — IA</div>
-                <div style="font-size:11px;color:var(--text3)">Claude sintetiza información pública del Congreso mexicano</div>
-              </div>
-            </div>
-            <button onclick="cargarVotacionesIA()" id="btn-cargar-vot" style="background:var(--accent);border:none;color:#fff;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
-              🔄 Cargar
-            </button>
-          </div>
-          <!-- Filtros rápidos -->
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-            <button onclick="cargarVotacionesIA('todas')" class="tema-chip active" id="vot-filter-todas" style="font-size:11px;padding:4px 10px">Todas</button>
-            <button onclick="cargarVotacionesIA('salud')" class="tema-chip" id="vot-filter-salud" style="font-size:11px;padding:4px 10px">🏥 Salud</button>
-            <button onclick="cargarVotacionesIA('economía')" class="tema-chip" id="vot-filter-economia" style="font-size:11px;padding:4px 10px">💰 Economía</button>
-            <button onclick="cargarVotacionesIA('seguridad')" class="tema-chip" id="vot-filter-seguridad" style="font-size:11px;padding:4px 10px">🛡️ Seguridad</button>
-            <button onclick="cargarVotacionesIA('derechos')" class="tema-chip" id="vot-filter-derechos" style="font-size:11px;padding:4px 10px">✊ Derechos</button>
-          </div>
-          <div id="vot-ia-live-container">
-            <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">
-              Toca <strong>Cargar</strong> para ver las votaciones más recientes del Congreso analizadas por IA 🧠
-            </div>
-          </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input id="vot-search" type="text" placeholder="🔍 Buscar tema, ley, materia..."
+            oninput="votFiltrar()"
+            style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
         </div>
 
-        <div class="section-header mb-16">
-          <div class="section-title">Votaciones registradas</div>
-          <span class="badge badge-blue">Base de datos local</span>
-        </div>
+        <div id="vot-stats" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
+        <div id="vot-lista" style="display:flex;flex-direction:column;gap:10px"></div>
 
-        <!-- Lista de votaciones -->
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
-
-          <!-- Votación 1 -->
-          <div class="card vot-card" onclick="abrirVotacion('agua')" style="cursor:pointer;border-color:var(--green)">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <div style="flex:1">
-                <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:2px">SENADO · Reforma constitucional Art. 4</div>
-                <div style="font-size:15px;font-weight:700">Ley General de Agua Potable</div>
-              </div>
-              <span id="vot-badge-en-vivo" class="badge badge-green" style="flex-shrink:0;margin-left:8px;display:none">🔴 En vivo</span>
-            </div>
-            <div class="vote-split mb-8">
-              <div class="vote-yes" style="width:70%">✅ 70%</div>
-              <div class="vote-no" style="width:20%">❌ 20%</div>
-              <div class="vote-abs" style="width:10%">⏸ 10%</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:11px;color:var(--text3)">84 a favor · 24 en contra · 12 abstenciones · Hoy</span>
-              <span style="font-size:11px;color:var(--accent2);font-weight:600">Ver quién votó qué →</span>
-            </div>
-          </div>
-
-          <!-- Votación 2 -->
-          <div class="card vot-card" onclick="abrirVotacion('fiscal')" style="cursor:pointer;border-color:var(--red)">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <div style="flex:1">
-                <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:2px">DIPUTADOS · ISR personas físicas</div>
-                <div style="font-size:15px;font-weight:700">Reforma Fiscal Progresiva</div>
-              </div>
-              <span class="badge badge-red" style="flex-shrink:0;margin-left:8px">Rechazada</span>
-            </div>
-            <div class="vote-split mb-8">
-              <div class="vote-yes" style="width:42%">✅ 42%</div>
-              <div class="vote-no" style="width:55%">❌ 55%</div>
-              <div class="vote-abs" style="width:3%">⏸ 3%</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:11px;color:var(--text3)">210 a favor · 275 en contra · 15 abstenciones · Ayer</span>
-              <span style="font-size:11px;color:var(--accent2);font-weight:600">Ver quién votó qué →</span>
-            </div>
-          </div>
-
-          <!-- Votación 3 -->
-          <div class="card vot-card" onclick="abrirVotacion('ia_ley')" style="cursor:pointer;border-color:var(--yellow)">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <div style="flex:1">
-                <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:2px">SENADO · Regulación de sistemas automáticos</div>
-                <div style="font-size:15px;font-weight:700">Ley de IA en Sector Público</div>
-              </div>
-              <span class="badge badge-yellow" style="flex-shrink:0;margin-left:8px">En comisión</span>
-            </div>
-            <div class="vote-split mb-8">
-              <div class="vote-yes" style="width:58%">✅ 58%</div>
-              <div class="vote-no" style="width:30%">❌ 30%</div>
-              <div class="vote-abs" style="width:12%">⏸ 12%</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:11px;color:var(--text3)">70 a favor · 36 en contra · 14 abstenciones · Hace 3 días</span>
-              <span style="font-size:11px;color:var(--accent2);font-weight:600">Ver quién votó qué →</span>
-            </div>
-          </div>
-
-          <!-- Votación 4 -->
-          <div class="card vot-card" onclick="abrirVotacion('paridad')" style="cursor:pointer;border-color:var(--accent)">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <div style="flex:1">
-                <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:2px">DIPUTADOS · LFT reforma</div>
-                <div style="font-size:15px;font-weight:700">Paridad Salarial Empresas +50</div>
-              </div>
-              <span class="badge badge-green" style="flex-shrink:0;margin-left:8px">Aprobada</span>
-            </div>
-            <div class="vote-split mb-8">
-              <div class="vote-yes" style="width:78%">✅ 78%</div>
-              <div class="vote-no" style="width:18%">❌ 18%</div>
-              <div class="vote-abs" style="width:4%">⏸ 4%</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:11px;color:var(--text3)">390 a favor · 90 en contra · 20 abstenciones · Hace 5 días</span>
-              <span style="font-size:11px;color:var(--accent2);font-weight:600">Ver quién votó qué →</span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Estadísticas -->
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-title mb-8">📊 Estadísticas del Periodo</div>
-            <div class="card-subtitle mb-12">Legislatura actual — 2024</div>
-            <div class="flex flex-col gap-10">
-              <div class="flex justify-between items-center"><span class="text-sm">Total iniciativas</span><span class="mono">842</span></div>
-              <div class="flex justify-between items-center"><span class="text-sm">Aprobadas</span><span class="mono" style="color:var(--green2)">394 (46.7%)</span></div>
-              <div class="flex justify-between items-center"><span class="text-sm">Rechazadas</span><span class="mono" style="color:var(--red2)">248 (29.4%)</span></div>
-              <div class="flex justify-between items-center"><span class="text-sm">En proceso</span><span class="mono" style="color:var(--yellow2)">200 (23.7%)</span></div>
-              <div class="divider"></div>
-              <div class="flex justify-between items-center"><span class="text-sm">Asistencia promedio</span><span class="mono" style="color:var(--accent2)">82.4%</span></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title mb-8">🗳️ Voto por Partido (Agua)</div>
-            <div class="card-subtitle mb-12">Clic en votación para ver legislador por legislador</div>
-            <div class="flex flex-col gap-10">
-              <div><div class="flex justify-between text-xs mb-6"><span style="color:var(--accent2)">MORENA (128)</span><span>94% a favor</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:94%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-6"><span style="color:var(--red2)">PAN (78)</span><span>23% a favor</span></div><div class="progress-bar-outer"><div class="progress-bar-inner red" style="width:23%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-6"><span style="color:var(--yellow2)">PRI (42)</span><span>60% a favor</span></div><div class="progress-bar-outer"><div class="progress-bar-inner yellow" style="width:60%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-6"><span style="color:var(--green2)">MC (31)</span><span>71% a favor</span></div><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:71%"></div></div></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title mb-8">🗺️ Voto por Estado (Agua)</div>
-            <div class="card-subtitle mb-12">Desglose regional — abre la votación para ver completo</div>
-            <div id="vot-page-por-estado" style="display:flex;flex-direction:column;gap:6px">
-              <script>
-              (function(){
-                const v = typeof votacionesDB !== 'undefined' && votacionesDB.agua;
-                if (!v) return;
-                const estados = {};
-                v.legisladores.forEach(l => {
-                  if (!estados[l.estado]) estados[l.estado] = {favor:0,contra:0,abstencion:0,total:0};
-                  estados[l.estado][l.voto]++;
-                  estados[l.estado].total++;
-                });
-                document.getElementById('vot-page-por-estado').innerHTML = Object.entries(estados)
-                  .sort((a,b) => b[1].total - a[1].total).slice(0, 8)
-                  .map(([e,d]) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
-                    <div style="flex:1;font-size:12px;font-weight:600">🗺️ ${e}</div>
-                    <div style="display:flex;gap:8px;font-size:11px">
-                      ${d.favor ? `<span style="color:var(--green2)">✅ ${d.favor}</span>` : ''}
-                      ${d.contra ? `<span style="color:var(--red2)">❌ ${d.contra}</span>` : ''}
-                      ${d.abstencion ? `<span style="color:var(--yellow2)">⏸ ${d.abstencion}</span>` : ''}
-                    </div>
-                  </div>`).join('') + `<button onclick="abrirVotacion('agua')" style="margin-top:6px;width:100%;padding:8px;background:transparent;border:1px dashed var(--border2);border-radius:8px;color:var(--text3);font-size:11px;cursor:pointer;font-family:inherit">Ver todos los estados →</button>`;
-              })();
-              </script>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ══════ MODAL DETALLE VOTACIÓN ══════ -->
-    <div id="vot-modal-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);overflow-y:auto" onclick="cerrarVotModal(event)">
-      <div id="vot-modal" style="background:var(--bg2);border-radius:20px 20px 0 0;margin-top:40px;min-height:calc(100vh - 40px);padding:0;position:relative" onclick="event.stopPropagation()">
-
-        <!-- Header sticky -->
-        <div style="position:sticky;top:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 18px;z-index:10;border-radius:20px 20px 0 0">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <button onclick="cerrarVotModal()" style="background:var(--surface);border:none;color:var(--text1);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">✕</button>
-            <div style="text-align:center;flex:1;padding:0 12px">
-              <div id="vot-modal-camara" style="font-size:10px;color:var(--text3);font-weight:600"></div>
-              <div id="vot-modal-titulo" style="font-size:15px;font-weight:700"></div>
-            </div>
-            <span id="vot-modal-badge" class="badge"></span>
-          </div>
-          <!-- Barra resumen -->
-          <div class="vote-split" id="vot-modal-barra" style="height:18px;border-radius:6px;margin-bottom:6px"></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px" id="vot-modal-nums"></div>
-        </div>
-
-        <div style="padding:16px 18px">
-
-          <!-- Tabs: por voto / por partido / por estado -->
-          <div class="tab-bar mb-16">
-            <div class="tab active" onclick="switchTab(this);switchVotTab('vt-legisladores')">👤 Legisladores</div>
-            <div class="tab" onclick="switchTab(this);switchVotTab('vt-partido')">🏳️ Por Partido</div>
-            <div class="tab" onclick="switchTab(this);switchVotTab('vt-estado')">🗺️ Por Estado</div>
-            <div class="tab" onclick="switchTab(this);switchVotTab('vt-ia')">🧠 Análisis IA</div>
-          </div>
-
-          <!-- TAB: Legisladores -->
-          <div id="vt-legisladores">
-            <!-- Búsqueda y filtros -->
-            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-              <input id="vot-search" type="text" placeholder="🔍 Buscar legislador o estado..."
-                style="flex:1;min-width:160px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text1);font-size:13px;font-family:inherit"
-                oninput="filtrarLegisladores()">
-              <select id="vot-filtro-voto" onchange="filtrarLegisladores()"
-                style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text1);font-size:12px;font-family:inherit">
-                <option value="all">Todos los votos</option>
-                <option value="favor">✅ A favor</option>
-                <option value="contra">❌ En contra</option>
-                <option value="abstencion">⏸ Abstención</option>
-                <option value="ausente">🚫 Ausente</option>
-              </select>
-              <select id="vot-filtro-partido" onchange="filtrarLegisladores()"
-                style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text1);font-size:12px;font-family:inherit">
-                <option value="all">Todos los partidos</option>
-              </select>
-            </div>
-
-            <div id="vot-count" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
-            <div id="vot-lista-legisladores" style="display:flex;flex-direction:column;gap:6px"></div>
-          </div>
-
-          <!-- TAB: Por Partido -->
-          <div id="vt-partido" style="display:none">
-            <div id="vot-por-partido" style="display:flex;flex-direction:column;gap:12px"></div>
-          </div>
-
-          <!-- TAB: Por Estado -->
-          <div id="vt-estado" style="display:none">
-            <div id="vot-por-estado" style="display:flex;flex-direction:column;gap:10px"></div>
-          </div>
-
-          <!-- TAB: Análisis IA -->
-          <div id="vt-ia" style="display:none">
-            <div id="vot-ia-content" style="font-size:13px;line-height:1.7;color:var(--text2)">
-              <div style="text-align:center;padding:24px">
-                <div style="font-size:32px;margin-bottom:8px">🧠</div>
-                <div class="card-title mb-4">Análisis en proceso...</div>
-                <div class="typing-indicator" style="justify-content:center"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/votaciones_por_periodonplxvi.php" target="_blank" style="color:var(--accent2)">SITL · Sistema de Información Legislativa</a> · Cámara de Diputados</div>
       </div>
     </div>
 
@@ -25713,491 +25558,4 @@ function munCambiarEstado() {
 
 function munCambiarMunicipio() {
   const estad = document.getElementById('mun-selector-estado');
-  const mun   = document.getElementById('mun-selector-mun');
-  const header= document.getElementById('mun-nombre-header');
-  if (!estad || !mun || !header) return;
-  const estadoTxt = estad.options[estad.selectedIndex]?.text || '';
-  const munTxt    = mun.options[mun.selectedIndex]?.text || '';
-
-  // Panel principal
-  header.textContent = `${munTxt}, ${estadoTxt}`;
-
-  // Representantes
-  const repHero = document.getElementById('rep-hero-title');
-  if (repHero) repHero.textContent = `Cabildo de ${munTxt}`;
-
-  // Leyes
-  const leyesTit = document.getElementById('leyes-titulo-mun');
-  if (leyesTit) leyesTit.textContent = `Gaceta Municipal · ${munTxt}`;
-
-  // Presupuesto
-  const presTit = document.getElementById('presupuesto-titulo-mun');
-  if (presTit) presTit.textContent = `Cuenta Pública · ${munTxt}`;
-
-  // Contratos
-  const contFuente = document.getElementById('contratos-fuente-mun');
-  if (contFuente) contFuente.textContent = `Fuente: Tesorería Municipal · CompraNet · SESEA ${estadoTxt}`;
-
-  // Noticias
-  const noticiasTit = document.getElementById('noticias-titulo-mun');
-  if (noticiasTit) noticiasTit.textContent = `${munTxt} · ${estadoTxt}`;
-
-  // Actualizar nombre del municipio en todos los banners ilustrativos
-  document.querySelectorAll('.dib-mun-nombre').forEach(el => {
-    el.textContent = `${munTxt}, ${estadoTxt}`;
-  });
-}
-
-function munFiltrarLeyes(tipo) {
-  document.querySelectorAll('#mun-leyes-lista .card').forEach(item => {
-    item.style.display = (tipo === 'todos' || item.dataset.tipo === tipo) ? 'block' : 'none';
-  });
-  document.querySelectorAll('.mun-ley-filter').forEach(btn => {
-    const active = btn.getAttribute('onclick')?.includes(`'${tipo}'`);
-    btn.style.background   = active ? 'rgba(13,148,136,0.2)' : 'var(--surface)';
-    btn.style.borderColor  = active ? '#0d9488' : 'var(--border)';
-    btn.style.color        = active ? '#2dd4bf'  : 'var(--text2)';
-  });
-}
-  </script>
-</body>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     SISTEMA DE MODALES DE AVISO LEGAL — IA TEQUIO
-     Aparece UNA SOLA VEZ por módulo. Se guarda aceptación en localStorage.
-     Módulos cubiertos: corrupcion · dinero · votaciones · verificacion
-═══════════════════════════════════════════════════════════════ -->
-
-<style>
-  /* ── Modal overlay ── */
-  .ia-aviso-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 8000;
-    background: rgba(0,0,0,0.82);
-    backdrop-filter: blur(6px);
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-  .ia-aviso-overlay.active { display: flex; }
-
-  /* ── Modal box ── */
-  .ia-aviso-box {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 480px;
-    overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-    animation: fadeUp 0.25s ease;
-  }
-
-  /* ── Header strip ── */
-  .ia-aviso-header {
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .ia-aviso-icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .ia-aviso-titulo {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 3px;
-  }
-  .ia-aviso-subtitulo {
-    font-size: 11px;
-    color: var(--text3);
-    font-weight: 500;
-  }
-
-  /* ── Body ── */
-  .ia-aviso-body { padding: 18px 20px; }
-
-  /* ── Aviso legal principal ── */
-  .ia-aviso-legal {
-    background: rgba(245,158,11,0.07);
-    border: 1px solid rgba(245,158,11,0.25);
-    border-left: 3px solid var(--yellow);
-    border-radius: 0 10px 10px 0;
-    padding: 12px 14px;
-    margin-bottom: 14px;
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.65;
-  }
-  .ia-aviso-legal strong { color: var(--yellow2); }
-
-  /* ── Lista de limitaciones ── */
-  .ia-aviso-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    margin-bottom: 14px;
-  }
-  .ia-aviso-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.5;
-  }
-  .ia-aviso-item-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--text3);
-    flex-shrink: 0;
-    margin-top: 6px;
-  }
-
-  /* ── Fuentes oficiales ── */
-  .ia-aviso-fuentes {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
-  }
-  .ia-aviso-fuentes-label {
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--text3);
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-  }
-  .ia-aviso-fuentes-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .ia-aviso-fuentes-links a {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent2);
-    text-decoration: none;
-    transition: border-color 0.15s;
-  }
-  .ia-aviso-fuentes-links a:hover { border-color: var(--accent2); }
-
-  /* ── Footer ── */
-  .ia-aviso-footer {
-    padding: 0 20px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .ia-aviso-btn-aceptar {
-    width: 100%;
-    padding: 13px;
-    background: var(--accent);
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: var(--font-body);
-    transition: background 0.15s;
-  }
-  .ia-aviso-btn-aceptar:hover { background: #2563eb; }
-  .ia-aviso-no-mostrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    font-size: 11px;
-    color: var(--text3);
-    padding: 4px;
-    user-select: none;
-  }
-  .ia-aviso-no-mostrar input { cursor: pointer; accent-color: var(--accent); }
-</style>
-
-<!-- ── MODAL 1: Radar de Corrupción ── -->
-<div class="ia-aviso-overlay" id="aviso-corrupcion">
-  <div class="ia-aviso-box">
-    <div class="ia-aviso-header">
-      <div class="ia-aviso-icon" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25)">🔍</div>
-      <div>
-        <div class="ia-aviso-titulo">Aviso Legal — Radar de Corrupción</div>
-        <div class="ia-aviso-subtitulo">Herramienta informativa · Tequio · Módulo IA</div>
-      </div>
-    </div>
-    <div class="ia-aviso-body">
-      <div class="ia-aviso-legal">
-        <strong>Este contenido es de carácter estrictamente informativo y no constituye asesoría jurídica, denuncia formal ni dictamen de auditoría.</strong> Los análisis son generados por inteligencia artificial a partir de información de conocimiento público y no sustituyen los informes oficiales de la Auditoría Superior de la Federación (ASF) ni de ninguna autoridad competente.
-      </div>
-      <div class="ia-aviso-lista">
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>La IA <strong>no accede</strong> a bases de datos oficiales en tiempo real (ASF, CompraNet, SFP).</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Los datos pueden estar <strong>desactualizados o ser incompletos</strong>. Verifica antes de actuar o compartir.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Para interponer una denuncia formal, acude a la <strong>SFP, FGR o tu Contraloría estatal</strong>.</span></div>
-      </div>
-      <div class="ia-aviso-fuentes">
-        <div class="ia-aviso-fuentes-label">FUENTES OFICIALES PARA VERIFICAR</div>
-        <div class="ia-aviso-fuentes-links">
-          <a href="https://www.asf.gob.mx" target="_blank" rel="noopener">📋 ASF</a>
-          <a href="https://compranet.hacienda.gob.mx" target="_blank" rel="noopener">🏛️ CompraNet</a>
-          <a href="https://www.sfp.gob.mx" target="_blank" rel="noopener">🔎 SFP</a>
-          <a href="https://www.fgr.org.mx" target="_blank" rel="noopener">⚖️ FGR</a>
-        </div>
-      </div>
-    </div>
-    <div class="ia-aviso-footer">
-      <button class="ia-aviso-btn-aceptar" onclick="iaAvisoAceptar('corrupcion')">Entendido — Continuar al análisis</button>
-      <label class="ia-aviso-no-mostrar">
-        <input type="checkbox" id="aviso-corrupcion-nosave"> No volver a mostrar este aviso
-      </label>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL 2: Dinero Público / Presupuesto ── -->
-<div class="ia-aviso-overlay" id="aviso-dinero">
-  <div class="ia-aviso-box">
-    <div class="ia-aviso-header">
-      <div class="ia-aviso-icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25)">💰</div>
-      <div>
-        <div class="ia-aviso-titulo">Aviso Legal — Análisis Presupuestal IA</div>
-        <div class="ia-aviso-subtitulo">Herramienta informativa · Tequio · Módulo IA</div>
-      </div>
-    </div>
-    <div class="ia-aviso-body">
-      <div class="ia-aviso-legal">
-        <strong>Este contenido es de carácter estrictamente informativo y no constituye asesoría fiscal, contable ni dictamen financiero.</strong> Los cálculos de contribución fiscal son estimaciones educativas basadas en tasas generales y no reflejan la situación fiscal individual del usuario.
-      </div>
-      <div class="ia-aviso-lista">
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Las cifras del PEF 2025 son <strong>datos públicos oficiales</strong>; los análisis derivados son generados por IA y pueden contener errores.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>El análisis de contratos <strong>no equivale a una auditoría</strong> ni tiene valor probatorio.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Para información fiscal personalizada, consulta al <strong>SAT o un contador público certificado</strong>.</span></div>
-      </div>
-      <div class="ia-aviso-fuentes">
-        <div class="ia-aviso-fuentes-label">FUENTES OFICIALES PARA VERIFICAR</div>
-        <div class="ia-aviso-fuentes-links">
-          <a href="https://www.shcp.gob.mx" target="_blank" rel="noopener">📊 SHCP</a>
-          <a href="https://www.asf.gob.mx" target="_blank" rel="noopener">📋 ASF</a>
-          <a href="https://compranet.hacienda.gob.mx" target="_blank" rel="noopener">🏛️ CompraNet</a>
-          <a href="https://www.inegi.org.mx" target="_blank" rel="noopener">📈 INEGI</a>
-          <a href="https://www.sat.gob.mx" target="_blank" rel="noopener">🧾 SAT</a>
-        </div>
-      </div>
-    </div>
-    <div class="ia-aviso-footer">
-      <button class="ia-aviso-btn-aceptar" onclick="iaAvisoAceptar('dinero')">Entendido — Continuar al análisis</button>
-      <label class="ia-aviso-no-mostrar">
-        <input type="checkbox" id="aviso-dinero-nosave"> No volver a mostrar este aviso
-      </label>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL 3: Votaciones IA ── -->
-<div class="ia-aviso-overlay" id="aviso-votaciones">
-  <div class="ia-aviso-box">
-    <div class="ia-aviso-header">
-      <div class="ia-aviso-icon" style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25)">🗳️</div>
-      <div>
-        <div class="ia-aviso-titulo">Aviso Legal — Votaciones del Congreso IA</div>
-        <div class="ia-aviso-subtitulo">Herramienta informativa · Tequio · Módulo IA</div>
-      </div>
-    </div>
-    <div class="ia-aviso-body">
-      <div class="ia-aviso-legal">
-        <strong>Este contenido es de carácter estrictamente informativo y no constituye un registro oficial de votaciones legislativas.</strong> Los datos generados por inteligencia artificial son aproximaciones educativas basadas en información pública disponible hasta la fecha de entrenamiento del modelo.
-      </div>
-      <div class="ia-aviso-lista">
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>La IA <strong>no tiene acceso en tiempo real</strong> al sistema de votaciones del Senado ni de la Cámara de Diputados.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Los números de votos y fechas pueden ser <strong>aproximados o incorrectos</strong>. No cites esta herramienta como fuente primaria.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Para datos oficiales y en tiempo real, consulta el <strong>Diario Oficial</strong> o los portales del Congreso.</span></div>
-      </div>
-      <div class="ia-aviso-fuentes">
-        <div class="ia-aviso-fuentes-label">FUENTES OFICIALES PARA VERIFICAR</div>
-        <div class="ia-aviso-fuentes-links">
-          <a href="https://www.senado.gob.mx" target="_blank" rel="noopener">🏛️ Senado</a>
-          <a href="https://www.diputados.gob.mx" target="_blank" rel="noopener">🏛️ Diputados</a>
-          <a href="https://www.dof.gob.mx" target="_blank" rel="noopener">📜 DOF</a>
-          <a href="https://infosen.senado.gob.mx" target="_blank" rel="noopener">🔎 InfoSen</a>
-        </div>
-      </div>
-    </div>
-    <div class="ia-aviso-footer">
-      <button class="ia-aviso-btn-aceptar" onclick="iaAvisoAceptar('votaciones')">Entendido — Continuar al análisis</button>
-      <label class="ia-aviso-no-mostrar">
-        <input type="checkbox" id="aviso-votaciones-nosave"> No volver a mostrar este aviso
-      </label>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL 4: Verificación Ciudadana ── -->
-<div class="ia-aviso-overlay" id="aviso-verificacion">
-  <div class="ia-aviso-box">
-    <div class="ia-aviso-header">
-      <div class="ia-aviso-icon" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25)">✅</div>
-      <div>
-        <div class="ia-aviso-titulo">Aviso Legal — Verificación Ciudadana IA</div>
-        <div class="ia-aviso-subtitulo">Módulo Beta · Herramienta informativa · Tequio</div>
-      </div>
-    </div>
-    <div class="ia-aviso-body">
-      <div class="ia-aviso-legal">
-        <strong>Este módulo es de carácter informativo y experimental (Beta). No constituye un mecanismo oficial de denuncia, verificación periodística ni resolución jurisdiccional.</strong> El análisis de promesas y cumplimiento de compromisos es generado por inteligencia artificial con base en información pública disponible, y puede contener errores, omisiones o interpretaciones incorrectas.
-      </div>
-      <div class="ia-aviso-lista">
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Los datos de promesas son <strong>ilustrativos</strong> y no representan registros oficiales del Congreso o partidos políticos.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Los reportes ciudadanos <strong>se almacenan únicamente en tu dispositivo</strong> y no tienen valor probatorio formal.</span></div>
-        <div class="ia-aviso-item"><div class="ia-aviso-item-dot"></div><span>Para denuncias formales, acude a la <strong>SFP, CNDH, FGR</strong> o a la autoridad competente en tu estado.</span></div>
-      </div>
-      <div class="ia-aviso-fuentes">
-        <div class="ia-aviso-fuentes-label">FUENTES OFICIALES PARA VERIFICAR</div>
-        <div class="ia-aviso-fuentes-links">
-          <a href="https://www.diputados.gob.mx" target="_blank" rel="noopener">🏛️ Diputados</a>
-          <a href="https://www.senado.gob.mx" target="_blank" rel="noopener">🏛️ Senado</a>
-          <a href="https://www.cndh.org.mx" target="_blank" rel="noopener">⚖️ CNDH</a>
-          <a href="https://www.sfp.gob.mx" target="_blank" rel="noopener">🔎 SFP</a>
-        </div>
-      </div>
-    </div>
-    <div class="ia-aviso-footer">
-      <button class="ia-aviso-btn-aceptar" onclick="iaAvisoAceptar('verificacion')">Entendido — Continuar</button>
-      <label class="ia-aviso-no-mostrar">
-        <input type="checkbox" id="aviso-verificacion-nosave"> No volver a mostrar este aviso
-      </label>
-    </div>
-  </div>
-</div>
-
-<script>
-// ═══════════════════════════════════════════════════════════
-// SISTEMA DE AVISOS LEGALES IA — TEQUIO
-// ═══════════════════════════════════════════════════════════
-
-// Callbacks pendientes por módulo (se ejecutan tras aceptar)
-const _iaAvisoCallbacks = {};
-
-/**
- * Muestra el modal de aviso legal de un módulo IA.
- * Si el usuario ya lo aceptó y marcó "no mostrar", ejecuta el callback directo.
- *
- * @param {string} modulo   - 'corrupcion' | 'dinero' | 'votaciones' | 'verificacion'
- * @param {Function} cb     - Función a ejecutar cuando el usuario acepte
- */
-function iaAvisoMostrar(modulo, cb) {
-  const key = 'tequio_aviso_' + modulo;
-  try {
-    if (localStorage.getItem(key) === 'aceptado') {
-      // Ya aceptó y pidió no volver a ver — ejecutar directo
-      if (typeof cb === 'function') cb();
-      return;
-    }
-  } catch(e) {}
-
-  // Guardar callback
-  _iaAvisoCallbacks[modulo] = cb || null;
-
-  // Mostrar modal
-  const overlay = document.getElementById('aviso-' + modulo);
-  if (overlay) overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-/**
- * Llamado al presionar "Entendido — Continuar".
- * Guarda en localStorage si el usuario marcó el checkbox.
- * Luego ejecuta el callback pendiente.
- */
-function iaAvisoAceptar(modulo) {
-  const overlay = document.getElementById('aviso-' + modulo);
-  if (overlay) overlay.classList.remove('active');
-  document.body.style.overflow = '';
-
-  // Guardar preferencia si checkbox marcado
-  const checkbox = document.getElementById('aviso-' + modulo + '-nosave');
-  if (checkbox && checkbox.checked) {
-    try { localStorage.setItem('tequio_aviso_' + modulo, 'aceptado'); } catch(e) {}
-  }
-
-  // Ejecutar callback original
-  const cb = _iaAvisoCallbacks[modulo];
-  if (typeof cb === 'function') cb();
-  _iaAvisoCallbacks[modulo] = null;
-}
-
-// ─── INTERCEPTORES: envuelven las funciones IA existentes ───
-
-// 1. Radar de Corrupción — buscarCorrupcion() (módulo page-corrupcion)
-const _buscarCorrupcionOrig = typeof buscarCorrupcion !== 'undefined' ? buscarCorrupcion : null;
-function buscarCorrupcionConAviso() {
-  iaAvisoMostrar('corrupcion', () => {
-    if (_buscarCorrupcionOrig) _buscarCorrupcionOrig();
-  });
-}
-
-// Sobrescribir el onclick del botón de búsqueda en el módulo corrupcion
-document.addEventListener('DOMContentLoaded', () => {
-  // Botón buscar del Radar (page-corrupcion)
-  const btnRadar = document.querySelector('#page-corrupcion button[onclick*="buscarCorrupcion"]');
-  if (btnRadar) btnRadar.setAttribute('onclick', 'buscarCorrupcionConAviso()');
-
-  // Input enter del Radar
-  const inputRadar = document.querySelector('#corrupcion-query');
-  if (inputRadar) inputRadar.setAttribute('onkeydown', "if(event.key==='Enter')buscarCorrupcionConAviso()");
-
-  // Chips del Radar
-  document.querySelectorAll('#page-corrupcion .tema-chip').forEach(chip => {
-    const orig = chip.getAttribute('onclick') || '';
-    if (orig.includes('buscarCorrupcion')) {
-      chip.setAttribute('onclick', orig.replace('buscarCorrupcion()', 'buscarCorrupcionConAviso()'));
-    }
-  });
-
-  // 2. Votaciones IA — botón Cargar
-  const btnVot = document.getElementById('btn-cargar-vot');
-  if (btnVot) btnVot.setAttribute('onclick', "iaAvisoMostrar('votaciones', () => cargarVotacionesIA())");
-
-  // Filtros de votaciones IA
-  ['todas','salud','economía','seguridad','derechos'].forEach(tema => {
-    const safeId = tema === 'economía' ? 'economia' : tema;
-    const btn = document.getElementById('vot-filter-' + safeId);
-    if (btn) {
-      btn.setAttribute('onclick', `iaAvisoMostrar('votaciones', () => cargarVotacionesIA('${tema}'))`);
-    }
-  });
-
-  // 3. Dinero Público — analizador de contratos
-  const btnContrato = document.getElementById('pres-contrato-btn');
-  if (btnContrato) btnContrato.setAttribute('onclick', "iaAvisoMostrar('dinero', () => presAnalizarContrato())");
-
-  // Pregunta de presupuesto
-  const btnPregunta = document.querySelector('#pres-tab-compara button[onclick="presPreguntar()"]');
-  if (btnPregunta) btnPregunta.setAttribute('onclick', "iaAvisoMostrar('dinero', () => presPreguntar())");
-  const inputPregunta = document.getElementById('pres-pregunta-input');
-  if (inputPregunta) inputPregunta.setAttribute('onkeydown', "if(event.key==='Enter')iaAvisoMostrar('dinero', () => presPreguntar())");
-
-  // 4. Verificación ciudadana — selector de político
-  // El aviso se dispara al entrar al módulo por primera vez
-  // Se hace mediante el interceptor de showPage (ver abajo)
-});
-</script>
-</body>
-</html>
+  const mun   = document.getE
