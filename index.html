@@ -1856,7 +1856,7 @@
       </div>
       <div class="nav-item" data-page="jurisprudencia" onclick="showPage('jurisprudencia')">
         <span class="icon">⚖️</span> Jurisprudencia SCJN
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próximamente</span>
+        <span class="nav-badge green">✅ SJF2</span>
       </div>
       <div class="nav-item" data-page="presas" onclick="showPage('presas')">
         <span class="icon">💧</span> Presas y Cuencas
@@ -2480,25 +2480,54 @@
       </div>
     </div>
 
-    <!-- ───── JURISPRUDENCIA SCJN (PLACEHOLDER) ───── -->
+    <!-- ───── JURISPRUDENCIA SCJN (DATOS REALES Semanario Judicial) ───── -->
     <div id="page-jurisprudencia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#6d28d9 0%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)">
+        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
           <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">⚖️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Jurisprudencia SCJN</h1>
-              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Tesis y criterios obligatorios de la <strong>Suprema Corte de Justicia de la Nación</strong>.</p>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Tesis emblemáticas del <strong>Semanario Judicial de la Federación</strong>. Cada criterio aquí es <strong>obligatorio</strong> para jueces de todo el país.</p>
             </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">🔜 Próximamente</div>
+            <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SJF2 oficial →</a>
           </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
-          <div style="font-size:48px;margin-bottom:12px">⏳</div>
-          <div style="font-size:18px;font-weight:700;font-family:var(--font-display);margin-bottom:8px">Conexión técnica en proceso</div>
-          <div style="color:var(--text2);font-size:14px;max-width:480px;margin:0 auto 20px;line-height:1.5">El sistema oficial SJF2 requiere renderizado JavaScript. Estamos implementando un cliente que extraiga las tesis en background.</div>
-          <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:var(--accent);color:#fff;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:600;text-decoration:none;font-family:inherit;display:inline-block">Ver SJF2 oficial →</a>
+
+        <!-- Sello de Fuente Oficial Verificada -->
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:28px">✅</div>
+          <div style="flex:1;min-width:220px">
+            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada tesis tiene un <strong>número de registro digital</strong> del Semanario Judicial de la Federación (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">sjf2.scjn.gob.mx</code>). Curaduría inicial: 20 criterios emblemáticos · Décima y Undécima Época. Cero invención.</div>
+          </div>
         </div>
+
+        <!-- Filtros -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input id="jur-search" type="text" placeholder="🔍 Buscar por tema, ley o palabra clave..."
+            oninput="jurDebounceBuscar()"
+            style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+          <select id="jur-materia" onchange="jurBuscar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+            <option value="">Todas las materias</option>
+            <option value="Constitucional">⚖️ Constitucional</option>
+            <option value="Penal">🚔 Penal</option>
+            <option value="Civil">📋 Civil</option>
+            <option value="Administrativa">🏛️ Administrativa</option>
+            <option value="Laboral">💼 Laboral</option>
+          </select>
+          <select id="jur-instancia" onchange="jurBuscar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+            <option value="">Todas las instancias</option>
+            <option value="Pleno">🏛️ Pleno</option>
+            <option value="Primera Sala">1️⃣ Primera Sala</option>
+            <option value="Segunda Sala">2️⃣ Segunda Sala</option>
+          </select>
+        </div>
+
+        <div id="jur-stats" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
+        <div id="jur-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="color:var(--accent2)">SJF2 · Semanario Judicial de la Federación</a> · Suprema Corte de Justicia de la Nación</div>
       </div>
     </div>
 
@@ -3503,6 +3532,76 @@
       window.vcLogout = vcLogout;
 
       // ══════════════════════════════════════════════════════
+      // ── JURISPRUDENCIA SCJN ──────────────────────────────
+      // ══════════════════════════════════════════════════════
+      let _jurDebTimer = null;
+      function jurDebounceBuscar() {
+        clearTimeout(_jurDebTimer);
+        _jurDebTimer = setTimeout(jurBuscar, 350);
+      }
+      window.jurDebounceBuscar = jurDebounceBuscar;
+
+      async function jurBuscar() {
+        const q = document.getElementById('jur-search')?.value || '';
+        const materia = document.getElementById('jur-materia')?.value || '';
+        const instancia = document.getElementById('jur-instancia')?.value || '';
+        const stats = document.getElementById('jur-stats');
+        const lista = document.getElementById('jur-lista');
+        if (!lista) return;
+        lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Buscando tesis…</div>';
+        try {
+          const params = new URLSearchParams({ vista: 'jurisprudencia' });
+          if (q) params.set('q', q);
+          if (materia) params.set('materia', materia);
+          if (instancia) params.set('instancia', instancia);
+          const r = await fetch(`/api/data?${params.toString()}`);
+          const j = await r.json();
+          const tesis = j.tesis || [];
+          if (stats) stats.textContent = `${tesis.length} tesis · curaduría inicial`;
+          if (!tesis.length) {
+            lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">No se encontraron tesis con esos filtros.</div>';
+            return;
+          }
+          lista.innerHTML = tesis.map(t => jurRenderCard(t)).join('');
+        } catch (e) {
+          lista.innerHTML = `<div style="text-align:center;padding:40px;color:#ef4444">Error: ${e.message}</div>`;
+        }
+      }
+      window.jurBuscar = jurBuscar;
+      window.cargarJurisprudencia = jurBuscar;
+
+      function jurRenderCard(t) {
+        const matColor = ({
+          'Constitucional': '#a855f7',
+          'Penal': '#ef4444',
+          'Civil': '#3b82f6',
+          'Administrativa': '#f59e0b',
+          'Laboral': '#10b981',
+        })[t.materia] || '#6b7280';
+        const impBadge = t.importancia === 'alta'
+          ? '<span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">⭐ EMBLEMÁTICA</span>'
+          : '';
+        const fecha = t.fecha_publicacion ? new Date(t.fecha_publicacion).toLocaleDateString('es-MX', { year:'numeric', month:'short' }) : '';
+        const url = t.url_oficial || `https://sjf2.scjn.gob.mx/detalle/tesis/${t.registro_digital}`;
+        return `
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="background:${matColor}22;color:${matColor};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700">${t.materia || 'General'}</span>
+              <span style="color:var(--text3);font-size:11px">${t.instancia || ''} · ${t.epoca || ''} Época</span>
+              ${impBadge}
+              <span style="margin-left:auto;color:var(--text3);font-size:11px">${fecha}</span>
+            </div>
+            <div style="font-size:14px;font-weight:700;line-height:1.4;color:var(--text)">${t.rubro}</div>
+            ${t.resumen_ciudadano ? `<div style="font-size:13px;color:var(--text2);line-height:1.5;background:rgba(168,85,247,0.06);border-left:3px solid #a855f7;padding:10px 12px;border-radius:6px"><strong style="color:#a855f7">En palabras simples:</strong> ${t.resumen_ciudadano}</div>` : ''}
+            <div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text3);flex-wrap:wrap">
+              <span><strong>Clave:</strong> <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px">${t.tesis_clave || '—'}</code></span>
+              <span><strong>Registro:</strong> ${t.registro_digital}</span>
+              <a href="${url}" target="_blank" style="margin-left:auto;background:var(--accent);color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-weight:600">Ver en SJF2 →</a>
+            </div>
+          </div>`;
+      }
+
+      // ══════════════════════════════════════════════════════
       // ── QUEMONES — Fase 4.1.D ────────────────────────────
       // ══════════════════════════════════════════════════════
       async function cargarQuemones() {
@@ -4022,6 +4121,7 @@
           if (p === 'mapacontratos') cargarMapaContratos();
           if (p === 'votar') cargarVotar();
           if (p === 'quemones') cargarQuemones();
+          if (p === 'jurisprudencia') cargarJurisprudencia();
           // Mi Rep: refrescar sección "¿Votó como tú?" si existe
           if (p === 'mi-rep') {
             setTimeout(() => {
