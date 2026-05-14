@@ -680,6 +680,12 @@ export default async function handler(req, res) {
       const por_estado = rows.reduce((acc, z) => { acc[z.estado] = (acc[z.estado] || 0) + 1; return acc; }, {});
       return res.status(200).json({ zonas: rows, total: rows.length, por_estado });
     }
+    if (vista === 'lenguas') {
+      const rows = await sb('inali_lenguas?select=*&order=hablantes.desc.nullslast&limit=80');
+      const por_familia = rows.reduce((acc, l) => { acc[l.familia] = (acc[l.familia] || 0) + 1; return acc; }, {});
+      const por_riesgo = rows.reduce((acc, l) => { acc[l.riesgo] = (acc[l.riesgo] || 0) + 1; return acc; }, {});
+      return res.status(200).json({ lenguas: rows, total: rows.length, por_familia, por_riesgo });
+    }
     if (vista === 'unesco') {
       const rows = await sb('unesco_mexico?select=*&order=anio_inscripcion.asc.nullslast,nombre.asc&limit=100');
       const por_tipo = rows.reduce((acc, s) => { acc[s.tipo] = (acc[s.tipo] || 0) + 1; return acc; }, {});
