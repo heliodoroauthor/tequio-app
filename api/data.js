@@ -671,6 +671,52 @@ export default async function handler(req, res) {
       return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
     }
 
+    // ── Leyes Federales (Cám. Diputados) ──
+    if (vista === 'leyes') {
+      const q = (req.query.q || '').trim();
+      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,texto&order=id.desc&limit=300';
+      if (q && q.length > 2) path += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,texto.ilike.*${encodeURIComponent(q)}*)`;
+      const rows = await sb(path);
+      // Enriquecer con clasificación por materia (heurística sencilla)
+      const clasMat = (nombre) => {
+        const t = (nombre || '').toLowerCase();
+        if (/\b(trabajo|laboral|empleo|salario|isr|imss)\b/.test(t)) return 'laboral';
+        if (/\b(salud|imss|issste|sanitari|medicamento)\b/.test(t)) return 'salud';
+        if (/\b(ambient|ecolog|agua|forestal|cambio climatic|biodiversidad)\b/.test(t)) return 'ambiente';
+        if (/\b(fiscal|impuest|hacienda|iva|aduana)\b/.test(t)) return 'fiscal';
+        if (/\b(seguridad|policial|guardia nacional|delincuencia)\b/.test(t)) return 'seguridad';
+        if (/\b(educaci|sep|maestro|escolar|universidad)\b/.test(t)) return 'educacion';
+        if (/\b(transparenc|acceso a la informaci|inai)\b/.test(t)) return 'transparencia';
+        if (/\b(derechos humanos|discriminaci|indigen|igualdad)\b/.test(t)) return 'derechos';
+        if (/\b(ni[nñ]ez|adolescent|menor)\b/.test(t)) return 'ninez';
+        if (/\b(energ|electric|petrole|hidrocarbur|nuclear)\b/.test(t)) return 'energia';
+        if (/\b(digital|datos personales|telecomunicaci|ciberseg)\b/.test(t)) return 'digital';
+        if (/\b(constituci|amparo|cpeum)\b/.test(t)) return 'constitucional';
+        return 'general';
+      };
+      const leyes = rows.map(r => ({
+        id: r.id,
+        clave: `LEY-${String(r.id).padStart(4,'0')}`,
+        nombre: r.nombre,
+        fuente: r.fuente || 'Cámara de Diputados',
+        url: r.url || `https://www.diputados.gob.mx/LeyesBiblio/index.htm`,
+        fecha_publicacion: r.fecha_publicacion,
+        descripcion: (r.texto || '').slice(0, 400),
+        materia: clasMat(r.nombre),
+        ambito: 'federal',
+        estado: 'vigente',
+      }));
+      return res.status(200).json({ leyes, total: leyes.length });
+    }
+
+    if (vista === 'ley_detalle') {
+      const id = req.query.id;
+      if (!id) return res.status(400).json({ error: 'falta id' });
+      const rows = await sb(`leyes?id=eq.${id}&select=*`);
+      if (!rows.length) return res.status(404).json({ error: 'no encontrada' });
+      return res.status(200).json(rows[0]);
+    }
+
     // ── Jurisprudencia SCJN — Tesis del Semanario Judicial ──
     if (vista === 'jurisprudencia') {
       const q = (req.query.q || '').trim();
