@@ -202,6 +202,152 @@ export default async function handler(req, res) {
       });
     }
 
+    // ════════════ VOTACIÓN CIUDADANA — Fase 4.1.B ════════════
+
+    if (vista === 'registrar_ciudadano') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      let body = req.body;
+      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+      const { cookie_id, entidad, distrito, declara_mayor } = body || {};
+      if (!cookie_id || !entidad || distrito === undefined) {
+        return res.status(400).json({ error: 'cookie_id, entidad y distrito requeridos' });
+      }
+      if (!declara_mayor) {
+        return res.status(400).json({ error: 'Debes declarar ser mayor de 18 años para participar.' });
+      }
+      const distritoNum = parseInt(distrito, 10);
+      if (isNaN(distritoNum) || distritoNum < 1 || distritoNum > 50) {
+        return res.status(400).json({ error: 'Distrito inválido (1-50).' });
+      }
+      // UUID v4 sanity check
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cookie_id)) {
+        return res.status(400).json({ error: 'cookie_id inválido (no es UUID).' });
+      }
+      const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim();
+      const ua = (req.headers['user-agent'] || '');
+      // Hash IP + UA con crypto.subtle (Edge runtime) o crypto si está en Node
+      const sha256 = async (s) => {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      };
+      const ip_hash = await sha256(ip || 'unknown');
+      const ua_hash = await sha256(ua || 'unknown');
+      // UPSERT directo
+      const url = `${SUPABASE_URL}/rest/v1/usuarios_ciudadanos?on_conflict=cookie_id`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation',
+        },
+        body: JSON.stringify({
+          cookie_id,
+          entidad,
+          distrito: distritoNum,
+          ip_signup_hash: ip_hash,
+          user_agent_hash: ua_hash,
+          declara_mayor_edad: true,
+          last_seen: new Date().toISOString(),
+        }),
+      });
+      if (!r.ok) {
+        const errText = await r.text();
+        return res.status(500).json({ error: 'No se pudo registrar', detail: errText.slice(0, 200) });
+      }
+      const data = await r.json();
+      return res.status(200).json({ ok: true, usuario_id: data?.[0]?.id, entidad, distrito: distritoNum });
+    }
+
+    if (vista === 'me') {
+      // Devuelve datos del usuario logueado (por cookie_id)
+      const cookie_id = req.query.cookie_id || '';
+      if (!cookie_id || !/^[0-9a-f-]{36}$/i.test(cookie_id)) {
+        return res.status(200).json({ logueado: false });
+      }
+      const rows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito,declara_mayor_edad,created_at`);
+      if (!rows || !rows.length) return res.status(200).json({ logueado: false });
+      const u = rows[0];
+      // Cuenta cuántos votos ha emitido
+      const votos = await sb(`votos_ciudadanos?usuario_id=eq.${u.id}&select=votacion_pendiente_id`);
+      return res.status(200).json({
+        logueado: true,
+        usuario: u,
+        num_votos: (votos || []).length,
+      });
+    }
+
+    if (vista === 'votaciones_pendientes') {
+      const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
+      const estado = req.query.estado || 'abierta';
+      const cookie_id = req.query.cookie_id || '';
+      const rows = await sb(`votaciones_pendientes?estado=eq.${encodeURIComponent(estado)}&order=fecha_propuesta.desc&select=id,titulo,asunto_corto,descripcion,materia,fecha_propuesta,fecha_votacion,gaceta_url,votacion_id,estado&limit=${limit}`);
+      const resultados = {};
+      const mi_voto = {};
+      if (rows && rows.length) {
+        const ids = rows.map(r => r.id).join(',');
+        const votosRows = await sb(`votos_ciudadanos?votacion_pendiente_id=in.(${ids})&select=votacion_pendiente_id,voto`);
+        for (const v of votosRows || []) {
+          if (!resultados[v.votacion_pendiente_id]) resultados[v.votacion_pendiente_id] = { si: 0, no: 0, abst: 0, total: 0 };
+          resultados[v.votacion_pendiente_id][v.voto] = (resultados[v.votacion_pendiente_id][v.voto] || 0) + 1;
+          resultados[v.votacion_pendiente_id].total++;
+        }
+        if (cookie_id && /^[0-9a-f-]{36}$/i.test(cookie_id)) {
+          const userRows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id`);
+          const uid = userRows?.[0]?.id;
+          if (uid) {
+            const misVotos = await sb(`votos_ciudadanos?usuario_id=eq.${uid}&votacion_pendiente_id=in.(${ids})&select=votacion_pendiente_id,voto`);
+            for (const v of misVotos || []) mi_voto[v.votacion_pendiente_id] = v.voto;
+          }
+        }
+      }
+      return res.status(200).json({ votaciones: rows || [], resultados, mi_voto });
+    }
+
+    if (vista === 'emitir_voto') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      let body = req.body;
+      if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+      const { cookie_id, entidad, distrito, votacion_pendiente_id, voto, declara_mayor } = body || {};
+      if (!cookie_id || !entidad || !distrito || !votacion_pendiente_id || !voto) {
+        return res.status(400).json({ error: 'Faltan campos.' });
+      }
+      if (!/^[0-9a-f-]{36}$/i.test(cookie_id)) return res.status(400).json({ error: 'cookie_id inválido.' });
+      if (!['si', 'no', 'abst'].includes(voto)) return res.status(400).json({ error: 'voto debe ser si/no/abst.' });
+
+      const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').split(',')[0].trim();
+      const ua = (req.headers['user-agent'] || '');
+      const sha256 = async (s) => {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      };
+      const ip_hash = await sha256(ip || 'unknown');
+      const ua_hash = await sha256(ua || 'unknown');
+
+      const url = `${SUPABASE_URL}/rest/v1/rpc/emitir_voto_ciudadano`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          p_cookie_id: cookie_id,
+          p_entidad: entidad,
+          p_distrito: parseInt(distrito, 10),
+          p_votacion_pendiente_id: parseInt(votacion_pendiente_id, 10),
+          p_voto: voto,
+          p_ip_hash: ip_hash,
+          p_ua_hash: ua_hash,
+          p_declara_mayor: !!declara_mayor,
+        }),
+      });
+      const result = await r.json();
+      return res.status(r.ok ? 200 : 400).json(result);
+    }
+
     // ────────── SENADORES — Fase 3.1.B ──────────
     if (vista === 'senadores') {
       // Lista de los 128 senadores con filtros
@@ -471,6 +617,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
+      'votaciones_pendientes','emitir_voto','registrar_ciudadano','me',
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista'
