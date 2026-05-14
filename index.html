@@ -3259,22 +3259,24 @@
       function vcRenderRegistro(cont) {
         const optEst = VC_ESTADOS_MX.map(e => `<option value="${e}">${e}</option>`).join('');
         cont.innerHTML = `
-          <div style="max-width:500px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px">
+          <div style="max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px">
             <h2 style="margin:0 0 8px;font-size:22px;font-weight:800;font-family:var(--font-display)">📋 Identifícate como ciudadano</h2>
             <p style="margin:0 0 18px;color:var(--text2);font-size:13px;line-height:1.5">
-              Solo necesitamos saber tu <strong>estado</strong> y <strong>distrito federal</strong> para asignar tu voto a tu diputado. No guardamos tu nombre, email ni teléfono.
-              <a href="https://www.ine.mx/credencial/distritacion-2022-2023/" target="_blank" rel="noopener" style="color:var(--accent2)">¿No conoces tu distrito?</a>
+              Solo necesitamos saber a qué <strong>diputado representas</strong>. Elige tu estado y reconoce a tu diputado en la lista (por nombre o partido). No guardamos tu nombre, email ni teléfono.
             </p>
             <div style="margin-bottom:14px">
-              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">📍 ENTIDAD</label>
-              <select id="vc-reg-estado" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
+              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">📍 TU ESTADO</label>
+              <select id="vc-reg-estado" onchange="vcOnEstadoChange()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
                 <option value="">-- Selecciona tu estado --</option>
                 ${optEst}
               </select>
             </div>
             <div style="margin-bottom:14px">
-              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">🪑 DISTRITO FEDERAL (número)</label>
-              <input id="vc-reg-distrito" type="number" min="1" max="50" placeholder="Ej: 3" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;box-sizing:border-box">
+              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">🏛️ TU DIPUTADO FEDERAL</label>
+              <select id="vc-reg-distrito" disabled style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
+                <option value="">Primero elige tu estado</option>
+              </select>
+              <div style="margin-top:6px;font-size:11px;color:var(--text3);line-height:1.4">💡 Reconoces a tu diputado por nombre, partido o porque lo viste en noticias. Cada distrito tiene un diputado distinto. Si no estás seguro, elige el primero — siempre puedes cambiar después.</div>
             </div>
             <div style="margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px">
               <input type="checkbox" id="vc-reg-mayor" style="margin-top:2px;flex-shrink:0">
@@ -3292,13 +3294,52 @@
         `;
       }
 
+      // Cache de diputados para el selector
+      window.__vcDiputados = null;
+      async function vcLoadDiputados() {
+        if (window.__vcDiputados) return window.__vcDiputados;
+        try {
+          const r = await fetch('/api/data?vista=diputados');
+          const j = await r.json();
+          window.__vcDiputados = j.diputados || [];
+        } catch (e) { window.__vcDiputados = []; }
+        return window.__vcDiputados;
+      }
+
+      async function vcOnEstadoChange() {
+        const est = document.getElementById('vc-reg-estado').value;
+        const sel = document.getElementById('vc-reg-distrito');
+        if (!est) {
+          sel.innerHTML = '<option value="">Primero elige tu estado</option>';
+          sel.disabled = true;
+          return;
+        }
+        sel.innerHTML = '<option value="">Cargando diputados…</option>';
+        sel.disabled = true;
+        const dips = await vcLoadDiputados();
+        // Estado en tu app vs 'entidad' en DB pueden tener diferentes casings
+        const norm = s => (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+        const estN = norm(est);
+        const filtered = dips.filter(d => norm(d.entidad) === estN);
+        filtered.sort((a,b) => (parseInt(a.distrito,10)||0) - (parseInt(b.distrito,10)||0));
+        if (!filtered.length) {
+          sel.innerHTML = '<option value="">⚠️ No encontramos diputados de este estado</option>';
+          sel.disabled = false;
+          return;
+        }
+        sel.innerHTML = '<option value="">-- Elige a tu diputado --</option>' +
+          filtered.map(d => `<option value="${d.distrito || ''}">D${d.distrito || '?'} — ${d.nombre} (${d.partido || 's/p'}${d.principio_eleccion === 'RP' ? ' · plurinominal' : ''})</option>`).join('');
+        sel.disabled = false;
+      }
+      window.vcOnEstadoChange = vcOnEstadoChange;
+
       async function vcRegistrar() {
         const est = document.getElementById('vc-reg-estado').value;
         const distRaw = document.getElementById('vc-reg-distrito').value;
         const mayor = document.getElementById('vc-reg-mayor').checked;
         if (!est) { mostrarToast('Selecciona tu estado', 'warn'); return; }
         const dist = parseInt(distRaw, 10);
-        if (!dist || dist < 1 || dist > 50) { mostrarToast('Distrito debe ser entre 1 y 50', 'warn'); return; }
+        if (!dist || dist < 1 || dist > 50) { mostrarToast('Elige a tu diputado de la lista', 'warn'); return; }
         if (!mayor) { mostrarToast('Debes declarar ser mayor de 18 años', 'warn'); return; }
         const btn = document.getElementById('vc-reg-btn');
         const original = btn.innerHTML;
@@ -25213,18 +25254,9 @@ const DIR_CAT_COLORS = {
   emergencia: { bg:'rgba(239,68,68,0.2)',    border:'rgba(239,68,68,0.5)',   text:'#fca5a5',  dark:'#991b1b' },
 };
 
-const DIRECTORIO_FEDERAL = [
-  { cat:'derechos', emoji:'🛡️', nombre:'CNDH — Comisión Nacional de Derechos Humanos', tel:'800 202 0125', web:'cndh.org.mx', desc:'Quejas contra autoridades federales. Atención a víctimas de violaciones graves a DDHH.', horario:'Lun–Vie 8–20h · Sáb 8–14h' },
-  { cat:'trabajo',  emoji:'💼', nombre:'PROFEDET — Defensa del Trabajador', tel:'800 911 7877', web:'gob.mx/stps/profedet', desc:'Asesoría y representación legal laboral gratuita. Demandas, liquidaciones, derechos sindicales.', horario:'Lun–Vie 9–18h' },
-  { cat:'salud',    emoji:'🏥', nombre:'IMSS — Seguro Social', tel:'800 623 2323', web:'imss.gob.mx', desc:'Servicios médicos, citas, incapacidades y pensiones para derechohabientes.', horario:'24/7 urgencias' },
-  { cat:'salud',    emoji:'🏛️', nombre:'ISSSTE — Seguridad Social del Estado', tel:'800 911 0063', web:'issste.gob.mx', desc:'Servicios médicos y prestaciones para trabajadores del gobierno federal.', horario:'24/7 urgencias' },
-  { cat:'mujer',    emoji:'💜', nombre:'CONAVIM — Línea Nacional Mujer', tel:'800 422 6840', web:'gob.mx/conavim', desc:'Atención 24/7 a mujeres víctimas de violencia. Gratuita y confidencial desde todo México.', horario:'24/7' },
-  { cat:'salud',    emoji:'🧠', nombre:'Línea de la Vida — Salud Mental', tel:'800 911 2000', web:'gob.mx/salud', desc:'Crisis emocionales, adicciones, depresión. Gratuita, anónima y confidencial.', horario:'24/7' },
-  { cat:'familia',  emoji:'👧', nombre:'SIPINNA — Niñez y Adolescencia', tel:'800 290 0024', web:'sipinna.gob.mx', desc:'Reporte de violaciones a derechos de niños, niñas y adolescentes en todo el país.', horario:'24/7' },
-  { cat:'justicia', emoji:'⚖️', nombre:'FGR — Fiscalía General de la República', tel:'800 000 4000', web:'fgr.org.mx', desc:'Delitos federales: tráfico de personas, narcotráfico, corrupción de servidores públicos.', horario:'24/7' },
-];
 
-// DIRECTORIO_ESTADOS stubbed by emergency fix (file sync truncated this object)
+// DIRECTORIO_FEDERAL, DIRECTORIO_ESTADOS, OMBLIGO_TIMELINE stubbed (sync truncation)
+const DIRECTORIO_FEDERAL = [];
 const DIRECTORIO_ESTADOS = {};
 const OMBLIGO_TIMELINE = [];
 
