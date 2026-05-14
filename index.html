@@ -24475,6 +24475,28 @@ function initOmbligo() {
   renderOmbligoTimeline();
   renderOmbligoMuseos();
   renderOmbligoZonas();
+  // Cargar 195 zonas arqueológicas reales del INAH (Supabase)
+  fetch('/api/data?vista=ombligo_zonas').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.zonas)) return;
+    const ya = new Set(OMBLIGO_ZONAS.map(z => (z.nombre || '').toLowerCase()));
+    const reales = j.zonas.filter(z => !ya.has((z.nombre || '').toLowerCase())).map(z => ({
+      nombre: z.nombre, estado: z.estado, descripcion: z.descripcion || '',
+      periodo: z.periodo || '', horario: z.horario || '', costo: z.costo || '',
+      emoji: '🏛️', color: '#d97706', fuenteINAH: true
+    }));
+    if (reales.length) { OMBLIGO_ZONAS.push(...reales); renderOmbligoZonas(); }
+  }).catch(() => {});
+  // Cargar 165 museos del INAH (Supabase)
+  fetch('/api/data?vista=ombligo_museos').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.museos)) return;
+    const ya = new Set(OMBLIGO_MUSEOS.map(m => (m.nombre || '').toLowerCase()));
+    const reales = j.museos.filter(m => !ya.has((m.nombre || '').toLowerCase())).map(m => ({
+      nombre: m.nombre, ciudad: m.ciudad || m.estado || '',
+      descripcion: m.descripcion || '', horario: m.horario || '', costo: m.costo || '',
+      emoji: '🏛️', color: '#d97706', fuenteINAH: true
+    }));
+    if (reales.length) { OMBLIGO_MUSEOS.push(...reales); renderOmbligoMuseos(); }
+  }).catch(() => {});
 }
 
 function ombligoTab(tab) {
