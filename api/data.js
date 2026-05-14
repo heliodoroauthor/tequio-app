@@ -671,13 +671,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
     }
 
-    // ── Leyes Federales (Cám. Diputados) ──
+    // ── Leyes (Federales + Estatales) ──
     if (vista === 'leyes') {
       const q = (req.query.q || '').trim();
-      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,texto&order=id.desc&limit=300';
+      const ambito = (req.query.ambito || '').trim();
+      const entidad = (req.query.entidad || '').trim();
+      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,texto,ambito,entidad,tipo&order=ambito.asc,nombre.asc&limit=1000';
+      if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
+      if (entidad) path += `&entidad=eq.${encodeURIComponent(entidad)}`;
       if (q && q.length > 2) path += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,texto.ilike.*${encodeURIComponent(q)}*)`;
       const rows = await sb(path);
-      // Enriquecer con clasificación por materia (heurística sencilla)
+      // Clasificación por materia (heurística)
       const clasMat = (nombre) => {
         const t = (nombre || '').toLowerCase();
         if (/\b(trabajo|laboral|empleo|salario|isr|imss)\b/.test(t)) return 'laboral';
@@ -703,10 +707,19 @@ export default async function handler(req, res) {
         fecha_publicacion: r.fecha_publicacion,
         descripcion: (r.texto || '').slice(0, 400),
         materia: clasMat(r.nombre),
-        ambito: 'federal',
+        ambito: r.ambito || 'federal',
+        entidad: r.entidad || null,
+        tipo: r.tipo || 'ley',
         estado: 'vigente',
       }));
-      return res.status(200).json({ leyes, total: leyes.length });
+      return res.status(200).json({
+        leyes,
+        total: leyes.length,
+        por_ambito: leyes.reduce((acc, l) => {
+          acc[l.ambito] = (acc[l.ambito] || 0) + 1;
+          return acc;
+        }, {}),
+      });
     }
 
     if (vista === 'ley_detalle') {
