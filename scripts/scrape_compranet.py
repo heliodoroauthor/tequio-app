@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 """
-scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v3 — CSV directo)
-========================================================================
-La API JSON `api.datos.gob.mx/v2/contratacionesabiertas` está caída en mayo 2026.
-Plan B: descargar el CSV oficial de UPCP-Compranet directamente.
+scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v4 — CSV directo, columnas reales)
+========================================================================================
+v3 falló porque mi COL_MAP usaba nombres CAMEL_CASE_UPPER pero el CSV real
+usa Title Case con acentos: "Código del expediente", "Título del expediente",
+"Tipo Procedimiento", etc.
 
-Fuentes:
-  - 2025: https://upcp-compranet.buengobierno.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2025.csv
-  - 2024: https://upcp-compranet.hacienda.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2024.csv
-
-Estos CSVs tienen formato propio de Compranet (no OCDS), con columnas tipo:
-  CODIGO_EXPEDIENTE, NUMERO_PROCEDIMIENTO, TITULO_EXPEDIENTE,
-  TIPO_PROCEDIMIENTO, CARACTER, ESTATUS_CONTRATO, CLAVE_UC, NOMBRE_UC,
-  TITULO_CONTRATO, FECHA_INICIO, FECHA_FIN, IMPORTE_CONTRATO,
-  PROVEEDOR_CONTRATISTA, ESTRATIFICACION_MUC, etc.
+v4 fixes:
+  - Normaliza nombres de columna (lowercase, sin acentos, _ en lugar de espacios)
+  - Imprime las 73 columnas reales en el primer run
+  - Mapping flexible con fallback por substring
 """
-import os, sys, csv, io, time, requests
+import os, sys, csv, io, re, time, requests
 from datetime import datetime
 
 import urllib3
@@ -24,7 +20,6 @@ urllib3.disable_warnings()
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SERVICE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 
-# Fuentes oficiales (probar en orden, usar la primera que responda)
 CSV_URLS = [
     'https://upcp-compranet.buengobierno.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2025.csv',
     'https://upcp-compranet.hacienda.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2024.csv',
@@ -32,7 +27,7 @@ CSV_URLS = [
 
 UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
 HEADERS_WEB = {'User-Agent': UA}
-TIMEOUT_DOWNLOAD = 300  # 5 min para descargar CSV completo
+TIMEOUT_DOWNLOAD = 300
 
 BATCH_INSERT = int(os.environ.get('BATCH_INSERT', '200'))
 MAX_CONTRATOS = int(os.environ.get('MAX_CONTRATOS', '250000'))
@@ -44,7 +39,7 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-print("Tequio · Scraper Compranet (v3 — CSV directo)")
+print("Tequio · Scraper Compranet (v4 — CSV directo, columnas reales)")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE: {'OK' if SUPABASE_URL and SERVICE_KEY else 'MISSING'}")
 
@@ -52,15 +47,25 @@ if not (SUPABASE_URL and SERVICE_KEY):
     sys.exit(1)
 
 
+def norm_col(s):
+    """lowercase, sin acentos, alfanumérico+_."""
+    if not s:
+        return ''
+    s = str(s).strip().lower()
+    rep = {'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u','ñ':'n'}
+    for k,v in rep.items():
+        s = s.replace(k, v)
+    s = re.sub(r'[^a-z0-9]+', '_', s).strip('_')
+    return s
+
+
 def descargar_csv(url):
-    """Intenta descargar un CSV. Devuelve (text, err)."""
     print(f"\n[GET] {url}")
     try:
         r = requests.get(url, headers=HEADERS_WEB, timeout=TIMEOUT_DOWNLOAD, verify=False, stream=False)
         print(f"  Status: {r.status_code}, bytes: {len(r.content)}")
         if not r.ok:
             return None, f'HTTP {r.status_code}'
-        # Detectar encoding (Compranet CSVs suelen venir en latin-1 o utf-8-sig)
         try:
             text = r.content.decode('utf-8-sig')
         except UnicodeDecodeError:
@@ -74,19 +79,20 @@ def descargar_csv(url):
 
 
 def detectar_delimitador(sample):
-    """Compranet usa ',' o ';' o '|'. Detectar."""
     counts = {d: sample.count(d) for d in [',', ';', '|', '\t']}
     return max(counts, key=counts.get)
 
 
 def normalizar_procedimiento(s):
     s = (s or '').lower()
-    if 'licitaci' in s or 'lp' in s:
+    if 'licitaci' in s:
         return 'licitacion_publica'
-    if 'invitaci' in s or 'ito' in s:
+    if 'invitaci' in s:
         return 'invitacion_tres'
-    if 'adjudic' in s or 'ad' in s:
+    if 'adjudic' in s:
         return 'adjudicacion_directa'
+    if 'proyecto' in s and 'convocatoria' in s:
+        return 'licitacion_publica'
     return None
 
 
@@ -113,11 +119,12 @@ def normalizar_categoria(s):
 
 
 def parse_fecha(s):
-    """Convierte fecha 'DD/MM/YYYY' o 'YYYY-MM-DD' a 'YYYY-MM-DD'."""
     if not s:
         return None
     s = str(s).strip()
-    for fmt in ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%Y/%m/%d']:
+    if not s or s.lower() == 'null':
+        return None
+    for fmt in ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%Y/%m/%d', '%m/%d/%Y']:
         try:
             return datetime.strptime(s[:19], fmt).date().isoformat()
         except Exception:
@@ -126,75 +133,159 @@ def parse_fecha(s):
 
 
 def parse_monto(s):
-    if not s:
+    if s is None:
         return None
     s = str(s).strip().replace(',', '').replace('$', '').replace(' ', '')
+    if not s or s.lower() == 'null':
+        return None
     try:
         return float(s)
     except Exception:
         return None
 
 
-# Mapeo de nombres de columna conocidos → campos de nuestra tabla
+# ─── Mapeo por nombre normalizado ─────────────────────────────────────────
+# Keys = norm_col(nombre_columna_csv)
 COL_MAP = {
-    'CODIGO_EXPEDIENTE':           'ocid_origen',
-    'NUMERO_PROCEDIMIENTO':        'numero_proc',
-    'EXPEDIENTE':                  'ocid_origen',
-    'CODIGO_CONTRATO':             'codigo_contrato',
-    'TITULO_EXPEDIENTE':           'titulo',
-    'TITULO_CONTRATO':             'titulo',
-    'DESCRIPCION_CONTRATO':        'descripcion',
-    'DESCRIPCION_EXPEDIENTE':      'descripcion',
-    'CLAVE_UC':                    'dependencia_codigo',
-    'NOMBRE_UC':                   'unidad_compradora',
-    'RESPONSABLE':                 'responsable',
-    'ESTRATIFICACION_MUC':         'estratificacion',
-    'SIGLAS_UC':                   'dependencia_codigo',
-    'RAMO':                        'ramo',
-    'CLAVE_DEPENDENCIA':           'dependencia_codigo',
-    'DEPENDENCIA':                 'dependencia',
-    'NOMBRE_DEPENDENCIA':          'dependencia',
-    'TIPO_CONTRATACION':           'tipo_contrato',
-    'TIPO_PROCEDIMIENTO':          'tipo_procedimiento',
-    'FORMA_PROCEDIMIENTO':         'forma_proc',
-    'CARACTER':                    'caracter',
-    'CARACTER_PROCEDIMIENTO':      'caracter',
-    'PROVEEDOR_CONTRATISTA':       'proveedor_nombre',
-    'NOMBRE_PROVEEDOR':            'proveedor_nombre',
-    'RAZON_SOCIAL':                'proveedor_nombre',
-    'RFC':                         'proveedor_rfc',
-    'RFC_PROVEEDOR':               'proveedor_rfc',
-    'ESTRATIFICACION_MPYME':       'estrat_pyme',
-    'SIGLAS_PAIS':                 'proveedor_pais',
-    'IMPORTE_CONTRATO':            'monto_mxn',
-    'IMPORTE_TOTAL':               'monto_mxn',
-    'IMPORTE':                     'monto_mxn',
-    'MONEDA':                      'moneda',
-    'FECHA_INICIO':                'fecha_inicio',
-    'FECHA_FIN':                   'fecha_fin',
-    'FECHA_FIRMA':                 'fecha_firma',
-    'FECHA_APERTURA_PROPOSICIONES':'fecha_firma',
-    'FECHA_FALLO':                 'fecha_firma',
-    'ENTIDAD_FEDERATIVA':          'entidad_federativa',
-    'ESTATUS_CONTRATO':            'estatus',
+    # IDs / Códigos
+    'codigo_del_expediente':         'ocid_origen',
+    'codigo_expediente':             'ocid_origen',
+    'referencia_del_expediente':     'numero_proc',
+    'numero_de_procedimiento':       'numero_proc',
+    'codigo_del_contrato':           'codigo_contrato',
+    'codigo_contrato':               'codigo_contrato',
+    # Títulos / descripción
+    'titulo_del_expediente':         'titulo',
+    'titulo_del_contrato':           'titulo',
+    'titulo_expediente':             'titulo',
+    'titulo_contrato':               'titulo',
+    'descripcion_del_contrato':      'descripcion',
+    'descripcion_del_expediente':    'descripcion',
+    'descripcion_contrato':          'descripcion',
+    'descripcion_expediente':        'descripcion',
+    # Dependencia
+    'institucion':                   'dependencia',
+    'nombre_de_la_institucion':      'dependencia',
+    'dependencia':                   'dependencia',
+    'nombre_de_la_dependencia':      'dependencia',
+    'siglas_de_la_institucion':      'dependencia_codigo',
+    'siglas_institucion':            'dependencia_codigo',
+    'clave_institucion':             'dependencia_codigo',
+    'clave_de_la_institucion':       'dependencia_codigo',
+    'nombre_de_la_uc':               'unidad_compradora',
+    'nombre_uc':                     'unidad_compradora',
+    'clave_de_la_uc':                'clave_uc',
+    'clave_uc':                      'clave_uc',
+    'descripcion_ramo':              'ramo',
+    'ramo':                          'ramo',
+    'clave_ramo':                    'clave_ramo',
+    # Procedimiento
+    'tipo_procedimiento':            'tipo_procedimiento',
+    'tipo_de_procedimiento':         'tipo_procedimiento',
+    'caracter':                      'caracter',
+    'caracter_del_procedimiento':    'caracter',
+    'caracter_procedimiento':        'caracter',
+    'tipo_de_contratacion':          'tipo_contrato',
+    'tipo_contratacion':             'tipo_contrato',
+    # Proveedor
+    'proveedor_o_contratista':       'proveedor_nombre',
+    'proveedor_contratista':         'proveedor_nombre',
+    'nombre_del_proveedor_o_contratista': 'proveedor_nombre',
+    'nombre_del_proveedor':          'proveedor_nombre',
+    'razon_social':                  'proveedor_nombre',
+    'razon_social_del_proveedor':    'proveedor_nombre',
+    'rfc':                           'proveedor_rfc',
+    'rfc_del_proveedor':             'proveedor_rfc',
+    'rfc_del_proveedor_o_contratista': 'proveedor_rfc',
+    'rfc_proveedor':                 'proveedor_rfc',
+    'siglas_del_pais':               'proveedor_pais',
+    'siglas_pais':                   'proveedor_pais',
+    'pais_de_origen':                'proveedor_pais',
+    'estratificacion_de_la_mipyme':  'estrat_pyme',
+    'estratificacion_mipyme':        'estrat_pyme',
+    # Montos
+    'importe_del_contrato':          'monto_mxn',
+    'importe_contrato':              'monto_mxn',
+    'importe_total':                 'monto_mxn',
+    'importe_total_del_contrato':    'monto_mxn',
+    'monto':                         'monto_mxn',
+    'monto_total':                   'monto_mxn',
+    'moneda':                        'moneda',
+    'tipo_de_moneda':                'moneda',
+    # Fechas
+    'fecha_de_firma':                'fecha_firma',
+    'fecha_firma':                   'fecha_firma',
+    'fecha_inicio':                  'fecha_inicio',
+    'fecha_inicio_contrato':         'fecha_inicio',
+    'fecha_de_inicio_del_contrato':  'fecha_inicio',
+    'fecha_de_inicio':               'fecha_inicio',
+    'fecha_fin':                     'fecha_fin',
+    'fecha_fin_contrato':            'fecha_fin',
+    'fecha_de_fin_del_contrato':     'fecha_fin',
+    'fecha_de_fin':                  'fecha_fin',
+    'fecha_termino':                 'fecha_fin',
+    # Geográfico
+    'entidad_federativa':            'entidad_federativa',
+    'estado':                        'entidad_federativa',
+    'municipio':                     'municipio',
+    'estatus_del_contrato':          'estatus',
+    'estatus_contrato':              'estatus',
 }
 
 
-def parse_csv_row(row):
-    """Toma una row dict del CSV y devuelve dict listo para nuestra tabla."""
+def parse_csv_row(row, debug_first=False):
     out = {}
-    for col, valor in row.items():
-        if not col:
+    if debug_first:
+        print("  [SAMPLE ROW]:")
+    for col_orig, valor in row.items():
+        if not col_orig:
             continue
-        key = COL_MAP.get(col.strip().upper())
+        col_norm = norm_col(col_orig)
+        # 1) Exact match
+        key = COL_MAP.get(col_norm)
+        # 2) Fallback substring matching (para campos clave)
+        if not key:
+            if 'titulo' in col_norm and ('expediente' in col_norm or 'contrato' in col_norm):
+                key = 'titulo'
+            elif 'descripcion' in col_norm and ('expediente' in col_norm or 'contrato' in col_norm or 'partida' in col_norm):
+                key = 'descripcion' if 'descripcion' not in out else None
+            elif 'proveedor' in col_norm or 'contratista' in col_norm or 'razon_social' in col_norm:
+                if 'rfc' in col_norm:
+                    key = 'proveedor_rfc'
+                elif 'pais' in col_norm:
+                    key = 'proveedor_pais'
+                elif 'estratificacion' in col_norm or 'mipyme' in col_norm or 'tipo' in col_norm:
+                    pass  # ignore
+                else:
+                    key = 'proveedor_nombre'
+            elif col_norm == 'rfc':
+                key = 'proveedor_rfc'
+            elif 'importe' in col_norm or col_norm.startswith('monto'):
+                key = 'monto_mxn'
+            elif 'fecha' in col_norm and 'firma' in col_norm:
+                key = 'fecha_firma'
+            elif 'fecha' in col_norm and 'inicio' in col_norm:
+                key = 'fecha_inicio'
+            elif 'fecha' in col_norm and ('fin' in col_norm or 'termino' in col_norm):
+                key = 'fecha_fin'
+            elif col_norm in ('institucion', 'dependencia') or 'nombre_de_la_institucion' in col_norm:
+                key = 'dependencia'
+
+        if debug_first and valor not in (None, ''):
+            v_short = str(valor)[:60]
+            mapped = f' → {key}' if key else ''
+            print(f"    {col_orig!r}{mapped}: {v_short!r}")
+
         if key and valor not in (None, '', 'NULL'):
-            out[key] = valor.strip() if isinstance(valor, str) else valor
+            # No sobrescribir si ya hay valor (preferir el primer match)
+            if key not in out:
+                out[key] = valor.strip() if isinstance(valor, str) else valor
 
     # OCID compuesto si no viene
     ocid = out.get('ocid_origen') or out.get('codigo_contrato') or out.get('numero_proc')
     if not ocid:
         return None
-    out['ocid'] = f"CN-MX-{ocid}"
+    out['ocid'] = f"CN-MX-{str(ocid).strip()}"
 
     # Limpiar campos a tipos correctos
     monto = parse_monto(out.get('monto_mxn'))
@@ -202,7 +293,7 @@ def parse_csv_row(row):
     out['fecha_firma']  = parse_fecha(out.get('fecha_firma'))
     out['fecha_inicio'] = parse_fecha(out.get('fecha_inicio'))
     out['fecha_fin']    = parse_fecha(out.get('fecha_fin'))
-    if out['fecha_inicio'] and out['fecha_fin']:
+    if out.get('fecha_inicio') and out.get('fecha_fin'):
         try:
             d1 = datetime.strptime(out['fecha_inicio'], '%Y-%m-%d').date()
             d2 = datetime.strptime(out['fecha_fin'], '%Y-%m-%d').date()
@@ -214,25 +305,20 @@ def parse_csv_row(row):
     out['caracter']           = normalizar_caracter(out.get('caracter'))
     out['tipo_contrato']      = normalizar_categoria(out.get('tipo_contrato'))
 
-    out['titulo'] = (out.get('titulo') or out.get('descripcion') or 'Sin título')[:500]
+    titulo = out.get('titulo') or out.get('descripcion') or ''
+    out['titulo'] = (titulo or 'Sin título')[:500]
     if out.get('descripcion'):
         out['descripcion'] = out['descripcion'][:2000]
 
-    # Flag
-    out['flag_adjudicacion_directa_alta'] = (
+    out['flag_adjudicacion_directa_alta'] = bool(
         out.get('tipo_procedimiento') == 'adjudicacion_directa' and
         monto is not None and monto > UMBRAL_AD_ALTA_MXN
     )
 
     # Limpiar campos extra que no van en la tabla
-    for k in ['ocid_origen', 'numero_proc', 'codigo_contrato', 'forma_proc',
-              'responsable', 'estratificacion', 'estrat_pyme', 'estatus']:
+    for k in ['ocid_origen', 'numero_proc', 'codigo_contrato', 'clave_uc',
+              'clave_ramo', 'estrat_pyme', 'estatus']:
         out.pop(k, None)
-
-    # Campos requeridos
-    if not out.get('titulo') or out['titulo'] == 'Sin título':
-        if not out.get('proveedor_nombre'):
-            return None
 
     return out
 
@@ -244,8 +330,12 @@ def bulk_upsert(rows):
     h = {**HEADERS_SB, 'Prefer': 'resolution=merge-duplicates,return=minimal'}
     try:
         r = requests.post(url, json=rows, headers=h, timeout=60)
-        return len(rows) if r.ok else 0
-    except Exception:
+        if not r.ok:
+            print(f"  [HTTP {r.status_code}] {r.text[:300]}")
+            return 0
+        return len(rows)
+    except Exception as e:
+        print(f"  [EXC] {e}")
         return 0
 
 
@@ -259,25 +349,31 @@ def refresh_view():
 
 
 def procesar_csv(text):
-    """Lee CSV text y procesa fila por fila, insertando en batches."""
     delim = detectar_delimitador(text[:5000])
     print(f"  Delimitador detectado: {delim!r}")
 
     reader = csv.DictReader(io.StringIO(text), delimiter=delim)
     headers = reader.fieldnames or []
-    print(f"  Columnas encontradas ({len(headers)}): {headers[:15]}")
+    print(f"  Columnas encontradas ({len(headers)}):")
+    for i, h in enumerate(headers, 1):
+        norm = norm_col(h)
+        mapped = COL_MAP.get(norm)
+        flag = f' → {mapped}' if mapped else ''
+        print(f"    {i:>2}. {h!r}{flag}")
 
     batch = []
     total_filas = 0
     total_inserted = 0
     total_skipped = 0
+    first_debug = True
 
     for row in reader:
         total_filas += 1
         if total_filas > MAX_CONTRATOS:
             print(f"  [CAP] Alcanzado MAX_CONTRATOS={MAX_CONTRATOS}")
             break
-        parsed = parse_csv_row(row)
+        parsed = parse_csv_row(row, debug_first=first_debug)
+        first_debug = False
         if not parsed:
             total_skipped += 1
             continue
@@ -308,7 +404,6 @@ def main():
             continue
         inserted = procesar_csv(text)
         inserted_total += inserted
-        # Si ya cargamos suficientes, no procesar el siguiente CSV
         if inserted_total >= 50000:
             print(f"  [STOP] Ya cargamos {inserted_total} contratos. Saltando CSVs adicionales.")
             break
