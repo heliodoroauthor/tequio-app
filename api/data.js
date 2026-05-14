@@ -671,6 +671,23 @@ export default async function handler(req, res) {
       return res.status(200).json({ total, monto_total, adjudicacion_directa, flags_rojos });
     }
 
+    // ── Ombligo · INAH (Zonas Arqueológicas + Museos) ──
+    if (vista === 'ombligo_zonas') {
+      const estado = (req.query.estado || '').trim();
+      let path = 'inah_zonas_arqueologicas?select=*&order=estado.asc,nombre.asc&limit=300';
+      if (estado) path += `&estado=eq.${encodeURIComponent(estado)}`;
+      const rows = await sb(path);
+      const por_estado = rows.reduce((acc, z) => { acc[z.estado] = (acc[z.estado] || 0) + 1; return acc; }, {});
+      return res.status(200).json({ zonas: rows, total: rows.length, por_estado });
+    }
+    if (vista === 'ombligo_museos') {
+      const estado = (req.query.estado || '').trim();
+      let path = 'inah_museos?select=*&order=estado.asc,nombre.asc&limit=300';
+      if (estado) path += `&estado=eq.${encodeURIComponent(estado)}`;
+      const rows = await sb(path);
+      return res.status(200).json({ museos: rows, total: rows.length });
+    }
+
     // ── Noticias Cívicas (DOF + SCJN + SEGOB + Presidencia + Diputados) ──
     if (vista === 'noticias') {
       const q = (req.query.q || '').trim();
