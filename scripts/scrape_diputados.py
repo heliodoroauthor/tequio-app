@@ -97,77 +97,104 @@ def extraer_dipt_ids_por_estado(edot):
 
 
 def parse_curricula(html, dipt_id):
-    """Parsea la página de currícula de un diputado y devuelve diccionario."""
-    # Nombre: <h1># Dip. NOMBRE</h1>
-    nombre_m = re.search(r'#\s*Dip\.\s*([^\n#]+)', html)
-    nombre = nombre_m.group(1).strip() if nombre_m else None
+    """Parsea la página de currícula. v2: usa BeautifulSoup sobre HTML real (no markdown)."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, 'lxml')
 
-    # Principio: **Mayoría Relativa** | **Representación Proporcional**
-    principio_m = re.search(r'Principio de elecci[óo]n:\s*\*\*([^*]+)\*\*', html)
-    principio = principio_m.group(1).strip() if principio_m else None
+    # Texto plano sin tags, normalizado
+    texto = soup.get_text(separator='\n')
+    # Comprimir whitespace pero preservar saltos de línea
+    lineas = [ln.strip() for ln in texto.split('\n')]
+    lineas = [ln for ln in lineas if ln]
+    texto_norm = '\n'.join(lineas)
 
-    # Entidad
-    entidad_m = re.search(r'Entidad:\s*\*\*([^*]+)\*\*', html)
-    entidad = entidad_m.group(1).strip() if entidad_m else None
+    def find_after_label(label, multiline=False):
+        # Busca "LABEL:" o "LABEL: valor" — toma el texto siguiente al colon
+        pattern = re.compile(re.escape(label) + r'\s*:?\s*(.+)', re.I)
+        for ln in lineas:
+            m = pattern.match(ln)
+            if m:
+                return m.group(1).strip()
+        return None
 
-    # Distrito (o Circunscripción)
-    distrito_m = re.search(r'(?:Distrito|Circunscripci[óo]n):\s*\*\*([^*]+)\*\*', html)
-    distrito = distrito_m.group(1).strip() if distrito_m else None
+    def find_inline(label):
+        # Buscar "Label: valor" en el texto completo
+        m = re.search(re.escape(label) + r'\s*:\s*([^\n]+)', texto_norm, re.I)
+        return m.group(1).strip() if m else None
 
-    # Curul
-    curul_m = re.search(r'Curul:\s*\*\*([^*]+)\*\*', html)
-    curul = curul_m.group(1).strip() if curul_m else None
+    # Nombre: línea "DIP. NOMBRE COMPLETO"
+    nombre = None
+    for ln in lineas:
+        m = re.match(r'^DIP\.?\s+(.+?)$', ln, re.I)
+        if m:
+            nombre = m.group(1).strip().title()
+            break
 
-    # Reelecto
-    reelecto_m = re.search(r'Reelecto:\s*\*\*([^*]+)\*\*', html)
-    reelecto = reelecto_m.group(1).strip() if reelecto_m else None
+    principio = find_inline('Principio de elección') or find_inline('Principio de elecci')
+    entidad = find_inline('Entidad')
+    distrito = find_inline('Distrito') or find_inline('Circunscripción') or find_inline('Circunscripci')
+    curul = find_inline('Curul')
+    reelecto = find_inline('Reelecto')
+    suplente = find_inline('Suplente')
 
-    # Suplente
-    suplente_m = re.search(r'Suplente:\s*\*\*([^*]+)\*\*', html)
-    suplente = suplente_m.group(1).strip() if suplente_m else None
-
-    # Email (cualquier @diputados.gob.mx o similar)
-    email_m = re.search(r'\b([\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})\b', html)
+    # Email — buscar en todo el texto
+    email_m = re.search(r'\b([\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})\b', texto_norm)
     email = email_m.group(1) if email_m else None
 
-    # Foto: /fotos_lxviconfondo/NNN_foto_chica.jpg
-    foto_m = re.search(r'fotos_lxviconfondo/(\d+_foto_chica\.jpg)', html)
-    foto_url = f"{BASE}/fotos_lxviconfondo/{foto_m.group(1)}" if foto_m else None
+    # Foto: extraer src del img que apunta a fotos_lxviconfondo
+    foto_url = None
+    for img in soup.find_all('img'):
+        src = img.get('src', '')
+        if 'fotos_lxviconfondo' in src:
+            if src.startswith('http'):
+                foto_url = src
+            else:
+                foto_url = f"{BASE}/{src.lstrip('/')}" if not src.startswith('/') else f"https://sitl.diputados.gob.mx{src}"
+            break
 
-    # Partido: imagen logo /images/morena.webp etc
+    # Partido: imagen logo (morena.webp, pan.webp, etc)
     partido = None
     partido_codigo = None
-    logo_m = re.search(r'images/(morena|pan|pri|pvem|pt|mc|prd|na|es|ind|sg)\.webp', html, re.I)
-    if logo_m:
-        codigo = logo_m.group(1).lower()
-        partido, partido_codigo = LOGO_PARTIDO.get(codigo, (codigo.upper(), codigo))
+    for img in soup.find_all('img'):
+        src = img.get('src', '').lower()
+        m = re.search(r'images/(morena|pan|pri|pvem|pt|mc|prd|na|es|ind|sg)\.(webp|png|jpg|gif)', src)
+        if m:
+            codigo = m.group(1)
+            partido, partido_codigo = LOGO_PARTIDO.get(codigo, (codigo.upper(), codigo))
+            break
 
-    # Comisiones: [Nombre (Rol)](url)
+    # Comisiones: <a href="...comt=N">Nombre (Rol)</a>
     comisiones = []
-    for m in re.finditer(r'\[([^\]]+?)\]\(.*?comt=(\d+)\)', html):
-        texto = m.group(1).strip()
+    for a in soup.find_all('a', href=True):
+        href = a.get('href', '')
+        m = re.search(r'comt=(\d+)', href)
+        if not m:
+            continue
+        texto_a = a.get_text(strip=True)
+        if not texto_a or len(texto_a) < 3:
+            continue
         rol = 'Integrante'
-        rol_m = re.search(r'\(([^)]+)\)\s*$', texto)
-        nombre_com = texto
+        nombre_com = texto_a
+        rol_m = re.search(r'\(([^)]+)\)\s*$', texto_a)
         if rol_m:
             rol = rol_m.group(1).strip()
-            nombre_com = texto[:rol_m.start()].strip()
+            nombre_com = texto_a[:rol_m.start()].strip()
         comisiones.append({
-            'comt_id': int(m.group(2)),
-            'nombre': nombre_com,
-            'rol': rol
+            'comt_id': int(m.group(1)),
+            'nombre': nombre_com[:120],
+            'rol': rol[:50]
         })
 
     # Fecha nacimiento: "13-abril - 1963" o similar
     fecha_nacimiento = None
-    fnac_m = re.search(r'\b(\d{1,2})[\s-]+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)[\s-]+(\d{4})\b', html, re.I)
+    meses_es = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
+                'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
+    fnac_m = re.search(r'\b(\d{1,2})\s*[-–\s]\s*(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s*[-–\s]\s*(\d{4})\b', texto_norm, re.I)
     if fnac_m:
-        meses = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
-                 'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
-        d = int(fnac_m.group(1))
-        m = meses.get(fnac_m.group(2).lower(), 1)
-        y = int(fnac_m.group(3))
         try:
+            d = int(fnac_m.group(1))
+            m = meses_es.get(fnac_m.group(2).lower(), 1)
+            y = int(fnac_m.group(3))
             fecha_nacimiento = f"{y:04d}-{m:02d}-{d:02d}"
         except Exception:
             fecha_nacimiento = None
@@ -227,55 +254,79 @@ def upsert_diputado(d):
 
 
 def extraer_votaciones_de_periodo(pert):
-    """Recorre la lista de votaciones de un periodo y devuelve [{votacion_id, fecha, asunto}]."""
+    """Recorre la lista de votaciones del periodo. v2: parser sobre HTML real con BS4."""
+    from bs4 import BeautifulSoup
     url = f"{BASE}/votacionesxperiodonplxvi.php?pert={pert}"
     html = http_get(url)
     if not html:
         return []
-    votaciones = []
-    fecha_actual = None
-    # Pattern: "10 Febrero 2026"
-    fecha_re = re.compile(r'\b(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})\b', re.I)
-    # Pattern: "[N](.../estadistico_votacionnplxvi.php?votaciont=NNN) | ASUNTO"
+    soup = BeautifulSoup(html, 'lxml')
+
     meses_es = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
                 'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
-    # Recorrer el texto buscando fechas y votaciones en orden
-    # Strategy: split on "votaciont=" markers and join with surrounding context
-    items_re = re.compile(r'\[\d+\]\([^)]+votaciont=(\d+)\)\s*\|\s*([^|\n]+?)(?:\s*\||$)', re.S)
-    # Reconstruct order by linear scan
-    pos = 0
-    while pos < len(html):
-        fm = fecha_re.search(html, pos)
-        im = items_re.search(html, pos)
-        if not im:
-            break
-        if fm and fm.start() < im.start():
-            d, mes, y = int(fm.group(1)), meses_es.get(fm.group(2).lower(),1), int(fm.group(3))
+
+    # Recorrer las celdas/filas en orden. Detectamos:
+    # - filas con fecha "10 Febrero 2026"
+    # - links con votaciont=NNN seguidos del título de la votación
+    votaciones = []
+    fecha_actual = None
+    fecha_re = re.compile(r'^(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})$', re.I)
+
+    # Estrategia: iterar todos los <tr> o filas de tabla, y dentro ver si tienen votaciont
+    # Como fallback, iterar TODO el árbol y usar texto contextual
+    nodos = soup.find_all(['tr', 'td', 'div', 'a'])
+    for nodo in nodos:
+        texto = nodo.get_text(strip=True)
+        if not texto:
+            continue
+        # Es fecha?
+        fm = fecha_re.match(texto)
+        if fm:
             try:
-                fecha_actual = f"{y:04d}-{mes:02d}-{d:02d}"
+                d = int(fm.group(1))
+                m = meses_es.get(fm.group(2).lower(), 1)
+                y = int(fm.group(3))
+                fecha_actual = f"{y:04d}-{m:02d}-{d:02d}"
             except Exception:
                 pass
-            pos = fm.end()
-        else:
-            votacion_id = int(im.group(1))
-            asunto_raw = im.group(2).strip()
-            # Detectar tipo en el asunto
-            tipo = None
-            if 'EN LO GENERAL Y EN LO PARTICULAR' in asunto_raw.upper():
-                tipo = 'general_particular'
-            elif 'EN LO GENERAL' in asunto_raw.upper():
-                tipo = 'general'
-            elif 'EN LO PARTICULAR' in asunto_raw.upper():
-                tipo = 'particular'
-            votaciones.append({
-                'votacion_id': votacion_id,
-                'fecha': fecha_actual,
-                'asunto': asunto_raw[:1000],
-                'tipo': tipo,
-                'pert_id': pert,
-                'url_oficial': f"{BASE}/estadistico_votacionnplxvi.php?votaciont={votacion_id}",
-            })
-            pos = im.end()
+            continue
+        # Es link a votación?
+        if nodo.name == 'a':
+            href = nodo.get('href', '')
+            mvot = re.search(r'votaciont=(\d+)', href)
+            if mvot and texto.isdigit():
+                # Encontrar asunto: el siguiente elemento o texto del padre
+                parent = nodo.parent
+                if parent:
+                    parent_txt = parent.get_text(separator=' | ', strip=True)
+                    # El número se asume al inicio; el asunto viene después del "|"
+                    partes = [p.strip() for p in parent_txt.split('|')]
+                    # Buscar la parte más larga (probablemente el asunto)
+                    asunto = max(partes, key=len) if partes else ''
+                    asunto = re.sub(r'^\d+\s*', '', asunto)  # quitar número al inicio
+                    asunto = asunto.strip()
+                    if len(asunto) < 10:
+                        continue
+                    tipo = None
+                    up = asunto.upper()
+                    if 'EN LO GENERAL Y EN LO PARTICULAR' in up:
+                        tipo = 'general_particular'
+                    elif 'EN LO GENERAL' in up:
+                        tipo = 'general'
+                    elif 'EN LO PARTICULAR' in up:
+                        tipo = 'particular'
+                    votacion_id = int(mvot.group(1))
+                    # Deduplicar
+                    if any(v['votacion_id'] == votacion_id for v in votaciones):
+                        continue
+                    votaciones.append({
+                        'votacion_id': votacion_id,
+                        'fecha': fecha_actual,
+                        'asunto': asunto[:1000],
+                        'tipo': tipo,
+                        'pert_id': pert,
+                        'url_oficial': f"{BASE}/estadistico_votacionnplxvi.php?votaciont={votacion_id}",
+                    })
     return votaciones
 
 
