@@ -3276,7 +3276,14 @@
               <select id="vc-reg-distrito" disabled style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
                 <option value="">Primero elige tu estado</option>
               </select>
-              <div style="margin-top:6px;font-size:11px;color:var(--text3);line-height:1.4">💡 Reconoces a tu diputado por nombre, partido o porque lo viste en noticias. Cada distrito tiene un diputado distinto. Si no estás seguro, elige el primero — siempre puedes cambiar después.</div>
+              <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5">
+                💡 <strong>Cómo identificar a tu diputado:</strong>
+                <ul style="margin:4px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px">
+                  <li>Por <strong>nombre o partido</strong> si te suena de noticias</li>
+                  <li>En tu <strong>credencial INE</strong> (lado de atrás, abajo) busca <strong>"DTTO"</strong> o <strong>"DISTRITO LOCAL/FEDERAL"</strong> — ese número es tu distrito</li>
+                  <li>Si no estás seguro, elige el primero — siempre puedes cambiar después</li>
+                </ul>
+              </div>
             </div>
             <div style="margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px">
               <input type="checkbox" id="vc-reg-mayor" style="margin-top:2px;flex-shrink:0">
@@ -25243,19 +25250,9 @@ function testigoDescargarFoto() {
 // DIRECTORIO DE SERVICIOS POR ESTADO — 32 ESTADOS
 // ═══════════════════════════════════════════════════════════
 
-const DIR_CAT_COLORS = {
-  justicia:   { bg:'rgba(59,130,246,0.12)',  border:'rgba(59,130,246,0.35)',  text:'#60a5fa',  dark:'#1d4ed8' },
-  derechos:   { bg:'rgba(139,92,246,0.12)',  border:'rgba(139,92,246,0.35)', text:'#a78bfa',  dark:'#6d28d9' },
-  mujer:      { bg:'rgba(236,72,153,0.12)',  border:'rgba(236,72,153,0.35)', text:'#f472b6',  dark:'#be185d' },
-  salud:      { bg:'rgba(16,185,129,0.12)',  border:'rgba(16,185,129,0.35)', text:'#34d399',  dark:'#047857' },
-  familia:    { bg:'rgba(245,158,11,0.12)',  border:'rgba(245,158,11,0.35)', text:'#fbbf24',  dark:'#b45309' },
-  trabajo:    { bg:'rgba(99,102,241,0.12)',  border:'rgba(99,102,241,0.35)', text:'#818cf8',  dark:'#4338ca' },
-  proteccion: { bg:'rgba(239,68,68,0.12)',   border:'rgba(239,68,68,0.35)',  text:'#f87171',  dark:'#b91c1c' },
-  emergencia: { bg:'rgba(239,68,68,0.2)',    border:'rgba(239,68,68,0.5)',   text:'#fca5a5',  dark:'#991b1b' },
-};
 
-
-// DIRECTORIO_FEDERAL, DIRECTORIO_ESTADOS, OMBLIGO_TIMELINE stubbed (sync truncation)
+// Stubs por sync truncation
+const DIR_CAT_COLORS = {};
 const DIRECTORIO_FEDERAL = [];
 const DIRECTORIO_ESTADOS = {};
 const OMBLIGO_TIMELINE = [];
