@@ -26016,6 +26016,39 @@ function initOmbligo() {
   renderOmbligoTimeline();
   renderOmbligoMuseos();
   renderOmbligoZonas();
+  // Cargar zonas y museos INAH desde Supabase (195 zonas + 165 museos)
+  fetch('/api/data?vista=ombligo_zonas').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.zonas)) return;
+    const ya = new Set(OMBLIGO_ZONAS.map(z => (z.nombre || '').toLowerCase()));
+    const reales = j.zonas.filter(z => !ya.has((z.nombre || '').toLowerCase())).map(z => ({
+      nombre: z.nombre, estado: z.estado,
+      subtitulo: z.responsable || 'Zona Arqueológica INAH',
+      emoji: '🏛️', color: '#d97706', periodo: 'Prehispánico',
+      costo: 'Ver inah.gob.mx',
+      horario: z.condicion === 'Cerrada' ? 'Cerrada' : (z.condicion === 'Temporalmente cerrada' ? 'Temp. cerrada' : 'Consultar INAH'),
+      descripcion: 'Sitio bajo resguardo del ' + (z.responsable || 'INAH') + '.',
+      fuenteINAH: true,
+    }));
+    if (reales.length) { OMBLIGO_ZONAS.push(...reales); renderOmbligoZonas(); }
+    const c = document.getElementById('ombligo-zonas-count');
+    if (c) c.textContent = OMBLIGO_ZONAS.length + '+';
+  }).catch(() => {});
+  fetch('/api/data?vista=ombligo_museos').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.museos)) return;
+    const ya = new Set(OMBLIGO_MUSEOS.map(m => (m.nombre || '').toLowerCase()));
+    const reales = j.museos.filter(m => !ya.has((m.nombre || '').toLowerCase())).map(m => ({
+      nombre: m.nombre, ciudad: m.estado,
+      subtitulo: m.responsable || 'Museo del INAH',
+      emoji: '🏛️', color: '#3b82f6',
+      horario: m.condicion === 'Cerrado' ? 'Cerrado' : 'Consultar INAH',
+      costo: 'Ver inah.gob.mx',
+      descripcion: 'Recinto del INAH. ' + (m.ubicacion_fisica || ''),
+      fuenteINAH: true,
+    }));
+    if (reales.length) { OMBLIGO_MUSEOS.push(...reales); renderOmbligoMuseos(); }
+    const c = document.getElementById('ombligo-museos-count');
+    if (c) c.textContent = OMBLIGO_MUSEOS.length + '+';
+  }).catch(() => {});
 }
 
 function ombligoTab(tab) {
@@ -26218,56 +26251,11 @@ function ombligoJumpEra(id) {
     if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'start' });
   }, 80);
 }
+function renderOmbligoMuseos(){const el=document.getElementById('ombligo-museos');if(!el)return;el.innerHTML=OMBLIGO_MUSEOS.map(m=>{const c=m.color||'#3b82f6';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${m.emoji||'🏛️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>${m.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad||m.ubicacion||''}</span></div>${m.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>`:''}${m.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${m.horario?`<span>🕐 ${m.horario}</span>`:''}${m.costo?`<span>💰 ${m.costo}</span>`:''}</div></div>`;}).join('');}
 
-function renderOmbligoMuseos() {
-  const el = document.getElementById('ombligo-museos');
-  if (!el) return;
-  el.innerHTML = OMBLIGO_MUSEOS.map(m => {
-    const color = m.color || '#3b82f6';
-    return `<div style="background:var(--surface);border:1px solid ${color}40;border-radius:14px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-        <span style="font-size:24px">${m.emoji || '🏛️'}</span>
-        <span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>
-        ${m.fuenteINAH ? '<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>' : ''}
-        <span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad || m.ubicacion || ''}</span>
-      </div>
-      ${m.subtitulo ? `<div style="font-size:12px;color:${color};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>` : ''}
-      ${m.descripcion ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>` : ''}
-      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">
-        ${m.horario ? `<span>🕐 ${m.horario}</span>` : ''}
-        ${m.costo ? `<span>💰 ${m.costo}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
+function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?`<span>💰 ${z.costo}</span>`:''}</div></div>`;}).join('');}
 
-function renderOmbligoZonas() {
-  const el = document.getElementById('ombligo-zonas');
-  if (!el) return;
-  el.innerHTML = OMBLIGO_ZONAS.map(z => {
-    const color = z.color || '#22c55e';
-    return `<div style="background:var(--surface);border:1px solid ${color}40;border-radius:14px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-        <span style="font-size:24px">${z.emoji || '🏔️'}</span>
-        <span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>
-        ${z.patrimonio ? '<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>' : ''}
-        ${z.fuenteINAH ? '<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>' : ''}
-        <span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado || ''}</span>
-      </div>
-      ${z.subtitulo ? `<div style="font-size:12px;color:${color};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>` : ''}
-      ${z.descripcion ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>` : ''}
-      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">
-        ${z.periodo ? `<span>🗿 ${z.periodo}</span>` : ''}
-        ${z.horario ? `<span>🕐 ${z.horario}</span>` : ''}
-        ${z.costo ? `<span>💰 ${z.costo}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-window.initOmbligo = initOmbligo;
-window.ombligoTab = ombligoTab;
-
+window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
 </script>
 </body>
 </html>
