@@ -2007,7 +2007,7 @@
 
       <div class="nav-item" data-page="ia" onclick="showPage('ia')">
         <span class="icon">🧠</span> Asistente Legal IA
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ RAG 800+</span>
       </div>
       <div class="nav-item" data-page="comparador" onclick="showPage('comparador')">
         <span class="icon">⚖️</span> Comparar Propuestas
@@ -5066,6 +5066,27 @@
     <!-- ───── IA CÍVICA ───── -->
     <div id="page-ia" class="page">
       <div class="content" style="max-width:900px">
+
+        <!-- Header oficial -->
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#5b21b6 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(91,33,182,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:54px;line-height:1">🧠</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Asistente Legal IA</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong>757 leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sello de Fuente Oficial Verificada con RAG -->
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:28px">✅</div>
+          <div style="flex:1;min-width:220px">
+            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">RAG SOBRE FUENTES OFICIALES</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca primero en una base vectorial de leyes, tesis y noticias verificadas. Powered by <strong>Gemini</strong> + <strong>Supabase pgvector</strong>. <strong>No sustituye asesoría legal profesional.</strong></div>
+          </div>
+        </div>
+
         <div class="alert alert-warn mb-16">
           <span>⚖️</span>
           <span>Esta IA proporciona <strong>información educativa y orientación general</strong>. No sustituye asesoría legal profesional.</span>
@@ -5105,18 +5126,24 @@
               <div class="msg-avatar ai">🧠</div>
               <div>
                 <div class="msg-bubble">
-                  ¡Hola! Soy el <strong>Asistente Cívico IA</strong> de VOTO.<br><br>
-                  Puedo ayudarte con:
-                  <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px">
+                  ¡Hola! Soy el <strong>Asistente Legal de Tequio</strong>.<br><br>
+                  Antes de responder, busco en una base vectorial de fuentes oficiales:
+                  <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
+                    <li><strong>757 leyes</strong> federales y estatales (Cám. Diputados)</li>
+                    <li><strong>20 tesis emblemáticas</strong> de la SCJN (Semanario Judicial)</li>
+                    <li><strong>Decretos del DOF</strong> y comunicados SCJN (RSS oficial)</li>
+                  </ul>
+                  <br>Puedo ayudarte a:
+                  <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
                     <li>📜 Explicar leyes en lenguaje simple</li>
                     <li>🛡️ Conocer tus derechos fundamentales</li>
-                    <li>💼 Orientación en situaciones laborales</li>
-                    <li>💰 Entender el gasto y presupuesto público</li>
-                    <li>✊ Asesoría para organizarte con otros</li>
+                    <li>💼 Orientación laboral (LFT, IMSS, PROFEDET)</li>
+                    <li>💰 Entender presupuesto y gasto público</li>
+                    <li>✊ Asesoría para organizarte ciudadanamente</li>
                   </ul>
-                  <br>Elige una categoría arriba o escribe tu pregunta directamente 👆
+                  <br>Elige una categoría arriba o escribe tu pregunta 👆
                 </div>
-                <div class="msg-source">🔒 IA educativa · Fuentes: DOF, CPEUM, LFT · No es asesoría legal</div>
+                <div class="msg-source">🔒 IA educativa con RAG · Fuentes: CPEUM, DOF, SCJN, Cám. Diputados · No es asesoría legal</div>
               </div>
             </div>
           </div>
