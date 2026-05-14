@@ -3364,14 +3364,14 @@
             <div style="font-size:22px;font-weight:700">💬 Chat Comunitario</div>
             <div class="card-subtitle">Denuncias, ideas y alertas de tu estado · Voz ciudadana en tiempo real</div>
           </div>
-          <div id="chat-online-count" style="font-size:11px;color:#a5b4fc;font-weight:600;white-space:nowrap">🧪 Modo demo</div>
+          <div id="chat-online-count" style="font-size:11px;color:#6ee7b7;font-weight:600;white-space:nowrap">💬 Comunidad activa</div>
         </div>
 
-        <!-- Banner: chat simulado -->
-        <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:16px;flex-shrink:0;margin-top:1px">🧪</span>
-          <div style="font-size:12px;color:#a5b4fc;line-height:1.6">
-            <strong>Demostración del chat comunitario.</strong> Los mensajes que ves son ejemplos simulados — no hay usuarios reales leyendo. En producción, este chat conectará con ciudadanos reales de tu estado. <strong>No compartas información personal o sensible aquí.</strong>
+        <!-- Banner: reglas de comunidad -->
+        <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:16px;flex-shrink:0;margin-top:1px">💬</span>
+          <div style="font-size:12px;color:#6ee7b7;line-height:1.6">
+            <strong>Chat real con la comunidad de Tequio.</strong> Tus mensajes se publican públicamente para ciudadanos de tu estado. <strong>No compartas datos personales</strong> (teléfonos, RFC, CURP, contraseñas) — se filtran automáticamente. Mensajes con ≥3 reportes se ocultan. Sólo se permiten enlaces a dominios oficiales (.gob.mx, .org.mx).
           </div>
         </div>
 
@@ -3459,7 +3459,7 @@
             📢 Publicar
           </button>
           <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.6">
-            🧪 <strong style="color:#a5b4fc">Modo demo</strong> · Tus mensajes se guardan solo en este dispositivo. No hay comunidad real conectada. No compartas datos personales.
+            🌐 Tu mensaje se publica para todos los lectores de Tequio · Máximo 5 mensajes por hora · No compartas datos personales
           </div>
         </div>
       </div>
@@ -18080,42 +18080,51 @@ async function expandirEvento(id, container) {
 document.addEventListener('DOMContentLoaded', () => setTimeout(renderTimeline, 200));
 
 // ═══════════════════════════════════════════════════════════
-// CHAT COMUNITARIO
+// CHAT COMUNITARIO — Real (Supabase via /api/data)
 // ═══════════════════════════════════════════════════════════
 let chatEstadoActual = 'Ciudad de México';
 let chatFiltroActual = 'todos';
 let chatMensajes = [];
-
-const CHAT_SEMILLA = {
-  'Ciudad de México': [
-    {nick:'Vecino_Iztapalapa',tipo:'denuncia',texto:'Llevan 3 días sin agua en la col. San Lorenzo. El SACMEX no responde. ¿Alguien más con el mismo problema?',votos:23,ts:Date.now()-3600000},
-    {nick:'Maestro_CDMX',tipo:'idea',texto:'Propuesta: crear brigadas vecinales de lectura en parques los domingos. Quién se apunta?',votos:45,ts:Date.now()-7200000},
-    {nick:'Ciudadano_Anonimo',tipo:'alerta',texto:'Baches enormes en Av. Insurgentes Sur altura Metro Mixcoac. Ya hubo accidente de moto.',votos:17,ts:Date.now()-1800000},
-  ],
-  'Jalisco': [
-    {nick:'TapatioLibre',tipo:'denuncia',texto:'Corrupción en licitación de obra pública en Zapopan. Los contratos van siempre a la misma empresa.',votos:38,ts:Date.now()-5400000},
-    {nick:'Organizate_GDL',tipo:'organizacion',texto:'Reunión este sábado en Plaza Liberación para hablar del proyecto de Tren Ligero. 11am.',votos:29,ts:Date.now()-9000000},
-  ],
-  'Nacional': [
-    {nick:'Ciudadano_MX',tipo:'idea',texto:'¿Por qué no existe una app para reportar baches directamente al gobierno con GPS? Oh espera...',votos:112,ts:Date.now()-86400000},
-    {nick:'Periodista_Libre',tipo:'alerta',texto:'Ley de telecomunicaciones podría permitir vigilancia masiva. Revisen el artículo 189.',votos:67,ts:Date.now()-43200000},
-  ],
-};
+let chatTotalHoy = 0;
+let chatPollHandle = null;
+let chatVotados = new Set(JSON.parse(localStorage.getItem('tequio_chat_voted') || '[]'));
+let chatReportados = new Set(JSON.parse(localStorage.getItem('tequio_chat_reported') || '[]'));
 
 function cambiarEstadoChat(estado) {
   chatEstadoActual = estado;
+  localStorage.setItem('voto_estado', estado);
   cargarMensajesChat();
 }
 
-function cargarMensajesChat() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('tequio_chat_' + chatEstadoActual) || '[]');
-    const semilla = CHAT_SEMILLA[chatEstadoActual] || CHAT_SEMILLA['Nacional'];
-    chatMensajes = [...semilla, ...saved].sort((a,b) => b.ts - a.ts);
-  } catch(e) {
-    chatMensajes = CHAT_SEMILLA[chatEstadoActual] || [];
+async function cargarMensajesChat() {
+  const feed = document.getElementById('chat-feed');
+  if (feed && !chatMensajes.length) {
+    feed.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px">Cargando mensajes…</div>';
   }
-  renderMensajesChat();
+  try {
+    const url = `/api/data?vista=chat&estado=${encodeURIComponent(chatEstadoActual)}` +
+                (chatFiltroActual !== 'todos' ? `&filtro=${encodeURIComponent(chatFiltroActual)}` : '');
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('fetch failed');
+    const j = await r.json();
+    chatMensajes = (j.mensajes || []).map(m => ({
+      id: m.id, nick: m.nick, tipo: m.tipo, texto: m.texto, estado: m.estado,
+      votos: m.votos || 0,
+      ts: m.created_at ? new Date(m.created_at).getTime() : Date.now()
+    }));
+    chatTotalHoy = j.total_hoy || 0;
+    renderMensajesChat();
+    actualizarContadorChat();
+  } catch(e) {
+    if (feed) feed.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red2);font-size:13px">No se pudieron cargar los mensajes. Revisa tu conexión.</div>';
+  }
+}
+
+function actualizarContadorChat() {
+  const el = document.getElementById('chat-online-count');
+  if (el) el.textContent = chatTotalHoy > 0
+    ? `💬 ${chatTotalHoy} mensaje${chatTotalHoy===1?'':'s'} hoy`
+    : '💬 Comunidad activa';
 }
 
 function filtrarMensajes(tipo) {
@@ -18123,29 +18132,25 @@ function filtrarMensajes(tipo) {
   document.querySelectorAll('[id^="cm-"]').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('cm-' + tipo);
   if (btn) btn.classList.add('active');
-  renderMensajesChat();
+  cargarMensajesChat();
 }
 
 function renderMensajesChat() {
   const feed = document.getElementById('chat-feed');
   if (!feed) return;
-  const msgs = chatFiltroActual === 'todos' ? chatMensajes : chatMensajes.filter(m => m.tipo === chatFiltroActual);
+  const msgs = chatMensajes;
   if (!msgs.length) {
     feed.innerHTML = `<div style="text-align:center;padding:40px 20px">
       <svg viewBox="0 0 100 80" style="width:90px;margin-bottom:12px;opacity:0.5">
         <rect x="10" y="10" width="60" height="40" rx="10" fill="none" stroke="#6366f1" stroke-width="2"/>
         <rect x="10" y="42" width="12" height="12" rx="2" fill="#1e2a42" stroke="#6366f1" stroke-width="2"/>
         <polygon points="10,42 22,42 10,58" fill="#6366f1" opacity="0.5"/>
-        <rect x="25" y="22" width="30" height="3" rx="1.5" fill="#6366f1" opacity="0.5"/>
-        <rect x="25" y="31" width="20" height="3" rx="1.5" fill="#6366f1" opacity="0.3"/>
         <rect x="40" y="28" width="40" height="28" rx="8" fill="none" stroke="#a78bfa" stroke-width="2"/>
-        <rect x="48" y="37" width="24" height="3" rx="1.5" fill="#a78bfa" opacity="0.5"/>
-        <rect x="48" y="46" width="16" height="3" rx="1.5" fill="#a78bfa" opacity="0.3"/>
       </svg>
-      <div style="font-size:14px;font-weight:700;color:var(--text2);margin-bottom:6px">Sin mensajes aquí</div>
-      <div style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:14px">¡Sé el primero en compartir<br>una denuncia, idea o alerta!</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text2);margin-bottom:6px">Nadie ha publicado todavía</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:14px">Sé la primera persona en compartir<br>una denuncia, idea, alerta u organización<br>para <strong>${chatEstadoActual}</strong>.</div>
       <button onclick="document.getElementById('cm-texto').focus()" style="background:var(--accent);border:none;color:#fff;border-radius:10px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-        ✍️ Publicar
+        ✍️ Publicar el primer mensaje
       </button>
     </div>`;
     return;
@@ -18159,31 +18164,70 @@ function renderMensajesChat() {
     if (diff < 86400000) return Math.floor(diff/3600000) + 'h';
     return Math.floor(diff/86400000) + 'd';
   };
+  const esc = s => (s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 
-  feed.innerHTML = msgs.map((m,i) => `
+  feed.innerHTML = msgs.map(m => {
+    const yaVoto = chatVotados.has(m.id);
+    const yaReporto = chatReportados.has(m.id);
+    return `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;border-left:3px solid ${colorTipo[m.tipo]||'var(--border)'}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="display:flex;align-items:center;gap:6px">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           <span style="font-size:14px">${iconoTipo[m.tipo]||'💬'}</span>
-          <span style="font-size:11px;font-weight:700;color:${colorTipo[m.tipo]}">${m.tipo?.toUpperCase()}</span>
-          <span style="font-size:11px;color:var(--text3)">· @${m.nick}</span>
+          <span style="font-size:11px;font-weight:700;color:${colorTipo[m.tipo]}">${esc(m.tipo).toUpperCase()}</span>
+          <span style="font-size:11px;color:var(--text3)">· @${esc(m.nick)}</span>
         </div>
         <span style="font-size:10px;color:var(--text3)">${tiempoRelativo(m.ts)}</span>
       </div>
-      <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:8px">${m.texto}</div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <button onclick="votarMensaje(${i})" style="background:none;border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text3);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">
-          👍 <span id="votos-${i}">${m.votos}</span>
+      <div style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:8px;white-space:pre-wrap;word-break:break-word">${esc(m.texto)}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button onclick="votarMensaje('${m.id}')" ${yaVoto?'disabled':''} style="background:${yaVoto?'rgba(99,102,241,0.15)':'none'};border:1px solid ${yaVoto?'rgba(99,102,241,0.4)':'var(--border)'};border-radius:20px;padding:3px 10px;font-size:11px;color:${yaVoto?'var(--accent)':'var(--text3)'};cursor:${yaVoto?'default':'pointer'};font-family:inherit;display:flex;align-items:center;gap:4px;opacity:${yaVoto?0.7:1}">
+          👍 <span id="votos-${m.id}">${m.votos}</span>
         </button>
-        <button onclick="responderChat('${m.nick}')" style="background:none;border:none;font-size:11px;color:var(--accent2);cursor:pointer;font-family:inherit">Responder</button>
+        <button onclick="responderChat('${esc(m.nick)}')" style="background:none;border:none;font-size:11px;color:var(--accent2);cursor:pointer;font-family:inherit">Responder</button>
+        <button onclick="reportarMensaje('${m.id}')" ${yaReporto?'disabled':''} style="margin-left:auto;background:none;border:none;font-size:10px;color:var(--text3);cursor:${yaReporto?'default':'pointer'};font-family:inherit;opacity:${yaReporto?0.5:0.8}" title="Reportar mensaje inapropiado">
+          ${yaReporto?'✓ Reportado':'🚩 Reportar'}
+        </button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-function votarMensaje(idx) {
-  chatMensajes[idx].votos = (chatMensajes[idx].votos || 0) + 1;
-  const el = document.getElementById('votos-' + idx);
-  if (el) el.textContent = chatMensajes[idx].votos;
+async function votarMensaje(id) {
+  if (chatVotados.has(id)) return;
+  chatVotados.add(id);
+  localStorage.setItem('tequio_chat_voted', JSON.stringify([...chatVotados]));
+  // Optimistic UI
+  const msg = chatMensajes.find(m => m.id === id);
+  if (msg) { msg.votos = (msg.votos||0) + 1; const el = document.getElementById('votos-'+id); if (el) el.textContent = msg.votos; }
+  try {
+    await fetch('/api/data?vista=chat_votar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id })
+    });
+  } catch(e) { /* silent */ }
+  renderMensajesChat();
+}
+
+async function reportarMensaje(id) {
+  if (chatReportados.has(id)) return;
+  if (!confirm('¿Reportar este mensaje como inapropiado? Si recibe 3 reportes, se ocultará automáticamente.')) return;
+  chatReportados.add(id);
+  localStorage.setItem('tequio_chat_reported', JSON.stringify([...chatReportados]));
+  try {
+    const r = await fetch('/api/data?vista=chat_reportar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id })
+    });
+    const j = await r.json();
+    if (j.oculto) {
+      chatMensajes = chatMensajes.filter(m => m.id !== id);
+      mostrarToast('Mensaje oculto por múltiples reportes', 'success');
+    } else {
+      mostrarToast('Reporte enviado', 'success');
+    }
+  } catch(e) {}
+  renderMensajesChat();
 }
 
 function responderChat(nick) {
@@ -18191,30 +18235,52 @@ function responderChat(nick) {
   if (input) { input.value = '@' + nick + ' '; input.focus(); }
 }
 
-function publicarMensaje() {
+async function publicarMensaje() {
   const texto = document.getElementById('cm-texto')?.value?.trim();
   if (!texto || texto.length < 5) { mostrarToast('Escribe al menos 5 caracteres', 'warn'); return; }
+  if (texto.length > 500) { mostrarToast('Máximo 500 caracteres', 'warn'); return; }
   const nick = document.getElementById('cm-nick')?.value?.trim() || 'Ciudadano_' + Math.floor(Math.random()*9000+1000);
   const tipo = document.getElementById('cm-tipo')?.value || 'idea';
-  const msg = { nick, tipo, texto, votos: 0, ts: Date.now() };
-  chatMensajes.unshift(msg);
-  // Guardar en localStorage
+  const btn = document.querySelector('button[onclick="publicarMensaje()"]');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.textContent = 'Publicando…'; }
   try {
-    const saved = JSON.parse(localStorage.getItem('tequio_chat_' + chatEstadoActual) || '[]');
-    saved.unshift(msg);
-    localStorage.setItem('tequio_chat_' + chatEstadoActual, JSON.stringify(saved.slice(0,50)));
-  } catch(e) {}
-  document.getElementById('cm-texto').value = '';
-  renderMensajesChat();
-  mostrarToast('✅ Mensaje publicado', 'success');
+    const r = await fetch('/api/data?vista=chat_publicar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ texto, nick, tipo, estado: chatEstadoActual })
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      mostrarToast('⚠️ ' + (j.error || 'No se pudo publicar'), 'warn');
+    } else {
+      mostrarToast('✅ Mensaje publicado', 'success');
+      document.getElementById('cm-texto').value = '';
+      await cargarMensajesChat();
+    }
+  } catch(e) {
+    mostrarToast('Error de conexión', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '📢 Publicar'; }
+  }
 }
 
-// Inicializar al entrar al módulo
+// Auto-refresh cada 25s cuando la página está activa
+function iniciarPollingChat() {
+  if (chatPollHandle) return;
+  chatPollHandle = setInterval(() => {
+    if (document.getElementById('page-comunidad')?.classList.contains('active') && !document.hidden) {
+      cargarMensajesChat();
+    }
+  }, 25000);
+}
+
+// Inicializar al cargar
 document.addEventListener('DOMContentLoaded', () => {
   const estadoGuardado = localStorage.getItem('voto_estado') || 'Ciudad de México';
   const sel = document.getElementById('chat-estado-sel');
-  if (sel) { sel.value = estadoGuardado; }
-  cambiarEstadoChat(estadoGuardado);
+  if (sel) sel.value = estadoGuardado;
+  chatEstadoActual = estadoGuardado;
+  cargarMensajesChat();
+  iniciarPollingChat();
 });
 
 
