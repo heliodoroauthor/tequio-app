@@ -1930,6 +1930,10 @@
         <span class="icon">⚖️</span> Senadores
         <span class="nav-badge green">128 LXVI</span>
       </div>
+      <div class="nav-item" data-page="votar" onclick="showPage('votar')">
+        <span class="icon">🗳️</span> Vota tú primero
+        <span class="nav-badge" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff">🔥 Nuevo</span>
+      </div>
       <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
         <span class="icon">🗳️</span> Votaciones del Congreso
         <span class="nav-badge green">Pleno</span>
@@ -3201,6 +3205,244 @@
       window.senBuscarIA = senBuscarIA;
       window.senOpenDetalle = senOpenDetalle;
 
+      // ══════════════════════════════════════════════════════
+      // ── VOTACIÓN CIUDADANA — Fase 4.1.B ─────────────────
+      // ══════════════════════════════════════════════════════
+      const VC_ESTADOS_MX = [
+        'Aguascalientes','Baja California','Baja California Sur','Campeche',
+        'Chiapas','Chihuahua','Ciudad de México','Coahuila','Colima','Durango',
+        'Estado de México','Guanajuato','Guerrero','Hidalgo','Jalisco','Michoacán',
+        'Morelos','Nayarit','Nuevo León','Oaxaca','Puebla','Querétaro','Quintana Roo',
+        'San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala',
+        'Veracruz','Yucatán','Zacatecas'
+      ];
+
+      function vcUuid() {
+        // RFC4122 v4 simple
+        if (crypto?.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = Math.random() * 16 | 0;
+          return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+      }
+
+      function vcGetCookieId() {
+        let id = localStorage.getItem('tequio_vc_cookie_id');
+        if (!id || !/^[0-9a-f-]{36}$/i.test(id)) {
+          id = vcUuid();
+          localStorage.setItem('tequio_vc_cookie_id', id);
+        }
+        return id;
+      }
+
+      function vcGetSesion() {
+        const raw = localStorage.getItem('tequio_vc_sesion');
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch { return null; }
+      }
+
+      function vcSetSesion(s) {
+        localStorage.setItem('tequio_vc_sesion', JSON.stringify(s));
+      }
+
+      function vcLogout() {
+        if (!confirm('¿Cerrar sesión? Tu cookie_id se borrará pero tus votos quedan registrados.')) return;
+        localStorage.removeItem('tequio_vc_cookie_id');
+        localStorage.removeItem('tequio_vc_sesion');
+        cargarVotar();
+      }
+
+      function vcRenderRegistro(cont) {
+        const optEst = VC_ESTADOS_MX.map(e => `<option value="${e}">${e}</option>`).join('');
+        cont.innerHTML = `
+          <div style="max-width:500px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px">
+            <h2 style="margin:0 0 8px;font-size:22px;font-weight:800;font-family:var(--font-display)">📋 Identifícate como ciudadano</h2>
+            <p style="margin:0 0 18px;color:var(--text2);font-size:13px;line-height:1.5">
+              Solo necesitamos saber tu <strong>estado</strong> y <strong>distrito federal</strong> para asignar tu voto a tu diputado. No guardamos tu nombre, email ni teléfono.
+              <a href="https://www.ine.mx/credencial/distritacion-2022-2023/" target="_blank" rel="noopener" style="color:var(--accent2)">¿No conoces tu distrito?</a>
+            </p>
+            <div style="margin-bottom:14px">
+              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">📍 ENTIDAD</label>
+              <select id="vc-reg-estado" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none">
+                <option value="">-- Selecciona tu estado --</option>
+                ${optEst}
+              </select>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="display:block;font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px">🪑 DISTRITO FEDERAL (número)</label>
+              <input id="vc-reg-distrito" type="number" min="1" max="50" placeholder="Ej: 3" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px">
+              <input type="checkbox" id="vc-reg-mayor" style="margin-top:2px;flex-shrink:0">
+              <label for="vc-reg-mayor" style="font-size:12px;color:var(--text2);line-height:1.5;cursor:pointer">
+                Declaro bajo protesta de decir verdad que soy <strong>mayor de 18 años</strong> y ciudadano(a) mexicano(a).
+              </label>
+            </div>
+            <button id="vc-reg-btn" onclick="vcRegistrar()" style="width:100%;background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;border:none;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
+              🗳️ Continuar y empezar a votar
+            </button>
+            <div style="margin-top:14px;font-size:11px;color:var(--text3);text-align:center">
+              Beta · Solo cookie + IP hasheada · Sin OTP · <a href="#" onclick="event.preventDefault();alert('Privacidad: solo guardamos el hash SHA-256 de tu IP y user-agent para auditoría anti-fraude. Tu cookie_id es un UUID aleatorio sin información personal.')" style="color:var(--accent2)">Privacidad</a>
+            </div>
+          </div>
+        `;
+      }
+
+      async function vcRegistrar() {
+        const est = document.getElementById('vc-reg-estado').value;
+        const distRaw = document.getElementById('vc-reg-distrito').value;
+        const mayor = document.getElementById('vc-reg-mayor').checked;
+        if (!est) { mostrarToast('Selecciona tu estado', 'warn'); return; }
+        const dist = parseInt(distRaw, 10);
+        if (!dist || dist < 1 || dist > 50) { mostrarToast('Distrito debe ser entre 1 y 50', 'warn'); return; }
+        if (!mayor) { mostrarToast('Debes declarar ser mayor de 18 años', 'warn'); return; }
+        const btn = document.getElementById('vc-reg-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '⏳ Registrando…'; btn.disabled = true;
+        try {
+          const r = await fetch('/api/data?vista=registrar_ciudadano', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cookie_id: vcGetCookieId(),
+              entidad: est,
+              distrito: dist,
+              declara_mayor: true,
+            }),
+          });
+          const j = await r.json();
+          if (!j.ok) throw new Error(j.error || 'Error al registrar');
+          vcSetSesion({ usuario_id: j.usuario_id, entidad: j.entidad, distrito: j.distrito });
+          mostrarToast('✓ Identidad guardada. Empieza a votar.', 'success');
+          cargarVotar();
+        } catch (e) {
+          mostrarToast(e.message || 'Error', 'error');
+          btn.innerHTML = original; btn.disabled = false;
+        }
+      }
+
+      async function vcCargarVotaciones(sesion) {
+        const cont = document.getElementById('vc-contenedor');
+        cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Cargando votaciones pendientes…</div>';
+        try {
+          const r = await fetch(`/api/data?vista=votaciones_pendientes&limit=30&cookie_id=${encodeURIComponent(vcGetCookieId())}`);
+          const j = await r.json();
+          const votaciones = j.votaciones || [];
+          const resultados = j.resultados || {};
+          const mi_voto = j.mi_voto || {};
+          // Stats globales
+          const totalAbiertas = votaciones.length;
+          const yaVote = Object.keys(mi_voto).length;
+          const totalVotos = Object.values(resultados).reduce((s, r) => s + (r.total || 0), 0);
+          const headerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center">
+              <div style="display:flex;gap:18px;flex-wrap:wrap">
+                <div><div style="font-size:11px;color:var(--text3);font-weight:600">TÚ</div><div style="font-size:14px;color:var(--text)">${sesion.entidad} · Distrito ${sesion.distrito}</div></div>
+                <div><div style="font-size:11px;color:var(--text3);font-weight:600">📋 ABIERTAS</div><div style="font-size:14px;color:var(--text)">${totalAbiertas}</div></div>
+                <div><div style="font-size:11px;color:var(--text3);font-weight:600">✓ YA VOTASTE</div><div style="font-size:14px;color:var(--green2)">${yaVote}/${totalAbiertas}</div></div>
+                <div><div style="font-size:11px;color:var(--text3);font-weight:600">🇲🇽 PAÍS</div><div style="font-size:14px;color:var(--text)">${totalVotos.toLocaleString('es-MX')} votos</div></div>
+              </div>
+              <button onclick="vcLogout()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:inherit">Cerrar sesión</button>
+            </div>
+          `;
+          if (!votaciones.length) {
+            cont.innerHTML = headerHTML + '<div style="text-align:center;padding:40px;color:var(--text2)">Aún no hay votaciones abiertas. El scraper de la Gaceta corre cada lunes.</div>';
+            return;
+          }
+          const cardsHTML = votaciones.map(v => {
+            const yo = mi_voto[v.id];
+            const res = resultados[v.id] || { si: 0, no: 0, abst: 0, total: 0 };
+            const totalVot = res.total || 0;
+            const pctSi = totalVot ? Math.round(100 * res.si / totalVot) : 0;
+            const pctNo = totalVot ? Math.round(100 * res.no / totalVot) : 0;
+            const materiaColor = {
+              fiscal:'#f59e0b', laboral:'#10b981', salud:'#ef4444', seguridad:'#7c3aed',
+              educacion:'#3b82f6', energia:'#fbbf24', justicia:'#a855f7', electoral:'#06b6d4',
+              derechos_humanos:'#ec4899', medio_ambiente:'#22c55e', economia:'#0891b2',
+              migracion:'#f97316', reforma_legal:'#6366f1', general:'#94a3b8'
+            }[v.materia] || '#94a3b8';
+            return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;gap:10px;align-items:start;margin-bottom:10px;flex-wrap:wrap">
+                <span style="background:${materiaColor};color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px">${(v.materia || 'general').replace('_',' ')}</span>
+                <span style="font-size:11px;color:var(--text3)">${v.fecha_propuesta}</span>
+              </div>
+              <h3 style="margin:0 0 8px;font-size:15px;font-weight:700;line-height:1.4;color:var(--text)">${v.asunto_corto || v.titulo}</h3>
+              ${v.descripcion && v.descripcion !== v.titulo ? `<p style="margin:0 0 12px;font-size:12px;color:var(--text2);line-height:1.5">${v.descripcion.slice(0, 240)}${v.descripcion.length > 240 ? '…' : ''}</p>` : ''}
+              ${yo ? `
+                <div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+                  <div style="font-size:13px;color:var(--text)"><strong>Tu voto:</strong> ${yo === 'si' ? '🟢 SÍ' : yo === 'no' ? '🔴 NO' : '⊘ Abstención'}</div>
+                  <div style="font-size:11px;color:var(--text2)">📊 ${totalVot.toLocaleString('es-MX')} ciudadanos · ${pctSi}% SÍ · ${pctNo}% NO</div>
+                </div>
+              ` : `
+                <div style="display:flex;gap:8px;margin-bottom:10px">
+                  <button onclick="vcVotar(${v.id}, 'si', this)" style="flex:1;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">🟢 SÍ — apruebo</button>
+                  <button onclick="vcVotar(${v.id}, 'no', this)" style="flex:1;background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">🔴 NO — rechazo</button>
+                </div>
+                <div style="font-size:11px;color:var(--text3);text-align:center">📊 ${totalVot.toLocaleString('es-MX')} ciudadanos ya votaron · ${pctSi}% SÍ · ${pctNo}% NO (totales nacionales)</div>
+              `}
+              ${v.gaceta_url ? `<div style="margin-top:10px;text-align:right"><a href="${v.gaceta_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2)">📂 Ver texto oficial en Gaceta →</a></div>` : ''}
+            </div>`;
+          }).join('');
+          cont.innerHTML = headerHTML + cardsHTML;
+        } catch (e) {
+          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al cargar votaciones.</div>';
+        }
+      }
+
+      async function vcVotar(votacionId, voto, btn) {
+        const sesion = vcGetSesion();
+        if (!sesion) { mostrarToast('Sesión perdida. Recarga la página.', 'warn'); return; }
+        // Animación
+        const original = btn.innerHTML;
+        btn.innerHTML = '⏳ Enviando…'; btn.disabled = true;
+        try {
+          const r = await fetch('/api/data?vista=emitir_voto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cookie_id: vcGetCookieId(),
+              entidad: sesion.entidad,
+              distrito: sesion.distrito,
+              votacion_pendiente_id: votacionId,
+              voto,
+              declara_mayor: true,
+            }),
+          });
+          const j = await r.json();
+          if (!j.ok) throw new Error(j.error || 'Error');
+          mostrarToast(`✓ Voto registrado: ${voto === 'si' ? 'SÍ' : 'NO'}`, 'success');
+          // Recargar la lista
+          vcCargarVotaciones(sesion);
+        } catch (e) {
+          mostrarToast(e.message, 'error');
+          btn.innerHTML = original; btn.disabled = false;
+        }
+      }
+
+      async function cargarVotar() {
+        const cont = document.getElementById('vc-contenedor');
+        if (!cont) return;
+        cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Verificando sesión…</div>';
+        // Validar contra backend que cookie_id existe
+        try {
+          const r = await fetch(`/api/data?vista=me&cookie_id=${encodeURIComponent(vcGetCookieId())}`);
+          const j = await r.json();
+          if (j.logueado && j.usuario) {
+            vcSetSesion({ usuario_id: j.usuario.id, entidad: j.usuario.entidad, distrito: j.usuario.distrito });
+            vcCargarVotaciones({ entidad: j.usuario.entidad, distrito: j.usuario.distrito, usuario_id: j.usuario.id });
+          } else {
+            vcRenderRegistro(cont);
+          }
+        } catch (e) {
+          vcRenderRegistro(cont);
+        }
+      }
+
+      window.cargarVotar = cargarVotar;
+      window.vcRegistrar = vcRegistrar;
+      window.vcVotar = vcVotar;
+      window.vcLogout = vcLogout;
+
       // ── VOTACIONES PLENO LXVI ──────────────────────────────
       window.__votacionesData = [];
       function votRenderLista(filas) {
@@ -3532,6 +3774,7 @@
           if (p === 'votaciones') cargarVotaciones();
           if (p === 'mi-rep') cargarMiRepInit();
           if (p === 'mapacontratos') cargarMapaContratos();
+          if (p === 'votar') cargarVotar();
         };
       })();
 
@@ -3755,6 +3998,28 @@
         <div id="mirep-contenido"></div>
 
         <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="color:var(--accent2)">SITL · Sistema de Información Legislativa</a> · Cámara de Diputados LXVI</div>
+      </div>
+    </div>
+
+    <!-- ───── VOTACIÓN CIUDADANA — Fase 4.1.B ───── -->
+    <div id="page-votar" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 50%,#ea580c 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+            <div style="font-size:60px;line-height:1">🗳️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Vota antes que el Congreso</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">El pueblo vota PRIMERO. Después comparamos: <strong>¿tu diputado votó como tú o te traicionó?</strong> Si te ignora, va al muro de los 🔥 quemones.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque que cambia según el estado: registro o lista -->
+        <div id="vc-contenedor"></div>
+
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
+          Fuente: <a href="https://gaceta.diputados.gob.mx/" target="_blank" rel="noopener" style="color:var(--accent2)">Gaceta Parlamentaria · Cámara de Diputados LXVI</a> · Beta: identidad ligera por cookie · Sin OTP
+        </div>
       </div>
     </div>
 
@@ -25196,496 +25461,9 @@ function renderDirServicios() {
 // OMBLIGO — MEMORIA HISTÓRICA DE MÉXICO
 // ═══════════════════════════════════════════════════════════
 
-const OMBLIGO_TIMELINE = [
-  {
-    id:'prehispanico',
-    era:'Era Prehispánica',
-    rango:'~2500 a.C. – 1521',
-    emoji:'🏺',
-    color:'#d97706',
-    resumen:'Civilizaciones que dominaron astronomía, agricultura, arquitectura y sistemas de gobierno antes de que Europa "descubriera" América.',
-    cuerpo:`<strong>Las grandes civilizaciones:</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Olmecas</strong> (~1500–400 a.C.) — La "cultura madre". Primeras ciudades, escritura y calendario mesoamericano.</li>
-  <li><strong style="color:var(--text)">Teotihuacanos</strong> (~100–650 d.C.) — Ciudad de los dioses. Pirámides del Sol y la Luna. Primera metrópolis de América con ~125,000 habitantes.</li>
-  <li><strong style="color:var(--text)">Mayas</strong> (~250–900 d.C.) — Sistema de escritura completo, matemáticas, calendario más preciso del mundo antiguo, observatorios astronómicos.</li>
-  <li><strong style="color:var(--text)">Toltecas</strong> (~900–1150 d.C.) — Tula como capital. Quetzalcóatl como figura mítica que adoptarían los mexicas.</li>
-  <li><strong style="color:var(--text)">Mexicas / Aztecas</strong> (~1300–1521) — Imperio que llegó a dominar 38 millones de km² y 5–6 millones de personas. Tenochtitlan: la ciudad más grande del mundo en 1500.</li>
-</ul>
-<div style="margin-top:14px;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.25);border-radius:10px;padding:12px">
-<strong style="color:#fbbf24;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">El artículo 2 de la Constitución reconoce a los pueblos indígenas como sujetos de derecho. 68 lenguas nacionales. El INPI (Instituto Nacional de los Pueblos Indígenas) administra políticas derivadas de esta historia. La disputa por tierras comunales (ejidos) viene directamente de este periodo.</span>
-</div>`,
-    fuente:'INAH · UNAM · Arqueología Mexicana'
-  },
-  {
-    id:'conquista',
-    era:'La Conquista',
-    rango:'1519 – 1521',
-    emoji:'⚔️',
-    color:'#ef4444',
-    resumen:'En dos años, el Imperio Mexica colapsó. No solo por las armas españolas — sino por alianzas con pueblos sometidos, epidemias y la caída de Cuauhtémoc.',
-    cuerpo:`<strong>Lo que realmente pasó:</strong>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">📅 <strong style="color:var(--text)">Feb 1519</strong> — Hernán Cortés desembarca en Veracruz con 530 hombres y 16 caballos.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🤝 <strong style="color:var(--text)">Alianzas clave</strong> — Tlaxcaltecos, totonacas y otros 200,000 guerreros indígenas aliados fueron decisivos. No fue "españoles vs. mexicanos".</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">☠️ <strong style="color:var(--text)">1520 — La Noche Triste</strong> — Los españoles son expulsados de Tenochtitlan. 900 españoles muertos.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🦠 <strong style="color:var(--text)">La verdadera arma</strong> — Epidemia de viruela mata al 30–50% de la población mexica entre 1519–1521.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🏳️ <strong style="color:var(--text)">13 Ago 1521</strong> — Caída de Tenochtitlan. Cuauhtémoc rendido. Fin del Imperio Mexica.</div>
-</div>
-<div style="margin-top:14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:12px">
-<strong style="color:#f87171;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">El debate sobre el "Día de la Raza" vs "Día de la Resistencia Indígena" (12 oct) es herencia directa de cómo México interpreta la Conquista. López Obrador pidió disculpas a España y el Vaticano. La "deuda histórica" con pueblos indígenas sigue siendo debate constitucional activo.</span>
-</div>`,
-    fuente:'Hugh Thomas — La Conquista de México · INAH'
-  },
-  {
-    id:'virreinato',
-    era:'El Virreinato',
-    rango:'1521 – 1821',
-    emoji:'🕍',
-    color:'#8b5cf6',
-    resumen:'300 años de colonia española. Extractivismo, evangelización y una sociedad de castas que dejó cicatrices estructurales que México aún procesa.',
-    cuerpo:`<strong>El sistema colonial en síntesis:</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Economía extractiva</strong> — La plata de Zacatecas y Guanajuato financió la corona española. México aportó el 35% del PIB mundial de plata en el siglo XVIII.</li>
-  <li><strong style="color:var(--text)">Sociedad de castas</strong> — Españoles peninsulares → Criollos → Mestizos → Indígenas → Africanos esclavizados. Sistema legal de 16 categorías raciales.</li>
-  <li><strong style="color:var(--text)">La Inquisición</strong> — Tribunal activo 1571–1820. Censura, persecución, control ideológico total.</li>
-  <li><strong style="color:var(--text)">Evangelización</strong> — Destrucción sistemática de códices, templos y conocimiento indígena. También: primeras universidades de América (UNAM, 1551).</li>
-  <li><strong style="color:var(--text)">Ilustración criolla</strong> — Finales s. XVIII: criollos educados en Francia e Inglaterra empiezan a cuestionar el orden colonial. Semilla de la Independencia.</li>
-</ul>
-<div style="margin-top:14px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:10px;padding:12px">
-<strong style="color:#c084fc;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">La desigualdad económica actual de México tiene raíces directas en la estructura colonial. Los estados más pobres (Chiapas, Guerrero, Oaxaca) coinciden con las regiones de mayor población indígena y menor inversión colonial. El sistema de haciendas se transformó en latifundios que la Revolución intentó desmantelar.</span>
-</div>`,
-    fuente:'El Colegio de México · Enrique Florescano'
-  },
-  {
-    id:'independencia',
-    era:'Independencia',
-    rango:'1810 – 1821',
-    emoji:'🔔',
-    color:'#22c55e',
-    resumen:'Once años de guerra. El Grito de Dolores, la muerte de Hidalgo y Morelos, y finalmente un criollo conservador — Iturbide — consumando una independencia que no cambió la estructura de poder.',
-    cuerpo:`<strong>Hitos de la Independencia:</strong>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🔔 <strong style="color:var(--text)">16 Sep 1810</strong> — El Grito de Dolores. Hidalgo convoca a indígenas y mestizos contra el orden colonial. Ejército popular de 80,000.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">✍️ <strong style="color:var(--text)">Morelos — Sentimientos de la Nación (1813)</strong> — Proclama soberanía popular, abolición de esclavitud y reforma agraria. Primer proyecto constitucional real.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">☠️ <strong style="color:var(--text)">1811 y 1815</strong> — Hidalgo y Morelos ejecutados. La guerra continúa con Vicente Guerrero.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🤝 <strong style="color:var(--text)">Plan de Iguala (1821)</strong> — Iturbide y Guerrero se unen. Independencia consumada: tres garantías.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">⚠️ <strong style="color:var(--text)">La trampa</strong> — La estructura social y económica del virreinato quedó casi intacta. Los criollos reemplazaron a los peninsulares en el poder.</div>
-</div>
-<div style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px">
-<strong style="color:#4ade80;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">La Constitución de 1824 (primera de México) estableció el federalismo que aún hoy define la tensión entre estados y federación. La deuda independentista con Inglaterra fue el origen de un ciclo de endeudamiento externo que se repetiría a lo largo del s. XX.</span>
-</div>`,
-    fuente:'Lucas Alamán · Lorenzo de Zavala · UNAM Historia'
-  },
-  {
-    id:'reforma',
-    era:'Reforma e Intervención Francesa',
-    rango:'1855 – 1867',
-    emoji:'⚖️',
-    color:'#3b82f6',
-    resumen:'Benito Juárez y las Leyes de Reforma separaron Iglesia y Estado. Francia intentó imponer un Imperio. México ganó — y eso definió la soberanía nacional como valor central.',
-    cuerpo:`<strong>El momento más crítico de la soberanía mexicana:</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Leyes de Reforma (1859)</strong> — Benito Juárez nacionaliza bienes de la Iglesia, separa Iglesia-Estado, Registro Civil, matrimonio civil, cementerios laicos.</li>
-  <li><strong style="color:var(--text)">Intervención francesa (1862–1867)</strong> — Napoleón III aprovecha deudas de México para imponer a Maximiliano de Habsburgo como emperador. 35,000 soldados franceses.</li>
-  <li><strong style="color:var(--text)">5 de mayo de 1862</strong> — Victoria mexicana en Puebla. Símbolo de resistencia (no del fin de la intervención).</li>
-  <li><strong style="color:var(--text)">1867</strong> — Juárez gana. Maximiliano ejecutado en Querétaro. República restaurada.</li>
-</ul>
-<div style="margin-top:14px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:12px">
-<strong style="color:#60a5fa;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">El artículo 130 constitucional (laicidad del Estado) es hijo directo de las Leyes de Reforma. La separación Iglesia-Estado es ley vigente. La soberanía nacional como principio irrenunciable (art. 89 frac. X) tiene raíz en la resistencia a Francia.</span>
-</div>`,
-    fuente:'Museo Nacional de las Intervenciones · Justo Sierra'
-  },
-  {
-    id:'porfiriato',
-    era:'El Porfiriato',
-    rango:'1876 – 1911',
-    emoji:'🎩',
-    color:'#f59e0b',
-    resumen:'35 años de Porfirio Díaz. Modernización, inversión extranjera, ferrocarriles — y concentración brutal de la tierra, represión política y miseria rural que detonó la Revolución.',
-    cuerpo:`<strong>Orden y progreso... ¿para quién?</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Modernización selectiva</strong> — 26,000 km de vías de ferrocarril. CDMX con electricidad y arquitectura europea. Para el 5% criollo.</li>
-  <li><strong style="color:var(--text)">Haciendas y peonaje</strong> — El 1% de la población poseía el 97% de la tierra. Los campesinos en deuda perpetua, sin derechos.</li>
-  <li><strong style="color:var(--text)">Los Científicos</strong> — Tecnocracia que justificó el orden con "ciencia". Intelectuales al servicio del régimen.</li>
-  <li><strong style="color:var(--text)">Represión</strong> — Huelgas de Cananea (1906) y Río Blanco (1907) reprimidas con ejército. "Mátalos en caliente."</li>
-</ul>
-<div style="margin-top:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px">
-<strong style="color:#fbbf24;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">El miedo a la "reelección indefinida" y la concentración de poder viene del Porfiriato. El principio de "Sufragio Efectivo, No Reelección" sigue siendo referencia en debates electorales. El INEGI mide concentración de riqueza (Gini) — en muchos estados sigue siendo parecida a 1910.</span>
-</div>`,
-    fuente:'Friedrich Katz — Porfirio Díaz · El Colegio de México'
-  },
-  {
-    id:'revolucion',
-    era:'La Revolución Mexicana',
-    rango:'1910 – 1920',
-    emoji:'🌵',
-    color:'#dc2626',
-    resumen:'La primera revolución social del siglo XX. Zapata por la tierra, Villa por el norte, Madero por la democracia — y una Constitución de 1917 que aún nos rige.',
-    cuerpo:`<strong>La revolución más compleja de América Latina:</strong>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🗳️ <strong style="color:var(--text)">Madero (1910)</strong> — Plan de San Luis Potosí. Díaz huye. Madero presidente. Asesinado por Huerta en 1913.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🌾 <strong style="color:var(--text)">Zapata</strong> — Plan de Ayala. "La tierra es de quien la trabaja." Morelos como laboratorio de reforma agraria. Asesinado en 1919.</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">🐴 <strong style="color:var(--text)">Villa</strong> — División del Norte. El único líder que atacó territorio estadounidense en el s. XX (Columbus, 1916).</div>
-  <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:13px;color:var(--text2)">📜 <strong style="color:var(--text)">Constitución 1917</strong> — La más progresista del mundo en su momento: derechos laborales (art. 123), reforma agraria (art. 27), laicidad, derechos sociales.</div>
-</div>
-<div style="margin-top:14px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.25);border-radius:10px;padding:12px">
-<strong style="color:#f87171;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">La Constitución vigente es la de 1917. El artículo 27 (reforma agraria) y 123 (derechos laborales) son hijos directos de la Revolución. La LFT que protege tus derechos como trabajador hoy proviene de este artículo. Los ejidos que aún existen son herencia de Zapata.</span>
-</div>`,
-    fuente:'Adolfo Gilly — La Revolución Interrumpida · John Womack — Zapata'
-  },
-  {
-    id:'posrevolucion',
-    era:'México Post-Revolución y el PRI',
-    rango:'1920 – 2000',
-    emoji:'🦅',
-    color:'#a855f7',
-    resumen:'80 años de partido único (PRI). Industrialización, "Milagro Mexicano", Tlatelolco 1968, crisis del 94 — y una transición democrática que llegó en el año 2000.',
-    cuerpo:`<strong>El siglo del partido-Estado:</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Fundación del PNR/PRI (1929)</strong> — Plutarco Elías Calles crea el partido para institucionalizar el poder. Fin de los caudillos militares.</li>
-  <li><strong style="color:var(--text)">Cárdenas (1934–1940)</strong> — Reforma agraria masiva. Expropiación petrolera 1938. Creación de PEMEX. El presidente más popular del s. XX.</li>
-  <li><strong style="color:var(--text)">Milagro Mexicano (1950–1970)</strong> — Crecimiento del 6% anual. Clase media. Modernización — a costa del campo y de deuda.</li>
-  <li><strong style="color:var(--text)">Tlatelolco 2 Oct 1968</strong> — Masacre de estudiantes. El Estado asesina manifestantes 10 días antes de los JJ.OO. Herida abierta.</li>
-  <li><strong style="color:var(--text)">Crisis del 94</strong> — EZLN en Chiapas, asesinato de Colosio, devaluación. El "Error de diciembre".</li>
-  <li><strong style="color:var(--text)">2000</strong> — Fox (PAN) gana presidencia. Fin de 71 años de hegemonía priista.</li>
-</ul>
-<div style="margin-top:14px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:12px">
-<strong style="color:#c084fc;font-size:11px">⚡ CONEXIÓN CON EL PRESENTE</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">PEMEX, CFE, IMSS, ISSSTE — todas instituciones creadas en este periodo. La "cultura del PRI" (clientelismo, corporativismo, control mediático) que analistas ven reproducida en gobiernos posteriores. El INE nació en 1990 de la presión ciudadana post-fraude de 1988.</span>
-</div>`,
-    fuente:'Lorenzo Meyer · Enrique Krauze · UNAM'
-  },
-  {
-    id:'presente',
-    era:'México Contemporáneo',
-    rango:'2000 – Presente',
-    emoji:'🌐',
-    color:'#22c55e',
-    resumen:'Democracia electoral, pero crimen organizado, desigualdad, feminicidios y corrupción sistémica. El México de hoy exige ciudadanos informados.',
-    cuerpo:`<strong>Los retos del México de hoy:</strong>
-<ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--text2);font-size:13px">
-  <li><strong style="color:var(--text)">Alternancia democrática</strong> — PAN (2000–2012), PRI (2012–2018), MORENA (2018–presente). Primera mujer presidenta en 2024.</li>
-  <li><strong style="color:var(--text)">Crimen organizado</strong> — 40,000+ homicidios/año en pico (2018). Carteles con presencia en 32 estados.</li>
-  <li><strong style="color:var(--text)">Desigualdad</strong> — 10% más rico tiene 37% del ingreso nacional. 36% de la población en pobreza (CONEVAL 2022).</li>
-  <li><strong style="color:var(--text)">Movimiento feminista</strong> — 8M masivos desde 2020. La agenda feminista como fuerza política transformadora.</li>
-  <li><strong style="color:var(--text)">Reforma constitucional 2024</strong> — Elección popular de jueces. Debate sobre independencia judicial más intenso desde 1917.</li>
-</ul>
-<div style="margin-top:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px">
-<strong style="color:#4ade80;font-size:11px">⚡ TEQUIO Y ESTE MOMENTO</strong><br>
-<span style="font-size:12px;color:var(--text2);line-height:1.5">Esta app existe porque la ciudadanía activa es la única respuesta al México de hoy. Conocer la historia no es nostalgia — es entender por qué las instituciones funcionan (o no funcionan) como funcionan, y qué herramientas tienes para cambiarlas.</span>
-</div>`,
-    fuente:'INEGI · CONEVAL · UNAM · Animal Político'
-  }
-];
 
-const OMBLIGO_MUSEOS = [
-  {
-    nombre:'Museo Nacional de las Intervenciones',
-    subtitulo:'El más importante para entender la soberanía mexicana',
-    emoji:'🏰',
-    color:'#ef4444',
-    ubicacion:'Tlalpan, CDMX (Ex Convento de Churubusco)',
-    costo:'$85 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–18:00 · Cerrado lunes',
-    destaca:true,
-    descripcion:'Documenta TODAS las intervenciones extranjeras en México: española, norteamericana (1847), francesa (1862–67), y más. El edificio mismo fue escenario de la Batalla de Churubusco (1847) contra EE.UU.',
-    porQueImporta:'Para entender por qué la soberanía nacional es tan central en la política mexicana y por qué frases como "el respeto al derecho ajeno es la paz" (Juárez) siguen resonando hoy.',
-    salas:['Sala de las Intervenciones Extranjeras','Sala de la Batalla de Churubusco 1847','Sala de la Intervención Francesa y el Imperio','Sala de la Diplomacia Mexicana']
-  },
-  {
-    nombre:'Museo Nacional de Antropología',
-    subtitulo:'El museo más importante de México y uno de los mejores del mundo',
-    emoji:'🗿',
-    color:'#d97706',
-    ubicacion:'Bosque de Chapultepec, Miguel Hidalgo, CDMX',
-    costo:'$90 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–19:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'Alberga la colección prehispánica más importante del mundo. Piedra del Sol, Tláloc, salas de mayas, aztecas, olmecas, teotihuacanos. Más de 600,000 piezas en 23 salas permanentes.',
-    porQueImporta:'Sin el MNA no puedes entender quiénes fueron los pueblos que construyeron esta nación. Es el punto de partida de cualquier comprensión histórica seria.',
-    salas:['Sala Mexica (Azteca)','Sala Maya','Sala Olmeca','Sala Teotihuacana','Sala Oaxaca','Sala del Occidente']
-  },
-  {
-    nombre:'Museo del Templo Mayor',
-    subtitulo:'El corazón de Tenochtitlan, en el centro de la CDMX',
-    emoji:'🏺',
-    color:'#b45309',
-    ubicacion:'Centro Histórico, CDMX (a un lado de la Catedral)',
-    costo:'$90 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–17:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'Construido sobre las ruinas del Templo Mayor de Tenochtitlan, descubiertas en 1978. La Coyolxauhqui, la Piedra de Tízoc, ofrendas rituales. El pasado mexica literalmente bajo tus pies en el zócalo.',
-    porQueImporta:'La Ciudad de México está construida encima de Tenochtitlan. Cada obra de metro encuentra restos arqueológicos. Este museo hace visible esa superposición de civilizaciones que nos define.',
-    salas:['Sala del Templo Mayor','Sala de la Coyolxauhqui','Sala de Ofrendas','Sala Huitzilopochtli','Sala Tláloc']
-  },
-  {
-    nombre:'Castillo de Chapultepec — Museo Nacional de Historia',
-    subtitulo:'Del virreinato a la Revolución, desde el castillo más icónico de México',
-    emoji:'🏯',
-    color:'#1d4ed8',
-    ubicacion:'Bosque de Chapultepec, Miguel Hidalgo, CDMX',
-    costo:'$95 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–17:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'Residencia de Maximiliano, sede de los Niños Héroes (1847), residencia presidencial hasta Lázaro Cárdenas. Murales de Siqueiros y O\'Gorman. Vista panorámica de la CDMX.',
-    porQueImporta:'Es el único lugar donde puedes ver en un solo espacio la historia del virreinato, la intervención francesa, el Porfiriato y la Revolución — en el escenario físico donde ocurrió.',
-    salas:['Sala del Virreinato','Sala del Imperio de Maximiliano','Sala de la Reforma y República Restaurada','Sala del Porfiriato','Sala de la Revolución']
-  },
-  {
-    nombre:'Museo Nacional de la Revolución',
-    subtitulo:'Dentro del Monumento a la Revolución — la historia de 1910 en el corazón de la ciudad',
-    emoji:'🌵',
-    color:'#dc2626',
-    ubicacion:'Plaza de la República, Cuauhtémoc, CDMX',
-    costo:'$45 MXN general',
-    horario:'Mar–Dom 9:00–17:00 · Sáb 9:00–20:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'El Monumento alberga las tumbas de Madero, Plutarco Elías Calles, Lázaro Cárdenas y Francisco Villa. El museo documenta 1910–1940 con fotografías, armas y documentos originales.',
-    porQueImporta:'Para entender cómo la Revolución creó las instituciones que aún rigen al país: PEMEX, ejidos, los derechos laborales del art. 123, la educación pública gratuita.',
-    salas:['Sala de la Revolución 1910','Sala de Madero y el Porfiriato','Sala Constitución 1917','Sala del Cardenismo']
-  },
-  {
-    nombre:'Museo Casa de Hidalgo',
-    subtitulo:'La casa del Padre de la Patria en Dolores Hidalgo, Guanajuato',
-    emoji:'🔔',
-    color:'#059669',
-    ubicacion:'Dolores Hidalgo, Guanajuato',
-    costo:'$55 MXN general',
-    horario:'Mar–Sáb 10:00–17:45 · Dom 10:00–14:45 · Cerrado lunes',
-    destaca:false,
-    descripcion:'La casa donde vivió Miguel Hidalgo y Costilla. Objetos personales, documentos originales. Centro de peregrinación cívica cada 15–16 de septiembre. A pasos de la parroquia donde sonó el Grito.',
-    porQueImporta:'Para entender los orígenes de la Independencia más allá del mito — Hidalgo fue un cura ilustrado y economista que defendía industrias locales contra el monopolio colonial.',
-    salas:['Sala biográfica de Hidalgo','Sala de documentos históricos','Exhibición del Movimiento de Independencia']
-  }
-];
-
-const OMBLIGO_ZONAS = [
-  {
-    nombre:'Teotihuacán',
-    subtitulo:'La Ciudad de los Dioses · La metrópolis más grande de América en el año 500 d.C.',
-    emoji:'🔺',
-    color:'#d97706',
-    estado:'Estado de México',
-    periodo:'100 a.C. – 650 d.C.',
-    costo:'$90 MXN general · Domingos gratis para mexicanos',
-    horario:'Todos los días 9:00–17:00',
-    distancia:'~50 km al NE de la CDMX · 1 hora en camión desde Terminal del Norte',
-    destacado:'Pirámide del Sol (216m de base) · Pirámide de la Luna · Calzada de los Muertos · Palacio de Quetzalpapálotl',
-    descripcion:'La ciudad planificada más grande de Mesoamérica. En su apogeo tenía 125,000 habitantes — más que Roma en el mismo periodo. Quién la construyó sigue siendo misterio; los aztecas llegaron cuando ya estaba abandonada.',
-    patrimonio:true
-  },
-  {
-    nombre:'Monte Albán',
-    subtitulo:'Capital zapoteca sobre una montaña aplanada · 2,500 años de historia continua',
-    emoji:'⛰️',
-    color:'#16a34a',
-    estado:'Oaxaca',
-    periodo:'500 a.C. – 700 d.C.',
-    costo:'$90 MXN general',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'~10 km al O de Oaxaca city · 20 min en taxi o colectivo',
-    destacado:'Gran Plaza · Plataforma Sur · Observatorio · Galería de los Danzantes · 170+ tumbas exploradas',
-    descripcion:'Los zapotecos aplanaron una montaña entera para construir su capital. La Galería de los Danzantes muestra las primeras representaciones de escritura en Mesoamérica. Ciudad sagrada durante 1,200 años continuos.',
-    patrimonio:true
-  },
-  {
-    nombre:'Palenque',
-    subtitulo:'La joya maya en la selva chiapaneca · Arquitectura y astronomía extraordinarias',
-    emoji:'🌿',
-    color:'#0891b2',
-    estado:'Chiapas',
-    periodo:'200 – 900 d.C.',
-    costo:'$90 MXN general',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'8 km de Palenque ciudad · Taxi o colectivo',
-    destacado:'Templo de las Inscripciones · Tumba de Pakal · Palacio con torre observatorio · Templo de la Cruz',
-    descripcion:'Donde se descubrió la tumba del rey Pakal en 1952 — el mayor hallazgo arqueológico de México del siglo XX. El Templo de las Inscripciones contiene el texto histórico maya más largo conocido. La selva la rodea: ambiente incomparable.',
-    patrimonio:true
-  },
-  {
-    nombre:'Chichén Itzá',
-    subtitulo:'Una de las 7 Maravillas del Mundo Moderno · El calendario maya en piedra',
-    emoji:'🏛️',
-    color:'#7c3aed',
-    estado:'Yucatán',
-    periodo:'600 – 1200 d.C.',
-    costo:'$571 MXN aprox (federal + estatal combinado)',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'~200 km de Mérida · 2.5h en bus desde Mérida o Cancún',
-    destacado:'El Castillo (Pirámide de Kukulcán, 365 escalones) · Templo de los Guerreros · El Caracol observatorio · Cenote Sagrado',
-    descripcion:'El Castillo es un calendario en piedra: 365 escalones, 52 paneles, el fenómeno del equinoccio donde "la serpiente baja" por la escalinata norte. La acústica del Juego de Pelota es un logro de ingeniería sin paralelo en el mundo antiguo.',
-    patrimonio:true
-  },
-  {
-    nombre:'Tula (Tollán)',
-    subtitulo:'Capital tolteca · Los Atlantes y el mito de Quetzalcóatl',
-    emoji:'🗿',
-    color:'#9f1239',
-    estado:'Hidalgo',
-    periodo:'700 – 1150 d.C.',
-    costo:'$75 MXN general',
-    horario:'Mar–Dom 9:00–17:00',
-    distancia:'~80 km al N de la CDMX · 1.5h desde Central del Norte',
-    destacado:'Atlantes (4 figuras guerreras de 4.6m) · Pirámide B · Palacio Quemado · Tzompantli (altar de cráneos)',
-    descripcion:'Capital del Imperio Tolteca que influyó en toda Mesoamérica. Los Atlantes son los guardianes más fotografiados de México después del Ángel de la Independencia. El mito de Quetzalcóatl-Topiltzin nace aquí y viaja hasta los mayas de Yucatán.',
-    patrimonio:false
-  },
-  {
-    nombre:'El Tajín',
-    subtitulo:'La ciudad de los nichos · Centro del ritual del Volador de Papantla',
-    emoji:'🌀',
-    color:'#0369a1',
-    estado:'Veracruz',
-    periodo:'600 – 1200 d.C.',
-    costo:'$80 MXN general',
-    horario:'Todos los días 9:00–17:00',
-    distancia:'~20 km de Papantla · Colectivo desde Papantla',
-    destacado:'Pirámide de los Nichos (365 nichos = año solar) · Juegos de Pelota · Complejo de columnas · Voladores en vivo',
-    descripcion:'La Pirámide de los Nichos es única en Mesoamérica: 365 nichos representan el año solar. El Volador de Papantla, ritual que se practica en el sitio, es Patrimonio Cultural Inmaterial de la Humanidad por la UNESCO.',
-    patrimonio:true
-  }
-];
-
-let ombligoTabActual = 'timeline';
-let ombligoIniciado = false;
-
-function initOmbligo() {
-  if (ombligoIniciado) return;
-  ombligoIniciado = true;
-  renderOmbligoTimeline();
-  renderOmbligoMuseos();
-  renderOmbligoZonas();
-}
-
-function ombligoTab(tab) {
-  ombligoTabActual = tab;
-  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e' };
-  ['timeline','museos','zonas'].forEach(t => {
-    const panel = document.getElementById('opanel-' + t);
-    const btn   = document.getElementById('otab-' + t);
-    if (panel) panel.style.display = t === tab ? '' : 'none';
-    if (btn) {
-      const isActive = t === tab;
-      btn.style.color = isActive ? 'var(--text)' : 'var(--text2)';
-      btn.style.fontWeight = isActive ? '700' : '600';
-      btn.style.borderBottom = isActive ? `2px solid ${colorMap[t]}` : '2px solid transparent';
-    }
-  });
-}
-
-function renderOmbligoTimeline() {
-  const el = document.getElementById('ombligo-timeline');
-  const nav = document.getElementById('ombligo-era-nav');
-  if (!el) return;
-
-  // Era mini-nav
-  if (nav) {
-    nav.innerHTML = OMBLIGO_TIMELINE.map(era => `
-      <button onclick="ombligoJumpEra('oera-${era.id}')" title="${era.rango}"
-        style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid ${era.color}40;background:${era.color}12;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s"
-        onmouseover="this.style.background='${era.color}28';this.style.color='var(--text)'"
-        onmouseout="this.style.background='${era.color}12';this.style.color='var(--text2)'">
-        <span style="font-size:12px">${era.emoji}</span>
-        <span style="white-space:nowrap">${era.era.split(' ')[0]} ${era.era.split(' ')[1] || ''}</span>
-      </button>`).join('');
-  }
-
-  el.innerHTML = OMBLIGO_TIMELINE.map((era, i) => `
-    <div style="display:flex;gap:0;position:relative" id="era-wrap-${era.id}">
-      <!-- Columna izq: nodo + línea -->
-      <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0">
-        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
-          style="width:40px;height:40px;border-radius:50%;background:${era.color}18;border:2px solid ${era.color}70;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;z-index:1;transition:all 0.2s;outline:none"
-          onmouseover="this.style.background='${era.color}35';this.style.borderColor='${era.color}'"
-          onmouseout="this.style.background='${era.color}18';this.style.borderColor='${era.color}70'"
-          id="era-btn-${era.id}">${era.emoji}</button>
-        ${i < OMBLIGO_TIMELINE.length - 1
-          ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,${era.color}50,${OMBLIGO_TIMELINE[i+1].color}30);margin:2px 0"></div>`
-          : ''}
-      </div>
-
-      <!-- Contenido -->
-      <div style="flex:1;padding:2px 0 24px 16px;min-width:0">
-
-        <!-- Header siempre visible -->
-        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
-          style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
-            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${era.era}</span>
-            <span style="font-size:9px;font-weight:700;color:${era.color};background:${era.color}15;border:1px solid ${era.color}30;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap">${era.rango}</span>
-          </div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55">${era.resumen}</div>
-        </button>
-
-        <!-- Expanded card -->
-        <div id="oera-${era.id}" style="display:none;margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid ${era.color}30">
-          <!-- Color header strip -->
-          <div style="background:linear-gradient(135deg,${era.color}25,${era.color}10);padding:12px 16px;border-bottom:1px solid ${era.color}20">
-            <div style="font-size:10px;font-weight:700;color:${era.color};letter-spacing:2px;text-transform:uppercase">${era.emoji} ${era.era} · ${era.rango}</div>
-          </div>
-          <!-- Body -->
-          <div style="background:var(--surface);padding:16px;font-size:13px;line-height:1.65;color:var(--text)">
-            ${era.cuerpo}
-            <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px">
-              📚 <span>${era.fuente}</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>`).join('');
-}
-
-function ombligoEraToggle(id, wrapId) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  // Scroll into view when opening
-  if (!isOpen && wrapId) {
-    setTimeout(() => {
-      const wrap = document.getElementById(wrapId);
-      if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }, 50);
-  }
-}
-
-function ombligoJumpEra(id) {
-  // Open and scroll to era
-  const el = document.getElementById(id);
-  if (el) el.style.display = 'block';
-  setTimeout(() => {
-    const eraId = id.replace('oera-','era-wrap-');
-    const wrap = document.getElementById(eraId);
-    if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 80);
-}
-
-function renderOmbligoMuseos() {
-  const destacadoEl = document.getElementById('ombligo-museo-destacado');
-  const gridEl      = document.getElementById('ombligo-museos');
-  if (!gridEl) return;
-
-  const destacado = OMBLIGO_MUSEOS.find(m => m.destaca);
-  const resto     = OMBLIGO_MUSEOS.filter(m => !m.destaca);
-
-  // Featured banner
-  if (destacadoEl && destacado) {
-    const d = destacado;
-    const safeId = 'om-feat-' + d.nombre.replace(/[\s\(\)—·]/g,'_');
-    // Render disabled — template literal estaba mal terminado en sync.
-    if (destacadoEl) destacadoEl.innerHTML = '';
-  }
-  if (gridEl) gridEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text2)">Museos por cargar…</div>';
-}
+// OMBLIGO_TIMELINE incomplete — stubbed by emergency fix to keep JS valid
+const OMBLIGO_TIMELINE = [];
 
 </script>
 </body>
