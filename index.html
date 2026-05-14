@@ -1887,11 +1887,11 @@
 
       <div class="nav-item" data-page="iniciativas" onclick="showPage('iniciativas')">
         <span class="icon">✊</span> Iniciativas Ciudadanas
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ Votación</span>
       </div>
       <div class="nav-item" data-page="acciones" onclick="showPage('acciones')">
         <span class="icon">⚡</span> Generador de Acciones
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge green">✅ 13 plantillas</span>
       </div>
       <div class="nav-item" data-page="organizacion" onclick="showPage('organizacion')">
         <span class="icon">🤝</span> Organízate
@@ -7236,6 +7236,21 @@
               <span style="font-size:22px">🏥</span>
               <div style="font-weight:700;font-size:13px">Queja IMSS</div>
               <div style="font-size:10px;color:var(--text3)">Salud / CONAMED</div>
+            </div>
+            <div class="accion-tipo-btn" onclick="selectTipo(this,'arco')">
+              <span style="font-size:22px">🔐</span>
+              <div style="font-weight:700;font-size:13px">Solicitud ARCO</div>
+              <div style="font-size:10px;color:var(--text3)">Datos personales</div>
+            </div>
+            <div class="accion-tipo-btn" onclick="selectTipo(this,'peticion')">
+              <span style="font-size:22px">📨</span>
+              <div style="font-weight:700;font-size:13px">Derecho de Petición</div>
+              <div style="font-size:10px;color:var(--text3)">Art. 8° CPEUM</div>
+            </div>
+            <div class="accion-tipo-btn" onclick="selectTipo(this,'defensor')">
+              <span style="font-size:22px">🛡️</span>
+              <div style="font-weight:700;font-size:13px">Defensor Público</div>
+              <div style="font-size:10px;color:var(--text3)">Apoyo legal gratuito</div>
             </div>
           </div>
         </div>
@@ -15054,6 +15069,9 @@ const accionLabels = {
   diputado:  'Carta a Diputado/Senador',
   reforma:   'Propuesta de Reforma Ciudadana',
   imss:      'Queja ante CONAMED / IMSS',
+  arco:      'Solicitud ARCO (Datos Personales)',
+  peticion:  'Derecho de Petición — Art. 8° Constitucional',
+  defensor:  'Solicitud de Defensor Público Gratuito',
 };
 
 const accionDondePresenta = {
@@ -15067,6 +15085,9 @@ const accionDondePresenta = {
   diputado:  '• Envía por correo certificado al domicilio oficial o a través del <b>portal de la Cámara</b>: diputados.gob.mx / senado.gob.mx<br>• También puedes entregar en la oficina de enlace de tu distrito<br>• Busca a tu diputado en: diputados.gob.mx/diputados',
   reforma:   '• Necesitas el apoyo del <b>0.13% de la lista nominal</b> (~130,000 firmas) para presentarla formalmente<br>• Plataforma: diputados.gob.mx<br>• Usa la sección "Iniciativas Ciudadanas" de Tequio para reunir firmas',
   imss:      '• <b>CONAMED</b>: conamed.gob.mx — 800 711 0658 (arbitraje médico gratuito)<br>• <b>IMSS</b>: imss.gob.mx — Delegación o subdelegación de atención<br>• <b>CNDH</b>: si hay violación grave de DDHH en hospital público<br>• Plazo: <b>10 años</b> para responsabilidad médica civil',
+  arco:      '• <b>INAI</b>: home.inai.org.mx — Plataforma Nacional de Transparencia, sección "Datos Personales"<br>• Si es ante un particular (empresa/banco): entrega a su <b>Departamento de Datos Personales</b> con acuse<br>• La empresa tiene <b>20 días hábiles</b> para responder (LFPDPPP / LGPDPPSO)<br>• Si no responden o niegan: <b>Recurso de Revisión INAI</b> gratuito en línea',
+  peticion:  '• <b>Oficialía de Partes</b> de la institución — siempre solicita <b>acuse con sello y fecha</b><br>• Por correo certificado SEPOMEX si está lejos<br>• La autoridad tiene un <b>plazo razonable y breve</b> para responder (Art. 8° CPEUM)<br>• Si no responden: <b>amparo por omisión</b> (15 días para promoverlo desde el silencio)',
+  defensor:  '• <b>Federal</b>: Instituto Federal de Defensoría Pública (IFDP) — <b>800 224 4242</b> / ifdp.cjf.gob.mx<br>• <b>Estatal</b>: cada estado tiene su Defensoría Pública (busca "defensoría pública [tu estado]")<br>• <b>Servicio 100% gratuito</b> para personas sin recursos<br>• <b>Materias</b>: penal, civil, laboral, administrativo, familiar, amparo<br>• Lleva: identificación + comprobante de ingresos + carta inicial',
 };
 
 const accionGuiaPreguntas = {
@@ -15080,6 +15101,9 @@ const accionGuiaPreguntas = {
   diputado:  [{label:'¿Cuál es el nombre de tu diputado/senador?', id:'g1'}, {label:'¿Qué estás exigiendo que haga (iniciar ley, investigar, intervenir)?', id:'g2'}],
   reforma:   [{label:'¿Qué ley o artículo quieres cambiar?', id:'g1'}, {label:'¿Cuál es el problema actual que esa reforma resolvería?', id:'g2'}, {label:'¿Cuántas personas apoyan esta propuesta?', id:'g3'}],
   imss:      [{label:'¿En qué hospital o clínica ocurrió?', id:'g1'}, {label:'¿Qué atención se negó o fue incorrecta?', id:'g2'}, {label:'¿Hubo daños a tu salud por esta situación?', id:'g3'}],
+  arco:      [{label:'¿Qué derecho ARCO ejerces? (Acceso / Rectificación / Cancelación / Oposición)', id:'g1'}, {label:'¿Ante qué empresa o institución?', id:'g2'}, {label:'¿Qué datos específicos quieres ver, corregir o eliminar?', id:'g3'}],
+  peticion:  [{label:'¿A qué autoridad o funcionario diriges tu petición?', id:'g1'}, {label:'¿Qué pides exactamente? (sé claro y específico)', id:'g2'}, {label:'¿Hay un plazo legal aplicable o urgencia?', id:'g3'}],
+  defensor:  [{label:'¿Qué tipo de asunto necesitas defender? (penal/laboral/civil/familiar/amparo)', id:'g1'}, {label:'¿Hay un proceso ya iniciado? ¿Cuál es la fecha de la próxima audiencia?', id:'g2'}, {label:'¿Cuál es tu situación económica? (sin ingresos, salario mínimo, etc.)', id:'g3'}],
 };
 
 const accionPresets = {
@@ -15089,6 +15113,8 @@ const accionPresets = {
   salud:         { tipo:'imss',      situacion:'El día [fecha], acudí al hospital/clínica [nombre] del [IMSS/ISSSTE/SSA] en [ciudad]. El personal [médico/enfermero/administrativo] me negó atención [de urgencias/consulta] argumentando [motivo dado]. Como consecuencia, [describe daño a la salud]. Tengo número de derechohabiente [número si aplica].' },
   transparencia: { tipo:'solicitud', situacion:'Solicito a la institución [nombre completo de la institución y dependencia] la siguiente información pública: [describe los documentos, contratos, presupuestos o datos que solicitas] correspondientes al período [fechas]. Esta información es necesaria para [propósito: investigación periodística, ejercicio de derechos, verificación de uso de recursos públicos].' },
   discriminacion:{ tipo:'queja',     situacion:'El día [fecha], en [lugar], fui víctima de discriminación por parte de [persona/institución] en razón de mi [origen étnico/género/orientación sexual/discapacidad/condición de salud]. El acto discriminatorio consistió en [describe exactamente lo que pasó]. Esto me causó [daño económico/psicológico/acceso denegado a servicio]. Hay [testigos/evidencia].' },
+  datos_buro:    { tipo:'arco',      situacion:'Solicito ejercer mi derecho de [Acceso / Rectificación / Cancelación / Oposición] sobre mis datos personales registrados en [empresa: buró de crédito / banco / aseguradora / tienda departamental]. Los datos que solicito [conocer / corregir / eliminar] son: [datos específicos: historial crediticio, dirección, etc.]. Esta información [no es exacta / no debe seguir siendo tratada por la causa siguiente].' },
+  silencio_gob:  { tipo:'peticion',  situacion:'Con fundamento en el Art. 8° de la Constitución Política de los Estados Unidos Mexicanos, dirijo formal petición a [autoridad o funcionario] sobre el siguiente asunto: [describe el asunto]. He intentado obtener respuesta previamente mediante [oficio anterior / llamada / portal], sin éxito. Solicito atención por escrito en plazo breve y razonable, conforme al derecho de petición.' },
 };
 
 function accionCargarPreset(key) {
