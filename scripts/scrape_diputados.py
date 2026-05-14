@@ -36,6 +36,8 @@ TIMEOUT = 30
 MAX_ESTADOS = int(os.environ.get('MAX_ESTADOS', '32'))
 MAX_DIPUTADOS_DEBUG = int(os.environ.get('MAX_DIPUTADOS', '600'))  # safety cap
 SLEEP_BETWEEN = float(os.environ.get('SLEEP', '0.2'))
+SKIP_DIPUTADOS = os.environ.get('SKIP_DIPUTADOS', '0') == '1'
+SKIP_VOTACIONES = os.environ.get('SKIP_VOTACIONES', '0') == '1'
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -254,7 +256,11 @@ def upsert_diputado(d):
 
 
 def extraer_votaciones_de_periodo(pert):
-    """Recorre la lista de votaciones del periodo. v2: parser sobre HTML real con BS4."""
+    """v3: el HTML real tiene <tr> con [<td>fecha</td>] o [<td><a>1</a></td><td>ASUNTO</td>].
+
+    El asunto vive en el <tr> que contiene el link votaciont=NNN, en otro <td>.
+    La fecha vive en una fila SEPARADA que precede a las votaciones de ese día.
+    """
     from bs4 import BeautifulSoup
     url = f"{BASE}/votacionesxperiodonplxvi.php?pert={pert}"
     html = http_get(url)
@@ -265,22 +271,18 @@ def extraer_votaciones_de_periodo(pert):
     meses_es = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
                 'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
 
-    # Recorrer las celdas/filas en orden. Detectamos:
-    # - filas con fecha "10 Febrero 2026"
-    # - links con votaciont=NNN seguidos del título de la votación
     votaciones = []
     fecha_actual = None
-    fecha_re = re.compile(r'^(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})$', re.I)
+    fecha_re = re.compile(r'^(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})\s*$', re.I)
 
-    # Estrategia: iterar todos los <tr> o filas de tabla, y dentro ver si tienen votaciont
-    # Como fallback, iterar TODO el árbol y usar texto contextual
-    nodos = soup.find_all(['tr', 'td', 'div', 'a'])
-    for nodo in nodos:
-        texto = nodo.get_text(strip=True)
-        if not texto:
+    # Iterar SÓLO <tr>s en orden del documento
+    for tr in soup.find_all('tr'):
+        texto_tr = tr.get_text(separator=' ', strip=True)
+        if not texto_tr:
             continue
-        # Es fecha?
-        fm = fecha_re.match(texto)
+
+        # ¿Es una fila de fecha? "10 Febrero 2026"
+        fm = fecha_re.match(texto_tr)
         if fm:
             try:
                 d = int(fm.group(1))
@@ -290,43 +292,53 @@ def extraer_votaciones_de_periodo(pert):
             except Exception:
                 pass
             continue
-        # Es link a votación?
-        if nodo.name == 'a':
-            href = nodo.get('href', '')
-            mvot = re.search(r'votaciont=(\d+)', href)
-            if mvot and texto.isdigit():
-                # Encontrar asunto: el siguiente elemento o texto del padre
-                parent = nodo.parent
-                if parent:
-                    parent_txt = parent.get_text(separator=' | ', strip=True)
-                    # El número se asume al inicio; el asunto viene después del "|"
-                    partes = [p.strip() for p in parent_txt.split('|')]
-                    # Buscar la parte más larga (probablemente el asunto)
-                    asunto = max(partes, key=len) if partes else ''
-                    asunto = re.sub(r'^\d+\s*', '', asunto)  # quitar número al inicio
-                    asunto = asunto.strip()
-                    if len(asunto) < 10:
-                        continue
-                    tipo = None
-                    up = asunto.upper()
-                    if 'EN LO GENERAL Y EN LO PARTICULAR' in up:
-                        tipo = 'general_particular'
-                    elif 'EN LO GENERAL' in up:
-                        tipo = 'general'
-                    elif 'EN LO PARTICULAR' in up:
-                        tipo = 'particular'
-                    votacion_id = int(mvot.group(1))
-                    # Deduplicar
-                    if any(v['votacion_id'] == votacion_id for v in votaciones):
-                        continue
-                    votaciones.append({
-                        'votacion_id': votacion_id,
-                        'fecha': fecha_actual,
-                        'asunto': asunto[:1000],
-                        'tipo': tipo,
-                        'pert_id': pert,
-                        'url_oficial': f"{BASE}/estadistico_votacionnplxvi.php?votaciont={votacion_id}",
-                    })
+
+        # ¿Tiene un link con votaciont=NNN?
+        link = tr.find('a', href=re.compile(r'votaciont=\d+'))
+        if not link:
+            continue
+        mvot = re.search(r'votaciont=(\d+)', link.get('href', ''))
+        if not mvot:
+            continue
+        votacion_id = int(mvot.group(1))
+
+        # Deduplicar
+        if any(v['votacion_id'] == votacion_id for v in votaciones):
+            continue
+
+        # Extraer asunto: el <tr> tiene <td>1</td><td>ASUNTO</td>. Buscar el TD más largo.
+        tds = tr.find_all('td')
+        asunto = ''
+        for td in tds:
+            t = td.get_text(strip=True)
+            if len(t) > len(asunto) and not t.isdigit():
+                asunto = t
+        # Fallback: texto entero del tr sin el número del link
+        if len(asunto) < 10:
+            asunto = texto_tr
+            num_link = link.get_text(strip=True)
+            if num_link and asunto.startswith(num_link):
+                asunto = asunto[len(num_link):].strip()
+        if len(asunto) < 10:
+            continue
+
+        tipo = None
+        up = asunto.upper()
+        if 'EN LO GENERAL Y EN LO PARTICULAR' in up:
+            tipo = 'general_particular'
+        elif 'EN LO GENERAL' in up:
+            tipo = 'general'
+        elif 'EN LO PARTICULAR' in up:
+            tipo = 'particular'
+
+        votaciones.append({
+            'votacion_id': votacion_id,
+            'fecha': fecha_actual,
+            'asunto': asunto[:1000],
+            'tipo': tipo,
+            'pert_id': pert,
+            'url_oficial': f"{BASE}/estadistico_votacionnplxvi.php?votaciont={votacion_id}",
+        })
     return votaciones
 
 
@@ -349,6 +361,19 @@ def upsert_votacion(v):
 
 # ─────────────────────────────────────────────────────────────────
 def main():
+    if SKIP_DIPUTADOS:
+        print("\n[A+B] SALTADO (SKIP_DIPUTADOS=1)")
+    else:
+        scrapear_diputados()
+    if SKIP_VOTACIONES:
+        print("\n[C] SALTADO (SKIP_VOTACIONES=1)")
+        print("\nScrape Diputados completo (sin votaciones).")
+        return
+    scrapear_votaciones()
+    print("\nScrape Diputados LXVI completo.")
+
+
+def scrapear_diputados():
     # ETAPA A+B: Diputados
     print("\n[A+B] Extracción diputados por estado + curriculas")
     todos_dipt_ids = set()
@@ -382,24 +407,27 @@ def main():
         time.sleep(SLEEP_BETWEEN)
     print(f"\n  Diputados: {ok} actualizados, {fail} fallidos")
 
+
+def scrapear_votaciones():
     # ETAPA C: Votaciones
     print("\n[C] Extracción votaciones nominales por periodo")
     periodos = [1, 3, 5, 6, 8]  # pert IDs conocidos LXVI
     total_vot = 0
+    total_skipped = 0
     for pert in periodos:
         vots = extraer_votaciones_de_periodo(pert)
-        print(f"  Periodo {pert}: {len(vots)} votaciones")
+        print(f"  Periodo {pert}: {len(vots)} votaciones extraídas")
         for v in vots:
             ok_db, err = upsert_votacion(v)
             if ok_db:
                 total_vot += 1
+            elif err == 'sin fecha':
+                total_skipped += 1
             elif err:
                 print(f"    [WARN vot={v['votacion_id']}] {err[:100]}")
             time.sleep(0.1)
         time.sleep(SLEEP_BETWEEN)
-    print(f"\n  Votaciones: {total_vot} actualizadas")
-
-    print("\nScrape Diputados LXVI completo.")
+    print(f"\n  Votaciones: {total_vot} actualizadas, {total_skipped} sin fecha")
 
 
 if __name__ == '__main__':
