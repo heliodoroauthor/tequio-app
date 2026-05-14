@@ -11405,17 +11405,32 @@ function generarImagenRepresentante() {
   }, 200);
 
   // Ocultar splash cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', () => {
+  // FIX: el script corre después de DOMContentLoaded, así que check readyState
+  function _hideSplash() {
     setTimeout(() => {
-      bar.style.width = '100%';
-      label.textContent = '¡Bienvenido!';
+      if (bar) bar.style.width = '100%';
+      if (label) label.textContent = '¡Bienvenido!';
       clearInterval(tick);
       setTimeout(() => {
         splash.style.animation = 'splashFadeOut 0.5s ease forwards';
         setTimeout(() => { splash.style.display = 'none'; }, 500);
       }, 300);
     }, 1200);
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _hideSplash);
+  } else {
+    _hideSplash();
+  }
+
+  // Failsafe: a los 5 segundos forzar el hide pase lo que pase
+  setTimeout(() => {
+    if (splash && getComputedStyle(splash).display !== 'none') {
+      splash.style.display = 'none';
+      console.warn('[tequio] splash hidden by failsafe');
+    }
+  }, 5000);
 })();
 
 // ════════════════════════════════════════
