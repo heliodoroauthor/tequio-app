@@ -24594,8 +24594,10 @@ function initOmbligo() {
   }).catch(() => {});
   // Cargar 36 sitios UNESCO Patrimonio Mundial
   fetch('/api/data?vista=unesco').then(r => r.ok ? r.json() : null).then(j => {
-    if (!j || !Array.isArray(j.unesco)) return;
-    OMBLIGO_UNESCO.push(...j.unesco);
+    if (!j) return;
+    const arr = j.sitios || j.unesco;
+    if (!Array.isArray(arr)) return;
+    OMBLIGO_UNESCO.push(...arr);
     renderOmbligoUnesco();
   }).catch(() => {});
   // Cargar 68 lenguas indígenas INALI
