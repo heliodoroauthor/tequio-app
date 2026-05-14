@@ -278,15 +278,28 @@ def parse_compiled_release(record):
 
 
 def fetch_page(page):
-    """Pide una página y devuelve (records[], hasMore)."""
+    """Pide una página y devuelve (records[], hasMore, err).
+
+    El endpoint api.datos.gob.mx/v2/contratacionesabiertas devuelve {results: [...]}
+    Algunos packages OCDS usan 'records' o 'data', se intentan todos los keys.
+    """
     url = f"{API_BASE}?page={page}&pageSize={PAGE_SIZE}"
     try:
         r = requests.get(url, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
         if not r.ok:
-            return [], False, f'HTTP {r.status_code}'
+            return [], False, f'HTTP {r.status_code} body={r.text[:200]}'
         data = r.json()
-        records = data.get('records') or data.get('data') or []
-        # Heurística "hay más": si recibimos PAGE_SIZE records, asumir hay más
+        # Probar múltiples shapes del response
+        records = (data.get('results') or
+                   data.get('records') or
+                   data.get('data') or
+                   data.get('releases') or [])
+        # Debug print en la primera página
+        if page == 1:
+            keys = list(data.keys()) if isinstance(data, dict) else 'not-dict'
+            sample = records[0] if records else None
+            sample_keys = list(sample.keys()) if isinstance(sample, dict) else 'empty'
+            print(f"  [DEBUG page1] response keys: {keys}, first record keys: {sample_keys}")
         return records, len(records) >= PAGE_SIZE, None
     except Exception as e:
         return [], False, f'{type(e).__name__}: {e}'
