@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       modulo:
-        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | presas | diputados | votos | backfill_embeddings)'
+        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | presas | diputados | votos | compranet | backfill_embeddings)'
         required: false
         default: 'all'
 
@@ -90,6 +90,18 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           MAX_VOTACIONES: '300'
         run: python scripts/scrape_votos_individuales.py
+        continue-on-error: true
+        timeout-minutes: 30
+
+      - name: Compranet/ComprasMX scraper (OCDS APF)
+        if: ${{ github.event.inputs.modulo == 'compranet' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PAGE_SIZE: '500'
+          MAX_PAGES: '500'
+          MAX_CONTRATOS: '250000'
+        run: python scripts/scrape_compranet.py
         continue-on-error: true
         timeout-minutes: 30
 
