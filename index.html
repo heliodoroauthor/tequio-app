@@ -2866,6 +2866,23 @@
           if (p === 'pide-ayuda') leadPaso(1);
         };
       })();
+
+      // FIX CRÍTICO: el parser HTML del browser saca todas las .page de <main>
+      // y las cuelga directamente de <body>. Las movemos de vuelta dentro de main.
+      function tequioRehospedarPages() {
+        const main = document.querySelector('main.main');
+        if (!main) { setTimeout(tequioRehospedarPages, 50); return; }
+        const huerfanas = Array.from(document.body.querySelectorAll(':scope > .page'));
+        huerfanas.forEach(p => main.appendChild(p));
+        if (huerfanas.length) {
+          console.log('[tequio] Re-hosted', huerfanas.length, '.page elements into <main>');
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tequioRehospedarPages);
+      } else {
+        tequioRehospedarPages();
+      }
     </script>
 
     <!-- ───── LEYES ───── -->
