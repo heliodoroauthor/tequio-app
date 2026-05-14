@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 """
-scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v4 — CSV directo, columnas reales)
-========================================================================================
-v3 falló porque mi COL_MAP usaba nombres CAMEL_CASE_UPPER pero el CSV real
-usa Title Case con acentos: "Código del expediente", "Título del expediente",
-"Tipo Procedimiento", etc.
+scrape_compranet.py — Fase 3.1.C ComprasMX/Compranet (v5)
+=========================================================
+v4 logró cargar 400 contratos (LICONSA, ALEN DEL NORTE para "Alimentación
+para el Bienestar"). Pero el resto (91,450 filas) NO se cargó.
 
-v4 fixes:
-  - Normaliza nombres de columna (lowercase, sin acentos, _ en lugar de espacios)
-  - Imprime las 73 columnas reales en el primer run
-  - Mapping flexible con fallback por substring
+Diagnóstico v4 → v5:
+  - 1ros 2 batches OK; del 3ro en adelante falló todo. Sospecha: NaN/Infinity
+    en monto_mxn (json.dumps falla) o fechas raras.
+  - fecha_firma siempre NULL → el CSV no trae fecha_firma, usar fecha_inicio.
+  - Log truncado por debug excesivo → reducir verbosidad.
+
+v5 fixes:
+  - parse_monto rechaza NaN/Infinity
+  - fecha_firma = COALESCE(fecha_firma_real, fecha_inicio)
+  - Si un batch falla con HTTP 4xx, reintentar fila por fila para identificar bad row
+  - Cap de errores impresos (top 5) → log no se trunca
+  - Resumen compacto de columnas mapeadas vs ignoradas
 """
-import os, sys, csv, io, re, time, requests
+import os, sys, csv, io, re, time, math, json, requests
 from datetime import datetime
 
 import urllib3
@@ -29,9 +36,10 @@ UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
 HEADERS_WEB = {'User-Agent': UA}
 TIMEOUT_DOWNLOAD = 300
 
-BATCH_INSERT = int(os.environ.get('BATCH_INSERT', '200'))
+BATCH_INSERT = int(os.environ.get('BATCH_INSERT', '100'))
 MAX_CONTRATOS = int(os.environ.get('MAX_CONTRATOS', '250000'))
 UMBRAL_AD_ALTA_MXN = float(os.environ.get('UMBRAL_AD_ALTA_MXN', '10000000'))
+MAX_BAD_ROW_PRINTS = 5
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -39,16 +47,19 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-print("Tequio · Scraper Compranet (v4 — CSV directo, columnas reales)")
+print("Tequio · Scraper Compranet (v5)")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE: {'OK' if SUPABASE_URL and SERVICE_KEY else 'MISSING'}")
+print(f"  BATCH={BATCH_INSERT}  MAX={MAX_CONTRATOS}")
 
 if not (SUPABASE_URL and SERVICE_KEY):
     sys.exit(1)
 
 
+_stats = {'http_errs': 0, 'bad_rows_printed': 0, 'no_ocid': 0, 'no_titulo': 0}
+
+
 def norm_col(s):
-    """lowercase, sin acentos, alfanumérico+_."""
     if not s:
         return ''
     s = str(s).strip().lower()
@@ -133,21 +144,27 @@ def parse_fecha(s):
 
 
 def parse_monto(s):
+    """Devuelve float válido o None. Rechaza NaN/Infinity (rompen JSON)."""
     if s is None:
         return None
     s = str(s).strip().replace(',', '').replace('$', '').replace(' ', '')
-    if not s or s.lower() == 'null':
+    if not s or s.lower() in ('null', 'nan', 'inf', '-inf'):
         return None
     try:
-        return float(s)
+        v = float(s)
+        if math.isnan(v) or math.isinf(v):
+            return None
+        # PostgreSQL numeric(20,2) max ~ 10^18; rechazar excesos
+        if abs(v) > 1e15:
+            return None
+        return round(v, 2)
     except Exception:
         return None
 
 
-# ─── Mapeo por nombre normalizado ─────────────────────────────────────────
-# Keys = norm_col(nombre_columna_csv)
+# ─── COL_MAP (con variantes de nombre normalizado) ────────────────────────
 COL_MAP = {
-    # IDs / Códigos
+    # IDs
     'codigo_del_expediente':         'ocid_origen',
     'codigo_expediente':             'ocid_origen',
     'referencia_del_expediente':     'numero_proc',
@@ -174,11 +191,8 @@ COL_MAP = {
     'clave_de_la_institucion':       'dependencia_codigo',
     'nombre_de_la_uc':               'unidad_compradora',
     'nombre_uc':                     'unidad_compradora',
-    'clave_de_la_uc':                'clave_uc',
-    'clave_uc':                      'clave_uc',
     'descripcion_ramo':              'ramo',
     'ramo':                          'ramo',
-    'clave_ramo':                    'clave_ramo',
     # Procedimiento
     'tipo_procedimiento':            'tipo_procedimiento',
     'tipo_de_procedimiento':         'tipo_procedimiento',
@@ -201,8 +215,6 @@ COL_MAP = {
     'siglas_del_pais':               'proveedor_pais',
     'siglas_pais':                   'proveedor_pais',
     'pais_de_origen':                'proveedor_pais',
-    'estratificacion_de_la_mipyme':  'estrat_pyme',
-    'estratificacion_mipyme':        'estrat_pyme',
     # Montos
     'importe_del_contrato':          'monto_mxn',
     'importe_contrato':              'monto_mxn',
@@ -228,76 +240,85 @@ COL_MAP = {
     'entidad_federativa':            'entidad_federativa',
     'estado':                        'entidad_federativa',
     'municipio':                     'municipio',
-    'estatus_del_contrato':          'estatus',
-    'estatus_contrato':              'estatus',
 }
 
 
-def parse_csv_row(row, debug_first=False):
-    out = {}
-    if debug_first:
-        print("  [SAMPLE ROW]:")
-    for col_orig, valor in row.items():
-        if not col_orig:
-            continue
-        col_norm = norm_col(col_orig)
-        # 1) Exact match
-        key = COL_MAP.get(col_norm)
-        # 2) Fallback substring matching (para campos clave)
+def map_columns(headers):
+    """Devuelve dict {col_csv: campo_destino_o_None} y resumen."""
+    mapping = {}
+    mapped, unmapped = 0, 0
+    for col in headers:
+        norm = norm_col(col)
+        key = COL_MAP.get(norm)
+        # Fallback substring
         if not key:
-            if 'titulo' in col_norm and ('expediente' in col_norm or 'contrato' in col_norm):
+            if 'titulo' in norm and ('expediente' in norm or 'contrato' in norm):
                 key = 'titulo'
-            elif 'descripcion' in col_norm and ('expediente' in col_norm or 'contrato' in col_norm or 'partida' in col_norm):
-                key = 'descripcion' if 'descripcion' not in out else None
-            elif 'proveedor' in col_norm or 'contratista' in col_norm or 'razon_social' in col_norm:
-                if 'rfc' in col_norm:
+            elif 'descripcion' in norm and ('expediente' in norm or 'contrato' in norm):
+                key = 'descripcion'
+            elif ('proveedor' in norm or 'contratista' in norm or 'razon_social' in norm):
+                if 'rfc' in norm:
                     key = 'proveedor_rfc'
-                elif 'pais' in col_norm:
+                elif 'pais' in norm:
                     key = 'proveedor_pais'
-                elif 'estratificacion' in col_norm or 'mipyme' in col_norm or 'tipo' in col_norm:
-                    pass  # ignore
-                else:
+                elif 'estratificacion' not in norm and 'tipo' not in norm:
                     key = 'proveedor_nombre'
-            elif col_norm == 'rfc':
+            elif norm == 'rfc':
                 key = 'proveedor_rfc'
-            elif 'importe' in col_norm or col_norm.startswith('monto'):
+            elif 'importe' in norm or norm.startswith('monto'):
                 key = 'monto_mxn'
-            elif 'fecha' in col_norm and 'firma' in col_norm:
+            elif 'fecha' in norm and 'firma' in norm:
                 key = 'fecha_firma'
-            elif 'fecha' in col_norm and 'inicio' in col_norm:
+            elif 'fecha' in norm and 'inicio' in norm:
                 key = 'fecha_inicio'
-            elif 'fecha' in col_norm and ('fin' in col_norm or 'termino' in col_norm):
+            elif 'fecha' in norm and ('fin' in norm or 'termino' in norm):
                 key = 'fecha_fin'
-            elif col_norm in ('institucion', 'dependencia') or 'nombre_de_la_institucion' in col_norm:
+            elif norm in ('institucion', 'dependencia'):
                 key = 'dependencia'
+        mapping[col] = key
+        if key:
+            mapped += 1
+        else:
+            unmapped += 1
+    return mapping, mapped, unmapped
 
-        if debug_first and valor not in (None, ''):
-            v_short = str(valor)[:60]
-            mapped = f' → {key}' if key else ''
-            print(f"    {col_orig!r}{mapped}: {v_short!r}")
 
-        if key and valor not in (None, '', 'NULL'):
-            # No sobrescribir si ya hay valor (preferir el primer match)
-            if key not in out:
-                out[key] = valor.strip() if isinstance(valor, str) else valor
+def parse_csv_row(row, col_mapping):
+    out = {}
+    for col, valor in row.items():
+        key = col_mapping.get(col)
+        if not key:
+            continue
+        if valor in (None, '', 'NULL'):
+            continue
+        if key not in out:
+            out[key] = valor.strip() if isinstance(valor, str) else valor
 
-    # OCID compuesto si no viene
+    # OCID
     ocid = out.get('ocid_origen') or out.get('codigo_contrato') or out.get('numero_proc')
     if not ocid:
+        _stats['no_ocid'] += 1
         return None
     out['ocid'] = f"CN-MX-{str(ocid).strip()}"
 
-    # Limpiar campos a tipos correctos
+    # Limpiar tipos
     monto = parse_monto(out.get('monto_mxn'))
     out['monto_mxn'] = monto
     out['fecha_firma']  = parse_fecha(out.get('fecha_firma'))
     out['fecha_inicio'] = parse_fecha(out.get('fecha_inicio'))
     out['fecha_fin']    = parse_fecha(out.get('fecha_fin'))
+
+    # Fallback: si no hay fecha_firma, usar fecha_inicio
+    if not out.get('fecha_firma') and out.get('fecha_inicio'):
+        out['fecha_firma'] = out['fecha_inicio']
+
     if out.get('fecha_inicio') and out.get('fecha_fin'):
         try:
             d1 = datetime.strptime(out['fecha_inicio'], '%Y-%m-%d').date()
             d2 = datetime.strptime(out['fecha_fin'], '%Y-%m-%d').date()
-            out['duracion_dias'] = (d2 - d1).days
+            dd = (d2 - d1).days
+            if -3650 < dd < 36500:  # sanity check
+                out['duracion_dias'] = dd
         except Exception:
             pass
 
@@ -306,7 +327,11 @@ def parse_csv_row(row, debug_first=False):
     out['tipo_contrato']      = normalizar_categoria(out.get('tipo_contrato'))
 
     titulo = out.get('titulo') or out.get('descripcion') or ''
-    out['titulo'] = (titulo or 'Sin título')[:500]
+    titulo = titulo.strip() if isinstance(titulo, str) else str(titulo)
+    if not titulo:
+        _stats['no_titulo'] += 1
+        return None
+    out['titulo'] = titulo[:500]
     if out.get('descripcion'):
         out['descripcion'] = out['descripcion'][:2000]
 
@@ -316,27 +341,55 @@ def parse_csv_row(row, debug_first=False):
     )
 
     # Limpiar campos extra que no van en la tabla
-    for k in ['ocid_origen', 'numero_proc', 'codigo_contrato', 'clave_uc',
-              'clave_ramo', 'estrat_pyme', 'estatus']:
+    for k in ['ocid_origen', 'numero_proc', 'codigo_contrato']:
         out.pop(k, None)
+
+    # Sanitizar strings (truncar a longitudes razonables)
+    for k in ['dependencia', 'dependencia_codigo', 'unidad_compradora', 'ramo',
+              'proveedor_rfc', 'proveedor_nombre', 'proveedor_pais',
+              'tipo_contrato', 'entidad_federativa', 'municipio', 'moneda']:
+        if k in out and isinstance(out[k], str):
+            out[k] = out[k][:255]
 
     return out
 
 
 def bulk_upsert(rows):
+    """Intenta upsert del batch entero; si falla, intenta fila por fila."""
     if not rows:
         return 0
     url = f"{SUPABASE_URL}/rest/v1/contratos_publicos?on_conflict=ocid"
     h = {**HEADERS_SB, 'Prefer': 'resolution=merge-duplicates,return=minimal'}
     try:
         r = requests.post(url, json=rows, headers=h, timeout=60)
-        if not r.ok:
-            print(f"  [HTTP {r.status_code}] {r.text[:300]}")
-            return 0
-        return len(rows)
+        if r.ok:
+            return len(rows)
+        # Falló batch: log y reintentar individual
+        if _stats['http_errs'] < MAX_BAD_ROW_PRINTS:
+            _stats['http_errs'] += 1
+            print(f"  [HTTP {r.status_code}] batch falló: {r.text[:300]}")
     except Exception as e:
-        print(f"  [EXC] {e}")
-        return 0
+        if _stats['http_errs'] < MAX_BAD_ROW_PRINTS:
+            _stats['http_errs'] += 1
+            print(f"  [EXC] batch: {e}")
+
+    # Reintentar fila por fila
+    ok_count = 0
+    for row in rows:
+        try:
+            rr = requests.post(url, json=[row], headers=h, timeout=30)
+            if rr.ok:
+                ok_count += 1
+            else:
+                if _stats['bad_rows_printed'] < MAX_BAD_ROW_PRINTS:
+                    _stats['bad_rows_printed'] += 1
+                    snippet = json.dumps(row, default=str)[:400]
+                    print(f"  [BAD {rr.status_code}] {rr.text[:200]} | row={snippet}")
+        except Exception as e:
+            if _stats['bad_rows_printed'] < MAX_BAD_ROW_PRINTS:
+                _stats['bad_rows_printed'] += 1
+                print(f"  [EXC indiv] {e}")
+    return ok_count
 
 
 def refresh_view():
@@ -350,30 +403,28 @@ def refresh_view():
 
 def procesar_csv(text):
     delim = detectar_delimitador(text[:5000])
-    print(f"  Delimitador detectado: {delim!r}")
+    print(f"  Delimitador: {delim!r}")
 
     reader = csv.DictReader(io.StringIO(text), delimiter=delim)
     headers = reader.fieldnames or []
-    print(f"  Columnas encontradas ({len(headers)}):")
-    for i, h in enumerate(headers, 1):
-        norm = norm_col(h)
-        mapped = COL_MAP.get(norm)
-        flag = f' → {mapped}' if mapped else ''
-        print(f"    {i:>2}. {h!r}{flag}")
+    col_mapping, n_mapped, n_unmapped = map_columns(headers)
+    print(f"  Cols total: {len(headers)}  |  Mapeadas: {n_mapped}  |  Ignoradas: {n_unmapped}")
+    print(f"  Cols mapeadas:")
+    for col, key in col_mapping.items():
+        if key:
+            print(f"    {col!r} → {key}")
 
     batch = []
     total_filas = 0
     total_inserted = 0
     total_skipped = 0
-    first_debug = True
 
     for row in reader:
         total_filas += 1
         if total_filas > MAX_CONTRATOS:
             print(f"  [CAP] Alcanzado MAX_CONTRATOS={MAX_CONTRATOS}")
             break
-        parsed = parse_csv_row(row, debug_first=first_debug)
-        first_debug = False
+        parsed = parse_csv_row(row, col_mapping)
         if not parsed:
             total_skipped += 1
             continue
@@ -382,16 +433,18 @@ def procesar_csv(text):
             ok = bulk_upsert(batch)
             total_inserted += ok
             batch = []
-        if total_filas % 5000 == 0:
-            print(f"  [{total_filas}] {total_inserted} insertados, {total_skipped} skipped")
+        if total_filas % 10000 == 0:
+            print(f"  [{total_filas}] inserted={total_inserted}, skipped={total_skipped}")
 
     if batch:
-        ok = bulk_upsert(batch)
-        total_inserted += ok
+        total_inserted += bulk_upsert(batch)
 
     print(f"\n  Filas procesadas: {total_filas}")
     print(f"  Insertados:       {total_inserted}")
     print(f"  Skipped:          {total_skipped}")
+    print(f"  Skip por no_ocid: {_stats['no_ocid']}")
+    print(f"  Skip por no_tit:  {_stats['no_titulo']}")
+    print(f"  HTTP errors:      {_stats['http_errs']}")
     return total_inserted
 
 
@@ -405,7 +458,7 @@ def main():
         inserted = procesar_csv(text)
         inserted_total += inserted
         if inserted_total >= 50000:
-            print(f"  [STOP] Ya cargamos {inserted_total} contratos. Saltando CSVs adicionales.")
+            print(f"  [STOP] {inserted_total} contratos cargados, basta.")
             break
 
     print(f"\nTotal insertado: {inserted_total}")
