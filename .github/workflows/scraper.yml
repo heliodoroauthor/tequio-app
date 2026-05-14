@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       modulo:
-        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | presas | diputados | senadores | votos | compranet | gaceta | backfill_embeddings)'
+        description: 'Qué scraper correr (all | legal | conagua | banxico | inegi | presas | diputados | senadores | votos | compranet | gaceta | quemones | backfill_embeddings)'
         required: false
         default: 'all'
 
@@ -114,6 +114,17 @@ jobs:
         run: python scripts/scrape_compranet.py
         continue-on-error: true
         timeout-minutes: 30
+
+      - name: Cron Quemones (cerrar + ranking)
+        if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'quemones' || github.event.inputs.modulo == '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VENTANA_DIAS: '60'
+          MIN_SCORE: '0.5'
+        run: python scripts/scrape_cerrar_quemones.py
+        continue-on-error: true
+        timeout-minutes: 10
 
       - name: Gaceta Parlamentaria — Votación Ciudadana
         if: ${{ github.event.inputs.modulo == 'all' || github.event.inputs.modulo == 'gaceta' || github.event.inputs.modulo == '' }}
