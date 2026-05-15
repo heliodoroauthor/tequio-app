@@ -92,21 +92,32 @@ def pick(rec, *keys):
     return None
 
 
+def pick_monto(rec):
+    """SHCP usa montopef{anio} (ej: montopef2026) o monto*. Resolver dinamico."""
+    for k in ("monto", "montoaprobado", "montototal", "montoautorizado"):
+        if rec.get(k):
+            return rec[k]
+    for k, v in rec.items():
+        if k.startswith("monto") and v:
+            return v
+    return None
+
+
 def map_row(rec, anio):
-    # SHCP PEF CSV headers (normalized via normkey, sin underscores/acentos):
-    # ciclo, idramo, descramo, idur, descur, gpofuncional, descgpofuncional,
-    # idfuncion, descfuncion, idsubfuncion, descsubfuncion, idai, descai,
-    # idmodalidad, idpp, descpp, idobjetogasto/idog, descog,
-    # idtipogasto/idtg, idfuentefinanciamiento/idff, identidadfederativa/idef,
-    # montoaprobado / monto
-    monto = to_num(pick(rec, "montoaprobado", "monto", "montototal", "montotot", "montoautorizado"))
+    # SHCP PEF CSV headers reales (raw -> normkey):
+    # ciclo, id_ramo->idramo, desc_ramo->descramo, id_ur->idur, desc_ur->descur,
+    # gpo_funcional->gpofuncional, id_funcion->idfuncion, id_subfuncion->idsubfuncion,
+    # id_ai->idai, id_modalidad->idmodalidad, id_pp->idpp, desc_pp->descpp,
+    # id_capitulo, id_concepto, id_partida_generica, id_partida_especifica (OG),
+    # id_tipogasto, id_ff, id_entidad_federativa, id_clave_cartera,
+    # monto_pef_{anio}->montopef{anio}
     return {
         "ciclo": int(anio),
         "ramo": pick(rec, "idramo", "ramo"),
         "desc_ramo": pick(rec, "descramo", "descripcionramo"),
         "unidad_responsable": pick(rec, "idur", "ur", "unidadresponsable"),
         "desc_ur": pick(rec, "descur", "descripcionur"),
-        "finalidad": pick(rec, "idfinalidad", "finalidad"),
+        "finalidad": pick(rec, "idfinalidad", "finalidad", "gpofuncional"),
         "funcion": pick(rec, "idfuncion", "funcion"),
         "desc_funcion": pick(rec, "descfuncion"),
         "subfuncion": pick(rec, "idsubfuncion", "subfuncion"),
@@ -116,12 +127,13 @@ def map_row(rec, anio):
         "modalidad": pick(rec, "idmodalidad", "modalidad"),
         "programa_presupuestario": pick(rec, "idpp", "pp", "programapresupuestario"),
         "desc_pp": pick(rec, "descpp"),
-        "objeto_gasto": pick(rec, "idog", "idobjetogasto", "og", "objetogasto"),
-        "desc_og": pick(rec, "descog"),
-        "tipo_gasto": pick(rec, "idtg", "idtipogasto", "tg", "tipogasto"),
+        # objeto_gasto = partida especifica (5 digitos, granular CONAC)
+        "objeto_gasto": pick(rec, "idpartidaespecifica", "idpartidagenerica", "idconcepto", "idcapitulo", "idog", "idobjetogasto"),
+        "desc_og": pick(rec, "descpartidaespecifica", "descpartidagenerica", "descconcepto", "desccapitulo", "descog"),
+        "tipo_gasto": pick(rec, "idtipogasto", "idtg", "tipogasto"),
         "fuente_financiamiento": pick(rec, "idff", "idfuentefinanciamiento", "ff", "fuentefinanciamiento"),
-        "entidad_federativa": pick(rec, "idef", "identidadfederativa", "ef", "entidadfederativa"),
-        "monto": monto,
+        "entidad_federativa": pick(rec, "identidadfederativa", "idef", "ef", "entidadfederativa"),
+        "monto": to_num(pick_monto(rec)),
         "fecha_extraccion": datetime.now(timezone.utc).date().isoformat(),
     }
 
