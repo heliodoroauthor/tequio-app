@@ -1948,7 +1948,7 @@
       </div>
       <div class="nav-item" data-page="dinero" onclick="showPage('dinero')">
         <span class="icon">💰</span> Dinero Público
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+        <span class="nav-badge" style="background:#22c55e;color:#fff">✅ SHCP</span>
       </div>
       <div class="nav-item" data-page="mapacontratos" onclick="showPage('mapacontratos')">
         <span class="icon">🔥</span> Mapa de Contratos
@@ -3900,6 +3900,41 @@
       }
 
       // ══════════════════════════════════════════════════════
+      // ── INDICADORES FISCALES (Dinero Público) ───────────────
+      // ══════════════════════════════════════════════════════
+      async function cargarIndicadoresFiscales() {
+        const cont = document.getElementById('dinero-kpis');
+        if (!cont) return;
+        try {
+          const r = await fetch('/api/data?vista=indicadores_fiscales');
+          const j = await r.json();
+          const items = j.indicadores || [];
+          if (!items.length) {
+            cont.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text2);padding:18px">No hay indicadores cargados.</div>';
+            return;
+          }
+          cont.innerHTML = items.map(i => {
+            const dirCls = i.cambio_direccion === 'down' ? 'down' : (i.cambio_direccion === 'flat' ? '' : 'up');
+            const color = i.color_var || 'var(--text)';
+            const fuente = i.fuente_url
+              ? `<a href="${i.fuente_url}" target="_blank" rel="noopener" style="color:var(--text3);font-size:10px;text-decoration:underline;margin-top:4px;display:block">${i.fuente} →</a>`
+              : `<div style="color:var(--text3);font-size:10px;margin-top:4px">${i.fuente || ''}</div>`;
+            return `
+              <div class="stat-card">
+                <div class="stat-label">${i.label}</div>
+                <div class="stat-value" style="color:${color}">${i.valor_display}</div>
+                <div class="stat-change ${dirCls}">${i.cambio_label || ''}</div>
+                ${fuente}
+              </div>
+            `;
+          }).join('');
+        } catch(e) {
+          console.error('[indicadores_fiscales]', e);
+          cont.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;color:#ef4444;padding:18px">Error al cargar indicadores fiscales.</div>';
+        }
+      }
+
+      // ══════════════════════════════════════════════════════
       // ── DIFERENCIAS DE VOTO — Fase 4.1.D ────────────────────────────
       // ══════════════════════════════════════════════════════
       async function cargarQuemones() {
@@ -4803,35 +4838,15 @@
 
         <div class="alert alert-info mb-16">
           <span>📊</span>
-          <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Datos más recientes disponibles — verifica en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
-        </div>
-        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
-          <span style="font-size:18px">💡</span>
-          <div style="font-size:12px;color:var(--yellow2)"><strong>Este módulo:</strong> Deuda pública, déficit fiscal y contratos observados 2024 (ASF). Para ver el desglose del PEF 2025 y calcular tu aportación personal, visita <button onclick="showPage('presupuesto')" style="background:none;border:none;color:var(--accent2);font-size:12px;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline">💸 Dinero Público (PEF 2025) →</button></div>
+          <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Cada indicador enlaza al PDF oficial. Verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
         </div>
 
-        <!-- KPIs -->
-        <div class="grid-4 mb-16">
-          <div class="stat-card">
-            <div class="stat-label">PRESUPUESTO FEDERAL 2024</div>
-            <div class="stat-value" style="color:var(--accent2)">$9.1T</div>
-            <div class="stat-change up">MXN · Aprobado</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">DEUDA PÚBLICA TOTAL</div>
-            <div class="stat-value" style="color:var(--red2)">$13.7T</div>
-            <div class="stat-change down">↑ 3.2% vs 2023</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">DEUDA ESTADOS + MUNS</div>
-            <div class="stat-value" style="color:var(--yellow2)">$652B</div>
-            <div class="stat-change down">↑ 1.8% vs 2023</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">DÉFICIT FISCAL 2024</div>
-            <div class="stat-value" style="color:var(--red2)">-5.9%</div>
-            <div class="stat-change down">del PIB · Histórico</div>
-          </div>
+        <!-- KPIs (carga dinámica desde Supabase tabla indicadores_fiscales) -->
+        <div class="grid-4 mb-16" id="dinero-kpis">
+          <div class="stat-card"><div class="stat-label" style="color:var(--text3)">Cargando…</div></div>
+          <div class="stat-card"><div class="stat-label" style="color:var(--text3)">Cargando…</div></div>
+          <div class="stat-card"><div class="stat-label" style="color:var(--text3)">Cargando…</div></div>
+          <div class="stat-card"><div class="stat-label" style="color:var(--text3)">Cargando…</div></div>
         </div>
 
         <!-- Tabs principales -->
@@ -13780,6 +13795,7 @@ function showPage(id) {
   if (id === 'votosim') safeInit('initVotosim', typeof initVotosim !== 'undefined' ? initVotosim : null);
   if (id === 'directorio') safeInit('initDirectorio', typeof initDirectorio !== 'undefined' ? initDirectorio : (typeof renderDirectorio !== 'undefined' ? renderDirectorio : null));
   if (id === 'ombligo') safeInit('initOmbligo', typeof initOmbligo !== 'undefined' ? initOmbligo : null);
+  if (id === 'dinero') safeInit('cargarIndicadoresFiscales', typeof cargarIndicadoresFiscales !== 'undefined' ? cargarIndicadoresFiscales : null);
   if (id === 'comunidad') { try {
     const estadoGuardado = localStorage.getItem('voto_estado') || 'Ciudad de México';
     const sel = document.getElementById('chat-estado-sel');
