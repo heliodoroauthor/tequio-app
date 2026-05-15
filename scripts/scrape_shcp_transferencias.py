@@ -13,6 +13,7 @@ SB_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SB_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 GH_RUN_ID = os.environ.get("GITHUB_RUN_ID", "")
 URL_OVERRIDE = os.environ.get("TRANSFERENCIAS_URL", "").strip()
+ANIOS_FILTRO = os.environ.get("TRANSFERENCIAS_ANIOS", "").strip()
 
 if not SB_URL or not SB_KEY:
     print("[shcp_tre] Faltan SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY", file=sys.stderr)
@@ -57,44 +58,22 @@ def download_csv():
                 print(f"[shcp_tre] OK status={r.status_code} bytes={len(r.content)}")
                 for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
                     try:
-                        text = r.content.decode(enc)
-                        return text, url
+                        return r.content.decode(enc), url
                     except UnicodeDecodeError:
                         continue
                 return r.content.decode("latin-1"), url
             print(f"[shcp_tre] status={r.status_code}")
         except Exception as exc:
             print(f"[shcp_tre] err: {exc}")
-    raise RuntimeError("No se pudo descargar el CSV de ninguna URL candidata")
-
-
-def parse_csv(text):
-    sample = text[:5000]
-    sep = "," if sample.count(",") > sample.count(";") else ";"
-    reader = csv.reader(io.StringIO(text), delimiter=sep)
-    all_rows = list(reader)
-    if not all_rows: return []
-    raw_headers = [(c or "").strip() for c in all_rows[0]]
-    nh = [normkey(h) for h in raw_headers]
-    print(f"[shcp_tre] sep={sep!r} headers ({len(raw_headers)}): {raw_headers[:15]}")
-    print(f"[shcp_tre] normalized: {nh[:15]}")
-    rows = []
-    for row in all_rows[1:]:
-        if not row or not any((c or "").strip() for c in row): continue
-        rows.append(dict(zip(nh, [(c or "").strip() for c in row])))
-    print(f"[shcp_tre] data rows: {len(rows)}")
-    if rows: print(f"[shcp_tre] sample row 0: {rows[0]}")
-    return rows
+    raise RuntimeError("No se pudo descargar CSV")
 
 
 def parse_num(v):
     if v is None or v == "": return None
     s = str(v).replace(",", "").replace("$", "").strip()
     if not s or s.lower() in ("nan", "null", "none"): return None
-    try:
-        return float(s)
-    except (ValueError, TypeError):
-        return None
+    try: return float(s)
+    except: return None
 
 
 def parse_int(v):
@@ -115,64 +94,91 @@ NOMBRES_ESTADO = {
     "27": "Tabasco", "28": "Tamaulipas", "29": "Tlaxcala", "30": "Veracruz",
     "31": "Yucatan", "32": "Zacatecas",
 }
+# Reverse map: deaccent(nombre).lower() -> clave_entidad
+NOMBRE_TO_CLAVE = {deaccent(v).lower(): k for k, v in NOMBRES_ESTADO.items()}
+# Aliases comunes
+NOMBRE_TO_CLAVE["distrito federal"] = "09"
+NOMBRE_TO_CLAVE["ciudad de mexico"] = "09"
+NOMBRE_TO_CLAVE["mexico"] = "15"  # Estado de México
+NOMBRE_TO_CLAVE["veracruz de ignacio de la llave"] = "30"
+NOMBRE_TO_CLAVE["coahuila de zaragoza"] = "05"
+NOMBRE_TO_CLAVE["michoacan de ocampo"] = "16"
+
+MESES = {
+    "enero": 1, "febrero": 2, "marzo": 3, "abril": 4,
+    "mayo": 5, "junio": 6, "julio": 7, "agosto": 8,
+    "septiembre": 9, "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12,
+}
 
 
-def pick(rec, *keys):
-    for k in keys:
-        v = rec.get(k)
-        if v not in (None, ""): return v
+def detect_state(nombre):
+    """Extrae 'Estado:' del campo 'nombre'."""
+    if not nombre or ":" not in nombre:
+        return None, None
+    estado_raw = nombre.split(":", 1)[0].strip()
+    key = deaccent(estado_raw).lower()
+    cve = NOMBRE_TO_CLAVE.get(key)
+    if cve:
+        return cve, NOMBRES_ESTADO[cve]
+    return None, None
+
+
+def detect_ramo(subtema, nombre):
+    """Devuelve '28', '33' o None segun subtema/nombre."""
+    s_norm = deaccent((subtema or "")).lower()
+    n_norm = deaccent((nombre or "")).lower()
+    text = s_norm + " " + n_norm
+    if "participacion" in text:
+        return "28"
+    if "aportacion" in text or "fais" in text or "fortamun" in text or "fone" in text or "fassa" in text:
+        return "33"
+    if "convenio" in text:
+        return "23-convenios"
     return None
 
 
 def map_row(rec):
-    anio = parse_int(pick(rec, "anio", "ano", "ciclo", "ejercicio", "year"))
-    if not anio: return None
-    mes = parse_int(pick(rec, "mes", "periodo", "month"))
+    ciclo = parse_int(rec.get("ciclo"))
+    mes_es = (rec.get("mes") or "").strip()
+    mes = MESES.get(deaccent(mes_es).lower())
+    if not ciclo or not mes:
+        return None
 
-    cve_raw = pick(rec, "cveent", "claveent", "idestado", "idente", "claveentidad", "cveagee", "ent")
-    if cve_raw:
-        cve_str = str(cve_raw).strip().zfill(2)
-        if len(cve_str) > 2: cve_str = cve_str[-2:]
-    else:
-        ent_name = (pick(rec, "entidad", "estado", "nomentidad", "nomestado") or "").strip()
-        cve_str = None
-        for k, v in NOMBRES_ESTADO.items():
-            if deaccent(v).lower() == deaccent(ent_name).lower():
-                cve_str = k
-                break
-        if not cve_str: return None
+    nombre_full = (rec.get("nombre") or "").strip()
+    clave_ent, nombre_estado = detect_state(nombre_full)
+    if not clave_ent:
+        return None  # Skip rows que no son por estado (totales nacionales)
 
-    nombre_estado = NOMBRES_ESTADO.get(cve_str) or (pick(rec, "entidad", "estado") or "").strip()
-    ramo = (pick(rec, "ramo", "idramo", "noramo") or "").strip() or None
-    fondo = (pick(rec, "fondo", "idfondo", "descfondo") or "").strip() or None
-    concepto = (pick(rec, "concepto", "descripcion", "rubro", "descrubro") or "").strip() or None
+    concepto_full = nombre_full.split(":", 1)[1].strip() if ":" in nombre_full else nombre_full
+    subtema = (rec.get("subtema") or "").strip() or None
+    tema = (rec.get("tema") or "").strip() or None
+    ramo = detect_ramo(subtema, nombre_full)
+    fondo = subtema  # 'Participaciones', 'Aportaciones', etc.
+    tipo_dato = (rec.get("baseregistro") or "Pagado").strip().lower() or "pagado"
 
-    base = {
-        "clave_entidad": cve_str,
+    monto = parse_num(rec.get("monto"))
+    if monto is None:
+        return None
+    # Convertir de miles a pesos si aplica
+    unidad = (rec.get("unidadmedida") or "").strip().lower()
+    if "miles" in unidad:
+        monto = monto * 1000.0
+
+    return {
+        "clave_entidad": clave_ent,
         "nombre_estado": nombre_estado,
-        "anio": anio,
+        "anio": ciclo,
         "mes": mes,
         "ramo": ramo,
         "fondo": fondo,
-        "concepto": concepto,
+        "concepto": concepto_full[:500],
+        "tipo_dato": tipo_dato,
+        "monto": monto,
+        "unidad": "MXN",
         "fuente": "SHCP Transferencias EF",
         "fuente_url": None,
         "fecha_extraccion": datetime.now(timezone.utc).date().isoformat(),
     }
-
-    out = []
-    for col, label in [
-        ("aprobado", "aprobado"), ("modificado", "modificado"),
-        ("devengado", "devengado"), ("pagado", "pagado"), ("ejercido", "pagado"),
-        ("monto", "monto"), ("montoaprobado", "aprobado"),
-        ("montomodificado", "modificado"), ("montopagado", "pagado"),
-        ("montoejercido", "pagado"),
-    ]:
-        if col in rec:
-            v = parse_num(rec[col])
-            if v is not None:
-                out.append({**base, "tipo_dato": label, "monto": v})
-    return out
 
 
 def sb_upsert(table, rows, on_conflict, batch_size=500):
@@ -189,7 +195,7 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
         if not r.ok:
             raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
-        if total % 5000 == 0 or total == len(rows):
+        if total % 10000 == 0 or total == len(rows):
             print(f"[shcp_tre] upserted {total}/{len(rows)}")
     return total
 
@@ -216,32 +222,53 @@ def log_scraper(status, summary, error_msg, started_at, fuente_url):
 
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
-    summary = {"inserted": 0, "skipped": 0, "errors": []}
+    summary = {"inserted": 0, "skipped": 0, "errors": [], "by_anio": {}, "by_ramo": {}}
     src_url = ""
+    anios_set = set()
+    if ANIOS_FILTRO:
+        anios_set = {int(a.strip()) for a in ANIOS_FILTRO.split(",") if a.strip()}
+
     try:
         text, src_url = download_csv()
-        rows = parse_csv(text)
+        sample = text[:5000]
+        sep = "," if sample.count(",") > sample.count(";") else ";"
+        reader = csv.reader(io.StringIO(text), delimiter=sep)
+        all_rows = list(reader)
+        raw_headers = [(c or "").strip() for c in all_rows[0]]
+        nh = [normkey(h) for h in raw_headers]
+        print(f"[shcp_tre] headers ({len(raw_headers)}): {raw_headers[:15]}")
+
         mapped_all = []
-        for rec in rows:
-            mapped = map_row(rec)
-            if mapped:
-                for m in mapped:
-                    m["fuente_url"] = src_url
-                mapped_all.extend(mapped)
-            else:
+        for row in all_rows[1:]:
+            if not row or not any((c or "").strip() for c in row): continue
+            rec = dict(zip(nh, [(c or "").strip() for c in row]))
+            m = map_row(rec)
+            if not m:
                 summary["skipped"] += 1
+                continue
+            if anios_set and m["anio"] not in anios_set:
+                summary["skipped"] += 1
+                continue
+            m["fuente_url"] = src_url
+            mapped_all.append(m)
+            summary["by_anio"][str(m["anio"])] = summary["by_anio"].get(str(m["anio"]), 0) + 1
+            if m["ramo"]:
+                summary["by_ramo"][m["ramo"]] = summary["by_ramo"].get(m["ramo"], 0) + 1
+
         print(f"[shcp_tre] mapeados: {len(mapped_all)} (skipped {summary['skipped']})")
         if mapped_all: print(f"[shcp_tre] sample: {mapped_all[0]}")
 
+        # Dedup
         seen = set()
         deduped = []
         for m in mapped_all:
-            k = (m["clave_entidad"], m["anio"], m.get("mes"), m.get("ramo"), m.get("fondo"), m.get("concepto"), m.get("tipo_dato"))
+            k = (m["clave_entidad"], m["anio"], m["mes"], m.get("ramo"), m.get("fondo"), m.get("concepto"), m.get("tipo_dato"))
             if k in seen:
                 summary["skipped"] += 1
                 continue
             seen.add(k)
             deduped.append(m)
+        print(f"[shcp_tre] dedup: {len(mapped_all)} -> {len(deduped)}")
 
         ins = sb_upsert("transferencias_estatales", deduped,
                         on_conflict="clave_entidad,anio,mes,ramo,fondo,concepto,tipo_dato")
@@ -253,7 +280,7 @@ def main():
         status = "fail"
 
     log_scraper(status, summary, "; ".join(summary["errors"]) or None, started_at, src_url)
-    print(f"[shcp_tre] DONE status={status} total={summary['inserted']}")
+    print(f"[shcp_tre] DONE status={status} total={summary['inserted']} by_ramo={summary['by_ramo']}")
     sys.exit(0 if status == "ok" else 1)
 
 
