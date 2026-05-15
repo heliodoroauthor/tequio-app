@@ -25665,29 +25665,47 @@ const DIRECTORIO_ESTADOS = {
 };
 
 // ═══ DIRECTORIO DE SERVICIOS — Funciones de render ═══
+const DIR_EMOJI = {
+  'Aguascalientes':'🌹','Baja California':'🌊','Baja California Sur':'🐢','Campeche':'🐊','Chiapas':'🦜','Chihuahua':'⛰️',
+  'Ciudad de México':'🏙️','Coahuila':'🏜️','Colima':'🌋','Durango':'🦂','Estado de México':'🏭','Guanajuato':'🏛️',
+  'Guerrero':'🌺','Hidalgo':'🏰','Jalisco':'🌵','Michoacán':'🦋','Morelos':'🌸','Nayarit':'🐳',
+  'Nuevo León':'⚙️','Oaxaca':'🪶','Puebla':'🌋','Querétaro':'🌹','Quintana Roo':'🦩','San Luis Potosí':'🌵',
+  'Sinaloa':'🦞','Sonora':'☀️','Tabasco':'🌴','Tamaulipas':'🌾','Tlaxcala':'🌽','Veracruz':'🌊','Yucatán':'🦩','Zacatecas':'⛰️'
+};
 let dirEstadoSeleccionado = null;
 let dirCatActual = 'todos';
+let dirEstadosKeys = null; // cache
+
+function dirGetEstados(){
+  if (dirEstadosKeys) return dirEstadosKeys;
+  // Filtrar sólo keys con .capital (descarta basura como 'default' leak)
+  dirEstadosKeys = Object.keys(DIRECTORIO_ESTADOS).filter(k => DIRECTORIO_ESTADOS[k] && DIRECTORIO_ESTADOS[k].capital).sort();
+  return dirEstadosKeys;
+}
 
 function initDirectorio() {
-  // 1. Render grid de 32 estados
   const grid = document.getElementById('dir-states-grid');
   if (grid) {
     const estadoUsuario = localStorage.getItem('voto_estado') || '';
-    grid.innerHTML = Object.keys(DIRECTORIO_ESTADOS).sort().map(nombre => {
+    grid.innerHTML = dirGetEstados().map(nombre => {
       const e = DIRECTORIO_ESTADOS[nombre];
-      const sel = nombre === estadoUsuario || nombre === dirEstadoSeleccionado;
-      return `<button onclick="dirSeleccionarEstado('${nombre.replace(/'/g,"\\'")}')" style="padding:8px 4px;border-radius:8px;border:1px solid ${sel?'var(--accent)':'var(--border)'};background:${sel?'rgba(59,130,246,0.15)':'var(--surface)'};color:${sel?'var(--accent)':'var(--text2)'};font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;line-height:1.2">${e.abrev || nombre.slice(0,3).toUpperCase()}<div style="font-size:9px;font-weight:500;color:var(--text3);margin-top:2px">${nombre.length>14?nombre.slice(0,12)+'…':nombre}</div></button>`;
+      const sel = nombre === dirEstadoSeleccionado || (!dirEstadoSeleccionado && nombre === estadoUsuario);
+      const emoji = DIR_EMOJI[nombre] || '📍';
+      const safe = nombre.replace(/'/g,"\\'");
+      return `<button data-estado="${nombre}" onclick="dirSeleccionarEstado('${safe}')" style="padding:10px 4px;border-radius:10px;border:1px solid ${sel?'var(--accent)':'var(--border)'};background:${sel?'rgba(59,130,246,0.18)':'var(--surface)'};color:${sel?'var(--accent)':'var(--text2)'};font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;line-height:1.2;transition:all 0.15s"><div style="font-size:20px;margin-bottom:4px">${emoji}</div><div>${e.abrev || nombre.slice(0,3).toUpperCase()}</div></button>`;
     }).join('');
   }
-  // 2. Render servicios federales (siempre visibles)
   const fed = document.getElementById('dir-federales');
-  if (fed) {
+  if (fed && !fed.dataset.rendered) {
     fed.innerHTML = DIRECTORIO_FEDERAL.map(s => dirRenderServicio(s)).join('');
+    fed.dataset.rendered = '1';
   }
-  // 3. Si hay estado guardado del usuario, seleccionarlo
-  const estadoUsuario = localStorage.getItem('voto_estado');
-  if (estadoUsuario && DIRECTORIO_ESTADOS[estadoUsuario]) {
-    dirSeleccionarEstado(estadoUsuario);
+  // Auto-select state guardado
+  if (!dirEstadoSeleccionado) {
+    const estadoUsuario = localStorage.getItem('voto_estado');
+    if (estadoUsuario && DIRECTORIO_ESTADOS[estadoUsuario] && DIRECTORIO_ESTADOS[estadoUsuario].capital) {
+      dirSeleccionarEstado(estadoUsuario);
+    }
   }
 }
 
@@ -25700,15 +25718,27 @@ function dirRenderServicio(s) {
 }
 
 function dirSeleccionarEstado(nombre) {
+  if (!DIRECTORIO_ESTADOS[nombre] || !DIRECTORIO_ESTADOS[nombre].capital) return;
+  const prev = dirEstadoSeleccionado;
   dirEstadoSeleccionado = nombre;
+  // Solo actualiza los 2 botones afectados, NO re-pinta toda la grid (esto evita el lag)
+  const grid = document.getElementById('dir-states-grid');
+  if (grid) {
+    [prev, nombre].forEach(st => {
+      if (!st) return;
+      const btn = grid.querySelector(`button[data-estado="${st}"]`);
+      if (!btn) return;
+      const isSel = st === nombre;
+      btn.style.borderColor = isSel ? 'var(--accent)' : 'var(--border)';
+      btn.style.background = isSel ? 'rgba(59,130,246,0.18)' : 'var(--surface)';
+      btn.style.color = isSel ? 'var(--accent)' : 'var(--text2)';
+    });
+  }
+  // Header + lista de servicios
   const e = DIRECTORIO_ESTADOS[nombre];
-  if (!e) return;
-  // Repinta el grid para marcar el seleccionado
-  initDirectorio();
-  // Muestra el panel del estado
   const panel = document.getElementById('dir-estado-panel');
   const header = document.getElementById('dir-estado-header');
-  if (header) header.innerHTML = `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.05));border:1px solid var(--accent);border-radius:12px;padding:14px"><div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:4px">📍 ${nombre.toUpperCase()}</div><div style="font-size:13px;color:var(--text2)">Capital: <strong style="color:var(--text)">${e.capital}</strong> · ${e.servicios.length} servicios disponibles</div></div>`;
+  if (header) header.innerHTML = `<div style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(139,92,246,0.05));border:1px solid var(--accent);border-radius:12px;padding:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><span style="font-size:26px">${DIR_EMOJI[nombre]||'📍'}</span><div><div style="font-size:11px;color:var(--accent);font-weight:700;letter-spacing:1px">${nombre.toUpperCase()}</div><div style="font-size:12px;color:var(--text2)">Capital: <strong style="color:var(--text)">${e.capital}</strong> · ${e.servicios.length} servicios disponibles</div></div></div></div>`;
   if (panel) panel.style.display = 'block';
   dirRenderServiciosLista();
   setTimeout(() => panel?.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
@@ -25728,11 +25758,10 @@ function dirRenderServiciosLista() {
 
 function dirFiltroCat(cat) {
   dirCatActual = cat;
-  // Actualiza estilo de botones
   ['todos','justicia','derechos','mujer','salud','familia','proteccion'].forEach(c => {
     const btn = document.getElementById('dcat-'+c);
     if (!btn) return;
-    if (c === cat) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.fontWeight = '700'; }
+    if (c === cat) { btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.fontWeight = '700'; btn.style.borderColor = 'var(--accent)'; }
     else {
       const cols = { justicia:['rgba(59,130,246,0.4)','rgba(59,130,246,0.1)','#60a5fa'], derechos:['rgba(139,92,246,0.4)','rgba(139,92,246,0.1)','#a78bfa'], mujer:['rgba(236,72,153,0.4)','rgba(236,72,153,0.1)','#f472b6'], salud:['rgba(16,185,129,0.4)','rgba(16,185,129,0.1)','#34d399'], familia:['rgba(245,158,11,0.4)','rgba(245,158,11,0.1)','#fbbf24'], proteccion:['rgba(239,68,68,0.4)','rgba(239,68,68,0.1)','#f87171'], todos:['var(--border)','var(--surface)','var(--text2)'] };
       const [b,bg,col] = cols[c] || cols.todos;
@@ -25746,10 +25775,9 @@ function directorioBuscarEstado(query) {
   query = (query||'').toLowerCase().trim();
   const grid = document.getElementById('dir-states-grid');
   if (!grid) return;
-  const buttons = grid.querySelectorAll('button');
-  buttons.forEach(btn => {
-    const text = btn.textContent.toLowerCase();
-    btn.style.display = (!query || text.includes(query)) ? '' : 'none';
+  grid.querySelectorAll('button').forEach(btn => {
+    const estado = (btn.getAttribute('data-estado')||'').toLowerCase();
+    btn.style.display = (!query || estado.includes(query)) ? '' : 'none';
   });
 }
 // ═══ FIN Directorio render ═══
