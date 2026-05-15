@@ -6,8 +6,8 @@ SESNSP migro los datos abiertos de gob.mx/attachment/file/ a SharePoint
 (sspcgob-my.sharepoint.com) en formato XLSX. Soportamos ambos.
 
 Flujo:
-1. Scrapear pagina oficial y encontrar anchor cuyo texto contenga
-   "Fuero com[uú]n - Delitos" AND "[mm]unicipal"
+1. Scrapear pagina oficial con BeautifulSoup y encontrar anchor cuyo texto contenga
+   "Fuero com[uú]n - Delitos" AND "municipal"
 2. Convertir sharing link a direct download (append &download=1)
 3. Descargar (~80MB)
 4. Detectar tipo (XLSX vs CSV) por magic bytes
@@ -31,6 +31,7 @@ import sys
 import unicodedata
 from datetime import datetime, timezone
 import requests
+from bs4 import BeautifulSoup
 
 SB_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SB_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -68,28 +69,27 @@ def force_sharepoint_download(url):
 
 
 def find_dataset_url(html):
-    """Busca anchor con texto que contenga 'Fuero comun - Delitos' AND 'municipal'.
-
-    Prefiere rango de anios mas amplio (ej: '2015 - 2025' > 'Enero - marzo 2026').
+    """Parsea HTML con BS4, encuentra anchors con texto que contenga
+    'Fuero comun - Delitos' AND 'municipal' (case/accent insensitive).
     """
-    # Regex: <a href="URL">TEXTO</a>
-    anchors = re.findall(r'<a[^>]+href=\"([^\"]+)\"[^>]*>([^<]{5,200})</a>', html, re.IGNORECASE)
+    soup = BeautifulSoup(html, "html.parser")
+    anchors = soup.find_all("a", href=True)
     candidates = []
-    for href, text in anchors:
+    for a in anchors:
+        text = (a.get_text() or "").strip()
         t_norm = deaccent(text).lower()
         if ("fuero" in t_norm and "delitos" in t_norm and "municipal" in t_norm
                 and "victima" not in t_norm and "victimas" not in t_norm):
-            candidates.append((href, text.strip()))
+            candidates.append((a["href"], text))
     print(f"[sesnsp] {len(candidates)} candidatos:")
     for h, t in candidates[:10]:
-        print(f"  - {t!r}: {h[:100]}")
+        print(f"  - {t[:80]!r}: {h[:100]}")
 
     if not candidates:
         return None, None
 
-    # Priorizar rango de anios mas amplio (e.g. "2015 - 2025" tiene 11 anios)
     def score(text):
-        match = re.search(r'(\d{4})\s*-\s*(\d{4})', text)
+        match = re.search(r"(\d{4})\s*-\s*(\d{4})", text)
         if match:
             return int(match.group(2)) - int(match.group(1))
         return 0
@@ -107,10 +107,11 @@ def discover_dataset_url():
     print(f"[sesnsp] descubriendo URL desde {SESNSP_PAGE}")
     r = requests.get(SESNSP_PAGE, headers={"User-Agent": UA}, timeout=60)
     r.raise_for_status()
+    print(f"[sesnsp] HTML len={len(r.text)} status={r.status_code}")
     url, label = find_dataset_url(r.text)
     if not url:
         raise RuntimeError("No se encontro link SharePoint con 'Fuero comun - Delitos - municipal' en la pagina SESNSP")
-    print(f"[sesnsp] dataset elegido: {label!r}")
+    print(f"[sesnsp] dataset elegido: {label[:120]!r}")
     return url, label
 
 
@@ -123,25 +124,15 @@ def download_file(url):
 
 
 def detect_format(blob, url=""):
-    """Devuelve 'xlsx' | 'csv' | 'zip'"""
-    # XLSX magic bytes: PK (zip header) + has 'xl/' inside
     if blob[:2] == b"PK":
-        # Could be XLSX or ZIP. XLSX has xl/ folder
-        if b"xl/" in blob[:4096] or b"[Content_Types].xml" in blob[:4096]:
+        if b"xl/" in blob[:8192] or b"[Content_Types].xml" in blob[:8192]:
             return "xlsx"
         return "zip"
-    if url.lower().endswith(".csv") or blob[:200].decode("latin-1", errors="ignore").lower().count(",") > 3:
-        return "csv"
     return "csv"
 
 
 def parse_xlsx(blob):
-    """Parsea XLSX con openpyxl en modo read-only."""
-    try:
-        from openpyxl import load_workbook
-    except ImportError:
-        raise RuntimeError("openpyxl no instalado")
-
+    from openpyxl import load_workbook
     wb = load_workbook(io.BytesIO(blob), read_only=True, data_only=True)
     sheet = wb.active
     rows = []
@@ -178,11 +169,8 @@ def parse_int(s):
 
 
 def unpivot(all_rows):
-    """Convierte CSV/XLSX en formato wide a long. Devuelve rows long."""
     if not all_rows:
         return []
-
-    # Detectar header
     header_idx = 0
     for i, row in enumerate(all_rows[:5]):
         joined = " ".join(str(c) for c in row).lower()
