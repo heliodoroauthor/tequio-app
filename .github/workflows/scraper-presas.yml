@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
+          pip install requests beautifulsoup4 lxml xlrd==1.2.0 openpyxl
       - name: Run CONAGUA Presas scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
