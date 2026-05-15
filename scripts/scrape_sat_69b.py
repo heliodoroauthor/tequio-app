@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SAT 69-B v2 (saltar preambulo legal)
-
-El CSV de SAT incluye texto legal en las primeras filas antes del header real.
-Buscamos la fila donde la primera celda sea 'RFC' o contenga 'RFC' como token.
+Tequio - Scraper SAT 69-B v3
+- Salta preambulo legal
+- Normaliza headers sin acentos
+- Mapea las multiples columnas de situacion del SAT (presunto/desvirtuado/definitivo/sentencia)
 """
-import csv, io, json, os, sys
+import csv, io, json, os, sys, unicodedata
 from datetime import datetime, timezone
 import requests
 
@@ -22,9 +22,19 @@ CSV_URL = "http://omawww.sat.gob.mx/cifras_sat/Documents/Listado_Completo_69-B.c
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 
+def deaccent(s):
+    if not s: return ""
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
+def normkey(s):
+    s = deaccent(s or "").lower()
+    return "".join(ch for ch in s if ch.isalnum())
+
+
 def fetch_csv():
-    headers = {"User-Agent": UA, "Accept": "text/csv,application/octet-stream,*/*"}
-    r = requests.get(CSV_URL, headers=headers, timeout=120)
+    h = {"User-Agent": UA, "Accept": "text/csv,application/octet-stream,*/*"}
+    r = requests.get(CSV_URL, headers=h, timeout=120)
     r.raise_for_status()
     print(f"[sat69b] HTTP {r.status_code} bytes={len(r.content)}")
     for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
@@ -44,9 +54,6 @@ def parse_csv(text):
     print(f"[sat69b] separator={sep!r}")
     reader = csv.reader(io.StringIO(text), delimiter=sep)
     all_rows = list(reader)
-    print(f"[sat69b] total raw rows: {len(all_rows)}")
-
-    # Encontrar la fila de headers: primera fila donde algun campo sea exactamente "RFC"
     header_idx = None
     for i, row in enumerate(all_rows):
         cells = [(c or "").strip() for c in row]
@@ -54,49 +61,65 @@ def parse_csv(text):
             header_idx = i
             break
     if header_idx is None:
-        # Fallback: buscar fila con "rfc" como substring
-        for i, row in enumerate(all_rows):
-            cells = [(c or "").strip().upper() for c in row]
-            if any("RFC" == c[:3] for c in cells):
-                header_idx = i
-                break
-    if header_idx is None:
         raise RuntimeError("No se encontro fila de headers con RFC")
-
     raw_headers = [(c or "").strip() for c in all_rows[header_idx]]
-    headers = [h.lower() for h in raw_headers]
-    print(f"[sat69b] header row idx={header_idx}, headers: {raw_headers}")
-
+    print(f"[sat69b] header idx={header_idx}, headers: {raw_headers}")
+    norm_headers = [normkey(h) for h in raw_headers]
     rows = []
     for row in all_rows[header_idx + 1:]:
         if not row or not any((c or "").strip() for c in row):
             continue
-        rec = dict(zip(headers, [(c or "").strip() for c in row]))
-        if rec.get("rfc") or any(k == "rfc" for k in rec):
-            rows.append(rec)
+        rec = dict(zip(norm_headers, [(c or "").strip() for c in row]))
+        rec["__raw_headers__"] = raw_headers
+        rows.append(rec)
     print(f"[sat69b] data rows: {len(rows)}")
-    return rows, headers
+    return rows
+
+
+def find_first(rec, *candidates):
+    """Busca el primer campo no vacio entre candidatos (normalizando keys)."""
+    for cand in candidates:
+        ck = normkey(cand)
+        v = rec.get(ck)
+        if v: return v
+    return None
+
+
+def derive_situacion(rec):
+    """SAT 69-B no tiene UNA columna 'situacion', sino columnas separadas para
+    presuntos / desvirtuados / definitivos / sentencia favorable.
+    Determinamos la situacion por la columna que tiene dato."""
+    if find_first(rec, "publicacion pagina sat sentencia favorable", "publicaciondofsentenciafavorable"):
+        return "Sentencia favorable"
+    if find_first(rec, "publicacion pagina sat definitivos", "publicacion dof definitivos"):
+        return "Definitivo"
+    if find_first(rec, "publicacion pagina sat desvirtuados", "publicacion dof desvirtuados"):
+        return "Desvirtuado"
+    if find_first(rec, "publicacion pagina sat presuntos", "publicacion dof presuntos"):
+        return "Presunto"
+    return None
 
 
 def map_row(rec):
-    def get(*keys):
-        for k in keys:
-            kn = k.replace(" ", "").replace("_", "").lower()
-            for hkey in rec:
-                if hkey.replace(" ", "").replace("_", "").lower() == kn:
-                    v = (rec[hkey] or "").strip()
-                    if v: return v
-        return None
-    rfc = get("rfc", "RFC")
+    rfc = find_first(rec, "rfc", "RFC")
     if not rfc or len(rfc) < 11 or len(rfc) > 13:
         return None
     return {
         "rfc": rfc.upper(),
-        "nombre": get("nombre del contribuyente", "nombre", "razon_social", "razonsocial"),
-        "situacion": get("situacion del contribuyente", "situacion", "estatus"),
-        "numero_publicacion": get("No. y fecha de oficio global de presuncion", "numero", "oficio"),
-        "fecha_publicacion_sat": get("publicacion pagina sat presuntos", "fecha_publicacion", "fecha"),
-        "fecha_dof": get("publicacion dof presuntos", "fecha_dof", "dof"),
+        "nombre": find_first(rec, "nombre del contribuyente", "nombre", "razon social"),
+        "situacion": derive_situacion(rec),
+        "numero_publicacion": find_first(rec,
+            "numero y fecha de oficio global de presuncion sat",
+            "no y fecha de oficio global de presuncion sat",
+            "numero y fecha de oficio global de definitivos sat"),
+        "fecha_publicacion_sat": find_first(rec,
+            "publicacion pagina sat definitivos",
+            "publicacion pagina sat presuntos",
+            "publicacion pagina sat desvirtuados"),
+        "fecha_dof": find_first(rec,
+            "publicacion dof definitivos",
+            "publicacion dof presuntos",
+            "publicacion dof desvirtuados"),
         "fecha_extraccion": datetime.now(timezone.utc).date().isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -116,8 +139,6 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
         if not r.ok:
             raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
-        if total % 2000 == 0:
-            print(f"[sat69b] upserted {total}/{len(rows)}")
     return total
 
 
@@ -144,15 +165,19 @@ def main():
     started_at = datetime.now(timezone.utc).isoformat()
     try:
         text = fetch_csv()
-        rows, headers = parse_csv(text)
+        rows = parse_csv(text)
         mapped = [m for m in (map_row(r) for r in rows) if m]
-        print(f"[sat69b] mapped: {len(mapped)} de {len(rows)} con RFC valido")
+        print(f"[sat69b] mapped: {len(mapped)} de {len(rows)}")
         if mapped:
-            print(f"[sat69b] sample row: {mapped[0]}")
+            print(f"[sat69b] sample: {mapped[0]}")
+        # Stats por situacion
+        from collections import Counter
+        ct = Counter(m.get("situacion") or "UNKNOWN" for m in mapped)
+        print(f"[sat69b] por situacion: {dict(ct)}")
         ins = sb_upsert("sat_69b", mapped, "rfc,situacion,fecha_publicacion_sat")
         print(f"[sat69b] upserted: {ins}")
-        log_scraper("ok", {"inserted": ins, "rows_total": len(rows), "headers": headers}, None, started_at)
-        print(f"[sat69b] DONE status=ok total={ins}")
+        log_scraper("ok", {"inserted": ins, "by_situacion": dict(ct)}, None, started_at)
+        print(f"[sat69b] DONE total={ins}")
     except Exception as exc:
         import traceback; traceback.print_exc()
         log_scraper("fail", {"inserted": 0}, str(exc), started_at)
