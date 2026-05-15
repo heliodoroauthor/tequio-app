@@ -2,12 +2,18 @@
 """
 Tequio - Geo enrichment de municipios (lat/lng/altitud).
 
-Para cada municipio, obtiene las coordenadas del centroide via INEGI v2.
-Endpoint: https://gaia.inegi.org.mx/wscatgeo/v2/mgem/{cvegeo}
+Para cada municipio, obtiene las coordenadas de su cabecera municipal
+(localidad con cve_loc=0001) desde INEGI v2 localidades.
 
-v2 response schema:
-  {"datos":[{"cve_ent":"01","cve_mun":"001","nom_mun":"Aguascalientes",
-             "lat":"22.034","lng":"-102.362","minx":...,"maxx":...,"miny":...,"maxy":...}]}
+Endpoint: https://gaia.inegi.org.mx/wscatgeo/v2/localidades/{cve_ent}/{cve_mun}/U
+
+Response schema:
+  {"datos":[{"cvegeo":"010010001","cve_ent":"01","cve_mun":"001","cve_loc":"0001",
+             "nomgeo":"Aguascalientes","ambito":"URBANO",
+             "latitud":"21.8798228","longitud":"-102.2960467","altitud":"1878",
+             "pob_total":"863893","total_viviendas_habitadas":"246259"}, ...]}
+
+Estrategia: ThreadPoolExecutor 10 workers, ~2-3 min para 2,478 municipios.
 
 Env vars:
   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -32,7 +38,6 @@ if not SB_URL or not SB_KEY:
 
 SCRAPER_SLUG = "inegi_geo_municipios"
 UA = "Tequio.app/1.0 (civic-data; +https://tequio.app)"
-INEGI_BASE = "https://gaia.inegi.org.mx/wscatgeo"
 INEGI_V2 = "https://gaia.inegi.org.mx/wscatgeo/v2"
 
 
@@ -86,46 +91,65 @@ def fetch_municipios_list():
     return rows
 
 
+def fetch_localidades_municipio(cve_ent, cve_mun, ambito="U"):
+    """Devuelve lista de localidades URBANAS (U) o RURALES (R) del municipio."""
+    url = f"{INEGI_V2}/localidades/{cve_ent}/{cve_mun}/{ambito}"
+    data = http_get_json(url)
+    if not data:
+        return []
+    if isinstance(data, dict):
+        if data.get("result") == "404":
+            return []
+        rows = data.get("datos") or []
+    else:
+        rows = data
+    return rows or []
+
+
 def fetch_geo(municipio):
+    """Obtiene lat/lng/altitud de la cabecera (cve_loc=0001) del municipio."""
     cve_ent = municipio["clave_entidad"]
     cve_mun = municipio["clave_municipio"]
     clave_inegi = municipio["clave_inegi"]
 
-    url = f"{INEGI_V2}/mgem/{clave_inegi}"
-    data = http_get_json(url)
+    # 1. Buscar entre localidades URBANAS la cabecera (cve_loc=0001)
+    locs = fetch_localidades_municipio(cve_ent, cve_mun, "U")
+    cabecera = None
+    for loc in locs:
+        if loc.get("cve_loc") == "0001":
+            cabecera = loc
+            break
 
-    if not data:
-        url_v1 = f"{INEGI_BASE}/mloc/{cve_ent}/{cve_mun}/0001"
-        data = http_get_json(url_v1)
+    # 2. Si no esta en URBANAS, buscar en RURALES
+    if not cabecera:
+        rural_locs = fetch_localidades_municipio(cve_ent, cve_mun, "R")
+        for loc in rural_locs:
+            if loc.get("cve_loc") == "0001":
+                cabecera = loc
+                break
+        # Combinar para sample
+        locs = locs + rural_locs
 
-    if not data:
-        return {"clave_inegi": clave_inegi, "error": "no_data"}
+    # 3. Fallback: la mas poblada de las URBANAS si no hay 0001
+    if not cabecera and locs:
+        locs_with_pop = [l for l in locs if to_num(l.get("pob_total"))]
+        if locs_with_pop:
+            cabecera = max(locs_with_pop, key=lambda l: to_num(l.get("pob_total")) or 0)
 
-    rows = data.get("datos") if isinstance(data, dict) else data
-    if not rows:
-        return {"clave_inegi": clave_inegi, "error": "empty"}
+    if not cabecera:
+        return {"clave_inegi": clave_inegi, "error": "no_cabecera"}
 
-    row = rows[0]
-    lat = to_num(row.get("lat") or row.get("latitud"))
-    lon = to_num(row.get("lng") or row.get("lon") or row.get("longitud") or row.get("long"))
-    alt = to_int(row.get("alt") or row.get("altitud"))
-    cab = (row.get("nom_cab") or row.get("nom_loc") or row.get("cabecera") or "").strip() or None
-
-    if lat is None or lon is None:
-        minx = to_num(row.get("minx"))
-        maxx = to_num(row.get("maxx"))
-        miny = to_num(row.get("miny"))
-        maxy = to_num(row.get("maxy"))
-        if None not in (minx, maxx, miny, maxy):
-            lat = (miny + maxy) / 2
-            lon = (minx + maxx) / 2
+    lat = to_num(cabecera.get("latitud") or cabecera.get("lat"))
+    lon = to_num(cabecera.get("longitud") or cabecera.get("lng"))
+    alt = to_int(cabecera.get("altitud") or cabecera.get("alt"))
+    nom = (cabecera.get("nomgeo") or cabecera.get("nom_loc") or "").strip() or None
 
     return {
         "clave_inegi": clave_inegi,
         "latitud": lat,
         "longitud": lon,
         "altitud_msnm": alt,
-        "cabecera_municipal": cab,
+        "cabecera_municipal": nom,
     }
 
 
@@ -144,7 +168,7 @@ def log_scraper(status, summary, error_msg, started_at):
         requests.post(f"{SB_URL}/rest/v1/scraper_logs", headers={"Content-Type": "application/json", "apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}", "Prefer": "return=minimal"}, data=json.dumps([{
             "scraper_slug": SCRAPER_SLUG, "workflow_run_id": GH_RUN_ID or None, "status": status,
             "rows_inserted": 0, "rows_updated": summary.get("updated", 0), "rows_skipped": summary.get("skipped", 0),
-            "fuente_url": f"{INEGI_V2}/mgem/", "http_status": 200 if status == "ok" else 500,
+            "fuente_url": f"{INEGI_V2}/localidades/", "http_status": 200 if status == "ok" else 500,
             "error_msg": (error_msg or "")[:1000] or None, "notes": json.dumps(summary)[:1000],
             "started_at": started_at, "finished_at": datetime.now(timezone.utc).isoformat(),
         }]), timeout=30)
