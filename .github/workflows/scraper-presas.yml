@@ -1,7 +1,6 @@
 name: CONAGUA Presas Daily
 
 # Corre todos los dias a las 12:00 UTC (06:00 CDMX)
-# CONAGUA actualiza niveles de presas diariamente en SIH
 on:
   schedule:
     - cron: '0 12 * * *'
@@ -16,7 +15,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
