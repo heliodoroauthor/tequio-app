@@ -3900,7 +3900,7 @@
       }
 
       // ══════════════════════════════════════════════════════
-      // ── QUEMONES — Fase 4.1.D ────────────────────────────
+      // ── DIFERENCIAS DE VOTO — Fase 4.1.D ────────────────────────────
       // ══════════════════════════════════════════════════════
       async function cargarQuemones() {
         const grid = document.getElementById('qm-grid');
@@ -3919,7 +3919,7 @@
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#94a3b8">${j.total_quemones || 0}</div><div style="font-size:11px;color:var(--text2)">📊 Diferencias totales</div></div>
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total_diputados_evaluados || 0}</div><div style="font-size:11px;color:var(--text2)">Diputados evaluados</div></div>
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${j.total_incidentes || 0}</div><div style="font-size:11px;color:var(--text2)">Incidentes evaluados</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${ranking.length}</div><div style="font-size:11px;color:var(--text2)">En muro actual</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${ranking.length}</div><div style="font-size:11px;color:var(--text2)">En tablero actual</div></div>
           `;
           // Filtros: poblar dropdowns la primera vez
           if (!window.__qmFiltrosLoaded) {
@@ -3958,7 +3958,7 @@
                 </div>
                 <div style="text-align:right">
                   <div style="font-size:18px;font-weight:800;color:#fbbf24">${d.pct_quemones || 0}%</div>
-                  <div style="font-size:10px;color:var(--text3)">contra distrito</div>
+                  <div style="font-size:10px;color:var(--text3)">diferente al distrito</div>
                 </div>
               </div>
             </div>`;
@@ -4718,7 +4718,7 @@
       </div>
     </div>
 
-    <!-- ───── MURO DE QUEMONES — Fase 4.1.D ───── -->
+    <!-- ───── DIFERENCIAS DE VOTO — Fase 4.1.D ───── -->
     <div id="page-quemones" class="page">
       <div class="content">
         <div style="background:linear-gradient(135deg,#1e293b 0%,#475569 50%,#64748b 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
@@ -13815,6 +13815,7 @@ function showPage(id) {
     simulador: 'Simulador de Impacto',
     votosim:   '🗳️ Simulador de Voto 2027',
     iniciativas: 'Iniciativas Ciudadanas',
+    quemones: '📊 Diferencias de voto',
     acciones: '⚡ Generador de Acciones',
     debates: 'Debates Estructurados',
     derechos: 'Mis Derechos',
