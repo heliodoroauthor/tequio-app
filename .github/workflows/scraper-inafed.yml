@@ -1,0 +1,47 @@
+name: INAFED Presidentes Municipales
+
+on:
+  schedule:
+    - cron: '0 13 5 */2 *'
+  workflow_dispatch:
+    inputs:
+      csv_url:
+        description: 'Override URL del CSV'
+        required: false
+        default: ''
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run INAFED scraper
+        id: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          INAFED_CSV_URL: ${{ github.event.inputs.csv_url }}
+        run: python scripts/scrape_inafed_presidentes.py
+
+      - name: Log scraper run
+        if: always()
+        uses: ./.github/actions/log-scraper
+        with:
+          slug: inafed_presidentes
+          status: ${{ job.status }}
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
