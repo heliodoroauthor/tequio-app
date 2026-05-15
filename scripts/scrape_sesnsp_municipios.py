@@ -2,18 +2,15 @@
 """
 Tequio - Scraper SESNSP Incidencia Delictiva Municipal.
 
-SESNSP migro los datos abiertos de gob.mx/attachment/file/ a SharePoint
-(sspcgob-my.sharepoint.com) en formato XLSX. Soportamos ambos.
+SESNSP migro los datos abiertos a SharePoint en formato ZIP que contiene XLSX.
 
 Flujo:
-1. Scrapear pagina oficial con BeautifulSoup y encontrar anchor cuyo texto contenga
-   "Fuero com[uú]n - Delitos" AND "municipal"
-2. Convertir sharing link a direct download (append &download=1)
-3. Descargar (~80MB)
-4. Detectar tipo (XLSX vs CSV) por magic bytes
-5. Unpivot meses a long format
-6. Filtrar por SESNSP_ANIOS si esta seteado
-7. Upsert en delitos_municipios
+1. Scrapear pagina oficial con BeautifulSoup (o usar SESNSP_CSV_URL)
+2. Convertir sharing link a direct download (append ?download=1)
+3. Descargar (~130MB ZIP)
+4. Extraer CSV/XLSX del ZIP
+5. Parsear y unpivot meses a long format
+6. Upsert en delitos_municipios
 
 Env vars:
   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -29,6 +26,7 @@ import os
 import re
 import sys
 import unicodedata
+import zipfile
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
@@ -69,9 +67,6 @@ def force_sharepoint_download(url):
 
 
 def find_dataset_url(html):
-    """Parsea HTML con BS4, encuentra anchors con texto que contenga
-    'Fuero comun - Delitos' AND 'municipal' (case/accent insensitive).
-    """
     soup = BeautifulSoup(html, "html.parser")
     anchors = soup.find_all("a", href=True)
     candidates = []
@@ -79,12 +74,12 @@ def find_dataset_url(html):
         text = (a.get_text() or "").strip()
         t_norm = deaccent(text).lower()
         if ("fuero" in t_norm and "delitos" in t_norm and "municipal" in t_norm
-                and "victima" not in t_norm and "victimas" not in t_norm):
+                and "victima" not in t_norm and "victimas" not in t_norm
+                and "tablero" not in t_norm):
             candidates.append((a["href"], text))
     print(f"[sesnsp] {len(candidates)} candidatos:")
     for h, t in candidates[:10]:
         print(f"  - {t[:80]!r}: {h[:100]}")
-
     if not candidates:
         return None, None
 
@@ -110,7 +105,7 @@ def discover_dataset_url():
     print(f"[sesnsp] HTML len={len(r.text)} status={r.status_code}")
     url, label = find_dataset_url(r.text)
     if not url:
-        raise RuntimeError("No se encontro link SharePoint con 'Fuero comun - Delitos - municipal' en la pagina SESNSP")
+        raise RuntimeError("No se encontro link SharePoint con 'Fuero comun - Delitos - municipal'")
     print(f"[sesnsp] dataset elegido: {label[:120]!r}")
     return url, label
 
@@ -125,10 +120,32 @@ def download_file(url):
 
 def detect_format(blob, url=""):
     if blob[:2] == b"PK":
-        if b"xl/" in blob[:8192] or b"[Content_Types].xml" in blob[:8192]:
+        head = blob[:32768]
+        if b"xl/" in head or b"[Content_Types].xml" in head:
             return "xlsx"
         return "zip"
     return "csv"
+
+
+def extract_from_zip(blob):
+    """Extrae el archivo CSV/XLSX dentro de un ZIP."""
+    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+        names = zf.namelist()
+        print(f"[sesnsp] ZIP contiene {len(names)} entries: {names[:10]}")
+        # Preferir XLSX, luego XLS, luego CSV
+        for ext in (".xlsx", ".xls", ".csv"):
+            for name in names:
+                if name.lower().endswith(ext):
+                    print(f"[sesnsp] extrayendo {name} ({ext})")
+                    inner = zf.read(name)
+                    return inner, ext.lstrip(".")
+        # Fallback: primer archivo no-directorio
+        for name in names:
+            if not name.endswith("/"):
+                inner = zf.read(name)
+                print(f"[sesnsp] extrayendo {name} (extension desconocida)")
+                return inner, None
+    return None, None
 
 
 def parse_xlsx(blob):
@@ -147,6 +164,15 @@ def parse_csv_text(text):
     sep = "," if sample.count(",") > sample.count(";") else ";"
     reader = csv.reader(io.StringIO(text), delimiter=sep)
     return list(reader)
+
+
+def blob_to_text(blob):
+    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
+        try:
+            return blob.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return blob.decode("latin-1")
 
 
 MESES = {
@@ -276,7 +302,7 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
         if not r.ok:
             raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
-        if total % 5000 == 0:
+        if total % 10000 == 0:
             print(f"[sesnsp] upserted {total}/{len(rows)}")
     return total
 
@@ -312,18 +338,19 @@ def main():
         fmt = detect_format(blob, dataset_url)
         print(f"[sesnsp] formato detectado: {fmt}")
 
+        if fmt == "zip":
+            inner_blob, inner_ext = extract_from_zip(blob)
+            if not inner_blob:
+                raise RuntimeError("ZIP vacio o sin archivo CSV/XLSX")
+            new_fmt = inner_ext if inner_ext in ("xlsx", "csv") else detect_format(inner_blob)
+            print(f"[sesnsp] dentro del ZIP: formato={new_fmt}")
+            blob = inner_blob
+            fmt = new_fmt
+
         if fmt == "xlsx":
             all_rows = parse_xlsx(blob)
         elif fmt == "csv":
-            text = None
-            for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
-                try:
-                    text = blob.decode(enc)
-                    break
-                except UnicodeDecodeError:
-                    continue
-            if text is None:
-                text = blob.decode("latin-1")
+            text = blob_to_text(blob)
             all_rows = parse_csv_text(text)
         else:
             raise RuntimeError(f"Formato no soportado: {fmt}")
