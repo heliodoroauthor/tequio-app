@@ -4193,7 +4193,7 @@
           <div style="flex:1;min-width:180px;position:relative">
             <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
             <input id="leyes-search" type="text" placeholder="Buscar ley, artículo, tema..."
-              oninput="leyesFiltrar()"
+              oninput="leyesBuscarDebounced()"
               style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"
               onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
           </div>
@@ -16407,6 +16407,7 @@ let leyesTemaActual   = 'todos';
 
 function leyesSetAmbito(el, ambito) {
   leyesAmbitoActual = ambito;
+  if (typeof leyesPaginaActual !== 'undefined') leyesPaginaActual = 1;
   document.querySelectorAll('#page-leyes .tab-bar .tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   leyesFiltrar();
@@ -16414,6 +16415,7 @@ function leyesSetAmbito(el, ambito) {
 
 function leyesSetTema(el, tema) {
   leyesTemaActual = tema;
+  if (typeof leyesPaginaActual !== 'undefined') leyesPaginaActual = 1;
   document.querySelectorAll('#leyes-tema-panel .tema-chip').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   leyesFiltrar();
@@ -16427,6 +16429,16 @@ function leyesToggleTema() {
   btn.style.borderColor = visible ? 'var(--border)' : 'var(--accent)';
   btn.style.color       = visible ? 'var(--text2)'  : 'var(--accent2)';
 }
+
+// ─── LEYES: paginación + debounce + URL clickeable ───
+let leyesPaginaActual = 1;
+const LEYES_POR_PAGINA = 25;
+let _leyesBusquedaTimer = null;
+function leyesBuscarDebounced(){
+  clearTimeout(_leyesBusquedaTimer);
+  _leyesBusquedaTimer = setTimeout(()=>{ leyesPaginaActual = 1; leyesFiltrar(); }, 300);
+}
+function leyesIrPagina(n){ leyesPaginaActual = n; leyesFiltrar(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function leyesFiltrar() {
   const q     = (document.getElementById('leyes-search')?.value || '').toLowerCase().trim();
@@ -16452,17 +16464,23 @@ function leyesFiltrar() {
   const count  = document.getElementById('leyes-count');
 
   const ambitoLabel = {todas:'Todas',federal:'Federales',estatal:'Estatales',municipal:'Municipales',reforma:'Reformas Recientes'};
-  count.textContent = `${lista.length} leyes · ${ambitoLabel[leyesAmbitoActual] || 'Todas'} · ${leyesTemaActual !== 'todos' ? leyesTemaActual : 'todos los temas'}`;
+  const total = lista.length;
+  const totalPags = Math.max(1, Math.ceil(total / LEYES_POR_PAGINA));
+  if (leyesPaginaActual > totalPags) leyesPaginaActual = 1;
+  const inicio = (leyesPaginaActual - 1) * LEYES_POR_PAGINA;
+  const slice  = lista.slice(inicio, inicio + LEYES_POR_PAGINA);
+  count.textContent = `${total} leyes · ${ambitoLabel[leyesAmbitoActual] || 'Todas'} · ${leyesTemaActual !== 'todos' ? leyesTemaActual : 'todos los temas'} · pág. ${leyesPaginaActual}/${totalPags}`;
 
-  if (!lista.length) { el.innerHTML = ''; vacio.style.display = 'block'; return; }
+  if (!total) { el.innerHTML = ''; vacio.style.display = 'block'; const pe=document.getElementById('leyes-paginacion'); if(pe) pe.innerHTML=''; return; }
   vacio.style.display = 'none';
 
   const ambitoBadge = { federal:'🏛️ Federal', estatal:'🗺️ Estatal', municipal:'🏙️ Municipal', reforma:'🔄 Reforma' };
   const estadoColor = { vigente:'badge-green', reforma:'badge-yellow', derogada:'badge-red' };
 
-  el.innerHTML = lista.map(l => {
+  el.innerHTML = slice.map(l => {
     const tags = (l.etiquetas||[]).map(e => `<span class="badge badge-gray" style="font-size:10px">${e}</span>`).join('');
-    const prompt = `Explícame en lenguaje ciudadano esta ley mexicana:\\n\\nNombre: ${l.titulo}\\nClave: ${l.id}\\nFuente: ${l.fuente || ''}\\n\\nDescripción: ${l.desc}\\n\\n¿Qué cambia para los ciudadanos, a quién afecta, y qué derechos o obligaciones genera?`;
+    const fuenteURL = l.url || (l.ambito === 'federal' ? 'https://www.diputados.gob.mx/LeyesBiblio/index.htm' : 'https://www.dof.gob.mx');
+    const fuenteBadge = `<a href="${fuenteURL}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;color:var(--accent2);margin-left:auto;flex-shrink:0;text-decoration:none;display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);padding:3px 7px;border-radius:6px;font-weight:600">🔗 ${l.fuente || 'Fuente oficial'}</a>`;
     return `
     <div class="law-card" data-ambito="${l.ambito}" data-tema="${l.tema}"
       onclick="leyesAbrirDetalle('${l.id}')"
@@ -16477,21 +16495,43 @@ function leyesFiltrar() {
       <div class="law-meta" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
         <span class="badge ${estadoColor[l.estado]||'badge-gray'}" style="font-size:10px;text-transform:capitalize">${l.estado}</span>
         ${tags}
-        <span style="font-size:10px;color:var(--text3);margin-left:auto;flex-shrink:0">📄 ${l.fuente||''}</span>
+        ${fuenteBadge}
       </div>
-      <!-- Acciones rápidas (aparecen en hover via JS, siempre en móvil) -->
       <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap" onclick="event.stopPropagation()">
-        <button onclick="navegarCon('ia',{iaPrompt:\`${prompt}\`,toast:'Ley cargada en IA'})"
+        <button onclick="leyesAbrirDetalle('${l.id}')"
           style="flex:1;min-width:110px;padding:7px 10px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;color:var(--accent2);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
           🧠 Explicar con IA
         </button>
-        <button onclick="navegarCon('acciones',{accionConfig:{tipo:'solicitud',titulo:'🔍 Solicitud sobre esta ley',situacion:'Solicito información sobre la aplicación y cumplimiento de: ${l.titulo.replace(/'/g,"\\'")} (${l.id}).\\n\\nEspecíficamente deseo conocer:\\n1. ¿Cómo se aplica en mi municipio/estado?\\n2. ¿Qué autoridad es responsable de su cumplimiento?\\n3. ¿Qué mecanismo existe para denunciar incumplimientos?\\n\\nSolicito respuesta en los términos de la Ley General de Transparencia.'},toast:'Solicitud pre-llenada'})"
-          style="flex:1;min-width:110px;padding:7px 10px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:8px;color:#c084fc;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
-          📋 Solicitar info
-        </button>
+        <a href="${fuenteURL}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+          style="flex:1;min-width:110px;padding:7px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;color:#4ade80;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center">
+          📄 Ver fuente oficial
+        </a>
       </div>
     </div>`;
   }).join('');
+
+  // Render controles de paginación
+  let pagEl = document.getElementById('leyes-paginacion');
+  if (!pagEl) {
+    pagEl = document.createElement('div');
+    pagEl.id = 'leyes-paginacion';
+    pagEl.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap';
+    el.parentNode.insertBefore(pagEl, el.nextSibling);
+  }
+  if (totalPags <= 1) { pagEl.innerHTML = ''; return; }
+
+  const btn = (label, page, disabled, active) => `<button onclick="${disabled?'':'leyesIrPagina('+page+')'}" ${disabled?'disabled':''} style="background:${active?'var(--accent)':'var(--surface)'};border:1px solid ${active?'var(--accent)':'var(--border)'};color:${active?'#fff':'var(--text2)'};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:${disabled?'not-allowed':'pointer'};opacity:${disabled?0.4:1};font-family:inherit;min-width:36px">${label}</button>`;
+  let html = btn('‹', leyesPaginaActual-1, leyesPaginaActual===1, false);
+  const pags = new Set([1, totalPags, leyesPaginaActual, leyesPaginaActual-1, leyesPaginaActual+1, leyesPaginaActual-2, leyesPaginaActual+2].filter(p => p>=1 && p<=totalPags));
+  const sorted = [...pags].sort((a,b)=>a-b);
+  let prev = 0;
+  for (const p of sorted) {
+    if (p - prev > 1) html += `<span style="color:var(--text3);padding:0 4px">…</span>`;
+    html += btn(String(p), p, false, p===leyesPaginaActual);
+    prev = p;
+  }
+  html += btn('›', leyesPaginaActual+1, leyesPaginaActual===totalPags, false);
+  pagEl.innerHTML = html;
 }
 
 function leyesAbrirDetalle(id) {
