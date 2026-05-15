@@ -2836,40 +2836,135 @@
         if (vista === 'ranking' && !window.__rankingCargado) { cargarTuEstadoRanking(); }
       }
 
+      // Cache de rankings (no refetchear)
+      const __rankingCache = {};
+      async function __getRanking(indId) {
+        if (__rankingCache[indId]) return __rankingCache[indId];
+        const r = await fetch('/api/data?vista=inegi_comparador&indicador=' + encodeURIComponent(indId));
+        const j = await r.json();
+        __rankingCache[indId] = (j.estados || []).filter(f => f.valor != null).map(f => ({
+          ubicacion: f.ubicacion || '',
+          area: f.area_geografica || '',
+          valor: +f.valor || 0
+        })).sort((a,b) => b.valor - a.valor); // descendente por valor
+        return __rankingCache[indId];
+      }
+
       async function cargarTuEstadoDatos() {
         const codigo = document.getElementById('tu-estado-sel').value;
         const cont = document.getElementById('tu-estado-cards');
+        const sel = document.getElementById('tu-estado-sel');
+        const estadoNombre = sel.options[sel.selectedIndex]?.text || '';
         cont.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text2)">Cargando…</div>';
         try {
-          const r = await fetch('/api/data?vista=inegi_estado&estado=' + encodeURIComponent(codigo));
-          const j = await r.json();
-          const filas = j.indicadores || [];
-          // Filtrar al último valor por indicador
+          // Fetch en paralelo: datos del estado + rankings de TODOS los indicadores
+          const indIds = Object.keys(__INDICADORES_LABEL);
+          const [datosResp, ...rankings] = await Promise.all([
+            fetch('/api/data?vista=inegi_estado&estado=' + encodeURIComponent(codigo)).then(r => r.json()),
+            ...indIds.map(id => __getRanking(id))
+          ]);
+          const filas = datosResp.indicadores || [];
           const ultimoPorInd = {};
           filas.forEach(f => {
             const id = f.indicador_id;
-            if (!ultimoPorInd[id] || (f.fecha || '') > (ultimoPorInd[id].fecha || '')) {
-              ultimoPorInd[id] = f;
-            }
+            if (!ultimoPorInd[id] || (f.fecha || '') > (ultimoPorInd[id].fecha || '')) ultimoPorInd[id] = f;
           });
+          // Mapa indicadorId → ranking array
+          const rankByInd = {};
+          indIds.forEach((id, i) => { rankByInd[id] = rankings[i]; });
+
+          // Compartir state info
+          window.__tuEstadoCompartirData = { nombre: estadoNombre, codigo, indicadores: [] };
+
           const cards = [];
-          Object.keys(__INDICADORES_LABEL).forEach(id => {
+          indIds.forEach(id => {
             const meta = __INDICADORES_LABEL[id];
             const f = ultimoPorInd[id];
             const valor = f ? __fmtNumero(f.valor, meta.fmt) : '—';
             const fecha = f && f.fecha ? f.fecha.slice(0,4) : '';
+            const valorNum = f ? (+f.valor || 0) : null;
+
+            // Calcular posición y media nacional
+            const rank = rankByInd[id] || [];
+            const media = rank.length ? rank.reduce((s,r)=>s+r.valor,0) / rank.length : 0;
+            let pos = null;
+            if (valorNum !== null) {
+              // Buscar el estado por nombre (fuzzy: incluir primeros 8 chars del estadoNombre)
+              const claveNombre = estadoNombre.toLowerCase().split(' (')[0].slice(0,8);
+              const idx = rank.findIndex(r => (r.ubicacion||'').toLowerCase().includes(claveNombre));
+              if (idx >= 0) pos = idx + 1;
+            }
+            const totalEstados = rank.length || 32;
+            const mediaStr = __fmtNumero(media, meta.fmt);
+            const diff = (valorNum !== null && media) ? ((valorNum - media) / media) * 100 : null;
+            const sobreMedia = diff !== null && diff > 0;
+            const diffStr = diff !== null ? (sobreMedia ? '+' : '') + diff.toFixed(1) + '%' : '';
+            const colorPos = pos ? (pos <= 8 ? '#22c55e' : pos <= 24 ? '#fbbf24' : '#ef4444') : 'var(--text3)';
+
+            window.__tuEstadoCompartirData.indicadores.push({
+              icon: meta.icon, label: meta.label, valor, unidad: meta.unit, pos, total: totalEstados, media: mediaStr, diff: diffStr
+            });
+
             cards.push(`
-              <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px">
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:10px">
                 <div style="font-size:11px;letter-spacing:1px;color:var(--text2)">${meta.icon} ${meta.label.toUpperCase()}</div>
-                <div style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:6px 0;color:var(--accent2)">${valor}</div>
-                <div style="font-size:12px;color:var(--text2)">${meta.unit}${fecha ? ' · ' + fecha : ''}</div>
+                <div>
+                  <div style="font-size:30px;font-weight:800;font-family:var(--font-display);color:var(--accent2);line-height:1.1">${valor}</div>
+                  <div style="font-size:11px;color:var(--text3);margin-top:2px">${meta.unit}${fecha ? ' · ' + fecha : ''}</div>
+                </div>
+                ${pos ? `<div style="display:flex;align-items:center;gap:8px;font-size:11px;padding-top:10px;border-top:1px solid var(--border)">
+                  <span style="background:${colorPos}25;color:${colorPos};font-weight:800;padding:3px 8px;border-radius:8px">#${pos} de ${totalEstados}</span>
+                  <span style="color:var(--text3)">Media nacional: <strong style="color:var(--text2)">${mediaStr}</strong></span>
+                </div>
+                <div style="font-size:10px;color:${sobreMedia ? '#22c55e' : '#ef4444'};font-weight:700">${diff !== null ? (sobreMedia ? '📈 Por arriba de la media' : '📉 Por debajo de la media') + ' (' + diffStr + ')' : ''}</div>` : ''}
               </div>`);
           });
           cont.innerHTML = cards.join('') || '<div style="grid-column:1/-1;color:var(--text2);text-align:center;padding:24px">Sin datos para este estado.</div>';
+
+          // Mostrar botón de compartir
+          let shareBtn = document.getElementById('tu-estado-share-btn');
+          if (!shareBtn) {
+            shareBtn = document.createElement('button');
+            shareBtn.id = 'tu-estado-share-btn';
+            shareBtn.onclick = compartirTuEstado;
+            shareBtn.style.cssText = 'width:100%;margin-top:16px;padding:14px;background:linear-gradient(135deg,#1d4ed8,#7c3aed);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px';
+            shareBtn.innerHTML = '📤 Compartir mi estado';
+            cont.parentNode.insertBefore(shareBtn, cont.nextSibling);
+          }
         } catch(e) {
+          console.error('Tu Estado error:', e);
           cont.innerHTML = '<div style="grid-column:1/-1;color:#ef4444;text-align:center;padding:24px">Error al cargar.</div>';
         }
       }
+
+      function compartirTuEstado() {
+        const data = window.__tuEstadoCompartirData;
+        if (!data) return;
+        const lines = [
+          `🏞️ ${data.nombre} en cifras oficiales (INEGI)`,
+          ''
+        ];
+        data.indicadores.forEach(i => {
+          if (i.pos) {
+            lines.push(`${i.icon} ${i.label}: ${i.valor} ${i.unidad}`);
+            lines.push(`   #${i.pos} de ${i.total} · ${i.diff} vs media nacional`);
+          } else {
+            lines.push(`${i.icon} ${i.label}: ${i.valor} ${i.unidad}`);
+          }
+        });
+        lines.push('');
+        lines.push('📊 Consulta tu estado en tequio.app');
+        const texto = lines.join('\n');
+        if (navigator.share) {
+          navigator.share({ title: `${data.nombre} en cifras`, text: texto }).catch(()=>{});
+        } else {
+          navigator.clipboard?.writeText(texto).then(() => {
+            if (typeof mostrarToast === 'function') mostrarToast('✓ Copiado al portapapeles', 'success');
+            else alert('Copiado al portapapeles');
+          });
+        }
+      }
+      window.compartirTuEstado = compartirTuEstado;
 
       async function cargarTuEstadoRanking() {
         const indId = document.getElementById('tu-estado-indicador-sel').value;
@@ -26433,9 +26528,4 @@ function ombligoJumpEra(id) {
 }
 function renderOmbligoMuseos(){const el=document.getElementById('ombligo-museos');if(!el)return;el.innerHTML=OMBLIGO_MUSEOS.map(m=>{const c=m.color||'#3b82f6';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${m.emoji||'🏛️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>${m.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad||m.ubicacion||''}</span></div>${m.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>`:''}${m.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${m.horario?`<span>🕐 ${m.horario}</span>`:''}${m.costo?`<span>💰 ${m.costo}</span>`:''}</div></div>`;}).join('');}
 
-function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?`<span>💰 ${z.costo}</span>`:''}</div></div>`;}).join('');}
-
-window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
-</script>
-</body>
-</html>
+function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?
