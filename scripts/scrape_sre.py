@@ -1,26 +1,9 @@
 #!/usr/bin/env python3
 """
-Tequio · Scraper SRE (Embajadas + Consulados de Mexico en el Exterior)
-
-Lee los directorios oficiales de SRE:
-- https://portales.sre.gob.mx/directorio/embajadas-de-mexico-en-el-exterior
-- https://portales.sre.gob.mx/directorio/consulados-de-mexico-en-el-exterior
-
-Parsea la tabla HTML con BeautifulSoup, extrae pais/ciudad + directorio_url + sitio_web_url
-y upserta en sre_embajadas y sre_consulados.
-
-Variables de entorno requeridas:
-  SUPABASE_URL
-  SUPABASE_SERVICE_ROLE_KEY
+Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v2
 """
-
-import json
-import os
-import re
-import sys
-import unicodedata
+import json, os, re, sys, unicodedata
 from datetime import datetime, timezone
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -34,25 +17,39 @@ if not SB_URL or not SB_KEY:
 
 SCRAPER_SLUG = "sre_directorio"
 USER_AGENT = "TequioBot/1.0 (+https://tequio.app) civic-data-fetch"
-
 EMBAJADAS_URL = "https://portales.sre.gob.mx/directorio/embajadas-de-mexico-en-el-exterior"
 CONSULADOS_URL = "https://portales.sre.gob.mx/directorio/consulados-de-mexico-en-el-exterior"
 
+BLACKLIST = {
+    "directorio", "pais", "consulado", "embajada", "sre", "gob mx",
+    "interruptor de navegacion", "tramites", "gobierno", "participa", "busqueda",
+    "sre directorio", "english", "temas", "reformas", "leer mas",
+    "accesibilidad", "politica de privacidad", "terminos y condiciones",
+    "marco juridico", "portal de obligaciones de transparencia", "sistema infomex",
+    "inai", "atencion ciudadana", "quejas y denuncias", "facebook", "twitter",
+    "oficinas de pasaportes", "oficinas centrales", "dependencias federales",
+    "embajadas de mexico", "consulados de mexico", "misiones de mexico",
+    "oficinas de enlace de mexico",
+    "centro de informacion y atencion a personas", "mi consulado",
+}
 
-def slugify(text: str) -> str:
+
+def slugify(text):
     text = unicodedata.normalize("NFKD", text)
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.lower().strip()
     text = re.sub(r"[^a-z0-9]+", "-", text)
-    text = re.sub(r"-+", "-", text).strip("-")
-    return text
+    return re.sub(r"-+", "-", text).strip("-")
 
 
-def fetch_html(url: str, intentos: int = 3) -> str:
-    headers = {"User-Agent": USER_AGENT, "Accept": "text/html,*/*"}
+BLACKLIST_SLUGS = {slugify(b) for b in BLACKLIST}
+
+
+def fetch_html(url, intentos=3):
+    h = {"User-Agent": USER_AGENT, "Accept": "text/html,*/*"}
     for i in range(intentos):
         try:
-            r = requests.get(url, headers=headers, timeout=30)
+            r = requests.get(url, headers=h, timeout=30)
             r.raise_for_status()
             r.encoding = r.apparent_encoding or "utf-8"
             return r.text
@@ -63,116 +60,110 @@ def fetch_html(url: str, intentos: int = 3) -> str:
     return ""
 
 
-def parse_directorio(html: str, fuente_url: str, modo: str):
-    """
-    Cada celda <td> de la tabla contiene:
-      <strong>PAIS</strong><br>
-      <a href="...directorio...">Directorio</a>
-      <a href="...sitio web...">Sitio Web</a>
-    o variaciones de saltos de linea. Lo manejamos con regex tolerante.
-    """
+def text_between(node_a, node_b):
+    out = []
+    cur = node_a
+    if cur is None:
+        return ""
+    while True:
+        cur = cur.next_element
+        if cur is None or cur is node_b:
+            break
+        if isinstance(cur, str):
+            out.append(cur)
+    return "".join(out)
+
+
+def parse_directorio(html, fuente_url, modo):
     soup = BeautifulSoup(html, "lxml")
+    main = soup.select_one("main") or soup.select_one("#content") or soup
+    for tag in main.select("nav, header, footer, .sidebar, script, style"):
+        tag.decompose()
+
+    anchors = main.find_all("a")
     items = []
+    prev_anchor = None
 
-    # La pagina renderiza UNA tabla principal con embajadas/consulados; recorremos todas las celdas
-    for td in soup.select("table td"):
-        text = td.get_text(" ", strip=True)
-        if not text:
-            continue
-        anchors = td.find_all("a")
-        if not anchors:
-            continue
+    for i, a in enumerate(anchors):
+        label = (a.get_text() or "").strip().lower()
+        href = a.get("href") or ""
+        if label.startswith("directorio"):
+            raw = text_between(prev_anchor, a) if prev_anchor is not None else ""
+            if not raw and a.parent is not None:
+                raw = a.parent.get_text(" ", strip=True)
+            nombre = re.sub(r"\b(directorio|sitio web|pendiente)\b", "", raw, flags=re.IGNORECASE)
+            nombre = re.sub(r"https?://\S+", "", nombre)
+            nombre = re.sub(r"[\[\]\(\)]", "", nombre)
+            nombre = re.sub(r"\s+", " ", nombre).strip(" -,\n\t")
+            if nombre and 2 <= len(nombre) <= 80:
+                sitio_web_url = None
+                if i + 1 < len(anchors):
+                    nxt = anchors[i + 1]
+                    nlabel = (nxt.get_text() or "").strip().lower()
+                    if "sitio" in nlabel or "web" in nlabel:
+                        sitio_web_url = nxt.get("href") or None
+                items.append({
+                    "nombre_raw": nombre,
+                    "directorio_url": href or None,
+                    "sitio_web_url": sitio_web_url,
+                    "fuente_url": fuente_url,
+                })
+            prev_anchor = a
+        else:
+            prev_anchor = a
 
-        directorio_url = None
-        sitio_web_url = None
-        for a in anchors:
-            label = (a.get_text() or "").strip().lower()
-            href = a.get("href") or ""
-            if not href:
-                continue
-            if "directorio" in label and not directorio_url:
-                directorio_url = href
-            elif ("sitio" in label or "web" in label) and not sitio_web_url:
-                sitio_web_url = href
-
-        # Nombre: lo que aparece antes del primer link
-        # Limpiamos textos "Directorio" / "Sitio Web" del texto plano
-        nombre = re.sub(r"\b(directorio|sitio web)\b", "", text, flags=re.IGNORECASE)
-        nombre = re.sub(r"\s+", " ", nombre).strip()
-        if not nombre or len(nombre) < 2:
-            continue
-        # Evitar headers o celdas vacias con basura
-        if nombre.lower() in {"pais", "consulado", "embajada"}:
-            continue
-
-        item = {
-            "nombre_raw": nombre,
-            "directorio_url": directorio_url,
-            "sitio_web_url": sitio_web_url,
-            "fuente_url": fuente_url,
-        }
-        items.append(item)
-
-    # Deduplicar por nombre_raw
     seen = set()
     deduped = []
     for it in items:
         slug = slugify(it["nombre_raw"])
-        if slug in seen or not slug:
+        if not slug or slug in seen:
+            continue
+        if it["nombre_raw"].strip().lower() in BLACKLIST:
+            continue
+        if slug in BLACKLIST_SLUGS:
+            continue
+        durl = it["directorio_url"] or ""
+        if modo == "embajadas" and "embajadas-de-mexico" not in durl and "/embajadas/" not in durl:
+            continue
+        if modo == "consulados" and "consulados-de-mexico" not in durl and "/consulados/" not in durl:
             continue
         seen.add(slug)
         deduped.append(it)
-    print(f"[sre] {modo}: {len(deduped)} celdas parseadas")
+    print(f"[sre] {modo}: {len(deduped)} entradas de {len(items)} candidatos")
     return deduped
 
 
-def sb_upsert(table: str, rows, on_conflict: str):
+def sb_upsert(table, rows, on_conflict):
     if not rows:
         return 0
     url = f"{SB_URL}/rest/v1/{table}?on_conflict={on_conflict}"
-    r = requests.post(
-        url,
-        headers={
-            "Content-Type": "application/json",
-            "apikey": SB_KEY,
-            "Authorization": f"Bearer {SB_KEY}",
-            "Prefer": "resolution=merge-duplicates,return=minimal",
-        },
-        data=json.dumps(rows),
-        timeout=60,
-    )
+    r = requests.post(url, headers={
+        "Content-Type": "application/json", "apikey": SB_KEY,
+        "Authorization": f"Bearer {SB_KEY}",
+        "Prefer": "resolution=merge-duplicates,return=minimal",
+    }, data=json.dumps(rows), timeout=60)
     if not r.ok:
         raise RuntimeError(f"upsert {table} {r.status_code}: {r.text[:300]}")
     return len(rows)
 
 
-def log_scraper(status: str, summary: dict, error_msg, started_at):
+def log_scraper(status, summary, error_msg, started_at):
     payload = [{
-        "scraper_slug": SCRAPER_SLUG,
-        "workflow_run_id": GH_RUN_ID or None,
-        "status": status,
-        "rows_inserted": summary.get("inserted", 0),
-        "rows_updated": 0,
-        "rows_skipped": summary.get("skipped", 0),
+        "scraper_slug": SCRAPER_SLUG, "workflow_run_id": GH_RUN_ID or None,
+        "status": status, "rows_inserted": summary.get("inserted", 0),
+        "rows_updated": 0, "rows_skipped": summary.get("skipped", 0),
         "fuente_url": "https://portales.sre.gob.mx/directorio/",
-        "http_status": summary.get("http_status", 200),
+        "http_status": 200,
         "error_msg": (error_msg or "")[:1000] or None,
         "notes": json.dumps(summary)[:1000],
         "started_at": started_at,
         "finished_at": datetime.now(timezone.utc).isoformat(),
     }]
     try:
-        requests.post(
-            f"{SB_URL}/rest/v1/scraper_logs",
-            headers={
-                "Content-Type": "application/json",
-                "apikey": SB_KEY,
-                "Authorization": f"Bearer {SB_KEY}",
-                "Prefer": "return=minimal",
-            },
-            data=json.dumps(payload),
-            timeout=30,
-        )
+        requests.post(f"{SB_URL}/rest/v1/scraper_logs", headers={
+            "Content-Type": "application/json", "apikey": SB_KEY,
+            "Authorization": f"Bearer {SB_KEY}", "Prefer": "return=minimal",
+        }, data=json.dumps(payload), timeout=30)
     except Exception as exc:
         print(f"[sre] no se pudo loguear: {exc}", file=sys.stderr)
 
@@ -180,25 +171,23 @@ def log_scraper(status: str, summary: dict, error_msg, started_at):
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
     fecha_hoy = datetime.now(timezone.utc).date().isoformat()
+    now_iso = datetime.now(timezone.utc).isoformat()
     summary = {"inserted": 0, "embajadas": 0, "consulados": 0}
     hubo_error = False
     primer_error = None
 
-    # === EMBAJADAS ===
     try:
         html = fetch_html(EMBAJADAS_URL)
         items = parse_directorio(html, EMBAJADAS_URL, "embajadas")
-        rows = []
-        for it in items:
-            rows.append({
-                "pais": it["nombre_raw"],
-                "pais_slug": slugify(it["nombre_raw"]),
-                "directorio_url": it["directorio_url"],
-                "sitio_web_url": it["sitio_web_url"],
-                "fecha_extraccion": fecha_hoy,
-                "fuente_url": it["fuente_url"],
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            })
+        rows = [{
+            "pais": it["nombre_raw"],
+            "pais_slug": slugify(it["nombre_raw"]),
+            "directorio_url": it["directorio_url"],
+            "sitio_web_url": it["sitio_web_url"],
+            "fecha_extraccion": fecha_hoy,
+            "fuente_url": it["fuente_url"],
+            "updated_at": now_iso,
+        } for it in items]
         ins = sb_upsert("sre_embajadas", rows, "pais_slug")
         summary["embajadas"] = ins
         summary["inserted"] += ins
@@ -208,14 +197,12 @@ def main():
         primer_error = primer_error or f"embajadas: {exc}"
         print(f"[sre] FAIL embajadas: {exc}", file=sys.stderr)
 
-    # === CONSULADOS ===
     try:
         html = fetch_html(CONSULADOS_URL)
         items = parse_directorio(html, CONSULADOS_URL, "consulados")
         rows = []
         for it in items:
             nombre = it["nombre_raw"]
-            # Los consulados suelen tener formato "CIUDAD, PAIS" o "CIUDAD (PAIS)"
             ciudad = nombre
             pais = None
             if "," in nombre:
@@ -227,16 +214,14 @@ def main():
                 if m:
                     ciudad, pais = m.group(1).strip(), m.group(2).strip()
             rows.append({
-                "nombre": nombre,
-                "nombre_slug": slugify(nombre),
-                "pais": pais,
-                "ciudad": ciudad,
+                "nombre": nombre, "nombre_slug": slugify(nombre),
+                "pais": pais, "ciudad": ciudad,
                 "directorio_url": it["directorio_url"],
                 "sitio_web_url": it["sitio_web_url"],
                 "tipo": "consulado",
                 "fecha_extraccion": fecha_hoy,
                 "fuente_url": it["fuente_url"],
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": now_iso,
             })
         ins = sb_upsert("sre_consulados", rows, "nombre_slug")
         summary["consulados"] = ins
