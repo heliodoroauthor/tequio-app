@@ -1,0 +1,29 @@
+name: Banxico SIE Daily
+
+# Corre todos los dias habiles a las 14:00 UTC (08:00 CDMX)
+# Banxico publica el FIX en la maniana, asi que 8am ya tiene el dato del dia
+on:
+  schedule:
+    - cron: '0 14 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Banxico scraper
+        env:
+          BANXICO_TOKEN: ${{ secrets.BANXICO_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: node scripts/scrape_banxico.js
