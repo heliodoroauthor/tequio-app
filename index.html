@@ -2236,32 +2236,14 @@
             <div class="section-header">
               <div>
                 <div class="card-title">Actividad Legislativa Reciente</div>
-                <div class="card-subtitle">Últimas votaciones en el Congreso</div>
+                <div class="card-subtitle" id="dash-leg-subtitle">Últimas votaciones en el Congreso · LXVI</div>
               </div>
-              <button class="btn btn-ghost" onclick="showPage('votaciones')">Ver todo →</button>
-            </div>
-            <div class="flex flex-col gap-12">
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-green">Aprobada</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Ley General de Agua Potable</div><div class="text-xs">278 a favor · 42 en contra · 12 abstenciones</div></div>
-                <div class="text-xs">Hoy</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-red">Rechazada</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Reforma Fiscal Progresiva</div><div class="text-xs">140 a favor · 195 en contra · 5 abstenciones</div></div>
-                <div class="text-xs">Ayer</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:1px solid var(--border)">
-                <span class="badge badge-yellow">En debate</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Ley de IA en Sector Público</div><div class="text-xs">Comisión de Ciencia y Tecnología</div></div>
-                <div class="text-xs">Hace 2 días</div>
-              </div>
-              <div class="flex items-center gap-12" style="padding:10px 0">
-                <span class="badge badge-blue">Nueva</span>
-                <div style="flex:1"><div style="font-size:13px;font-weight:500">Paridad Salarial Empresas +50</div><div class="text-xs">Presentada por 3 partidos</div></div>
-                <div class="text-xs">Hace 3 días</div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <button class="btn btn-ghost" id="dash-leg-filtro-btn" onclick="dashLegToggleFiltro()" title="Filtrar por mi tema" style="font-size:11px;padding:4px 10px">🎯 Mi tema</button>
+                <button class="btn btn-ghost" onclick="showPage('votaciones')">Ver todo →</button>
               </div>
             </div>
+            <div id="dash-leg-lista" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
           <div class="card">
             <div class="section-header">
@@ -2314,6 +2296,132 @@
       }
     </style>
     <script>
+      // ─── ACTIVIDAD LEGISLATIVA DESTACADA (Dashboard) ───
+      // 4 items con metadatos verificables: tema, iniciador, links a Cámara/DOF
+      const LEG_DESTACADAS = [
+        {
+          titulo: 'Reforma al Poder Judicial — Elección popular de jueces',
+          tema: 'constitucional',
+          temaLabel: '⚖️ Justicia',
+          estado: 'aprobada',
+          fecha: 'Sep 2024',
+          fechaCorta: '15 sep 2024',
+          votacion: '359 a favor · 135 en contra (Diputados)',
+          iniciador: { tipo:'Ejecutivo', nombre:'Presidencia', partido:'MORENA' },
+          camara_url: 'https://www.diputados.gob.mx/LeyesBiblio/ref/cpeum.htm',
+          dof_url: 'https://dof.gob.mx/nota_detalle.php?codigo=5738985&fecha=15/09/2024',
+        },
+        {
+          titulo: 'Ley General de Aguas',
+          tema: 'agua',
+          temaLabel: '💧 Agua',
+          estado: 'en_debate',
+          fecha: '2024-2025',
+          fechaCorta: 'En revisión',
+          votacion: 'Comisión de Recursos Hidráulicos',
+          iniciador: { tipo:'Comisión', nombre:'Múltiples partidos', partido:'Bicameral' },
+          camara_url: 'https://www.diputados.gob.mx/LeyesBiblio/index.htm',
+          dof_url: null,
+        },
+        {
+          titulo: 'Reforma a la Ley de Telecomunicaciones',
+          tema: 'digital',
+          temaLabel: '💻 Digital',
+          estado: 'en_debate',
+          fecha: '2025',
+          fechaCorta: 'En comisiones',
+          votacion: 'Comisión de Comunicaciones',
+          iniciador: { tipo:'Ejecutivo', nombre:'Presidencia', partido:'MORENA' },
+          camara_url: 'https://www.diputados.gob.mx/LeyesBiblio/index.htm',
+          dof_url: null,
+        },
+        {
+          titulo: 'Aumento al salario mínimo 2025 (CONASAMI)',
+          tema: 'laboral',
+          temaLabel: '💼 Laboral',
+          estado: 'aprobada',
+          fecha: 'Dic 2024',
+          fechaCorta: 'Vigente desde ene 2025',
+          votacion: 'Acuerdo unánime CONASAMI',
+          iniciador: { tipo:'Acuerdo tripartita', nombre:'CONASAMI', partido:'STPS + IP + sindicatos' },
+          camara_url: 'https://www.gob.mx/conasami',
+          dof_url: 'https://dof.gob.mx/',
+        },
+      ];
+
+      function dashLegBadge(estado) {
+        const m = { aprobada:['badge-green','Aprobada'], rechazada:['badge-red','Rechazada'], en_debate:['badge-yellow','En debate'], nueva:['badge-blue','Nueva'] };
+        const [cls, label] = m[estado] || ['badge-gray', estado];
+        return `<span class="badge ${cls}" style="white-space:nowrap;flex-shrink:0">${label}</span>`;
+      }
+
+      function dashLegRender() {
+        const el = document.getElementById('dash-leg-lista');
+        const subtitle = document.getElementById('dash-leg-subtitle');
+        const filtroBtn = document.getElementById('dash-leg-filtro-btn');
+        if (!el) return;
+        const temaUsuario = (localStorage.getItem('voto_tema') || '').toLowerCase();
+        const filtrar = window.__dashLegFiltroActivo && temaUsuario;
+        const items = filtrar
+          ? LEG_DESTACADAS.filter(x => x.tema === temaUsuario)
+          : LEG_DESTACADAS;
+        if (filtroBtn) {
+          filtroBtn.style.background = filtrar ? 'rgba(99,179,237,0.15)' : '';
+          filtroBtn.style.color = filtrar ? 'var(--accent2)' : '';
+          filtroBtn.style.borderColor = filtrar ? 'var(--accent2)' : '';
+          filtroBtn.title = filtrar
+            ? `Filtrando por: ${temaUsuario} · click para quitar filtro`
+            : (temaUsuario ? `Filtrar por tu tema: ${temaUsuario}` : 'Configura tu tema en el onboarding');
+        }
+        if (subtitle) {
+          subtitle.textContent = filtrar
+            ? `Filtrado por: ${temaUsuario} · ${items.length} items`
+            : 'Últimas votaciones · iniciador + fuente oficial';
+        }
+        if (!items.length) {
+          el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">No hay actividad reciente sobre <strong>${temaUsuario}</strong>. <a onclick="dashLegToggleFiltro()" style="color:var(--accent2);cursor:pointer;text-decoration:underline">Ver todas</a></div>`;
+          return;
+        }
+        el.innerHTML = items.map(item => {
+          const camaraLink = item.camara_url ? `<a href="${item.camara_url}" target="_blank" rel="noopener" style="font-size:10px;color:var(--accent2);text-decoration:none;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:3px 7px;border-radius:6px;font-weight:600;white-space:nowrap">📋 Cámara →</a>` : '';
+          const dofLink = item.dof_url ? `<a href="${item.dof_url}" target="_blank" rel="noopener" style="font-size:10px;color:#34d399;text-decoration:none;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);padding:3px 7px;border-radius:6px;font-weight:600;white-space:nowrap">📜 DOF →</a>` : '';
+          const ini = item.iniciador || {};
+          return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+              ${dashLegBadge(item.estado)}
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600;line-height:1.3">${item.titulo}</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:2px">${item.votacion}</div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);white-space:nowrap">${item.fechaCorta}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:10px">
+              <span style="color:var(--text3)">Iniciador:</span>
+              <span style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:2px 7px;border-radius:6px;font-weight:600">${ini.tipo || ''}${ini.nombre ? ' · ' + ini.nombre : ''}${ini.partido ? ' (' + ini.partido + ')' : ''}</span>
+              <span style="background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:2px 7px;border-radius:6px">${item.temaLabel}</span>
+              <span style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap">${camaraLink}${dofLink}</span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      function dashLegToggleFiltro() {
+        const tema = localStorage.getItem('voto_tema');
+        if (!tema && !window.__dashLegFiltroActivo) {
+          if (typeof mostrarToast === 'function') mostrarToast('Configura tu tema en el onboarding (paso 2) para filtrar', 'warn');
+          return;
+        }
+        window.__dashLegFiltroActivo = !window.__dashLegFiltroActivo;
+        dashLegRender();
+      }
+
+      // Renderizar al cargar dashboard
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', dashLegRender);
+      } else {
+        setTimeout(dashLegRender, 0);
+      }
+
       // Cargar datos vivos del Dashboard
       (async function loadTequioDashboard() {
         try {
