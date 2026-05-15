@@ -867,6 +867,42 @@ export default async function handler(req, res) {
       return res.status(200).json({ desde, dias, series: Object.values(series_data) });
     }
 
+    if (vista === 'municipios') {
+      const estado = (req.query.estado || '').trim();
+      const q = (req.query.q || '').trim();
+      const limit = Math.min(parseInt(req.query.limit || '50', 10) || 50, 500);
+      const offset = Math.max(parseInt(req.query.offset || '0', 10) || 0, 0);
+      const orden = req.query.orden === 'nombre' ? 'nombre.asc' : 'poblacion_total.desc.nullslast';
+      const params = [
+        `select=clave_inegi,estado_slug,municipio_slug,nombre,nombre_estado,poblacion_total,viviendas_totales,latitud,longitud,cabecera_municipal`,
+        `order=${orden}`,
+        `limit=${limit}`,
+        `offset=${offset}`,
+      ];
+      if (estado) params.push(`estado_slug=eq.${encodeURIComponent(estado)}`);
+      if (q) params.push(`nombre=ilike.*${encodeURIComponent(q)}*`);
+      const rows = await sb(`municipios?${params.join('&')}`);
+      return res.status(200).json({ municipios: rows, total: rows.length, filtro_estado: estado || null, busqueda: q || null });
+    }
+
+    if (vista === 'municipio') {
+      const clave = (req.query.clave_inegi || req.query.clave || '').trim();
+      const slug = (req.query.slug || '').trim();
+      const estado = (req.query.estado || '').trim();
+      let url;
+      if (clave) {
+        url = `municipios?clave_inegi=eq.${encodeURIComponent(clave)}&select=*`;
+      } else if (slug) {
+        const filt = estado ? `&estado_slug=eq.${encodeURIComponent(estado)}` : '';
+        url = `municipios?municipio_slug=eq.${encodeURIComponent(slug)}${filt}&select=*`;
+      } else {
+        return res.status(400).json({ error: 'Se requiere ?clave_inegi=XXXXX o ?slug=municipio[&estado=estado-slug]' });
+      }
+      const rows = await sb(url);
+      if (!rows || !rows.length) return res.status(404).json({ error: 'Municipio no encontrado' });
+      return res.status(200).json({ municipio: rows[0], matches: rows.length, otros: rows.length > 1 ? rows.slice(1) : [] });
+    }
+
     if (vista === 'inegi_estado') {
       const estado = req.query.estado || '0700';
       const rows = await sb(`demograficos_inegi?area_geografica=eq.${estado}&order=indicador_id.asc&select=indicador_id,nombre,valor,unidad,fecha,ubicacion`);
@@ -1014,4 +1050,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-                                 }
+  }
