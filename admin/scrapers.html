@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Salud de scrapers · Tequio</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  :root {
+    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
+    --text:#e8eef9; --muted:#8a98b3;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .wrap{max-width:920px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+  h1{font-size:18px;margin:0;font-weight:700}
+  .meta{color:var(--muted);font-size:12px}
+  button{background:var(--card);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer}
+  button:hover{background:#1a2236}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .summary div{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+  .summary .n{font-size:22px;font-weight:700;line-height:1}
+  .summary .l{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+  .summary .ok .n{color:var(--ok)}
+  .summary .warn .n{color:var(--warn)}
+  .summary .bad .n{color:var(--bad)}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+  .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .dot.ok{background:var(--ok);box-shadow:0 0 8px rgba(34,197,94,.5)}
+  .dot.warn{background:var(--warn)}
+  .dot.bad{background:var(--bad)}
+  .dot.info{background:var(--info)}
+  .name{font-weight:600;font-size:14px;text-transform:capitalize}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+  .err{color:var(--bad);font-size:11px;margin-top:4px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all}
+  .right{text-align:right;font-size:12px;color:var(--muted)}
+  .right strong{display:block;color:var(--text);font-size:14px}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  @media (max-width:520px){
+    .summary{grid-template-columns:repeat(2,1fr)}
+    .row{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+    .right{grid-column:1/-1;text-align:left;border-top:1px solid var(--border);padding-top:8px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Salud de scrapers</h1>
+      <div class="meta" id="meta">Cargando…</div>
+    </div>
+    <button id="reload">↻ Refrescar</button>
+  </header>
+  <div class="summary" id="summary"></div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+const $ = (s) => document.querySelector(s);
+const list = $('#list'), summary = $('#summary'), meta = $('#meta');
+
+function fmtTime(secs) {
+  if (secs == null) return 'nunca';
+  const s = Math.max(0, secs);
+  if (s < 60) return 'hace ' + Math.round(s) + 's';
+  if (s < 3600) return 'hace ' + Math.round(s/60) + ' min';
+  if (s < 86400) return 'hace ' + Math.round(s/3600) + ' h';
+  return 'hace ' + Math.round(s/86400) + ' d';
+}
+function fmtNum(n) {
+  if (n == null) return '—';
+  return new Intl.NumberFormat('es-MX').format(n);
+}
+function classify(s, secs) {
+  if (s === 'fail') return 'bad';
+  if (s === 'partial') return 'warn';
+  if (s === 'ok' && secs != null && secs > 7 * 86400) return 'warn'; // stale > 7d
+  if (s === 'ok') return 'ok';
+  return 'info';
+}
+
+async function load() {
+  meta.textContent = 'Cargando…';
+  list.innerHTML = '';
+  try {
+    const r = await fetch('/api/data?vista=scrapers_health', {cache:'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const rows = j.scrapers || [];
+    if (!rows.length) {
+      list.innerHTML = '<div class="empty">Sin runs registrados todavía.</div>';
+      summary.innerHTML = '';
+      meta.textContent = 'Sin datos · ' + new Date().toLocaleTimeString('es-MX');
+      return;
+    }
+    const counts = {ok:0, warn:0, bad:0, total:rows.length};
+    for (const r of rows) {
+      const c = classify(r.last_status, r.seconds_since_last_run);
+      if (c === 'ok') counts.ok++;
+      else if (c === 'warn') counts.warn++;
+      else if (c === 'bad') counts.bad++;
+    }
+    summary.innerHTML = [
+      ['n', counts.total, 'Total'],
+      ['ok', counts.ok, 'Sanos'],
+      ['warn', counts.warn, 'Atención'],
+      ['bad', counts.bad, 'Fallando'],
+    ].map(([cls, n, lbl]) => '<div class="' + cls + '"><div class="n">' + n + '</div><div class="l">' + lbl + '</div></div>').join('');
+    list.innerHTML = rows.map(r => {
+      const c = classify(r.last_status, r.seconds_since_last_run);
+      const time = fmtTime(r.seconds_since_last_run);
+      const slug = (r.scraper_slug || '').replace(/_/g, ' ');
+      const errLine = r.last_error ? '<div class="err">⚠ ' + r.last_error.slice(0, 120) + '</div>' : '';
+      const wfLink = r.workflow_run_id ? '<a href="https://github.com/heliodoroauthor/tequio-app/actions/runs/' + r.workflow_run_id + '" target="_blank" rel="noopener" style="color:var(--info)">run #' + r.workflow_run_id + '</a>' : '';
+      return '<div class="row"><span class="dot ' + c + '"></span><div><div class="name">' + slug + '</div><div class="sub">' + time + ' · ' + fmtNum(r.last_rows_inserted) + ' filas · ' + r.runs_30d + ' runs en 30d (' + r.failures_30d + ' fallas)</div>' + errLine + '</div><div class="right"><strong>' + (r.last_status || '?') + '</strong>' + wfLink + '</div></div>';
+    }).join('');
+    meta.textContent = rows.length + ' scrapers · Actualizado ' + new Date().toLocaleTimeString('es-MX');
+  } catch (e) {
+    list.innerHTML = '<div class="empty" style="color:var(--bad)">Error: ' + e.message + '</div>';
+    meta.textContent = 'Falló la carga';
+  }
+}
+
+document.getElementById('reload').addEventListener('click', load);
+load();
+setInterval(load, 60000); // auto-refresh cada minuto
+</script>
+</body>
+</html>
