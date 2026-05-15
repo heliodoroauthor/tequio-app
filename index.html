@@ -1935,7 +1935,7 @@
         <span class="nav-badge green">✅ Gaceta</span>
       </div>
       <div class="nav-item" data-page="quemones" onclick="showPage('quemones')">
-        <span class="icon">🔥</span> Muro de Quemones
+        <span class="icon">📊</span> Diferencias de voto
         <span class="nav-badge green">✅ Cruzado</span>
       </div>
       <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
@@ -3906,7 +3906,7 @@
         const grid = document.getElementById('qm-grid');
         const partido = document.getElementById('qm-partido').value;
         const entidad = document.getElementById('qm-entidad').value;
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Cargando muro de quemones…</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Cargando diferencias de voto…</div>';
         try {
           const params = new URLSearchParams({ vista: 'quemones_ranking', limit: '50' });
           if (partido) params.set('partido', partido);
@@ -3916,7 +3916,7 @@
           const ranking = j.ranking || [];
           // Stats
           document.getElementById('qm-stats').innerHTML = `
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#ef4444">${j.total_quemones || 0}</div><div style="font-size:11px;color:var(--text2)">🔥 Quemones totales</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#94a3b8">${j.total_quemones || 0}</div><div style="font-size:11px;color:var(--text2)">📊 Diferencias totales</div></div>
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total_diputados_evaluados || 0}</div><div style="font-size:11px;color:var(--text2)">Diputados evaluados</div></div>
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${j.total_incidentes || 0}</div><div style="font-size:11px;color:var(--text2)">Incidentes evaluados</div></div>
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${ranking.length}</div><div style="font-size:11px;color:var(--text2)">En muro actual</div></div>
@@ -3933,7 +3933,7 @@
             window.__qmFiltrosLoaded = true;
           }
           if (!ranking.length) {
-            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Aún no hay datos suficientes para evaluar quemones. El cron corre cada lunes después de que cierran las votaciones ciudadanas.</div>';
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Aún no hay datos suficientes para calcular diferencias de voto. El cálculo corre cada lunes, después de cerrar las votaciones ciudadanas.</div>';
             document.getElementById('qm-count').textContent = '0 diputados';
             return;
           }
@@ -3942,7 +3942,7 @@
             const fotoHTML = d.foto_url
               ? `<img src="${d.foto_url}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #ef4444;background:var(--surface2);flex-shrink:0"><div style="width:60px;height:60px;border-radius:50%;background:var(--surface2);border:2px solid #ef4444;display:none;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏛️</div>`
               : `<div style="width:60px;height:60px;border-radius:50%;background:var(--surface2);border:2px solid #ef4444;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏛️</div>`;
-            const intensidad = d.num_quemones >= 10 ? 'rgba(220,38,38,0.20)' : d.num_quemones >= 5 ? 'rgba(220,38,38,0.12)' : 'rgba(220,38,38,0.06)';
+            const intensidad = d.num_quemones >= 10 ? 'rgba(148,163,184,0.20)' : d.num_quemones >= 5 ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.06)';
             return `<div onclick="qmAbrirDetalle(${d.dipt_id})" style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #ef4444;border-radius:14px;padding:14px;cursor:pointer;transition:transform 0.15s;background-image:radial-gradient(circle at 90% 10%,${intensidad},transparent 70%)" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='translateY(0)'">
               <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
                 ${fotoHTML}
@@ -3953,7 +3953,7 @@
               </div>
               <div style="display:flex;justify-content:space-between;align-items:end;padding-top:10px;border-top:1px solid var(--border)">
                 <div>
-                  <div style="font-size:30px;font-weight:800;font-family:var(--font-display);color:#ef4444;line-height:1">🔥 ${d.num_quemones || 0}</div>
+                  <div style="font-size:30px;font-weight:800;font-family:var(--font-display);color:#94a3b8;line-height:1">📊 ${d.num_quemones || 0}</div>
                   <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">de ${d.total_votaciones_evaluadas || 0} votaciones</div>
                 </div>
                 <div style="text-align:right">
@@ -3964,7 +3964,7 @@
             </div>`;
           }).join('');
         } catch (e) {
-          grid.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;grid-column:1/-1">Error al cargar quemones.</div>';
+          grid.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px;grid-column:1/-1">Error al cargar diferencias de voto.</div>';
         }
       }
 
@@ -3996,8 +3996,8 @@
               <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text2);font-size:14px;font-family:inherit">✕</button>
             </div>
             <div style="background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px;margin-bottom:18px">
-              <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🔥 Historial de quemones</div>
-              <div style="font-size:14px;color:var(--text)">${(inc || []).filter(i => i.es_quemon).length} votaciones contra su distrito · ${inc.length} evaluadas</div>
+              <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">📊 Historial de diferencias</div>
+              <div style="font-size:14px;color:var(--text)">${(inc || []).filter(i => i.es_quemon).length} votos diferentes al sentir de su distrito · ${inc.length} evaluadas</div>
             </div>
             ${(inc || []).length ? `<div style="display:flex;flex-direction:column;gap:10px">
               ${inc.map(i => {
@@ -4012,7 +4012,7 @@
                     <span style="color:var(--text3)">📅 ${fecha}</span>
                     <span><strong>Diputado:</strong> ${votoIcon[i.voto_diputado] || '—'}</span>
                     <span><strong>Distrito:</strong> ${votoIcon[i.voto_distrito_mayoritario] || '—'} (${i.votos_ciudadanos_total || 0} votos · ${i.margen_pct || 0}%)</span>
-                    <span style="background:${i.es_quemon ? '#ef4444' : '#22c55e'};color:#fff;padding:2px 8px;border-radius:6px;font-weight:700">${i.es_quemon ? '🔥 QUEMÓN' : '✓ CUMPLIÓ'}</span>
+                    <span style="background:${i.es_quemon ? '#64748b' : '#22c55e'};color:#fff;padding:2px 8px;border-radius:6px;font-weight:700">${i.es_quemon ? 'VOTÓ DIFERENTE' : '✓ COINCIDIÓ'}</span>
                   </div>
                 </div>`;
               }).join('')}
@@ -4050,7 +4050,7 @@
           const comp = j.comparaciones || [];
           const pctCoinc = stats.pct_coincide || 0;
           const color = pctCoinc >= 70 ? '#22c55e' : pctCoinc >= 40 ? '#fbbf24' : '#ef4444';
-          const msg = pctCoinc >= 70 ? 'Te representa bien' : pctCoinc >= 40 ? 'Te representa a medias' : 'Te traiciona seguido';
+          const msg = pctCoinc >= 70 ? 'Te representa bien' : pctCoinc >= 40 ? 'Te representa a medias' : 'Vota muy diferente a ti';
           cont.innerHTML = `
             <div style="background:linear-gradient(135deg,#1f1d2b 0%,#2a1f2e 100%);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:16px">
               <h3 style="margin:0 0 12px;font-size:18px;font-weight:800;font-family:var(--font-display)">🎯 ¿Votó como tú?</h3>
@@ -4065,13 +4065,13 @@
                   <div style="font-size:10px;color:var(--text3);font-weight:600">coincide contigo</div>
                 </div>
               </div>
-              <div style="background:rgba(0,0,0,0.18);border-radius:10px;padding:10px;margin-bottom:14px;font-size:12px;color:${color};font-weight:600">${msg} · ${stats.coincide || 0} coincidencias · ${stats.contra || 0} traiciones · ${stats.comparables || 0} comparaciones (de ${stats.total_votos_emitidos || 0} votos tuyos)</div>
+              <div style="background:rgba(0,0,0,0.18);border-radius:10px;padding:10px;margin-bottom:14px;font-size:12px;color:${color};font-weight:600">${msg} · ${stats.coincide || 0} coincidencias · ${stats.contra || 0} votos diferentes · ${stats.comparables || 0} comparaciones (de ${stats.total_votos_emitidos || 0} votos tuyos)</div>
               ${comp.length ? `<div style="display:flex;flex-direction:column;gap:6px">
                 ${comp.slice(0, 8).map(c => {
                   const iconVoto = { si:'🟢', no:'🔴', abst:'⊘', ausente:'🫥' };
                   const estBg = c.estado === 'coincide' ? 'rgba(34,197,94,0.10)' : c.estado === 'contra' ? 'rgba(239,68,68,0.10)' : c.estado === 'ausente' ? 'rgba(148,163,184,0.10)' : 'rgba(148,163,184,0.05)';
                   const estIcon = c.estado === 'coincide' ? '✅' : c.estado === 'contra' ? '🔴' : c.estado === 'ausente' ? '🫥' : '⏳';
-                  const estTxt = c.estado === 'coincide' ? 'Coincidió' : c.estado === 'contra' ? 'Te traicionó' : c.estado === 'ausente' ? 'Se ausentó' : 'Sin voto real aún';
+                  const estTxt = c.estado === 'coincide' ? 'Coincidió' : c.estado === 'contra' ? 'Votó diferente' : c.estado === 'ausente' ? 'Se ausentó' : 'Sin voto real aún';
                   return `<div style="background:${estBg};border-radius:8px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
                     <div style="flex:1;min-width:160px;font-size:12px;color:var(--text);line-height:1.3">${c.asunto.slice(0, 90)}${c.asunto.length > 90 ? '…' : ''}</div>
                     <div style="font-size:11px;color:var(--text2);white-space:nowrap"><span title="Tú">${iconVoto[c.mi_voto] || '?'}</span> vs <span title="Diputado">${c.voto_diputado ? iconVoto[c.voto_diputado] : '⏳'}</span> · ${estIcon} ${estTxt}</div>
@@ -4704,7 +4704,7 @@
             <div style="font-size:60px;line-height:1">🗳️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Vota antes que el Congreso</h1>
-              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">El pueblo vota PRIMERO. Después comparamos: <strong>¿tu diputado votó como tú o te traicionó?</strong> Si te ignora, va al muro de los 🔥 quemones.</p>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">El pueblo vota PRIMERO. Después comparamos: <strong>¿tu diputado votó igual o diferente?</strong> Si votó diferente al sentir de su distrito, queda registrado en el <a onclick="showPage('quemones')" style="color:#fff;text-decoration:underline;cursor:pointer">tablero de diferencias de voto</a>.</p>
             </div>
           </div>
         </div>
@@ -4721,13 +4721,12 @@
     <!-- ───── MURO DE QUEMONES — Fase 4.1.D ───── -->
     <div id="page-quemones" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#000 0%,#7c2d12 50%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.4);position:relative;overflow:hidden">
-          <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:0.18;line-height:1">🔥</div>
+        <div style="background:linear-gradient(135deg,#1e293b 0%,#475569 50%,#64748b 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
           <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative">
-            <div style="font-size:60px;line-height:1">🔥</div>
+            <div style="font-size:54px;line-height:1">📊</div>
             <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">El Muro de la Traición</h1>
-              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Diputados que votaron <strong>contra la voluntad de su propio distrito</strong>. Datos cruzados entre voto ciudadano (Tequio) y voto real en el pleno.</p>
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Diferencias de voto</h1>
+              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Diputados que <strong>votaron diferente a la mayoría ciudadana de su distrito</strong> en Tequio. Comparativa con base en el voto real registrado en el SITL.</p>
             </div>
           </div>
         </div>
@@ -4749,8 +4748,8 @@
 
         <div id="qm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
 
-        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">
-          Quemón = voto del diputado distinto al de la mayoría de su distrito en Tequio · Solo se genera cuando hay ≥1 voto ciudadano del distrito y voto del diputado registrado en SITL.
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center;line-height:1.6">
+          Diferencia = voto del diputado distinto al de la mayoría ciudadana de su distrito en Tequio. Solo se genera cuando hay ≥1 voto ciudadano del distrito y voto del diputado registrado en SITL. <strong>Esta métrica es indicativa, no concluyente</strong>: la muestra de Tequio puede no representar a todo el distrito. Para el voto oficial completo, consulta <a onclick="showPage('votaciones')" style="color:var(--accent2);cursor:pointer">Pleno de Diputados</a>.
         </div>
       </div>
     </div>
