@@ -1,6 +1,6 @@
 name: CONAGUA Sequia Quincenal
 
-# Corre los jueves a las 15:00 UTC (NADM publica los jueves)
+# Corre los jueves a las 15:00 UTC
 on:
   schedule:
     - cron: '0 15 * * 4'
@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
