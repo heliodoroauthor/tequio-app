@@ -1,0 +1,63 @@
+name: 'Log scraper run'
+description: 'POST a row to scraper_logs in Supabase'
+inputs:
+  slug:
+    description: 'Scraper slug'
+    required: true
+  status:
+    description: 'job.status (success/failure/cancelled)'
+    required: true
+  rows_inserted:
+    description: 'Number of rows inserted (optional)'
+    required: false
+    default: '0'
+  fuente_url:
+    description: 'Source URL'
+    required: false
+    default: ''
+  error_msg:
+    description: 'Error message if failed'
+    required: false
+    default: ''
+  supabase_url:
+    description: 'SUPABASE_URL'
+    required: true
+  supabase_key:
+    description: 'SUPABASE_SERVICE_ROLE_KEY'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      env:
+        SLUG: ${{ inputs.slug }}
+        STATUS: ${{ inputs.status }}
+        ROWS: ${{ inputs.rows_inserted }}
+        FUENTE: ${{ inputs.fuente_url }}
+        ERRMSG: ${{ inputs.error_msg }}
+        SB_URL: ${{ inputs.supabase_url }}
+        SB_KEY: ${{ inputs.supabase_key }}
+        RUN_ID: ${{ github.run_id }}
+      run: |
+        case "$STATUS" in
+          success) MAPPED="ok" ;;
+          cancelled|skipped) MAPPED="cancelled" ;;
+          *) MAPPED="fail" ;;
+        esac
+        FINISHED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        PAYLOAD=$(jq -nc \
+          --arg slug "$SLUG" \
+          --arg status "$MAPPED" \
+          --argjson rows "${ROWS:-0}" \
+          --arg fuente "$FUENTE" \
+          --arg err "$ERRMSG" \
+          --arg run_id "$RUN_ID" \
+          --arg fin "$FINISHED" \
+          '[{scraper_slug:$slug, status:$status, rows_inserted:$rows, fuente_url:($fuente // null), error_msg:($err // null), workflow_run_id:$run_id, finished_at:$fin, http_status:(if $status=="ok" then 200 else 500 end)}]')
+        echo "[log-scraper] POST $SLUG status=$MAPPED rows=${ROWS:-0}"
+        curl -sS -X POST "$SB_URL/rest/v1/scraper_logs" \
+          -H "apikey: $SB_KEY" \
+          -H "Authorization: Bearer $SB_KEY" \
+          -H "Content-Type: application/json" \
+          -H "Prefer: return=minimal" \
+          -d "$PAYLOAD" || echo "[log-scraper] WARN: POST failed"
