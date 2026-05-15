@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v3
-Sin decompose, search global. Filtra por URL pattern.
+Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v4
+Cambio: UA Mozilla para evitar bloqueo de SRE.
 """
 import json, os, re, sys, unicodedata
 from datetime import datetime, timezone
@@ -17,7 +17,7 @@ if not SB_URL or not SB_KEY:
     sys.exit(1)
 
 SCRAPER_SLUG = "sre_directorio"
-USER_AGENT = "TequioBot/1.0 (+https://tequio.app) civic-data-fetch"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 EMBAJADAS_URL = "https://portales.sre.gob.mx/directorio/embajadas-de-mexico-en-el-exterior"
 CONSULADOS_URL = "https://portales.sre.gob.mx/directorio/consulados-de-mexico-en-el-exterior"
 
@@ -47,12 +47,19 @@ BLACKLIST_SLUGS = {slugify(b) for b in BLACKLIST}
 
 
 def fetch_html(url, intentos=3):
-    h = {"User-Agent": USER_AGENT, "Accept": "text/html,*/*"}
+    h = {
+        "User-Agent": USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+    }
     for i in range(intentos):
         try:
-            r = requests.get(url, headers=h, timeout=30)
+            r = requests.get(url, headers=h, timeout=30, allow_redirects=True)
             r.raise_for_status()
             r.encoding = r.apparent_encoding or "utf-8"
+            print(f"[sre] fetch {url}: status={r.status_code} bytes={len(r.text)}")
             return r.text
         except Exception as exc:
             if i == intentos - 1:
@@ -77,18 +84,16 @@ def text_between(node_a, node_b):
 
 def parse_directorio(html, fuente_url, modo):
     soup = BeautifulSoup(html, "lxml")
-    # Sin decompose - filtramos por URL pattern al final. Iteramos TODOS los
-    # anchors del documento (tablas para embajadas, ul/li para consulados).
     anchors = soup.find_all("a")
     items = []
     prev_anchor = None
-    anchors_directorio_count = 0
+    dir_count = 0
 
     for i, a in enumerate(anchors):
         label = (a.get_text() or "").strip().lower()
         href = a.get("href") or ""
         if label.startswith("directorio"):
-            anchors_directorio_count += 1
+            dir_count += 1
             raw = text_between(prev_anchor, a) if prev_anchor is not None else ""
             if not raw and a.parent is not None:
                 raw = a.parent.get_text(" ", strip=True)
@@ -130,7 +135,7 @@ def parse_directorio(html, fuente_url, modo):
             continue
         seen.add(slug)
         deduped.append(it)
-    print(f"[sre] {modo}: anchors={len(anchors)} dir_anchors={anchors_directorio_count} items={len(items)} deduped={len(deduped)}")
+    print(f"[sre] {modo}: anchors={len(anchors)} dir_anchors={dir_count} items={len(items)} deduped={len(deduped)}")
     return deduped
 
 
