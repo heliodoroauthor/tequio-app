@@ -2,21 +2,14 @@
 """
 Tequio - Scraper SESNSP Incidencia Delictiva Municipal.
 
-SESNSP migro los datos abiertos a SharePoint en formato ZIP que contiene XLSX.
-
-Flujo:
-1. Scrapear pagina oficial con BeautifulSoup (o usar SESNSP_CSV_URL)
-2. Convertir sharing link a direct download (append ?download=1)
-3. Descargar (~130MB ZIP)
-4. Extraer CSV/XLSX del ZIP
-5. Parsear y unpivot meses a long format
-6. Upsert en delitos_municipios
+SESNSP migro los datos abiertos a SharePoint en ZIP que contiene N archivos XLSX
+(uno por anio: 2015.xlsx, 2016.xlsx, ..., 2025.xlsx).
 
 Env vars:
   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 Opcional:
   GITHUB_RUN_ID
-  SESNSP_ANIOS - lista comma-separated, default = todos
+  SESNSP_ANIOS - comma-separated, filtra archivos del ZIP (mucho mas rapido)
   SESNSP_CSV_URL - URL directa (override del scraping)
 """
 import csv
@@ -44,6 +37,10 @@ if not SB_URL or not SB_KEY:
 SCRAPER_SLUG = "sesnsp_municipios"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 SESNSP_PAGE = "https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva"
+
+ANIOS_FILTRO = set()
+if SESNSP_ANIOS:
+    ANIOS_FILTRO = {int(a.strip()) for a in SESNSP_ANIOS.split(",") if a.strip()}
 
 
 def deaccent(s):
@@ -118,37 +115,7 @@ def download_file(url):
     return r.content
 
 
-def detect_format(blob, url=""):
-    if blob[:2] == b"PK":
-        head = blob[:32768]
-        if b"xl/" in head or b"[Content_Types].xml" in head:
-            return "xlsx"
-        return "zip"
-    return "csv"
-
-
-def extract_from_zip(blob):
-    """Extrae el archivo CSV/XLSX dentro de un ZIP."""
-    with zipfile.ZipFile(io.BytesIO(blob)) as zf:
-        names = zf.namelist()
-        print(f"[sesnsp] ZIP contiene {len(names)} entries: {names[:10]}")
-        # Preferir XLSX, luego XLS, luego CSV
-        for ext in (".xlsx", ".xls", ".csv"):
-            for name in names:
-                if name.lower().endswith(ext):
-                    print(f"[sesnsp] extrayendo {name} ({ext})")
-                    inner = zf.read(name)
-                    return inner, ext.lstrip(".")
-        # Fallback: primer archivo no-directorio
-        for name in names:
-            if not name.endswith("/"):
-                inner = zf.read(name)
-                print(f"[sesnsp] extrayendo {name} (extension desconocida)")
-                return inner, None
-    return None, None
-
-
-def parse_xlsx(blob):
+def parse_xlsx_blob(blob):
     from openpyxl import load_workbook
     wb = load_workbook(io.BytesIO(blob), read_only=True, data_only=True)
     sheet = wb.active
@@ -206,7 +173,6 @@ def unpivot(all_rows):
 
     raw_headers = [str(c or "").strip() for c in all_rows[header_idx]]
     nh = [normkey(h) for h in raw_headers]
-    print(f"[sesnsp] headers (norm): {nh[:15]}")
 
     def idx(*names):
         for n in names:
@@ -229,8 +195,6 @@ def unpivot(all_rows):
         mes_key = MESES.get(deaccent(h).lower())
         if mes_key:
             mes_indices[i] = mes_key
-
-    print(f"[sesnsp] indices: anio={i_anio} cve_ent={i_cve_ent} cve_mun={i_cve_mun} tipo={i_tipo} meses={list(mes_indices.values())}")
 
     if i_anio == -1 or i_cve_mun == -1:
         raise RuntimeError(f"Headers faltantes. Headers crudos: {raw_headers[:20]}")
@@ -283,8 +247,7 @@ def unpivot(all_rows):
         except Exception:
             skipped += 1
 
-    print(f"[sesnsp] long rows: {len(rows_long)} (skipped {skipped})")
-    return rows_long
+    return rows_long, skipped
 
 
 def sb_upsert(table, rows, on_conflict, batch_size=500):
@@ -303,7 +266,7 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
             raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
         if total % 10000 == 0:
-            print(f"[sesnsp] upserted {total}/{len(rows)}")
+            print(f"[sesnsp]   upserted {total}/{len(rows)}")
     return total
 
 
@@ -327,70 +290,90 @@ def log_scraper(status, summary, error_msg, started_at, fuente_url):
         print(f"[sesnsp] no log: {exc}", file=sys.stderr)
 
 
+def process_xlsx_blob(blob, anio_hint=None):
+    """Devuelve lista de rows long para upsert."""
+    all_rows = parse_xlsx_blob(blob)
+    rows, skipped = unpivot(all_rows)
+    return rows, skipped
+
+
+def year_from_filename(name):
+    m = re.search(r"(\d{4})", os.path.basename(name))
+    return int(m.group(1)) if m else None
+
+
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
-    summary = {"inserted": 0, "skipped": 0, "errors": []}
+    summary = {"inserted": 0, "skipped": 0, "errors": [], "by_anio": {}}
     dataset_url = ""
 
     try:
         dataset_url, label = discover_dataset_url()
         blob = download_file(dataset_url)
-        fmt = detect_format(blob, dataset_url)
-        print(f"[sesnsp] formato detectado: {fmt}")
 
-        if fmt == "zip":
-            inner_blob, inner_ext = extract_from_zip(blob)
-            if not inner_blob:
-                raise RuntimeError("ZIP vacio o sin archivo CSV/XLSX")
-            new_fmt = inner_ext if inner_ext in ("xlsx", "csv") else detect_format(inner_blob)
-            print(f"[sesnsp] dentro del ZIP: formato={new_fmt}")
-            blob = inner_blob
-            fmt = new_fmt
+        # SESNSP ZIP contiene 1 XLSX por anio
+        if blob[:2] != b"PK":
+            raise RuntimeError(f"Esperaba ZIP (PK header), recibi {blob[:8]!r}")
 
-        if fmt == "xlsx":
-            all_rows = parse_xlsx(blob)
-        elif fmt == "csv":
-            text = blob_to_text(blob)
-            all_rows = parse_csv_text(text)
-        else:
-            raise RuntimeError(f"Formato no soportado: {fmt}")
+        with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+            names = zf.namelist()
+            print(f"[sesnsp] ZIP contiene {len(names)} entries")
+            xlsx_files = [n for n in names if n.lower().endswith(".xlsx")]
+            print(f"[sesnsp] {len(xlsx_files)} archivos XLSX")
 
-        print(f"[sesnsp] total filas crudas: {len(all_rows)}")
-        rows = unpivot(all_rows)
+            for name in sorted(xlsx_files):
+                file_year = year_from_filename(name)
+                if ANIOS_FILTRO and file_year and file_year not in ANIOS_FILTRO:
+                    print(f"[sesnsp] SKIP {name} (anio {file_year} no esta en filtro)")
+                    continue
 
-        if SESNSP_ANIOS:
-            anios_set = {int(a.strip()) for a in SESNSP_ANIOS.split(",") if a.strip()}
-            before = len(rows)
-            rows = [r for r in rows if r["anio"] in anios_set]
-            print(f"[sesnsp] filtrado por anios {anios_set}: {before} -> {len(rows)}")
+                print(f"[sesnsp] procesando {name} (anio detectado={file_year})")
+                inner = zf.read(name)
+                try:
+                    rows, skipped = process_xlsx_blob(inner, anio_hint=file_year)
+                except Exception as exc:
+                    summary["errors"].append(f"{name}: {exc}")
+                    print(f"[sesnsp]   FAIL parsing: {exc}", file=sys.stderr)
+                    continue
 
-        seen = set()
-        deduped = []
-        for r in rows:
-            k = (r["clave_inegi"], r["anio"], r["mes"], r.get("bien_juridico"),
-                 r.get("tipo_delito"), r.get("subtipo_delito"), r.get("modalidad"))
-            if k in seen:
-                summary["skipped"] += 1
-                continue
-            seen.add(k)
-            deduped.append(r)
-        print(f"[sesnsp] dedup: {len(rows)} -> {len(deduped)}")
+                if ANIOS_FILTRO:
+                    before = len(rows)
+                    rows = [r for r in rows if r["anio"] in ANIOS_FILTRO]
+                    if before != len(rows):
+                        print(f"[sesnsp]   filtrado anio: {before} -> {len(rows)}")
 
-        if deduped:
-            ins = sb_upsert("delitos_municipios", deduped,
-                            on_conflict="clave_inegi,anio,mes,bien_juridico,tipo_delito,subtipo_delito,modalidad")
-            summary["inserted"] = ins
-            print(f"[sesnsp] upserted: {ins}")
+                # Dedup
+                seen = set()
+                deduped = []
+                for r in rows:
+                    k = (r["clave_inegi"], r["anio"], r["mes"], r.get("bien_juridico"),
+                         r.get("tipo_delito"), r.get("subtipo_delito"), r.get("modalidad"))
+                    if k in seen:
+                        summary["skipped"] += 1
+                        continue
+                    seen.add(k)
+                    deduped.append(r)
 
-        status = "ok" if summary["inserted"] > 0 else "fail"
+                if not deduped:
+                    print(f"[sesnsp]   sin filas para upsert")
+                    continue
+
+                print(f"[sesnsp]   upserting {len(deduped)} filas...")
+                ins = sb_upsert("delitos_municipios", deduped,
+                                on_conflict="clave_inegi,anio,mes,bien_juridico,tipo_delito,subtipo_delito,modalidad")
+                summary["inserted"] += ins
+                summary["by_anio"][str(file_year)] = ins
+                print(f"[sesnsp]   {name}: +{ins} filas (total: {summary['inserted']})")
+
+        status = "ok" if summary["inserted"] > 0 else ("partial" if summary["errors"] else "fail")
     except Exception as exc:
         import traceback; traceback.print_exc()
         summary["errors"].append(str(exc))
         status = "fail"
 
-    log_scraper(status, summary, "; ".join(summary["errors"]) or None, started_at, dataset_url)
-    print(f"[sesnsp] DONE status={status} total={summary['inserted']}")
-    sys.exit(0 if status == "ok" else 1)
+    log_scraper(status, summary, "; ".join(summary["errors"][:5]) or None, started_at, dataset_url)
+    print(f"[sesnsp] DONE status={status} total={summary['inserted']} by_anio={summary['by_anio']}")
+    sys.exit(0 if status in ("ok", "partial") and summary["inserted"] > 0 else 1)
 
 
 if __name__ == "__main__":
