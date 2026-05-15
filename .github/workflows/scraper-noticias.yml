@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -27,8 +26,28 @@ jobs:
           pip install requests beautifulsoup4 lxml
 
       - name: Run noticias scraper
+        id: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           MAX_PER_FUENTE: '40'
         run: python scripts/scrape_noticias.py
+
+      - name: Start time
+        id: t
+        if: always()
+        run: echo "ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Log to scraper_logs
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          STATUS=$([ "${{ job.status }}" = "success" ] && echo "ok" || echo "fail")
+          curl -sS -X POST "$SUPABASE_URL/rest/v1/scraper_logs" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "[{\"scraper_slug\":\"noticias\",\"status\":\"$STATUS\",\"workflow_run_id\":\"${{ github.run_id }}\",\"finished_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"http_status\":200}]"
