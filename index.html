@@ -5318,13 +5318,19 @@
           <div id="ver-promesas-list" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
 
-        <!-- Modal: Enviar reporte -->
-        <div id="ver-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:0" onclick="if(event.target===this)verCerrarModal()">
-          <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;border:1px solid var(--border)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-              <div style="font-size:14px;font-weight:800">📋 Reportar incumplimiento</div>
-              <button onclick="verCerrarModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+        <!-- Modal: Enviar reporte (fix mobile: header sticky + X grande + swipe-to-close) -->
+        <div id="ver-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:flex-end;justify-content:center;padding:0" onclick="if(event.target===this)verCerrarModal()">
+          <div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:0 0 32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);position:relative;-webkit-overflow-scrolling:touch">
+            <!-- Drag handle visible -->
+            <div style="position:sticky;top:0;background:var(--bg2);padding:10px 0 0;z-index:10;border-radius:20px 20px 0 0">
+              <div style="width:40px;height:4px;background:var(--text3);opacity:0.4;border-radius:2px;margin:0 auto 8px"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg2)">
+                <div style="font-size:14px;font-weight:800">📋 Reportar incumplimiento</div>
+                <button onclick="verCerrarModal()" aria-label="Cerrar"
+                  style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1;font-weight:700;padding:0;flex-shrink:0">✕</button>
+              </div>
             </div>
+            <div style="padding:16px 20px 0">
             <div id="ver-modal-promesa" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5"></div>
             <div style="margin-bottom:12px">
               <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">¿DÓNDE OCURRIÓ EL INCUMPLIMIENTO?</div>
@@ -5355,6 +5361,7 @@
               📤 Enviar reporte ciudadano
             </button>
             <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--text3)">Los reportes son anónimos · Solo se almacenan en tu dispositivo · No hay servidor</div>
+            </div>
           </div>
         </div>
 
