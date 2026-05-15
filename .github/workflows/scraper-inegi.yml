@@ -20,8 +20,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml
       - name: Run INEGI scraper
+        id: scraper
         env:
           INEGI_TOKEN: ${{ secrets.INEGI_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python scripts/scrape_inegi.py
+      - name: Log scraper run
+        if: always()
+        uses: ./.github/actions/log-scraper
+        with:
+          slug: inegi
+          status: ${{ job.status }}
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
