@@ -26001,12 +26001,30 @@ const DIRECTORIO_ESTADOS = {
     { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Tlaxcala',                    tel:'246 462 0040', web:'diftlaxcala.gob.mx',   desc:'Asistencia social a familias y comunidades tlaxcaltecas.',                   horario:'Lun–Vie 8–16h' },
     { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Tlaxcala',        tel:'246 462 0080', web:'tlaxcala.gob.mx',       desc:'Emergencias por sismos, lluvias e incendios forestales.',                    horario:'24/7' },
   ]},
-  'Veracruz': { polId:'sn', nombre:'Rocío Nahle García', cargo:'Gobernadora · Veracruz', partido:'MORENA', color:'#b45309', avatarBg:'linear-gradient(135deg,#b45309,#92400e)', iniciales:'RN',
-    votos:[{tema:'⛽ Refinería Dos Bocas',voto:'A favor',color:'var(--green2)'},{tema:'🌿 Manglares',voto:'En contra',color:'var(--red2)'},{tema:'💼 Empleo industrial',voto:'A favor',color:'var(--green2)'}] },
-  'Oaxaca': { polId:'eo', nombre:'Salomón Jara Cruz', cargo:'Gobernador · Oaxaca', partido:'MORENA', color:'#b45309', avatarBg:'linear-gradient(135deg,#78350f,#92400e)', iniciales:'SJ',
-    votos:[{tema:'🪶 Derechos indígenas',voto:'A favor',color:'var(--green2)'},{tema:'🌬️ Energía eólica',voto:'En proceso',color:'var(--yellow2)'},{tema:'🏥 Hospitales rurales',voto:'A favor',color:'var(--green2)'}] },
-  'default': { polId:'mb', nombre:'Ricardo Mora H.', cargo:'Diputado Federal · MC · Nuevo León', partido:'MC', color:'#ea580c', avatarBg:'linear-gradient(135deg,#ea580c,#f97316)', iniciales:'RM',
-    votos:[{tema:'💧 Ley de Agua',voto:'A favor',color:'var(--green2)'},{tema:'💰 Reforma Fiscal',voto:'A favor',color:'var(--green2)'},{tema:'⚖️ Paridad Salarial',voto:'A favor',color:'var(--green2)'}] },
+  'Veracruz': { capital:'Xalapa-Enríquez', abrev:'VER', servicios:[
+    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado de Veracruz',  tel:'228 141 4000', web:'fiscaliaveracruz.gob.mx',     desc:'Denuncia delitos federales y de fuero común. MP de zonas urbanas y rurales.', horario:'24/7' },
+    { cat:'derechos',  emoji:'🛡️', nombre:'CEDH Veracruz',                            tel:'228 817 4050', web:'cedhveracruz.org.mx',         desc:'Comisión Estatal de Derechos Humanos. Quejas contra autoridades estatales y municipales.', horario:'Lun–Vie 9–17h' },
+    { cat:'mujer',     emoji:'💜', nombre:'Instituto Veracruzano de las Mujeres (IVM)', tel:'228 842 1707', web:'ivermujeres.gob.mx',          desc:'Atención a víctimas de violencia, refugios y asesoría jurídica gratuita.', horario:'Lun–Vie 9–17h · línea 24/7' },
+    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de Veracruz (SESVER)',  tel:'228 842 1400', web:'ssaver.gob.mx',               desc:'Hospitales generales en Xalapa, Veracruz, Poza Rica, Coatzacoalcos y centros rurales.', horario:'24/7 urgencias' },
+    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Estatal Veracruz',                     tel:'228 842 1000', web:'difver.gob.mx',               desc:'Asistencia social, atención a niñez, adultos mayores y discapacidad.', horario:'Lun–Vie 8–16h' },
+    { cat:'proteccion',emoji:'🔒', nombre:'Protección Civil Veracruz',                tel:'228 842 1900', web:'proteccioncivilveracruz.gob.mx', desc:'Estado crítico para huracanes del Golfo y desbordamientos. Coordina con SMN-CONAGUA.', horario:'24/7' },
+  ]},
+  'Yucatán': { capital:'Mérida', abrev:'YUC', servicios:[
+    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General del Estado de Yucatán', tel:'999 930 3250', web:'fge.yucatan.gob.mx',         desc:'MP estatal y fiscalías especializadas (violencia familiar, delitos sexuales, alta tecnología).', horario:'24/7' },
+    { cat:'derechos',  emoji:'🛡️', nombre:'CODHEY — Com. Derechos Humanos Yucatán', tel:'999 927 0189', web:'codhey.org',                  desc:'Recibe quejas contra autoridades estatales y municipales. Atención presencial y en línea.', horario:'Lun–Vie 9–15h' },
+    { cat:'mujer',     emoji:'💜', nombre:'IEGY — Inst. Equidad de Género Yucatán', tel:'999 946 1200', web:'iegy.yucatan.gob.mx',         desc:'Atención psicológica, jurídica y de trabajo social a mujeres víctimas de violencia.', horario:'Lun–Vie 8–16h' },
+    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud Yucatán (SSY)',        tel:'999 930 0555', web:'ssy.yucatan.gob.mx',          desc:'Hospitales generales, materno-infantil O´Horán, red rural maya.', horario:'24/7 urgencias' },
+    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'DIF Yucatán',                              tel:'999 930 4800', web:'dif.yucatan.gob.mx',          desc:'Asistencia social, atención a comunidades mayas y adultos mayores.', horario:'Lun–Vie 8–16h' },
+    { cat:'proteccion',emoji:'🔒', nombre:'PROCIVY — Protección Civil Yucatán',      tel:'999 930 0101', web:'procivy.yucatan.gob.mx',      desc:'Coordina temporada de huracanes Caribe-Atlántico. Refugios anticiclónicos.', horario:'24/7' },
+  ]},
+  'Zacatecas': { capital:'Zacatecas', abrev:'ZAC', servicios:[
+    { cat:'justicia',   emoji:'⚖️', nombre:'Fiscalía General de Justicia del Estado', tel:'492 922 0800', web:'fiscaliazacatecas.gob.mx',    desc:'MP estatal. Fiscalía especializada en homicidios, desapariciones y violencia de género.', horario:'24/7' },
+    { cat:'derechos',  emoji:'🛡️', nombre:'CDHEZ — Com. Derechos Humanos Zacatecas', tel:'492 924 1801', web:'cdhezac.org.mx',              desc:'Recibe quejas, orientación y atención a víctimas de violación a DDHH.', horario:'Lun–Vie 9–15h' },
+    { cat:'mujer',     emoji:'💜', nombre:'SEMUJER — Sec. de las Mujeres',          tel:'492 925 5200', web:'semujer.zacatecas.gob.mx',    desc:'Centros de atención integral y módulos en municipios. Línea de emergencia.', horario:'Lun–Vie 8–17h · línea 24/7' },
+    { cat:'salud',     emoji:'🏥', nombre:'Servicios de Salud de Zacatecas',         tel:'492 898 9000', web:'sszacatecas.gob.mx',          desc:'Red hospitalaria estatal + IMSS-Bienestar. Crítica en zonas serranas y mineras.', horario:'24/7 urgencias' },
+    { cat:'familia',   emoji:'👨‍👩‍👧', nombre:'SEDIF Zacatecas',                         tel:'492 924 2211', web:'dif.zacatecas.gob.mx',        desc:'Asistencia a niñez, adultos mayores, personas con discapacidad y migrantes retornados.', horario:'Lun–Vie 8–16h' },
+    { cat:'proteccion',emoji:'🔒', nombre:'UEPC — Protección Civil Zacatecas',       tel:'492 925 5400', web:'uepc.zacatecas.gob.mx',       desc:'Coordina emergencias por sismos, sequías, granizadas y nevadas en sierra.', horario:'24/7' },
+  ]},
 };
 
 // ═══ DIRECTORIO DE SERVICIOS — Funciones de render ═══
