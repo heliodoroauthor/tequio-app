@@ -19,7 +19,12 @@ if not SB_URL or not SB_KEY:
     sys.exit(1)
 
 SCRAPER_SLUG = "inafed_presidentes"
-UA = "Tequio.app/1.0 (civic-data; +https://tequio.app)"
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+HEADERS = {
+    "User-Agent": UA,
+    "Accept": "text/csv,text/plain,application/octet-stream,*/*",
+    "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+}
 INAFED_CSV = "https://www.datos.gob.mx/dataset/a67f0a5b-5933-4d7f-8d51-53cb874ffd29/resource/22dec87e-ec40-45e6-9bf7-3065ad1ad7b5/download/presidentes_municipales.csv"
 
 
@@ -36,13 +41,22 @@ def normkey(s):
 def download_csv():
     url = INAFED_URL_OVERRIDE or INAFED_CSV
     print(f"[inafed] descargando {url}")
-    r = requests.get(url, headers={"User-Agent": UA}, timeout=120)
+    # Session con cookies (algunos sitios gob.mx requieren visita previa)
+    sess = requests.Session()
+    sess.headers.update(HEADERS)
+    # Touch landing page primero para obtener cookies
+    try:
+        sess.get("https://www.datos.gob.mx/dataset/presidentas_presidentes_municipales", timeout=30)
+    except Exception:
+        pass
+    r = sess.get(url, timeout=120)
+    print(f"[inafed] HTTP {r.status_code} bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
     r.raise_for_status()
     for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
         try:
             text = r.content.decode(enc)
             if "estado" in text[:500].lower():
-                print(f"[inafed] decoded {enc}, bytes={len(r.content)}")
+                print(f"[inafed] decoded {enc}")
                 return text, url
         except UnicodeDecodeError:
             continue
