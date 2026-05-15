@@ -2008,6 +2008,31 @@
           <div style="font-size:13px;color:var(--text3)" id="dash-fecha"></div>
         </div>
 
+        <!-- ACCIONES RÁPIDAS — arriba para máxima accionabilidad -->
+        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:10px">⚡ ACCIONES RÁPIDAS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+          <div onclick="showPage('acciones')" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(99,179,237,0.3)">
+            <div style="font-size:24px;margin-bottom:8px">⚡</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Genera tu denuncia</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7)">La IA la redacta en segundos</div>
+          </div>
+          <div onclick="showPage('politicos')" style="background:linear-gradient(135deg,#1a1a1a,#dc2626);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(239,68,68,0.3)">
+            <div style="font-size:24px;margin-bottom:8px">📋</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Promesas rotas</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Comparte y viraliza</div>
+          </div>
+          <div onclick="showPage('organizacion');switchOrgTab('ot-planeador')" style="background:linear-gradient(135deg,#0f2027,#7c3aed);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(139,92,246,0.3)">
+            <div style="font-size:24px;margin-bottom:8px">✊</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Organízate</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Plan de acción con IA</div>
+          </div>
+          <div onclick="showPage('noticias')" style="background:linear-gradient(135deg,#0f2027,#16a34a);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(34,197,94,0.3)">
+            <div style="font-size:24px;margin-bottom:8px">📰</div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Noticias de hoy</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Lo que pasa en tu estado</div>
+          </div>
+        </div>
+
         <!-- ALERTA IA POR ESTADO -->
         <div id="dash-alerta-ia-card" style="display:none;margin-bottom:16px">
           <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(245,158,11,0.08));border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:14px 16px">
@@ -2066,52 +2091,27 @@
           <div id="dash-ia-noticias"><div style="font-size:12px;color:var(--text3)">Toca "Actualizar" para cargar noticias de tu estado con IA 🧠</div></div>
         </div>
 
-        <!-- ACCIONES RÁPIDAS -->
-        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:10px">⚡ ACCIONES RÁPIDAS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-          <div onclick="showPage('acciones')" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(99,179,237,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">⚡</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Genera tu denuncia</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">La IA la redacta en segundos</div>
-          </div>
-          <div onclick="showPage('politicos')" style="background:linear-gradient(135deg,#1a1a1a,#dc2626);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(239,68,68,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">📋</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Promesas rotas</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Comparte y viraliza</div>
-          </div>
-          <div onclick="showPage('organizacion');switchOrgTab('ot-planeador')" style="background:linear-gradient(135deg,#0f2027,#7c3aed);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(139,92,246,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">✊</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Organízate</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Plan de acción con IA</div>
-          </div>
-          <div onclick="showPage('noticias')" style="background:linear-gradient(135deg,#0f2027,#16a34a);border-radius:16px;padding:16px;cursor:pointer;border:1px solid rgba(34,197,94,0.3)">
-            <div style="font-size:24px;margin-bottom:8px">📰</div>
-            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">Noticias de hoy</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7)">Lo que pasa en tu estado</div>
-          </div>
-        </div>
-
-        <!-- STATS + ACTIVIDAD -->
+        <!-- STATS — Todos verificables contra Supabase / fuentes oficiales -->
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" style="color:var(--accent2)">~1,240</div>
-            <div class="stat-change" style="color:var(--text3)">Muestra de 15 en app</div>
+            <div class="stat-value" style="color:var(--accent2)">757</div>
+            <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
-          <div class="stat-card" onclick="showPage('iniciativas')" style="cursor:pointer">
-            <div class="stat-label">INICIATIVAS ACTIVAS <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('iniciativas_activas')">🔍</button></div>
-            <div class="stat-value" style="color:var(--green2)">47</div>
-            <div class="stat-change up">↑ 12 nuevas hoy</div>
+          <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
+            <div class="stat-label">CONTRATOS PÚBLICOS <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('contratos_publicos')">🔍</button></div>
+            <div class="stat-value" style="color:var(--yellow2)">9,775</div>
+            <div class="stat-change" style="color:var(--green2)">✓ ComprasMX (APF)</div>
           </div>
           <div class="stat-card" onclick="showPage('dinero')" style="cursor:pointer">
             <div class="stat-label">DEUDA PÚBLICA <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('deuda_publica')">🔍</button></div>
             <div class="stat-value" style="color:var(--red2)">$13.7T</div>
-            <div class="stat-change down">↑ 3.2% vs 2023</div>
+            <div class="stat-change" style="color:var(--text3)">SHCP · Saldo neto</div>
           </div>
-          <div class="stat-card" onclick="showPage('ia')" style="cursor:pointer">
-            <div class="stat-label">CONSULTAS IA HOY <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('consultas_ia')">🔍</button></div>
-            <div class="stat-value" style="color:var(--purple)">18.4K</div>
-            <div class="stat-change up">↑ 340% vs ayer</div>
+          <div class="stat-card" onclick="showPage('ombligo')" style="cursor:pointer">
+            <div class="stat-label">PATRIMONIO INAH <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('patrimonio_inah')">🔍</button></div>
+            <div class="stat-value" style="color:var(--purple)">195+165</div>
+            <div class="stat-change" style="color:var(--green2)">✓ Zonas + museos INAH</div>
           </div>
         </div>
 
@@ -10625,10 +10625,10 @@ let obIntereses = new Set();
 // ─── FUENTES VERIFICABLES ───
 // ════════════════════════════════════════
 const fuentesDB = {
-  leyes_vigentes: { titulo:'Leyes Vigentes', dato:'~1,240 leyes federales vigentes en el DOF (la app muestra una selección representativa de 15)', fuente:'Diario Oficial de la Federación (DOF)', url:'https://www.dof.gob.mx', fecha:'Enero 2025', metodologia:'Conteo de ordenamientos federales publicados en el DOF que no han sido derogados. Incluye leyes, reglamentos y decretos con fuerza de ley. La aplicación incluye una muestra representativa de leyes clave para ciudadanos.', verificar:'dof.gob.mx → Búsqueda de Ordenamientos' },
-  iniciativas_activas: { titulo:'Iniciativas Activas', dato:'47 iniciativas activas', fuente:'Plataforma VOTO (datos internos)', fecha:'Tiempo real', metodologia:'Iniciativas con al menos una firma en los últimos 30 días.', verificar:'Ver sección Iniciativas Ciudadanas en esta app' },
+  leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'757 leyes en el catálogo de Tequio', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'Leyes federales vigentes (~280) + reglamentos + leyes core de los 32 estados. Scraping diario contra diputados.gob.mx y dof.gob.mx. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
+  contratos_publicos: { titulo:'Contratos Públicos APF', dato:'9,775 contratos cargados', fuente:'ComprasMX / CompraNet (OCDS)', url:'https://comprasmx.buengobierno.gob.mx', fecha:'Actualización semanal vía workflow', metodologia:'Contratos publicados por la Administración Pública Federal en el estándar de datos abiertos OCDS. Incluye contratante, proveedor, monto, fecha, modalidad de contratación.', verificar:'comprasmx.buengobierno.gob.mx → Contrataciones' },
   deuda_publica: { titulo:'Deuda Pública', dato:'$13.7 billones de pesos', fuente:'SHCP — Informe de Finanzas Públicas Q3 2024', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Publicado: 31 octubre 2024', metodologia:'Saldo de deuda del Sector Público Federal: interna ($9.84T) + externa ($3.86T) + PEMEX + CFE. Calculado conforme a la metodología del FMI.', verificar:'finanzaspublicas.hacienda.gob.mx → Deuda Pública → Informes Trimestrales' },
-  consultas_ia: { titulo:'Consultas IA', dato:'18,400 consultas en 24 hrs', fuente:'Plataforma VOTO (dato interno)', fecha:'Tiempo real', metodologia:'Conteo de conversaciones iniciadas con el Asistente IA en las últimas 24 horas.', verificar:'Dato interno de la plataforma' },
+  patrimonio_inah: { titulo:'Patrimonio Cultural · INAH', dato:'195 zonas arqueológicas + 165 museos', fuente:'INAH · Datos Abiertos', url:'https://datos.inah.gob.mx', fecha:'Catálogo INAH vigente', metodologia:'Catálogo oficial de zonas arqueológicas abiertas al público y museos administrados por el INAH. Datos abiertos del Instituto Nacional de Antropología e Historia.', verificar:'datos.inah.gob.mx → Zonas Arqueológicas · Museos' },
   deficit_2024: { titulo:'Déficit Fiscal 2024', dato:'5.9% del PIB', fuente:'SHCP — Criterios Generales de Política Económica 2025', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Octubre 2024', metodologia:'Requerimientos Financieros del Sector Público (RFSP) como % del PIB. El más alto desde 1988 según series históricas de Banxico.', verificar:'finanzaspublicas.hacienda.gob.mx → Comunicados → RFSP 2024' },
   tren_maya_irr: { titulo:'Irregularidades Tren Maya', dato:'$89,000 millones observados', fuente:'ASF — Auditoría 1771-GB, Cuenta Pública 2023', url:'https://www.asf.gob.mx', fecha:'2024', metodologia:'Auditoría de desempeño y financiera a tramos 5-7 del Tren Maya ejecutados por SEDENA. Incluye contratos sin licitación y diferencias no justificadas en costos.', verificar:'asf.gob.mx → Informes → Cuenta Pública 2023 → "Tren Maya"' },
   femincidios_2024: { titulo:'Feminicidios 2024', dato:'312 casos reconocidos ene-sep 2024', fuente:'SESNSP — Informe de incidencia delictiva septiembre 2024', url:'https://www.gob.mx/sesnsp', fecha:'Septiembre 2024', metodologia:'Carpetas de investigación abiertas por feminicidio. No incluye homicidios dolosos de mujeres no clasificados como feminicidio por los ministerios públicos locales.', verificar:'sesnsp.gob.mx → Incidencia Delictiva → Herramienta de Consulta' },
@@ -11661,8 +11661,11 @@ function showPage(id) {
 }
 
 // ─── Mi Diputado ───
-// Mapa de estados a representantes (datos de muestra — en producción conectar a API del Congreso)
-const diputadosPorEstado = {
+// Nombres genéricos retirados: México tiene ~300 diputados federales (uninominales) + 200 (plurinominales),
+// no hay "el diputado de un estado". Se requiere mapeo por distrito electoral o lista nominal.
+// Hasta tener match real por distrito, mostramos null state con CTA al sitio oficial.
+const diputadosPorEstado = {};
+const _diputadosPorEstadoLegacy = {
   'Ciudad de México':  { nombre:'Omar Domínguez L.',   partido:'MORENA', cargo:'Diputado Federal',  foto:'OD', color:'#e11d48' },
   'Jalisco':           { nombre:'Sergio Medina R.',     partido:'PAN',    cargo:'Diputado Federal',  foto:'SM', color:'#2563eb' },
   'Estado de México':  { nombre:'Ulises Pérez C.',      partido:'PRI',    cargo:'Diputado Federal',  foto:'UP', color:'#16a34a' },
@@ -11705,7 +11708,19 @@ function mostrarMiDiputado(estado) {
 
   if (!d) {
     el.style.display = 'block';
-    el.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:8px 0">No tenemos datos del diputado federal de ${estado} aún. Consulta en diputados.gob.mx</div>`;
+    el.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="font-size:24px;flex-shrink:0">🏛️</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Selecciona tu distrito electoral</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.5">${estado} tiene varios diputados federales (uno por distrito). Para mostrarte el tuyo necesitamos saber tu distrito electoral exacto, no sólo el estado.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://www.ine.mx/voto-y-elecciones/ubica-tu-modulo/" target="_blank" rel="noopener" style="flex:1;min-width:140px;background:var(--accent);border:none;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;text-decoration:none;text-align:center">📍 Buscar mi distrito (INE)</a>
+        <a href="https://www.diputados.gob.mx/inicio.htm" target="_blank" rel="noopener" style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;text-decoration:none;text-align:center">Directorio Cámara →</a>
+      </div>
+    </div>`;
     return;
   }
 
