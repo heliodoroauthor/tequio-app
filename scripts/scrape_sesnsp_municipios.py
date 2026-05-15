@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SESNSP Incidencia Delictiva Municipal (IDEFC_NM).
+Tequio - Scraper SESNSP Incidencia Delictiva Municipal.
 
-SESNSP publica mensualmente un CSV con incidencia delictiva por municipio:
-  https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva
+SESNSP migro los datos abiertos de gob.mx/attachment/file/ a SharePoint
+(sspcgob-my.sharepoint.com) en formato XLSX. Soportamos ambos.
 
-El CSV tiene formato wide con columnas: Ano, Clave_Ent, Entidad, Cve. Municipio,
-Municipio, Bien juridico afectado, Tipo de delito, Subtipo de delito, Modalidad,
-Enero, Febrero, ..., Diciembre
-
-Strategy:
-1. Scrape la pagina oficial gob.mx para encontrar el ultimo link IDEFC_NM_*.csv
-2. Descargar el CSV (~80MB)
-3. Unpivot meses a long format
-4. Filtrar por anios si SESNSP_ANIOS esta definido
-5. Upsert en delitos_municipios
+Flujo:
+1. Scrapear pagina oficial y encontrar anchor cuyo texto contenga
+   "Fuero com[uú]n - Delitos" AND "[mm]unicipal"
+2. Convertir sharing link a direct download (append &download=1)
+3. Descargar (~80MB)
+4. Detectar tipo (XLSX vs CSV) por magic bytes
+5. Unpivot meses a long format
+6. Filtrar por SESNSP_ANIOS si esta seteado
+7. Upsert en delitos_municipios
 
 Env vars:
-  SUPABASE_URL
-  SUPABASE_SERVICE_ROLE_KEY
+  SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 Opcional:
   GITHUB_RUN_ID
   SESNSP_ANIOS - lista comma-separated, default = todos
-  SESNSP_CSV_URL - URL directa al CSV (override del scraping)
+  SESNSP_CSV_URL - URL directa (override del scraping)
 """
 import csv
 import io
@@ -60,40 +58,104 @@ def normkey(s):
     return "".join(ch for ch in s if ch.isalnum())
 
 
-def find_csv_url(html_text):
-    matches = re.findall(r'(https?://[^"\'\s<>]+IDEFC[_\-A-Z0-9]*\.csv)', html_text, re.IGNORECASE)
-    matches += re.findall(r'(https?://[^"\'\s<>]+attachment/file/\d+/IDEFC[^"\'\s<>]+)', html_text, re.IGNORECASE)
-    nm = [u for u in matches if "_NM" in u.upper() or "NM_" in u.upper()]
-    return list(dict.fromkeys(nm)) or list(dict.fromkeys(matches))
+def force_sharepoint_download(url):
+    if "sharepoint.com" not in url:
+        return url
+    if "download=1" in url:
+        return url
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}download=1"
 
 
-def discover_csv_url():
+def find_dataset_url(html):
+    """Busca anchor con texto que contenga 'Fuero comun - Delitos' AND 'municipal'.
+
+    Prefiere rango de anios mas amplio (ej: '2015 - 2025' > 'Enero - marzo 2026').
+    """
+    # Regex: <a href="URL">TEXTO</a>
+    anchors = re.findall(r'<a[^>]+href=\"([^\"]+)\"[^>]*>([^<]{5,200})</a>', html, re.IGNORECASE)
+    candidates = []
+    for href, text in anchors:
+        t_norm = deaccent(text).lower()
+        if ("fuero" in t_norm and "delitos" in t_norm and "municipal" in t_norm
+                and "victima" not in t_norm and "victimas" not in t_norm):
+            candidates.append((href, text.strip()))
+    print(f"[sesnsp] {len(candidates)} candidatos:")
+    for h, t in candidates[:10]:
+        print(f"  - {t!r}: {h[:100]}")
+
+    if not candidates:
+        return None, None
+
+    # Priorizar rango de anios mas amplio (e.g. "2015 - 2025" tiene 11 anios)
+    def score(text):
+        match = re.search(r'(\d{4})\s*-\s*(\d{4})', text)
+        if match:
+            return int(match.group(2)) - int(match.group(1))
+        return 0
+
+    candidates.sort(key=lambda x: score(x[1]), reverse=True)
+    url, label = candidates[0]
+    return force_sharepoint_download(url), label
+
+
+def discover_dataset_url():
     if SESNSP_CSV_URL_OVERRIDE:
-        print(f"[sesnsp] usando override URL: {SESNSP_CSV_URL_OVERRIDE}")
-        return SESNSP_CSV_URL_OVERRIDE
+        url = force_sharepoint_download(SESNSP_CSV_URL_OVERRIDE)
+        print(f"[sesnsp] usando override URL: {url}")
+        return url, "OVERRIDE"
     print(f"[sesnsp] descubriendo URL desde {SESNSP_PAGE}")
     r = requests.get(SESNSP_PAGE, headers={"User-Agent": UA}, timeout=60)
     r.raise_for_status()
-    urls = find_csv_url(r.text)
-    if not urls:
-        raise RuntimeError("No se encontro link IDEFC_NM en la pagina SESNSP")
-    print(f"[sesnsp] encontrados {len(urls)} links candidatos")
-    return urls[0]
+    url, label = find_dataset_url(r.text)
+    if not url:
+        raise RuntimeError("No se encontro link SharePoint con 'Fuero comun - Delitos - municipal' en la pagina SESNSP")
+    print(f"[sesnsp] dataset elegido: {label!r}")
+    return url, label
 
 
-def download_csv(url):
-    print(f"[sesnsp] descargando {url}")
-    r = requests.get(url, headers={"User-Agent": UA, "Accept": "text/csv,*/*"}, timeout=300)
+def download_file(url):
+    print(f"[sesnsp] descargando {url[:120]}")
+    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=600, allow_redirects=True)
     r.raise_for_status()
-    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
-        try:
-            text = r.content.decode(enc)
-            if "Clave" in text[:5000] or "Ent" in text[:5000]:
-                print(f"[sesnsp] decoded as {enc}, bytes={len(r.content)}")
-                return text
-        except UnicodeDecodeError:
-            continue
-    return r.content.decode("latin-1")
+    print(f"[sesnsp] bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
+    return r.content
+
+
+def detect_format(blob, url=""):
+    """Devuelve 'xlsx' | 'csv' | 'zip'"""
+    # XLSX magic bytes: PK (zip header) + has 'xl/' inside
+    if blob[:2] == b"PK":
+        # Could be XLSX or ZIP. XLSX has xl/ folder
+        if b"xl/" in blob[:4096] or b"[Content_Types].xml" in blob[:4096]:
+            return "xlsx"
+        return "zip"
+    if url.lower().endswith(".csv") or blob[:200].decode("latin-1", errors="ignore").lower().count(",") > 3:
+        return "csv"
+    return "csv"
+
+
+def parse_xlsx(blob):
+    """Parsea XLSX con openpyxl en modo read-only."""
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        raise RuntimeError("openpyxl no instalado")
+
+    wb = load_workbook(io.BytesIO(blob), read_only=True, data_only=True)
+    sheet = wb.active
+    rows = []
+    for row in sheet.iter_rows(values_only=True):
+        rows.append([("" if v is None else str(v)) for v in row])
+    wb.close()
+    return rows
+
+
+def parse_csv_text(text):
+    sample = text[:5000]
+    sep = "," if sample.count(",") > sample.count(";") else ";"
+    reader = csv.reader(io.StringIO(text), delimiter=sep)
+    return list(reader)
 
 
 MESES = {
@@ -104,33 +166,33 @@ MESES = {
 
 
 def parse_int(s):
-    if not s or s == "" or s.strip() == "":
+    if s is None:
         return None
-    s = s.replace(",", "").strip()
+    s = str(s).replace(",", "").strip()
+    if s == "" or s.lower() in ("nan", "none", "null"):
+        return None
     try:
         return int(float(s))
     except (ValueError, TypeError):
         return None
 
 
-def parse_and_unpivot(text):
-    sample = text[:5000]
-    sep = "," if sample.count(",") > sample.count(";") else ";"
-    reader = csv.reader(io.StringIO(text), delimiter=sep)
-    all_rows = list(reader)
+def unpivot(all_rows):
+    """Convierte CSV/XLSX en formato wide a long. Devuelve rows long."""
     if not all_rows:
         return []
 
+    # Detectar header
     header_idx = 0
     for i, row in enumerate(all_rows[:5]):
-        joined = " ".join(row).lower()
+        joined = " ".join(str(c) for c in row).lower()
         if "ano" in normkey(joined) or "anio" in normkey(joined) or "clave" in normkey(joined):
             header_idx = i
             break
 
-    raw_headers = [(c or "").strip() for c in all_rows[header_idx]]
+    raw_headers = [str(c or "").strip() for c in all_rows[header_idx]]
     nh = [normkey(h) for h in raw_headers]
-    print(f"[sesnsp] sep={sep!r} headers (norm): {nh[:15]}...")
+    print(f"[sesnsp] headers (norm): {nh[:15]}")
 
     def idx(*names):
         for n in names:
@@ -154,20 +216,20 @@ def parse_and_unpivot(text):
         if mes_key:
             mes_indices[i] = mes_key
 
-    print(f"[sesnsp] cols: anio={i_anio} cve_ent={i_cve_ent} cve_mun={i_cve_mun} bien={i_bien} tipo={i_tipo} subtipo={i_subtipo} mod={i_modalidad} meses={list(mes_indices.values())}")
+    print(f"[sesnsp] indices: anio={i_anio} cve_ent={i_cve_ent} cve_mun={i_cve_mun} tipo={i_tipo} meses={list(mes_indices.values())}")
 
     if i_anio == -1 or i_cve_mun == -1:
-        raise RuntimeError(f"Headers faltantes. Headers: {raw_headers[:20]}")
+        raise RuntimeError(f"Headers faltantes. Headers crudos: {raw_headers[:20]}")
 
     rows_long = []
     skipped = 0
     for row in all_rows[header_idx + 1:]:
-        if not row or len([c for c in row if (c or "").strip()]) < 5:
+        if not row or len([c for c in row if str(c or "").strip()]) < 5:
             continue
         try:
             anio = parse_int(row[i_anio])
-            cve_ent_raw = (row[i_cve_ent] or "").strip() if i_cve_ent >= 0 else ""
-            cve_mun_raw = (row[i_cve_mun] or "").strip() if i_cve_mun >= 0 else ""
+            cve_ent_raw = str(row[i_cve_ent] or "").strip() if i_cve_ent >= 0 else ""
+            cve_mun_raw = str(row[i_cve_mun] or "").strip() if i_cve_mun >= 0 else ""
             if not anio or not cve_mun_raw:
                 skipped += 1
                 continue
@@ -177,12 +239,12 @@ def parse_and_unpivot(text):
                 cve_mun = cve_mun[-3:]
             clave_inegi = f"{cve_ent}{cve_mun}"
 
-            bien = (row[i_bien] or "").strip() if i_bien >= 0 else None
-            tipo = (row[i_tipo] or "").strip() if i_tipo >= 0 else None
-            subtipo = (row[i_subtipo] or "").strip() if i_subtipo >= 0 else None
-            modalidad = (row[i_modalidad] or "").strip() if i_modalidad >= 0 else None
-            entidad = (row[i_entidad] or "").strip() if i_entidad >= 0 else None
-            municipio = (row[i_municipio] or "").strip() if i_municipio >= 0 else None
+            bien = str(row[i_bien] or "").strip() if i_bien >= 0 else None
+            tipo = str(row[i_tipo] or "").strip() if i_tipo >= 0 else None
+            subtipo = str(row[i_subtipo] or "").strip() if i_subtipo >= 0 else None
+            modalidad = str(row[i_modalidad] or "").strip() if i_modalidad >= 0 else None
+            entidad = str(row[i_entidad] or "").strip() if i_entidad >= 0 else None
+            municipio = str(row[i_municipio] or "").strip() if i_municipio >= 0 else None
 
             for col_idx, mes_num in mes_indices.items():
                 if col_idx >= len(row):
@@ -194,8 +256,8 @@ def parse_and_unpivot(text):
                     "clave_inegi": clave_inegi,
                     "clave_entidad": cve_ent,
                     "clave_municipio": cve_mun,
-                    "nombre_estado": entidad,
-                    "nombre_municipio": municipio,
+                    "nombre_estado": entidad or None,
+                    "nombre_municipio": municipio or None,
                     "anio": anio,
                     "mes": mes_num,
                     "bien_juridico": bien or None,
@@ -218,17 +280,11 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
     for i in range(0, len(rows), batch_size):
         batch = rows[i:i + batch_size]
         url = f"{SB_URL}/rest/v1/{table}?on_conflict={on_conflict}"
-        r = requests.post(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "apikey": SB_KEY,
-                "Authorization": f"Bearer {SB_KEY}",
-                "Prefer": "resolution=merge-duplicates,return=minimal",
-            },
-            data=json.dumps(batch),
-            timeout=120,
-        )
+        r = requests.post(url, headers={
+            "Content-Type": "application/json", "apikey": SB_KEY,
+            "Authorization": f"Bearer {SB_KEY}",
+            "Prefer": "resolution=merge-duplicates,return=minimal",
+        }, data=json.dumps(batch), timeout=120)
         if not r.ok:
             raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
@@ -239,30 +295,20 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
 
 def log_scraper(status, summary, error_msg, started_at, fuente_url):
     try:
-        requests.post(
-            f"{SB_URL}/rest/v1/scraper_logs",
-            headers={
-                "Content-Type": "application/json",
-                "apikey": SB_KEY,
-                "Authorization": f"Bearer {SB_KEY}",
-                "Prefer": "return=minimal",
-            },
-            data=json.dumps([{
-                "scraper_slug": SCRAPER_SLUG,
-                "workflow_run_id": GH_RUN_ID or None,
-                "status": status,
-                "rows_inserted": summary.get("inserted", 0),
-                "rows_updated": 0,
-                "rows_skipped": summary.get("skipped", 0),
-                "fuente_url": fuente_url,
-                "http_status": 200 if status == "ok" else 500,
-                "error_msg": (error_msg or "")[:1000] or None,
-                "notes": json.dumps(summary)[:1000],
-                "started_at": started_at,
-                "finished_at": datetime.now(timezone.utc).isoformat(),
-            }]),
-            timeout=30,
-        )
+        requests.post(f"{SB_URL}/rest/v1/scraper_logs", headers={
+            "Content-Type": "application/json", "apikey": SB_KEY,
+            "Authorization": f"Bearer {SB_KEY}", "Prefer": "return=minimal",
+        }, data=json.dumps([{
+            "scraper_slug": SCRAPER_SLUG, "workflow_run_id": GH_RUN_ID or None,
+            "status": status, "rows_inserted": summary.get("inserted", 0),
+            "rows_updated": 0, "rows_skipped": summary.get("skipped", 0),
+            "fuente_url": (fuente_url or SESNSP_PAGE)[:500],
+            "http_status": 200 if status == "ok" else 500,
+            "error_msg": (error_msg or "")[:1000] or None,
+            "notes": json.dumps(summary)[:1000],
+            "started_at": started_at,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+        }]), timeout=30)
     except Exception as exc:
         print(f"[sesnsp] no log: {exc}", file=sys.stderr)
 
@@ -270,12 +316,32 @@ def log_scraper(status, summary, error_msg, started_at, fuente_url):
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
     summary = {"inserted": 0, "skipped": 0, "errors": []}
-    csv_url = ""
+    dataset_url = ""
 
     try:
-        csv_url = discover_csv_url()
-        text = download_csv(csv_url)
-        rows = parse_and_unpivot(text)
+        dataset_url, label = discover_dataset_url()
+        blob = download_file(dataset_url)
+        fmt = detect_format(blob, dataset_url)
+        print(f"[sesnsp] formato detectado: {fmt}")
+
+        if fmt == "xlsx":
+            all_rows = parse_xlsx(blob)
+        elif fmt == "csv":
+            text = None
+            for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
+                try:
+                    text = blob.decode(enc)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            if text is None:
+                text = blob.decode("latin-1")
+            all_rows = parse_csv_text(text)
+        else:
+            raise RuntimeError(f"Formato no soportado: {fmt}")
+
+        print(f"[sesnsp] total filas crudas: {len(all_rows)}")
+        rows = unpivot(all_rows)
 
         if SESNSP_ANIOS:
             anios_set = {int(a.strip()) for a in SESNSP_ANIOS.split(",") if a.strip()}
@@ -286,7 +352,8 @@ def main():
         seen = set()
         deduped = []
         for r in rows:
-            k = (r["clave_inegi"], r["anio"], r["mes"], r.get("bien_juridico"), r.get("tipo_delito"), r.get("subtipo_delito"), r.get("modalidad"))
+            k = (r["clave_inegi"], r["anio"], r["mes"], r.get("bien_juridico"),
+                 r.get("tipo_delito"), r.get("subtipo_delito"), r.get("modalidad"))
             if k in seen:
                 summary["skipped"] += 1
                 continue
@@ -306,7 +373,7 @@ def main():
         summary["errors"].append(str(exc))
         status = "fail"
 
-    log_scraper(status, summary, "; ".join(summary["errors"]) or None, started_at, csv_url or SESNSP_PAGE)
+    log_scraper(status, summary, "; ".join(summary["errors"]) or None, started_at, dataset_url)
     print(f"[sesnsp] DONE status={status} total={summary['inserted']}")
     sys.exit(0 if status == "ok" else 1)
 
