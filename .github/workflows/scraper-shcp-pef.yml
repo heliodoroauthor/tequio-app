@@ -1,0 +1,38 @@
+name: SHCP PEF Anual
+
+# Corre el dia 15 de marzo de cada anio
+on:
+  schedule:
+    - cron: '0 13 15 3 *'
+  workflow_dispatch:
+    inputs:
+      anios:
+        description: 'Anios a procesar (comma-separated, ej: 2025,2026)'
+        required: false
+        default: '2026'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run SHCP PEF scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          PEF_ANIOS: ${{ github.event.inputs.anios || '2026' }}
+        run: python scripts/scrape_shcp_pef.py
