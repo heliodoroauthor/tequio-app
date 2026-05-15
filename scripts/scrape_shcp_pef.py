@@ -63,13 +63,16 @@ def parse_csv(text):
     header_idx = 0
     raw_headers = [(c or "").strip() for c in all_rows[header_idx]]
     nh = [normkey(h) for h in raw_headers]
-    print(f"[shcp] sep={sep!r} headers: {raw_headers}")
+    print(f"[shcp] sep={sep!r} raw_headers: {raw_headers}")
+    print(f"[shcp] normalized_headers: {nh}")
     rows = []
     for row in all_rows[header_idx + 1:]:
         if not row or not any((c or "").strip() for c in row):
             continue
         rows.append(dict(zip(nh, [(c or "").strip() for c in row])))
     print(f"[shcp] data rows: {len(rows)}")
+    if rows:
+        print(f"[shcp] sample row 0: {rows[0]}")
     return rows
 
 
@@ -80,36 +83,50 @@ def to_num(s):
     except: return None
 
 
+def pick(rec, *keys):
+    """Get first non-empty value among possible normalized keys."""
+    for k in keys:
+        v = rec.get(k)
+        if v not in (None, ""):
+            return v
+    return None
+
+
 def map_row(rec, anio):
-    monto = to_num(rec.get("monto") or rec.get("montoaprobado") or rec.get("montotot") or rec.get("monto_aprobado"))
+    # SHCP PEF CSV headers (normalized via normkey, sin underscores/acentos):
+    # ciclo, idramo, descramo, idur, descur, gpofuncional, descgpofuncional,
+    # idfuncion, descfuncion, idsubfuncion, descsubfuncion, idai, descai,
+    # idmodalidad, idpp, descpp, idobjetogasto/idog, descog,
+    # idtipogasto/idtg, idfuentefinanciamiento/idff, identidadfederativa/idef,
+    # montoaprobado / monto
+    monto = to_num(pick(rec, "montoaprobado", "monto", "montototal", "montotot", "montoautorizado"))
     return {
         "ciclo": int(anio),
-        "ramo": rec.get("ramo"),
-        "desc_ramo": rec.get("descramo") or rec.get("descripcionramo"),
-        "unidad_responsable": rec.get("ur") or rec.get("unidadresponsable"),
-        "desc_ur": rec.get("descur") or rec.get("descripcionur"),
-        "finalidad": rec.get("finalidad"),
-        "funcion": rec.get("funcion"),
-        "desc_funcion": rec.get("descfuncion"),
-        "subfuncion": rec.get("subfuncion"),
-        "desc_subfuncion": rec.get("descsubfuncion"),
-        "actividad_institucional": rec.get("ai") or rec.get("actividadinstitucional"),
-        "desc_ai": rec.get("descai"),
-        "modalidad": rec.get("modalidad"),
-        "programa_presupuestario": rec.get("pp") or rec.get("programapresupuestario"),
-        "desc_pp": rec.get("descpp"),
-        "objeto_gasto": rec.get("og") or rec.get("objetogasto"),
-        "desc_og": rec.get("descog"),
-        "tipo_gasto": rec.get("tg") or rec.get("tipogasto"),
-        "fuente_financiamiento": rec.get("ff") or rec.get("fuentefinanciamiento"),
-        "entidad_federativa": rec.get("ef") or rec.get("entidadfederativa"),
+        "ramo": pick(rec, "idramo", "ramo"),
+        "desc_ramo": pick(rec, "descramo", "descripcionramo"),
+        "unidad_responsable": pick(rec, "idur", "ur", "unidadresponsable"),
+        "desc_ur": pick(rec, "descur", "descripcionur"),
+        "finalidad": pick(rec, "idfinalidad", "finalidad"),
+        "funcion": pick(rec, "idfuncion", "funcion"),
+        "desc_funcion": pick(rec, "descfuncion"),
+        "subfuncion": pick(rec, "idsubfuncion", "subfuncion"),
+        "desc_subfuncion": pick(rec, "descsubfuncion"),
+        "actividad_institucional": pick(rec, "idai", "ai", "actividadinstitucional"),
+        "desc_ai": pick(rec, "descai"),
+        "modalidad": pick(rec, "idmodalidad", "modalidad"),
+        "programa_presupuestario": pick(rec, "idpp", "pp", "programapresupuestario"),
+        "desc_pp": pick(rec, "descpp"),
+        "objeto_gasto": pick(rec, "idog", "idobjetogasto", "og", "objetogasto"),
+        "desc_og": pick(rec, "descog"),
+        "tipo_gasto": pick(rec, "idtg", "idtipogasto", "tg", "tipogasto"),
+        "fuente_financiamiento": pick(rec, "idff", "idfuentefinanciamiento", "ff", "fuentefinanciamiento"),
+        "entidad_federativa": pick(rec, "idef", "identidadfederativa", "ef", "entidadfederativa"),
         "monto": monto,
         "fecha_extraccion": datetime.now(timezone.utc).date().isoformat(),
     }
 
 
 def sb_insert(table, rows, batch_size=500):
-    """SHCP no requiere on_conflict porque truncamos por ciclo antes."""
     if not rows: return 0
     total = 0
     for i in range(0, len(rows), batch_size):
@@ -128,7 +145,6 @@ def sb_insert(table, rows, batch_size=500):
 
 
 def delete_ciclo(table, ciclo):
-    """Delete previous data for this ciclo before re-inserting."""
     url = f"{SB_URL}/rest/v1/{table}?ciclo=eq.{ciclo}"
     r = requests.delete(url, headers={
         "apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}",
