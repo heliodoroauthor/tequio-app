@@ -2372,9 +2372,25 @@
 
         <div class="lead-paso" id="lead-paso-1" style="padding:24px 0;display:block">
           <h2 style="font-size:22px;font-weight:700;font-family:var(--font-display);margin-bottom:6px">Cuéntame qué te pasó</h2>
-          <p style="color:var(--text2);font-size:14px;margin-bottom:20px">Usa tus palabras. No necesitas saber términos legales — yo te entiendo.</p>
-          <textarea id="lead-descripcion" placeholder="Por ejemplo: Mi patrón no me pagó el aguinaldo y cuando le reclamé me despidieron sin razón..." style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:16px;font-size:16px;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
-          <button onclick="leadPaso(2)" style="width:100%;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;color:#fff;padding:18px;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:24px">Continuar →</button>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Usa tus palabras. No necesitas saber términos legales — yo te entiendo.</p>
+
+          <!-- Disclaimer de privacidad antes del textarea -->
+          <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
+            <span style="font-size:20px;flex-shrink:0">🔒</span>
+            <div style="font-size:12px;color:var(--text2);line-height:1.55">
+              <strong style="color:var(--yellow2)">Tu privacidad importa.</strong> Tu texto se clasifica localmente en tu dispositivo y solo se envía a un despacho si tú decides contactarlo. <strong>No incluyas datos personales</strong> — nombres completos, direcciones, RFC, CURP, números de cuenta, ni teléfonos de terceros. Tequio limpia automáticamente lo que parezcan datos sensibles antes de almacenar.
+            </div>
+          </div>
+
+          <textarea id="lead-descripcion" oninput="leadValidar()" placeholder="Por ejemplo: Mi patrón no me pagó el aguinaldo y cuando le reclamé me despidieron sin razón..." style="width:100%;min-height:160px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:16px;font-size:16px;font-family:inherit;resize:vertical;line-height:1.5"></textarea>
+
+          <!-- Consentimiento explícito -->
+          <label style="display:flex;gap:10px;align-items:flex-start;margin-top:16px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer">
+            <input type="checkbox" id="lead-consent" onchange="leadValidar()" style="margin-top:2px;width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)">
+            <span style="font-size:12px;color:var(--text2);line-height:1.5">Acepto que mi descripción se clasifique localmente y, si decido contactar un despacho, una versión sanitizada (sin datos personales detectados) se almacenará para conectarme con el abogado. Puedo dejar de usar este servicio en cualquier momento.</span>
+          </label>
+
+          <button id="lead-btn-continuar" onclick="leadPaso(2)" disabled style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:18px;border-radius:16px;font-size:17px;font-weight:700;cursor:not-allowed;font-family:inherit;margin-top:20px;opacity:0.5;transition:all 0.2s">Continuar →</button>
         </div>
 
         <div class="lead-paso" id="lead-paso-2" style="padding:24px 0;display:none">
@@ -2407,6 +2423,18 @@
           <div id="lead-despachos-list" style="display:flex;flex-direction:column;gap:12px"></div>
           <div style="margin-top:24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:center;font-size:13px;color:var(--text2)">
             💡 Tequio nunca te cobra. Los despachos verificados pagan membresía mensual.
+          </div>
+
+          <!-- CTA para reclutar despachos (escalar de 2 → 10+) -->
+          <div style="margin-top:24px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(168,85,247,0.05));border:1px solid rgba(99,102,241,0.25);border-radius:14px;padding:20px;text-align:center">
+            <div style="font-size:32px;margin-bottom:8px">⚖️</div>
+            <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">¿Eres abogado o despacho?</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:14px">Únete al directorio verificado de Tequio. Recibe casos pre-clasificados, sin datos personales, directo a tu inbox. Cobras como siempre — Tequio sólo te conecta.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+              <a href="mailto:despachos@tequio.app?subject=Solicitud%20de%20alta%20-%20despacho%20verificado&body=Hola%20equipo%20Tequio%2C%0A%0AQuiero%20unirme%20como%20despacho%20verificado.%0A%0ANombre%20del%20despacho%3A%20%0AEspecialidades%20(laboral%2C%20civil%2C%20familiar%2C%20penal%2C%20fiscal%2C%20mercantil%2C%20etc.)%3A%20%0AEstados%20donde%20opero%3A%20%0AC%C3%A9dula%20profesional%20del%20titular%3A%20%0ATel%C3%A9fono%20del%20despacho%3A%20%0AWhatsApp%20para%20clientes%3A%20%0A%C2%BFOfreces%20primera%20consulta%20gratis%3F%3A%20%0A%0AGracias." style="background:var(--accent);color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700">📩 Solicitar alta por email</a>
+              <a href="https://wa.me/5215555555555?text=Hola%2C%20soy%20despacho%20y%20quiero%20unirme%20a%20Tequio" target="_blank" rel="noopener" style="background:#22c55e;color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700">💬 WhatsApp</a>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:12px">Verificamos cédula profesional y referencias antes de listar a un despacho.</div>
           </div>
         </div>
       </div>
@@ -2616,6 +2644,15 @@
       let __leadDatos = { descripcion:'', tipo:'', area:'' };
 
       function leadPaso(n) {
+        // Bloquear paso 2 si no hay consentimiento
+        if (n === 2) {
+          const consent = document.getElementById('lead-consent');
+          const desc = document.getElementById('lead-descripcion');
+          if (!consent?.checked || !desc?.value || desc.value.trim().length < 20) {
+            if (typeof mostrarToast === 'function') mostrarToast('Marca el consentimiento y escribe al menos 20 caracteres', 'warn');
+            return;
+          }
+        }
         document.querySelectorAll('.lead-paso').forEach(el => el.style.display='none');
         document.getElementById('lead-paso-' + n).style.display = 'block';
         for (let i=1;i<=3;i++) {
@@ -2625,6 +2662,55 @@
         if (n === 2) clasificarCaso();
         if (n === 3) cargarDespachos();
       }
+
+      // Validador en tiempo real: habilita "Continuar" sólo con consent + 20+ chars
+      function leadValidar() {
+        const consent = document.getElementById('lead-consent');
+        const desc = document.getElementById('lead-descripcion');
+        const btn = document.getElementById('lead-btn-continuar');
+        if (!btn) return;
+        const ok = consent?.checked && desc?.value && desc.value.trim().length >= 20;
+        btn.disabled = !ok;
+        if (ok) {
+          btn.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
+          btn.style.color = '#fff';
+          btn.style.borderColor = 'transparent';
+          btn.style.cursor = 'pointer';
+          btn.style.opacity = '1';
+        } else {
+          btn.style.background = 'var(--surface)';
+          btn.style.color = 'var(--text3)';
+          btn.style.borderColor = 'var(--border)';
+          btn.style.cursor = 'not-allowed';
+          btn.style.opacity = '0.5';
+        }
+      }
+
+      // Sanitizador local: elimina/redacta datos personales detectables antes de almacenar
+      function leadSanitizar(texto) {
+        if (!texto) return '';
+        let s = String(texto);
+        // CURP (18 chars alfanuméricos con patrón específico)
+        s = s.replace(/\b[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z\d]\d\b/gi, '[CURP-REDACTADO]');
+        // RFC persona física (13 chars) o moral (12 chars)
+        s = s.replace(/\b[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}\b/gi, '[RFC-REDACTADO]');
+        // Teléfono mexicano (10 dígitos seguidos, con o sin espacios/guiones)
+        s = s.replace(/\b(?:\+?52[\s-]?)?(?:\d{2,3}[\s-]?)?\d{3}[\s-]?\d{2}[\s-]?\d{2}\b/g, m => {
+          const digits = m.replace(/\D/g,'');
+          return digits.length >= 10 ? '[TELÉFONO-REDACTADO]' : m;
+        });
+        // Email
+        s = s.replace(/\b[\w.+-]+@[\w-]+\.[\w.-]+\b/g, '[EMAIL-REDACTADO]');
+        // Tarjeta de crédito (16 dígitos con separadores)
+        s = s.replace(/\b(?:\d[\s-]?){13,19}\b/g, m => {
+          const d = m.replace(/\D/g,'');
+          return (d.length >= 13 && d.length <= 19) ? '[TARJETA-REDACTADA]' : m;
+        });
+        // Cuentas CLABE (18 dígitos)
+        s = s.replace(/\b\d{18}\b/g, '[CLABE-REDACTADA]');
+        return s;
+      }
+      window.leadSanitizar = leadSanitizar;
 
       async function clasificarCaso() {
         const desc = document.getElementById('lead-descripcion').value.trim();
@@ -2687,10 +2773,19 @@
 
       async function registrarLead(despachoId, canal) {
         try {
+          // SANITIZAR antes de enviar: quita RFC, CURP, teléfonos, emails, tarjetas, CLABE
+          const descripcionSanitizada = leadSanitizar(__leadDatos.descripcion || '').slice(0, 1000);
           await fetch('/api/data?vista=crear_lead', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ despacho_id: despachoId, canal, descripcion: __leadDatos.descripcion.slice(0,1000), area_legal: __leadDatos.area, tipo_caso: __leadDatos.tipo })
+            body: JSON.stringify({
+              despacho_id: despachoId,
+              canal,
+              descripcion: descripcionSanitizada,
+              area_legal: __leadDatos.area,
+              tipo_caso: __leadDatos.tipo,
+              sanitizado: true
+            })
           });
         } catch(e) {}
       }
