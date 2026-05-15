@@ -1,0 +1,49 @@
+name: INEGI EFIPEM Finanzas Municipales
+
+# Corre 1 vez al año el 15 de junio (INEGI publica las definitivas en mayo-junio)
+on:
+  schedule:
+    - cron: '0 14 15 6 *'
+  workflow_dispatch:
+    inputs:
+      anios:
+        description: 'Anios a procesar (ej: 2022,2023)'
+        required: false
+        default: ''
+      url:
+        description: 'Override URL del ZIP'
+        required: false
+        default: ''
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      - name: Run INEGI EFIPEM scraper
+        id: scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          EFIPEM_ANIOS: ${{ github.event.inputs.anios }}
+          EFIPEM_URL: ${{ github.event.inputs.url }}
+        run: python scripts/scrape_inegi_efipem_municipios.py
+      - name: Log scraper run
+        if: always()
+        uses: ./.github/actions/log-scraper
+        with:
+          slug: inegi_efipem
+          status: ${{ job.status }}
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
