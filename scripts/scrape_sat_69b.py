@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SAT 69-B (Listas Negras de Contribuyentes)
+Tequio - Scraper SAT 69-B v2 (saltar preambulo legal)
 
-El SAT publica los RFCs de contribuyentes con operaciones presuntamente
-inexistentes (factureras / EFOS) en un CSV oficial actualizado mensualmente.
-
-Fuente: http://omawww.sat.gob.mx/cifras_sat/Documents/Listado_Completo_69-B.csv
+El CSV de SAT incluye texto legal en las primeras filas antes del header real.
+Buscamos la fila donde la primera celda sea 'RFC' o contenga 'RFC' como token.
 """
 import csv, io, json, os, sys
 from datetime import datetime, timezone
@@ -28,11 +26,12 @@ def fetch_csv():
     headers = {"User-Agent": UA, "Accept": "text/csv,application/octet-stream,*/*"}
     r = requests.get(CSV_URL, headers=headers, timeout=120)
     r.raise_for_status()
+    print(f"[sat69b] HTTP {r.status_code} bytes={len(r.content)}")
     for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
         try:
             text = r.content.decode(enc)
-            if "RFC" in text[:500].upper() or "rfc" in text[:500]:
-                print(f"[sat69b] decoded as {enc}, bytes={len(r.content)}")
+            if "RFC" in text.upper()[:200000]:
+                print(f"[sat69b] decoded as {enc}")
                 return text
         except UnicodeDecodeError:
             continue
@@ -40,23 +39,42 @@ def fetch_csv():
 
 
 def parse_csv(text):
-    sample = text[:2000]
+    sample = text[:5000]
     sep = "," if sample.count(",") > sample.count(";") else ";"
     print(f"[sat69b] separator={sep!r}")
     reader = csv.reader(io.StringIO(text), delimiter=sep)
-    headers = None
+    all_rows = list(reader)
+    print(f"[sat69b] total raw rows: {len(all_rows)}")
+
+    # Encontrar la fila de headers: primera fila donde algun campo sea exactamente "RFC"
+    header_idx = None
+    for i, row in enumerate(all_rows):
+        cells = [(c or "").strip() for c in row]
+        if any(c.upper() == "RFC" for c in cells):
+            header_idx = i
+            break
+    if header_idx is None:
+        # Fallback: buscar fila con "rfc" como substring
+        for i, row in enumerate(all_rows):
+            cells = [(c or "").strip().upper() for c in row]
+            if any("RFC" == c[:3] for c in cells):
+                header_idx = i
+                break
+    if header_idx is None:
+        raise RuntimeError("No se encontro fila de headers con RFC")
+
+    raw_headers = [(c or "").strip() for c in all_rows[header_idx]]
+    headers = [h.lower() for h in raw_headers]
+    print(f"[sat69b] header row idx={header_idx}, headers: {raw_headers}")
+
     rows = []
-    for row in reader:
-        if not row or not any(c.strip() for c in row):
+    for row in all_rows[header_idx + 1:]:
+        if not row or not any((c or "").strip() for c in row):
             continue
-        if headers is None:
-            headers = [h.strip().lower() for h in row]
-            print(f"[sat69b] headers: {headers}")
-            continue
-        if len(row) < 2:
-            continue
-        rows.append(dict(zip(headers, row)))
-    print(f"[sat69b] parsed rows: {len(rows)}")
+        rec = dict(zip(headers, [(c or "").strip() for c in row]))
+        if rec.get("rfc") or any(k == "rfc" for k in rec):
+            rows.append(rec)
+    print(f"[sat69b] data rows: {len(rows)}")
     return rows, headers
 
 
@@ -69,15 +87,16 @@ def map_row(rec):
                     v = (rec[hkey] or "").strip()
                     if v: return v
         return None
-    rfc = get("RFC", "rfc")
-    if not rfc: return None
+    rfc = get("rfc", "RFC")
+    if not rfc or len(rfc) < 11 or len(rfc) > 13:
+        return None
     return {
-        "rfc": rfc,
-        "nombre": get("Nombre del Contribuyente", "nombre", "razon_social", "razonsocial"),
-        "situacion": get("Situacion del Contribuyente", "situacion", "estatus"),
+        "rfc": rfc.upper(),
+        "nombre": get("nombre del contribuyente", "nombre", "razon_social", "razonsocial"),
+        "situacion": get("situacion del contribuyente", "situacion", "estatus"),
         "numero_publicacion": get("No. y fecha de oficio global de presuncion", "numero", "oficio"),
-        "fecha_publicacion_sat": get("Publicacion pagina SAT presuntos", "fecha_publicacion", "fecha"),
-        "fecha_dof": get("Publicacion DOF presuntos", "fecha_dof", "dof"),
+        "fecha_publicacion_sat": get("publicacion pagina sat presuntos", "fecha_publicacion", "fecha"),
+        "fecha_dof": get("publicacion dof presuntos", "fecha_dof", "dof"),
         "fecha_extraccion": datetime.now(timezone.utc).date().isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -95,9 +114,9 @@ def sb_upsert(table, rows, on_conflict, batch_size=500):
             "Prefer": "resolution=merge-duplicates,return=minimal",
         }, data=json.dumps(batch), timeout=120)
         if not r.ok:
-            raise RuntimeError(f"upsert batch status={r.status_code}: {r.text[:300]}")
+            raise RuntimeError(f"upsert batch {i//batch_size} status={r.status_code}: {r.text[:300]}")
         total += len(batch)
-        if i % 5000 == 0 and i > 0:
+        if total % 2000 == 0:
             print(f"[sat69b] upserted {total}/{len(rows)}")
     return total
 
@@ -125,12 +144,14 @@ def main():
     started_at = datetime.now(timezone.utc).isoformat()
     try:
         text = fetch_csv()
-        rows, _ = parse_csv(text)
+        rows, headers = parse_csv(text)
         mapped = [m for m in (map_row(r) for r in rows) if m]
-        print(f"[sat69b] mapped: {len(mapped)} de {len(rows)} con RFC")
+        print(f"[sat69b] mapped: {len(mapped)} de {len(rows)} con RFC valido")
+        if mapped:
+            print(f"[sat69b] sample row: {mapped[0]}")
         ins = sb_upsert("sat_69b", mapped, "rfc,situacion,fecha_publicacion_sat")
         print(f"[sat69b] upserted: {ins}")
-        log_scraper("ok", {"inserted": ins}, None, started_at)
+        log_scraper("ok", {"inserted": ins, "rows_total": len(rows), "headers": headers}, None, started_at)
         print(f"[sat69b] DONE status=ok total={ins}")
     except Exception as exc:
         import traceback; traceback.print_exc()
