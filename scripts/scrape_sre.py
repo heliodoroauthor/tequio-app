@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v4
-Cambio: UA Mozilla para evitar bloqueo de SRE.
+Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v5
+Cambio v5: removed 'br' from Accept-Encoding (requests no decodifica brotli).
 """
 import json, os, re, sys, unicodedata
 from datetime import datetime, timezone
@@ -51,7 +51,7 @@ def fetch_html(url, intentos=3):
         "User-Agent": USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Encoding": "gzip, deflate",
         "Connection": "keep-alive",
     }
     for i in range(intentos):
