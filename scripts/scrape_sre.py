@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v2
+Tequio - Scraper SRE (Embajadas + Consulados de Mexico en el Exterior) v3
+Sin decompose, search global. Filtra por URL pattern.
 """
 import json, os, re, sys, unicodedata
 from datetime import datetime, timezone
@@ -76,18 +77,18 @@ def text_between(node_a, node_b):
 
 def parse_directorio(html, fuente_url, modo):
     soup = BeautifulSoup(html, "lxml")
-    main = soup.select_one("main") or soup.select_one("#content") or soup
-    for tag in main.select("nav, header, footer, .sidebar, script, style"):
-        tag.decompose()
-
-    anchors = main.find_all("a")
+    # Sin decompose - filtramos por URL pattern al final. Iteramos TODOS los
+    # anchors del documento (tablas para embajadas, ul/li para consulados).
+    anchors = soup.find_all("a")
     items = []
     prev_anchor = None
+    anchors_directorio_count = 0
 
     for i, a in enumerate(anchors):
         label = (a.get_text() or "").strip().lower()
         href = a.get("href") or ""
         if label.startswith("directorio"):
+            anchors_directorio_count += 1
             raw = text_between(prev_anchor, a) if prev_anchor is not None else ""
             if not raw and a.parent is not None:
                 raw = a.parent.get_text(" ", strip=True)
@@ -129,7 +130,7 @@ def parse_directorio(html, fuente_url, modo):
             continue
         seen.add(slug)
         deduped.append(it)
-    print(f"[sre] {modo}: {len(deduped)} entradas de {len(items)} candidatos")
+    print(f"[sre] {modo}: anchors={len(anchors)} dir_anchors={anchors_directorio_count} items={len(items)} deduped={len(deduped)}")
     return deduped
 
 
