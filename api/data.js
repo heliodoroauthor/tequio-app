@@ -777,6 +777,11 @@ export default async function handler(req, res) {
       });
     }
 
+    if (vista === 'scrapers_health') {
+      const rows = await sb('v_scrapers_health?order=last_finished_at.desc.nullslast&select=scraper_slug,last_status,last_rows_inserted,last_rows_updated,fuente_url,last_error,last_started_at,last_finished_at,workflow_run_id,seconds_since_last_run,failures_30d,runs_30d');
+      return res.status(200).json({ scrapers: rows });
+    }
+
     if (vista === 'ley_detalle') {
       const id = req.query.id;
       if (!id) return res.status(400).json({ error: 'falta id' });
@@ -827,6 +832,39 @@ export default async function handler(req, res) {
       const desde = new Date(Date.now() - dias * 86400000).toISOString().slice(0, 10);
       const rows = await sb(`econ_banxico?serie_id=eq.${serieId}&fecha=gte.${desde}&order=fecha.asc&select=fecha,valor,nombre,unidad`);
       return res.status(200).json({ serie_id: serieId, puntos: rows });
+    }
+
+    if (vista === 'econ_banxico') {
+      // Histórico de Banxico: dólar, tasa, inflación, etc.
+      // Filtro opcional: ?series=SF43718,SP30577&dias=365
+      const dias = Math.min(parseInt(req.query.dias || '365', 10) || 365, 3650);
+      const series = (req.query.series || '').trim();
+      const desde = new Date(Date.now() - dias * 86400000).toISOString().slice(0,10);
+      let filtro = `fecha=gte.${desde}`;
+      if (series) {
+        const ids = series.split(',').map(s => s.trim()).filter(Boolean).map(s => `"${s}"`).join(',');
+        if (ids) filtro += `&serie_id=in.(${ids})`;
+      }
+      const rows = await sb(`econ_banxico?${filtro}&order=fecha.asc&select=serie_id,serie_slug,nombre,unidad,frecuencia,fecha,valor,fuente,fuente_url&limit=20000`);
+      // Agrupar por serie_id para que el cliente solo itere
+      const series_data = {};
+      for (const r of rows) {
+        const k = r.serie_id;
+        if (!series_data[k]) {
+          series_data[k] = {
+            serie_id: r.serie_id,
+            serie_slug: r.serie_slug,
+            nombre: r.nombre,
+            unidad: r.unidad,
+            frecuencia: r.frecuencia,
+            fuente: r.fuente,
+            fuente_url: r.fuente_url,
+            puntos: []
+          };
+        }
+        series_data[k].puntos.push({ fecha: r.fecha, valor: r.valor });
+      }
+      return res.status(200).json({ desde, dias, series: Object.values(series_data) });
     }
 
     if (vista === 'inegi_estado') {
@@ -976,4 +1014,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-}
+                                 }
