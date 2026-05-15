@@ -108,6 +108,11 @@ export default async function handler(req, res) {
       return res.status(200).json({ alertas: rows });
     }
 
+    if (vista === 'indicadores_fiscales') {
+      const rows = await sb('indicadores_fiscales?order=orden.asc&select=slug,label,valor_display,valor_numerico,cambio_pct,cambio_direccion,cambio_label,color_var,fuente,fuente_url,periodo,fecha_dato,fecha_publicacion');
+      return res.status(200).json({ indicadores: rows });
+    }
+
     if (vista === 'sequia') {
       const rows = await sb('monitor_sequia?order=pct_sequia_extrema.desc.nullslast,pct_sequia_severa.desc.nullslast&select=fecha_corte,estado,nivel_sequia,pct_anomalo_seco,pct_sequia_moderada,pct_sequia_severa,pct_sequia_extrema,pct_sequia_excepcional');
       return res.status(200).json({ estados: rows });
