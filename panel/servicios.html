@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Servicios Publicos | Tequio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f1a;
+  --panel:#121829;
+  --panel-2:#1a2238;
+  --border:#26304a;
+  --text:#e6e9f2;
+  --muted:#8a93ad;
+  --gold:#fbbf24;
+  --gold-2:#f59e0b;
+  --red:#ef4444;
+  --red-2:#b91c1c;
+  --green:#22c55e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px}
+header .back{font-size:14px;color:var(--muted)}
+header h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+header p.sub{margin:0;color:var(--muted);font-size:14px}
+.embedded header .back{display:none}
+
+/* Emergency 911 hero */
+.hero911{
+  margin:16px 0 24px;
+  padding:22px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#7f1d1d 0%, #1a0606 100%);
+  border:1px solid #b91c1c;
+  box-shadow:0 8px 32px rgba(239,68,68,.25);
+  text-align:center;
+}
+.hero911 .label{color:#fecaca;font-size:12px;letter-spacing:.16em;font-weight:700;text-transform:uppercase}
+.hero911 h2{margin:8px 0 4px;font-size:32px;font-weight:800;color:#fff}
+.hero911 .num{font-size:56px;font-weight:800;color:#fbbf24;letter-spacing:-.02em;line-height:1}
+.hero911 .desc{margin-top:8px;color:#fecaca;font-size:14px}
+.hero911 .call{display:inline-block;margin-top:14px;background:#fbbf24;color:#1a0606;padding:12px 28px;border-radius:999px;font-weight:800;font-size:16px}
+.hero911 .call:hover{background:#fcd34d;text-decoration:none}
+
+/* Section titles */
+.section-title{margin:32px 0 12px;font-size:13px;letter-spacing:.18em;color:var(--muted);font-weight:700;text-transform:uppercase}
+
+/* State grid */
+.estados-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+@media (min-width:720px){.estados-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}}
+.estado-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px 6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+  transition:all .15s ease;
+  color:var(--text);
+}
+.estado-card:hover{background:var(--panel-2);border-color:var(--gold);transform:translateY(-2px)}
+.estado-card .emj{font-size:24px;line-height:1}
+.estado-card .abbr{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.estado-card .nombre{font-size:10px;color:var(--muted);text-align:center;line-height:1.2}
+
+/* State view */
+.state-header{display:flex;align-items:center;gap:14px;margin:8px 0 16px}
+.state-header .emj-big{font-size:48px;line-height:1}
+.state-header h2{margin:0;font-size:28px;font-weight:800}
+.back-btn{display:inline-block;margin-top:16px;padding:10px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-weight:600;font-size:14px;cursor:pointer}
+.back-btn:hover{background:var(--panel-2);text-decoration:none}
+
+/* Service cards */
+.servicios-list{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:720px){.servicios-list{grid-template-columns:1fr 1fr}}
+.serv-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.serv-card .cat{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.serv-card h3{margin:0;font-size:16px;font-weight:700;line-height:1.3}
+.serv-card .desc{margin:2px 0 4px;color:var(--muted);font-size:13px;line-height:1.4}
+.serv-card .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.serv-card .tel{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#0f2417;color:#86efac;border:1px solid #14532d;
+  padding:7px 12px;border-radius:999px;font-weight:700;font-size:13px;
+}
+.serv-card .tel:hover{background:#14532d;color:#bbf7d0;text-decoration:none}
+.serv-card .web,.serv-card .tw{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--panel-2);color:var(--gold);border:1px solid var(--border);
+  padding:7px 12px;border-radius:999px;font-weight:600;font-size:13px;
+}
+.serv-card .web:hover,.serv-card .tw:hover{background:#1f2a44;text-decoration:none}
+.serv-card.no-phone{opacity:.7}
+.serv-card.no-phone .tel{background:#2a1a0a;color:#fbbf24;border-color:#7c4a0e}
+
+/* Federal section */
+.fed-group{margin:24px 0}
+.fed-group h3{margin:0 0 10px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.fed-group .icon{font-size:22px}
+
+/* Proximamente */
+.proximo{
+  background:var(--panel);
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:14px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.proximo strong{color:var(--text);font-weight:700}
+
+/* Disclaimer */
+.disclaimer{
+  margin:32px 0 16px;
+  padding:14px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.5;
+}
+.disclaimer strong{color:var(--gold)}
+
+.loading{padding:24px;text-align:center;color:var(--muted);font-size:14px}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:14px;background:var(--panel);border:1px solid var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+<script>(function(){if(new URLSearchParams(location.search).get('embedded')==='1'){document.documentElement.classList.add('embedded');var s=document.createElement('style');s.textContent='.embedded a[href="/"],.embedded a[href="../"],.embedded .back-link,.embedded header>a:first-child{display:none!important;}';document.head.appendChild(s);}})();</script>
+
+<div class="wrap">
+  <header>
+    <a class="back" href="/">&larr; Tequio</a>
+    <h1>Servicios Publicos</h1>
+    <p class="sub">Telefonos verificados de servicios federales y estatales en Mexico</p>
+  </header>
+
+  <section class="hero911">
+    <div class="label">Emergencias en todo Mexico</div>
+    <h2>LLAMA AL</h2>
+    <div class="num">911</div>
+    <div class="desc">Policia &middot; Bomberos &middot; Ambulancias &middot; 24 horas</div>
+    <a class="call" href="tel:911">Llamar 911</a>
+  </section>
+
+  <div id="app"></div>
+
+  <div class="disclaimer">
+    <strong>Telefonos verificados al 16 de mayo 2026.</strong> Si encuentras un dato incorrecto, reportalo en <a href="mailto:hola@tequio.app">hola@tequio.app</a>. Cero datos inventados &mdash; las fuentes oficiales son las paginas .gob.mx de cada institucion.
+  </div>
+</div>
+
+<script>
+const ESTADOS_EMOJI = {
+  "01":{nombre:"Aguascalientes",abbr:"AGS",emoji:"&#127801;"},
+  "02":{nombre:"Baja California",abbr:"BC",emoji:"&#128044;"},
+  "03":{nombre:"Baja California Sur",abbr:"BCS",emoji:"&#128034;"},
+  "04":{nombre:"Campeche",abbr:"CAM",emoji:"&#128010;"},
+  "05":{nombre:"Coahuila",abbr:"COAH",emoji:"&#129419;"},
+  "06":{nombre:"Colima",abbr:"COL",emoji:"&#127755;"},
+  "07":{nombre:"Chiapas",abbr:"CHIS",emoji:"&#129436;"},
+  "08":{nombre:"Chihuahua",abbr:"CHIH",emoji:"&#127964;&#65039;"},
+  "09":{nombre:"Ciudad de Mexico",abbr:"CDMX",emoji:"&#127961;&#65039;"},
+  "10":{nombre:"Durango",abbr:"DGO",emoji:"&#129410;"},
+  "11":{nombre:"Guanajuato",abbr:"GTO",emoji:"&#9962;"},
+  "12":{nombre:"Guerrero",abbr:"GRO",emoji:"&#127802;"},
+  "13":{nombre:"Hidalgo",abbr:"HGO",emoji:"&#127984;"},
+  "14":{nombre:"Jalisco",abbr:"JAL",emoji:"&#129749;"},
+  "15":{nombre:"Estado de Mexico",abbr:"EDOMEX",emoji:"&#127963;&#65039;"},
+  "16":{nombre:"Michoacan",abbr:"MICH",emoji:"&#129419;"},
+  "17":{nombre:"Morelos",abbr:"MOR",emoji:"&#127800;"},
+  "18":{nombre:"Nayarit",abbr:"NAY",emoji:"&#128011;"},
+  "19":{nombre:"Nuevo Leon",abbr:"NL",emoji:"&#9968;&#65039;"},
+  "20":{nombre:"Oaxaca",abbr:"OAX",emoji:"&#129718;"},
+  "21":{nombre:"Puebla",abbr:"PUE",emoji:"&#127755;"},
+  "22":{nombre:"Queretaro",abbr:"QRO",emoji:"&#127799;"},
+  "23":{nombre:"Quintana Roo",abbr:"QROO",emoji:"&#129897;"},
+  "24":{nombre:"San Luis Potosi",abbr:"SLP",emoji:"&#127797;"},
+  "25":{nombre:"Sinaloa",abbr:"SIN",emoji:"&#129438;"},
+  "26":{nombre:"Sonora",abbr:"SON",emoji:"&#127774;"},
+  "27":{nombre:"Tabasco",abbr:"TAB",emoji:"&#127796;"},
+  "28":{nombre:"Tamaulipas",abbr:"TAMS",emoji:"&#127806;"},
+  "29":{nombre:"Tlaxcala",abbr:"TLAX",emoji:"&#127805;"},
+  "30":{nombre:"Veracruz",abbr:"VER",emoji:"&#127754;"},
+  "31":{nombre:"Yucatan",abbr:"YUC",emoji:"&#129897;"},
+  "32":{nombre:"Zacatecas",abbr:"ZAC",emoji:"&#9935;&#65039;"}
+};
+
+const CAT_META = {
+  emergencia:        {icono:'&#128680;', titulo:'Emergencia'},
+  salud:             {icono:'&#127973;', titulo:'Salud'},
+  finanzas:          {icono:'&#128176;', titulo:'Finanzas'},
+  derechos_humanos:  {icono:'&#9878;&#65039;', titulo:'Derechos Humanos'},
+  consumidor:        {icono:'&#9878;&#65039;', titulo:'Consumidor'},
+  laboral:           {icono:'&#128188;', titulo:'Laboral'},
+  mujer:             {icono:'&#128105;', titulo:'Linea Mujer'},
+  identidad:         {icono:'&#128100;', titulo:'Identidad'},
+  energia:           {icono:'&#9889;', titulo:'Energia'},
+  agua:              {icono:'&#128166;', titulo:'Agua'},
+  telefono:          {icono:'&#128241;', titulo:'Telefono'},
+  dif:               {icono:'&#128105;&#8205;&#128102;', titulo:'DIF'},
+  proteccion_civil:  {icono:'&#9888;&#65039;', titulo:'Proteccion Civil'},
+  transparencia:     {icono:'&#128194;', titulo:'Transparencia'},
+  fiscalia:          {icono:'&#9878;&#65039;', titulo:'Fiscalia'},
+};
+
+const CAT_ORDER = ['emergencia','salud','finanzas','derechos_humanos','consumidor','laboral','mujer','identidad','energia','agua','telefono','dif','proteccion_civil','transparencia','fiscalia'];
+
+function preserveEmbedded(qs){
+  const params=new URLSearchParams(qs||'');
+  if(new URLSearchParams(location.search).get('embedded')==='1') params.set('embedded','1');
+  return '?'+params.toString();
+}
+
+function escapeHtml(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+
+function servCard(s, opts){
+  opts=opts||{};
+  const tel = s.telefono ? `<a class="tel" href="tel:${encodeURIComponent(s.telefono.replace(/\s+/g,''))}">&#128222; ${escapeHtml(s.telefono)}</a>` : `<span class="tel">Telefono no disponible</span>`;
+  const web = s.sitio_web ? `<a class="web" href="${escapeHtml(s.sitio_web)}" target="_blank" rel="noopener">&#127760; Sitio oficial</a>` : '';
+  const tw  = s.twitter ? `<a class="tw" href="https://x.com/${encodeURIComponent(s.twitter.replace(/^@/,''))}" target="_blank" rel="noopener">&#119987; @${escapeHtml(s.twitter.replace(/^@/,''))}</a>` : '';
+  const cat = CAT_META[s.categoria] || {icono:'',titulo:s.categoria||''};
+  const klass = s.telefono ? 'serv-card' : 'serv-card no-phone';
+  return `<div class="${klass}">
+    <div class="cat">${cat.icono} ${escapeHtml(cat.titulo)}</div>
+    <h3>${escapeHtml(s.nombre)}</h3>
+    ${s.descripcion?`<div class="desc">${escapeHtml(s.descripcion)}</div>`:''}
+    <div class="row">${tel}${web}${tw}</div>
+  </div>`;
+}
+
+function renderFederalesAgrupados(federales){
+  const groups = {};
+  federales.forEach(s=>{(groups[s.categoria]=groups[s.categoria]||[]).push(s);});
+  const cats = Object.keys(groups).sort((a,b)=>{
+    const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
+    return (ia<0?999:ia)-(ib<0?999:ib);
+  });
+  return cats.map(c=>{
+    const meta=CAT_META[c]||{icono:'',titulo:c};
+    return `<div class="fed-group">
+      <h3><span class="icon">${meta.icono}</span> ${escapeHtml(meta.titulo)}</h3>
+      <div class="servicios-list">${groups[c].map(s=>servCard(s)).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLanding(federales){
+  const app=document.getElementById('app');
+  const grid = Object.keys(ESTADOS_EMOJI).map(c=>{
+    const e=ESTADOS_EMOJI[c];
+    return `<a class="estado-card" href="${preserveEmbedded('clave='+c)}">
+      <span class="emj">${e.emoji}</span>
+      <span class="abbr">${escapeHtml(e.abbr)}</span>
+      <span class="nombre">${escapeHtml(e.nombre)}</span>
+    </a>`;
+  }).join('');
+  app.innerHTML = `
+    <div class="section-title">Selecciona tu estado &mdash; Fiscalia General</div>
+    <div class="estados-grid">${grid}</div>
+    <div class="section-title">Servicios federales &mdash; aplican en todo Mexico</div>
+    ${renderFederalesAgrupados(federales)}
+  `;
+}
+
+function renderEstado(clave, federales, estatales){
+  const e = ESTADOS_EMOJI[clave]||{nombre:clave,emoji:'',abbr:clave};
+  const app=document.getElementById('app');
+  const lista = estatales.length
+    ? `<div class="servicios-list">${estatales.map(s=>servCard(s)).join('')}</div>`
+    : `<div class="empty">No hay servicios estatales registrados aun para este estado.</div>`;
+  app.innerHTML = `
+    <div class="state-header">
+      <span class="emj-big">${e.emoji}</span>
+      <h2>${escapeHtml(e.nombre)}</h2>
+    </div>
+    <div class="section-title">Servicios estatales</div>
+    ${lista}
+    <div class="section-title">Proximamente</div>
+    <div class="proximo">
+      &#128295; <strong>Estamos sumando:</strong> Comision Estatal de Derechos Humanos, DIF estatal, Linea Mujer estatal, Proteccion Civil estatal y Secretaria de Salud estatal de ${escapeHtml(e.nombre)}.
+    </div>
+    <a class="back-btn" href="${preserveEmbedded('')}">&larr; Volver a 32 estados</a>
+    <div class="section-title">Servicios federales &mdash; aplican en todo Mexico</div>
+    ${renderFederalesAgrupados(federales)}
+  `;
+}
+
+async function init(){
+  const app=document.getElementById('app');
+  app.innerHTML='<div class="loading">Cargando servicios...</div>';
+  const params=new URLSearchParams(location.search);
+  const clave=params.get('clave');
+  const url='/api/data?vista=servicios'+(clave?('&clave='+encodeURIComponent(clave)):'');
+  try{
+    const r=await fetch(url);
+    const j=await r.json();
+    const federales=Array.isArray(j.federales)?j.federales:[];
+    const estatales=Array.isArray(j.estatales)?j.estatales:[];
+    if(clave && ESTADOS_EMOJI[clave]){
+      renderEstado(clave, federales, estatales);
+    } else {
+      renderLanding(federales);
+    }
+  }catch(err){
+    app.innerHTML='<div class="empty">No fue posible cargar los servicios. Intenta de nuevo.</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
