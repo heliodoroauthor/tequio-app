@@ -99,8 +99,11 @@ const fmtMonto = (m) => {
 };
 const fmtFecha = (s) => {
   if (!s) return '—';
-  try { return new Date(s).toLocaleDateString('es-MX',{year:'numeric',month:'short',day:'numeric'}); }
-  catch { return s; }
+  if (/^\d+ de [a-záéíóú]+ de \d{4}/i.test(s)) return s;
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    try { return new Date(s).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); } catch(_) {}
+  }
+  return s;
 };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
