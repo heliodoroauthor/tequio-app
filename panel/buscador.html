@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0f1a">
+<title>Encuentra tu municipio · Tequio</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  :root {
+    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
+    --text:#e8eef9; --muted:#8a98b3; --hint:#6b7a96;
+    --accent:#a78bfa; --info:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 16px}
+  h1{font-size:28px;font-weight:800;margin:0 0 6px;letter-spacing:-0.02em}
+  .tag{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .tag strong{color:var(--text)}
+
+  .search-box{position:relative;margin-bottom:14px}
+  .search-box input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:16px;outline:none;-webkit-appearance:none}
+  .search-box input:focus{border-color:var(--info)}
+  .search-box .icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+
+  .filter{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .filter button{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .filter button:hover{background:#1a2236}
+  .filter button.active{background:var(--info);border-color:var(--info)}
+
+  .results{display:grid;gap:8px}
+  .result{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;text-decoration:none;color:var(--text);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;transition:all .15s}
+  .result:hover{border-color:var(--info);background:#1a2236}
+  .result .nom{font-size:16px;font-weight:700;line-height:1.2}
+  .result .est{color:var(--muted);font-size:13px;margin-top:2px}
+  .result .pob{text-align:right;font-size:14px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+  .result .pob span{color:var(--muted);font-size:11px;display:block;font-weight:400;text-transform:uppercase;letter-spacing:0.05em}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .loading{text-align:center;padding:20px;color:var(--muted)}
+
+  /* Top destacados */
+  .destacados{margin-bottom:20px}
+  .destacados h3{font-size:12px;color:var(--hint);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px}
+
+  footer{text-align:center;color:var(--hint);font-size:11px;padding:20px;margin-top:20px}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tu municipio en datos</h1>
+  <div class="tag"><strong>2,478</strong> municipios de México · INEGI · INAFED · SESNSP · SHCP</div>
+
+  <div class="search-box">
+    <input id="q" type="search" placeholder="Buscar municipio (ej: Tijuana, Iztapalapa...)" autocomplete="off" autocapitalize="off">
+    <span class="icon">🔍</span>
+  </div>
+
+  <div class="filter" id="filtroEstados">
+    <button data-estado="" class="active">Todos</button>
+  </div>
+
+  <div class="destacados" id="destacados">
+    <h3>Más poblados</h3>
+    <div class="results" id="results"><div class="loading">Cargando…</div></div>
+  </div>
+
+  <footer>Datos: INEGI Censo 2020, INAFED, SESNSP, SHCP · <a href="https://tequio.app">Tequio.app</a></footer>
+</div>
+
+<script>
+const ESTADOS = [
+  ['ciudad-de-mexico','CDMX'],['estado-de-mexico','Edomex'],['jalisco','Jalisco'],
+  ['nuevo-leon','NL'],['puebla','Puebla'],['guanajuato','Guanajuato'],
+  ['veracruz','Veracruz'],['chiapas','Chiapas'],['oaxaca','Oaxaca'],
+  ['michoacan','Michoacán'],['guerrero','Guerrero'],['chihuahua','Chihuahua'],
+  ['baja-california','BC'],['sonora','Sonora'],['tamaulipas','Tamaulipas'],
+  ['sinaloa','Sinaloa'],['coahuila','Coahuila'],['yucatan','Yucatán'],
+  ['queretaro','Querétaro'],['hidalgo','Hidalgo'],['morelos','Morelos'],
+  ['durango','Durango'],['tabasco','Tabasco'],['san-luis-potosi','SLP'],
+  ['quintana-roo','QRoo'],['zacatecas','Zacatecas'],['aguascalientes','Ags'],
+  ['nayarit','Nayarit'],['tlaxcala','Tlaxcala'],['campeche','Campeche'],
+  ['colima','Colima'],['baja-california-sur','BCS'],
+];
+
+const filtroEl = document.getElementById('filtroEstados');
+for (const [slug, label] of ESTADOS) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.dataset.estado = slug;
+  btn.onclick = () => setEstado(slug);
+  filtroEl.appendChild(btn);
+}
+
+let currentEstado = '';
+let currentQuery = '';
+let debounceTimer = null;
+
+const fmtNum = (n) => n == null ? '—' : new Intl.NumberFormat('es-MX').format(n);
+
+function setEstado(slug) {
+  currentEstado = slug;
+  filtroEl.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.estado === slug));
+  document.getElementById('destacados').querySelector('h3').textContent = slug ? 'Municipios del estado' : 'Más poblados';
+  search();
+}
+
+function search() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(doSearch, 250);
+}
+
+async function doSearch() {
+  let url = '/api/data?vista=municipios&limit=30';
+  if (currentEstado) url += '&estado=' + encodeURIComponent(currentEstado);
+  if (currentQuery) url += '&q=' + encodeURIComponent(currentQuery);
+  const el = document.getElementById('results');
+  el.innerHTML = '<div class="loading">Buscando…</div>';
+  try {
+    const r = await fetch(url);
+    const j = await r.json();
+    const items = j.municipios || [];
+    if (!items.length) {
+      el.innerHTML = '<div class="empty">No se encontró nada.</div>';
+      return;
+    }
+    el.innerHTML = items.map(m => `
+      <a class="result" href="/panel/municipio.html?clave_inegi=${m.clave_inegi}">
+        <div>
+          <div class="nom">${m.nombre}</div>
+          <div class="est">${m.nombre_estado || ''}</div>
+        </div>
+        <div class="pob">${fmtNum(m.poblacion_total)}<span>habitantes</span></div>
+      </a>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = '<div class="empty" style="color:#ef4444">Error: ' + e.message + '</div>';
+  }
+}
+
+document.getElementById('q').addEventListener('input', (e) => {
+  currentQuery = e.target.value.trim();
+  search();
+});
+
+// Initial load
+search();
+</script>
+</body>
+</html>
