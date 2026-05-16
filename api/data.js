@@ -1,5 +1,7 @@
 import nodeCrypto from 'node:crypto';
 
+export const config = { api: { bodyParser: { sizeLimit: '5mb' } } };
+
 // /api/data.js — endpoint Vercel para exponer Supabase al frontend
 //
 // Vistas soportadas:
@@ -1499,6 +1501,143 @@ export default async function handler(req, res) {
         total_federales: federales.length,
         total_estatales: estatales.length
       });
+    }
+
+    // ── Testigo Civico — listar reportes ──
+    if (vista === 'testigo_listar') {
+      const categoria = (req.query.categoria || '').trim();
+      const estado = (req.query.estado || '').trim();
+      const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      let path = `testigo_reportes?estatus=eq.publicado&select=*&order=created_at.desc&limit=${limit}`;
+      if (categoria) path += `&categoria=eq.${encodeURIComponent(categoria)}`;
+      if (estado) path += `&clave_entidad=eq.${encodeURIComponent(estado.padStart(2, '0'))}`;
+      const items = await sb(path);
+      return res.status(200).json({ items, total: items.length });
+    }
+
+    // ── Testigo Civico — crear reporte (rate limit 3/24h) ──
+    if (vista === 'testigo_crear') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { titulo, descripcion, categoria, foto_url, foto_thumb_url, lat, lng, nombre_estado, clave_entidad, nombre_municipio, device_hash, honeypot, tiempo_en_pagina_ms } = body;
+
+      if (honeypot) return res.status(400).json({ error: 'bot' });
+      if (typeof tiempo_en_pagina_ms === 'number' && tiempo_en_pagina_ms < 30000) {
+        return res.status(400).json({ error: 'Espera al menos 30 segundos' });
+      }
+
+      if (!titulo || titulo.length < 5 || titulo.length > 200) return res.status(400).json({ error: 'titulo 5-200 chars' });
+      if (!descripcion || descripcion.length < 10 || descripcion.length > 5000) return res.status(400).json({ error: 'descripcion 10-5000 chars' });
+      const validCats = ['corrupcion','infraestructura','seguridad','salud','ambiental','servicios','otro'];
+      if (!validCats.includes(categoria)) return res.status(400).json({ error: 'categoria invalida' });
+      if (!device_hash || device_hash.length < 10) return res.status(400).json({ error: 'device_hash requerido' });
+
+      const dia = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const recientes = await sb(`testigo_reportes?device_hash=eq.${encodeURIComponent(device_hash)}&created_at=gte.${encodeURIComponent(dia)}&select=id`);
+      if (recientes.length >= 3) {
+        return res.status(429).json({ error: 'Limite alcanzado: maximo 3 reportes cada 24 horas' });
+      }
+
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+
+      const payload = {
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim(),
+        categoria,
+        foto_url: foto_url || null,
+        foto_thumb_url: foto_thumb_url || null,
+        lat: typeof lat === 'number' ? Math.round(lat * 10000) / 10000 : null,
+        lng: typeof lng === 'number' ? Math.round(lng * 10000) / 10000 : null,
+        nombre_estado: nombre_estado || null,
+        clave_entidad: clave_entidad || null,
+        nombre_municipio: nombre_municipio || null,
+        device_hash,
+        ip_hash
+      };
+
+      const ins = await fetch(`${SUPABASE_URL}/rest/v1/testigo_reportes`, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY || ANON_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!ins.ok) {
+        const errText = await ins.text();
+        return res.status(500).json({ error: 'insert failed', detail: errText.slice(0, 200) });
+      }
+      const data = await ins.json();
+      return res.status(201).json({ ok: true, reporte: Array.isArray(data) ? data[0] : data });
+    }
+
+    // ── Testigo Civico — flag de reporte abusivo ──
+    if (vista === 'testigo_flag') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { reporte_id, device_hash } = body;
+      if (!reporte_id || !device_hash) return res.status(400).json({ error: 'reporte_id y device_hash requeridos' });
+
+      const upd = await fetch(`${SUPABASE_URL}/rest/v1/testigo_reportes?id=eq.${encodeURIComponent(reporte_id)}`, {
+        method: 'GET',
+        headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+      });
+      const rows = await upd.json();
+      if (!rows.length) return res.status(404).json({ error: 'no encontrado' });
+
+      const nuevoCount = (rows[0].reportes_count || 0) + 1;
+      const nuevoEstatus = nuevoCount >= 3 ? 'oculto' : 'publicado';
+
+      const patch = await fetch(`${SUPABASE_URL}/rest/v1/testigo_reportes?id=eq.${encodeURIComponent(reporte_id)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SERVICE_KEY || ANON_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ reportes_count: nuevoCount, estatus: nuevoEstatus })
+      });
+
+      if (!patch.ok) return res.status(500).json({ error: 'update failed' });
+      return res.status(200).json({ ok: true, oculto: nuevoEstatus === 'oculto' });
+    }
+
+    // ── Testigo Civico — subir foto (proxy a Supabase Storage) ──
+    if (vista === 'testigo_foto') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { foto_base64, device_hash, ext } = body;
+      if (!foto_base64 || !device_hash) return res.status(400).json({ error: 'foto_base64 y device_hash requeridos' });
+      const validExt = ['jpg','jpeg','png','webp'];
+      const safeExt = validExt.includes((ext || 'jpg').toLowerCase()) ? ext.toLowerCase() : 'jpg';
+      const mime = safeExt === 'png' ? 'image/png' : safeExt === 'webp' ? 'image/webp' : 'image/jpeg';
+
+      const b64 = foto_base64.replace(/^data:[^;]+;base64,/, '');
+      const buf = Buffer.from(b64, 'base64');
+      if (buf.length > 3145728) return res.status(400).json({ error: 'foto demasiado grande (max 3MB)' });
+
+      const filename = `${device_hash.slice(0,12)}/${Date.now()}.${safeExt}`;
+      const up = await fetch(`${SUPABASE_URL}/storage/v1/object/testigo-fotos/${filename}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY || ANON_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`,
+          'Content-Type': mime,
+          'x-upsert': 'true'
+        },
+        body: buf
+      });
+      if (!up.ok) {
+        const errText = await up.text();
+        return res.status(500).json({ error: 'upload failed', detail: errText.slice(0,200) });
+      }
+      const public_url = `${SUPABASE_URL}/storage/v1/object/public/testigo-fotos/${filename}`;
+      return res.status(201).json({ ok: true, foto_url: public_url });
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
