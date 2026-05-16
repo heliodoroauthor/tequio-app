@@ -30,6 +30,8 @@ export default async function handler(req, res) {
         'apikey': ANON_KEY,
         'Authorization': `Bearer ${ANON_KEY}`,
         'Accept': 'application/json',
+        'Range-Unit': 'items',
+        'Range': '0-49999',
       },
     });
     if (!r.ok) throw new Error(`Supabase ${r.status}`);
