@@ -1545,9 +1545,218 @@
     .bottom-nav-item { min-width: 44px; padding: 5px 6px; }
     .bottom-nav-item .bn-label { font-size: 8px; }
   }
+
+
+  /* === MIGRATED UX (FASE 1): SOS FAB + ACCESIBILIDAD + BOTTOM NAV + SPLASH === */
+  #sos-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 18px;
+    z-index: 9000;
+  }
+  #sos-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0.4);
+    animation: sos-pulse 2.5s infinite;
+    transition: transform 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #sos-btn:hover { transform: scale(1.08); }
+  @keyframes sos-pulse {
+    0%   { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0.4); }
+    70%  { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 14px rgba(220,38,38,0); }
+    100% { box-shadow: 0 4px 20px rgba(220,38,38,0.5), 0 0 0 0 rgba(220,38,38,0); }
+  }
+  #sos-menu {
+    display: none;
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    background: var(--bg2);
+    border: 1px solid rgba(220,38,38,0.35);
+    border-radius: 16px;
+    overflow: hidden;
+    min-width: 240px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: fadeUp 0.2s ease;
+  }
+  #sos-menu.open { display: block; }
+  .sos-menu-header {
+    padding: 10px 14px 8px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #f87171;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(220,38,38,0.2);
+    background: rgba(220,38,38,0.06);
+  }
+  .sos-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: var(--font-body);
+  }
+  .sos-menu-item:last-child { border-bottom: none; }
+  .sos-menu-item:hover { background: rgba(220,38,38,0.08); }
+  .sos-menu-item .sos-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+  .sos-menu-item .sos-desc { font-size: 10px; color: var(--text3); font-weight: 400; margin-top: 1px; }
+
+  /* === ACCESIBILIDAD === */
+  .acc-trigger {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-left: 8px;
+    transition: all 0.15s;
+  }
+  .acc-trigger:hover { background: var(--surface2); border-color: var(--accent2); }
+  #acc-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #acc-modal .acc-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #acc-modal h3 { font-family: var(--font-display); font-size: 18px; margin-bottom: 4px; color: var(--text); }
+  #acc-modal .acc-sub { font-size: 12px; color: var(--text3); margin-bottom: 18px; }
+  #acc-modal .acc-section { margin-bottom: 18px; }
+  #acc-modal .acc-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+  #acc-modal .acc-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  #acc-modal .acc-btn {
+    flex: 1; min-width: 90px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  #acc-modal .acc-btn:hover { border-color: var(--accent2); }
+  #acc-modal .acc-btn.active { border-color: var(--accent2); background: rgba(96,165,250,0.12); }
+  #acc-modal .acc-actions { display: flex; gap: 8px; margin-top: 8px; }
+  html.font-grande { font-size: 17px; }
+  html.font-pequeno { font-size: 13px; }
+  html.alto-contraste { filter: contrast(1.25); }
+  html.alto-contraste body { background: #000 !important; color: #fff !important; }
+  html.alto-contraste { --bg: #000; --bg2: #0a0a0a; --text: #fff; --border: #fff; --text2: #ddd; --text3: #bbb; }
+
+  /* === BOTTOM NAV (mobile) === */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    z-index: 30;
+    padding: 6px 0 env(safe-area-inset-bottom, 6px);
+    justify-content: space-around;
+    align-items: center;
+  }
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.15s;
+    min-width: 52px;
+    color: var(--text3);
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+  }
+  .bottom-nav-item.active { color: var(--accent2); }
+  .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-item .bn-label { font-size: 9px; font-weight: 600; letter-spacing: 0.3px; }
+  .bottom-nav-item.bn-emergencia {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: #fff;
+    min-width: 60px;
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 12px rgba(220,38,38,0.4);
+  }
+  .bottom-nav-item.bn-emergencia .bn-icon { font-size: 22px; }
+  @media (max-width: 767px) {
+    body { padding-bottom: 68px; }
+    .bottom-nav { display: flex; }
+    #sos-fab { bottom: 88px; }
+  }
+
+  /* === SPLASH SCREEN === */
+  #splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: linear-gradient(135deg,#060c1a 0%,#0d1528 60%,#080f1e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  #splash-screen .splash-mascot { width: 120px; height: 120px; margin-bottom: 16px; animation: axoloteFloat 2s ease-in-out infinite; }
+  #splash-screen .splash-logo { font-family: var(--font-display, 'Syne', sans-serif); font-size: 36px; font-weight: 900; background: linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; margin-bottom: 4px; }
+  #splash-screen .splash-sub { font-size: 11px; color: #475569; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
+  #splash-screen .splash-bar-wrap { width: 180px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+  #splash-screen #splash-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#3b82f6,#a78bfa); border-radius: 100px; transition: width 0.3s ease; }
+  #splash-screen .splash-label { font-size: 11px; color: #334155; margin-top: 10px; font-weight: 500; }
+  @keyframes axoloteFloat { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+  @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  /* === END MIGRATED UX === */
 </style>
 </head>
 <body>
+<!-- ════════ SPLASH SCREEN (Axolote+Quetzal) ════════ -->
+<div id="splash-screen">
+  <svg class="splash-mascot" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="22" cy="26" rx="12" ry="8" fill="#f472b6"/><ellipse cx="22" cy="27" rx="8" ry="5" fill="#fda4af" opacity="0.6"/><path d="M34 26 Q40 22 42 28 Q40 32 34 30 Z" fill="#e879f9"/><path d="M15 30 Q12 34 10 36 Q12 35 14 33" stroke="#f472b6" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M18 32 Q16 37 15 39 Q17 37 18 35" stroke="#f472b6" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M26 32 Q27 37 28 39 Q28 36 27 34" stroke="#e879f9" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M30 30 Q33 34 34 36 Q32 34 30 32" stroke="#e879f9" stroke-width="2" stroke-linecap="round" fill="none"/><ellipse cx="13" cy="24" rx="7" ry="6" fill="#f472b6"/><circle cx="11" cy="23" r="2" fill="#1e1b4b"/><circle cx="11.7" cy="22.3" r="0.6" fill="white"/><path d="M10 18 Q8 12 6 8 Q9 13 11 17" fill="#34d399" stroke="#059669" stroke-width="0.5"/><path d="M13 17 Q12 10 11 6 Q13 11 14 16" fill="#6ee7b7" stroke="#059669" stroke-width="0.5"/><path d="M16 18 Q16 11 17 7 Q17 12 17 17" fill="#34d399" stroke="#059669" stroke-width="0.5"/><path d="M20 18 Q18 10 14 4 Q17 10 19 17" fill="#10b981" stroke="#059669" stroke-width="0.4"/><path d="M23 18 Q22 9 21 3 Q23 9 24 17" fill="#34d399" stroke="#059669" stroke-width="0.4"/><path d="M26 19 Q26 10 28 4 Q27 10 26 18" fill="#6ee7b7" stroke="#059669" stroke-width="0.4"/><circle cx="20" cy="25" r="1.5" fill="#fbbf24" opacity="0.8"/><circle cx="24" cy="27" r="1" fill="#818cf8" opacity="0.8"/><circle cx="28" cy="25" r="1.2" fill="#fbbf24" opacity="0.8"/><path d="M9 25 Q11 27 13 25" stroke="#be185d" stroke-width="1" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="24" rx="2" ry="1.2" fill="#a78bfa" opacity="0.5"/><ellipse cx="30" cy="26" rx="1.5" ry="1" fill="#f9a8d4" opacity="0.6"/></svg>
+  <div class="splash-logo">Tequio</div>
+  <div class="splash-sub">Plataforma Cívica Digital</div>
+  <div class="splash-bar-wrap"><div id="splash-bar"></div></div>
+  <div class="splash-label" id="splash-label">Iniciando...</div>
+</div>
+
 
 <!-- ════════ SPLASH SCREEN ════════ -->
 <div id="splash-screen" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#060c1a 0%,#0d1528 60%,#080f1e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
@@ -1989,7 +2198,8 @@
         <div id="btn-modo-ninos" class="btn-icon" title="Modo niños — explícame como si tuviera 10 años" onclick="toggleModoNiños()" role="button" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 8px;font-size:16px;cursor:pointer">🧒</div>
         <div class="btn-icon" title="Accesibilidad y configuración" onclick="abrirAccesibilidad()" role="button" aria-label="Configuración de accesibilidad">⚙️</div>
       </div>
-    </div>
+    <button class="acc-trigger" onclick="abrirAccesibilidad()" aria-label="Accesibilidad" title="Accesibilidad">⚙️</button>
+      </div>
 
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
@@ -26770,6 +26980,152 @@ function renderOmbligoMuseos(){const el=document.getElementById('ombligo-museos'
 function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?`<span>💰 ${z.costo}</span>`:''}</div></div>`;}).join('');}
 
 window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
+</script>
+
+<!-- ════════ SOS FAB ════════ -->
+<div id="sos-fab">
+  <div id="sos-menu">
+    <div class="sos-menu-header">🆘 Ayuda de emergencia</div>
+    <div class="sos-menu-item" onclick="sosGo('emergencia')"><span class="sos-icon">🚨</span><div><div>Modo Emergencia 24/7</div><div class="sos-desc">Líneas de crisis y ayuda inmediata</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('derechos')"><span class="sos-icon">⚖️</span><div><div>Mis Derechos</div><div class="sos-desc">Conoce tus derechos ciudadanos</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('offline')"><span class="sos-icon">📵</span><div><div>Sin Internet</div><div class="sos-desc">Próximamente: versión offline</div></div></div>
+  </div>
+  <button id="sos-btn" onclick="toggleSosMenu()" aria-label="SOS - Ayuda de emergencia">SOS</button>
+</div>
+
+<!-- ════════ BOTTOM NAV (móvil) ════════ -->
+<nav class="bottom-nav" role="navigation" aria-label="Navegación rápida">
+  <button class="bottom-nav-item" onclick="if(window.showPage)showPage('dashboard')"><span class="bn-icon">🏠</span><span class="bn-label">Inicio</span></button>
+  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('servicios')"><span class="bn-icon">🆘</span><span class="bn-label">Servicios</span></button>
+  <button class="bottom-nav-item bn-emergencia" onclick="if(window.cargarPanel)cargarPanel('emergencia')"><span class="bn-icon">🚨</span><span class="bn-label">Emergencia</span></button>
+  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('estado')"><span class="bn-icon">🗺️</span><span class="bn-label">Estado</span></button>
+  <button class="bottom-nav-item" onclick="if(window.toggleSidebar)toggleSidebar();else if(window.openSidebar)openSidebar()"><span class="bn-icon">📋</span><span class="bn-label">Más</span></button>
+</nav>
+
+<!-- ════════ ACCESIBILIDAD MODAL ════════ -->
+<div id="acc-modal" onclick="cerrarAccesibilidad(event)">
+  <div class="acc-box" onclick="event.stopPropagation()">
+    <h3>Accesibilidad</h3>
+    <div class="acc-sub">Ajusta el tamaño del texto y el contraste.</div>
+    <div class="acc-section">
+      <div class="acc-label">Tamaño de texto</div>
+      <div class="acc-row">
+        <button class="acc-btn" id="acc-size-pequeno" onclick="setFontSize('pequeno')">Pequeño</button>
+        <button class="acc-btn" id="acc-size-normal" onclick="setFontSize('normal')">Normal</button>
+        <button class="acc-btn" id="acc-size-grande" onclick="setFontSize('grande')">Grande</button>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-label">Contraste</div>
+      <div class="acc-row">
+        <button class="acc-btn" id="acc-contraste-off" onclick="setContraste(false)">Normal</button>
+        <button class="acc-btn" id="acc-contraste-on" onclick="setContraste(true)">Alto Contraste</button>
+      </div>
+    </div>
+    <div class="acc-actions">
+      <button class="acc-btn" onclick="resetAccesibilidad()">Reset</button>
+      <button class="acc-btn" onclick="document.getElementById('acc-modal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MIGRATED UX JS (FASE 1) ════════ -->
+<script>
+// === SOS FAB ===
+function toggleSosMenu() {
+  document.getElementById('sos-menu').classList.toggle('open');
+}
+function sosGo(slug) {
+  document.getElementById('sos-menu').classList.remove('open');
+  if (slug === 'offline') {
+    alert('Próximamente: versión offline para emergencias sin Internet.');
+    return;
+  }
+  if (window.cargarPanel) cargarPanel(slug === 'derechos' ? 'emergencia' : slug);
+}
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#sos-fab')) {
+    var m = document.getElementById('sos-menu');
+    if (m) m.classList.remove('open');
+  }
+});
+
+// === ACCESIBILIDAD ===
+function abrirAccesibilidad() {
+  document.getElementById('acc-modal').style.display = 'flex';
+  syncAccButtons();
+}
+function cerrarAccesibilidad(e) {
+  if (e && e.target.id !== 'acc-modal') return;
+  document.getElementById('acc-modal').style.display = 'none';
+}
+function syncAccButtons() {
+  var cls = document.documentElement.classList;
+  var size = cls.contains('font-grande') ? 'grande' : cls.contains('font-pequeno') ? 'pequeno' : 'normal';
+  ['pequeno','normal','grande'].forEach(function(s){
+    var el = document.getElementById('acc-size-'+s);
+    if (el) el.classList.toggle('active', s===size);
+  });
+  var alto = cls.contains('alto-contraste');
+  var on = document.getElementById('acc-contraste-on');
+  var off = document.getElementById('acc-contraste-off');
+  if (on) on.classList.toggle('active', alto);
+  if (off) off.classList.toggle('active', !alto);
+}
+function setFontSize(size) {
+  var cls = document.documentElement.classList;
+  cls.remove('font-pequeno','font-grande');
+  if (size === 'pequeno') cls.add('font-pequeno');
+  if (size === 'grande') cls.add('font-grande');
+  try { localStorage.setItem('tequio_font_size', size); } catch(e){}
+  syncAccButtons();
+}
+function setContraste(alto) {
+  document.documentElement.classList.toggle('alto-contraste', !!alto);
+  try { localStorage.setItem('tequio_alto_contraste', alto ? '1' : '0'); } catch(e){}
+  syncAccButtons();
+}
+function resetAccesibilidad() { setFontSize('normal'); setContraste(false); }
+function loadAccesibilidadSettings() {
+  try {
+    var size = localStorage.getItem('tequio_font_size');
+    if (size && size !== 'normal') setFontSize(size);
+    if (localStorage.getItem('tequio_alto_contraste') === '1') setContraste(true);
+  } catch(e){}
+}
+document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
+
+// === SPLASH SCREEN (once per session) ===
+(function(){
+  function hideSplash() {
+    var s = document.getElementById('splash-screen');
+    if (!s) return;
+    s.style.animation = 'splashFadeOut 0.4s ease forwards';
+    setTimeout(function(){ if (s.parentNode) s.remove(); }, 500);
+  }
+  function runSplash() {
+    var bar = document.getElementById('splash-bar');
+    if (bar) {
+      setTimeout(function(){ bar.style.width = '30%'; }, 100);
+      setTimeout(function(){ bar.style.width = '70%'; }, 500);
+      setTimeout(function(){ bar.style.width = '100%'; }, 1000);
+    }
+    setTimeout(hideSplash, 1200);
+  }
+  try {
+    if (sessionStorage.getItem('tequio_splash_shown') === '1') {
+      var s = document.getElementById('splash-screen');
+      if (s) s.remove();
+    } else {
+      sessionStorage.setItem('tequio_splash_shown', '1');
+      if (document.readyState === 'complete') runSplash();
+      else window.addEventListener('load', runSplash);
+    }
+  } catch(e) {
+    if (document.readyState === 'complete') runSplash();
+    else window.addEventListener('load', runSplash);
+  }
+})();
 </script>
 </body>
 </html>
