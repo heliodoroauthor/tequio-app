@@ -1104,6 +1104,46 @@ export default async function handler(req, res) {
     }
     // ─────────────── FIN CHAT COMUNITARIO ───────────────
 
+    // ── SAT 69-B — Empresas factureras EFOS ──
+    if (vista === 'sat_69b') {
+      const q = (req.query.q || '').trim().toUpperCase();
+      const situacion = (req.query.situacion || '').trim();
+      if (!q || q.length < 3) {
+        return res.status(400).json({ error: 'Pasa ?q=RFC o nombre (min 3 caracteres)' });
+      }
+      const RFC_RE = /^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/i;
+      const RFC_PREFIX = /^[A-ZÑ&]{3,4}[0-9]{0,6}$/i;
+      let path;
+      if (RFC_RE.test(q) || RFC_PREFIX.test(q)) {
+        path = `sat_69b?rfc=ilike.${encodeURIComponent(q)}*&select=rfc,nombre,situacion,numero_publicacion,fecha_publicacion_sat,fecha_dof,pagina_dof,fuente_url&order=fecha_publicacion_sat.desc&limit=50`;
+      } else {
+        path = `sat_69b?nombre=ilike.*${encodeURIComponent(q)}*&select=rfc,nombre,situacion,numero_publicacion,fecha_publicacion_sat,fecha_dof,pagina_dof,fuente_url&order=fecha_publicacion_sat.desc&limit=50`;
+      }
+      if (situacion) path += `&situacion=eq.${encodeURIComponent(situacion)}`;
+      const rows = await sb(path);
+      return res.status(200).json({ items: rows, total: rows.length, query: q });
+    }
+
+    // ── SAT 69 — Deudores firmes del SAT ──
+    if (vista === 'sat_69') {
+      const q = (req.query.q || '').trim().toUpperCase();
+      const supuesto = (req.query.supuesto || '').trim();
+      if (!q || q.length < 3) {
+        return res.status(400).json({ error: 'Pasa ?q=RFC o nombre (min 3 caracteres)' });
+      }
+      const RFC_RE = /^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/i;
+      const RFC_PREFIX = /^[A-ZÑ&]{3,4}[0-9]{0,6}$/i;
+      let path;
+      if (RFC_RE.test(q) || RFC_PREFIX.test(q)) {
+        path = `sat_69?rfc=ilike.${encodeURIComponent(q)}*&select=rfc,nombre,supuesto,entidad_federativa,monto,ejercicio,tipo_persona,fecha_primera_publicacion,fuente_url&order=monto.desc.nullslast&limit=50`;
+      } else {
+        path = `sat_69?nombre=ilike.*${encodeURIComponent(q)}*&select=rfc,nombre,supuesto,entidad_federativa,monto,ejercicio,tipo_persona,fecha_primera_publicacion,fuente_url&order=monto.desc.nullslast&limit=50`;
+      }
+      if (supuesto) path += `&supuesto=eq.${encodeURIComponent(supuesto)}`;
+      const rows = await sb(path);
+      return res.status(200).json({ items: rows, total: rows.length, query: q });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
