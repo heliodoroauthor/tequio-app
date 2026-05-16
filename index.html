@@ -1926,7 +1926,7 @@
       <div class="nav-item" onclick="mostrarProximamente('testigo')">
         <span class="icon">📸</span> Testigo Cívico
       </div>
-      <div class="nav-item" onclick="mostrarProximamente('directorio')">
+      <div class="nav-item" onclick="cargarPanel('directorio')">
         <span class="icon">📞</span> Directorio 32 Estados
       </div>
     </div>
@@ -13668,7 +13668,8 @@ function cargarPanel(slug) {
     'votar': '/panel/votar.html?embedded=1',
     'iniciativa-firmar': '/panel/iniciativa-firmar.html?embedded=1',
     'sre': '/panel/sre.html?embedded=1',
-    'scrapers-admin': '/admin/scrapers.html?embedded=1'
+    'scrapers-admin': '/admin/scrapers.html?embedded=1',
+    'directorio': '/panel/directorio.html?embedded=1'
   };
   const url = PANELS[slug];
   if (!url) return;
@@ -13697,7 +13698,8 @@ function cargarPanel(slug) {
       'votar': 'Vota antes del Congreso',
       'iniciativa-firmar': 'Firma Iniciativas',
       'sre': 'México en el Mundo',
-      'scrapers-admin': 'Scrapers Health'
+      'scrapers-admin': 'Scrapers Health',
+      'directorio': '📞 Directorio 32 Estados'
     };
     titleEl.textContent = TITLES[slug] || 'Panel';
   }
