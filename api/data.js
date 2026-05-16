@@ -1304,6 +1304,142 @@ export default async function handler(req, res) {
       return res.status(200).json(out);
     }
 
+    // IP Hash - devuelve hash sha256 de IP del cliente con salt
+    if (vista === 'ip_hash') {
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '')
+        .split(',')[0].trim() || 'unknown';
+      const salt = process.env.SALT_IP || 'tequio-salt-v1';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + salt).digest('hex').slice(0, 32);
+      return res.status(200).json({ ip_hash });
+    }
+
+    // Chat enviar (Nivel 2) - 30s rate limit por device_hash
+    if (vista === 'chat_enviar') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { mensaje, device_hash, estado, honeypot } = body;
+      if (honeypot) return res.status(400).json({ error: 'bot' });
+      if (!mensaje || mensaje.length < 1 || mensaje.length > 2000) {
+        return res.status(400).json({ error: 'mensaje 1-2000 chars' });
+      }
+      if (!device_hash || device_hash.length < 10) {
+        return res.status(400).json({ error: 'device_hash requerido' });
+      }
+      const recent = await sb('chat_mensajes?device_hash=eq.' + encodeURIComponent(device_hash) + '&order=timestamp.desc&limit=1');
+      if (recent.length > 0) {
+        const sec = (Date.now() - new Date(recent[0].timestamp).getTime()) / 1000;
+        if (sec < 30) return res.status(429).json({ error: 'Espera ' + Math.ceil(30 - sec) + 's' });
+      }
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+      const key = SERVICE_KEY || ANON_KEY;
+      const ins = await fetch(SUPABASE_URL + '/rest/v1/chat_mensajes', {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ mensaje: mensaje.trim(), device_hash, ip_hash, estado: estado || null })
+      });
+      if (!ins.ok) return res.status(500).json({ error: 'insert failed' });
+      return res.status(201).json({ ok: true });
+    }
+
+    // Votar Nivel 3 - registrar voto sobre iniciativa con dedup
+    if (vista === 'votar') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { iniciativa_id, voto, device_hash, ine_hash, distrito, estado, honeypot, tiempo_en_pagina_ms, scroll_detectado } = body;
+      if (honeypot) return res.status(400).json({ error: 'bot' });
+      if (!iniciativa_id || !voto) return res.status(400).json({ error: 'iniciativa_id y voto requeridos' });
+      if (!['a_favor', 'en_contra', 'abstencion'].includes(voto)) return res.status(400).json({ error: 'voto invalido' });
+      if (!device_hash && !ine_hash) return res.status(400).json({ error: 'device_hash o ine_hash requerido' });
+      if (typeof tiempo_en_pagina_ms === 'number' && tiempo_en_pagina_ms < 5000) return res.status(400).json({ error: 'demasiado rapido' });
+      if (scroll_detectado === false) return res.status(400).json({ error: 'sin interaccion humana' });
+      if (ine_hash) {
+        const yaVoto = await sb('votos?ine_hash=eq.' + encodeURIComponent(ine_hash) + '&iniciativa_id=eq.' + encodeURIComponent(iniciativa_id) + '&limit=1');
+        if (yaVoto.length > 0) return res.status(409).json({ error: 'Ya votaste con INE en esta iniciativa' });
+      }
+      if (device_hash) {
+        const yaVoto = await sb('votos?device_hash=eq.' + encodeURIComponent(device_hash) + '&iniciativa_id=eq.' + encodeURIComponent(iniciativa_id) + '&limit=1');
+        if (yaVoto.length > 0) return res.status(409).json({ error: 'Ya votaste desde este dispositivo' });
+      }
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+      const key = SERVICE_KEY || ANON_KEY;
+      const ins = await fetch(SUPABASE_URL + '/rest/v1/votos', {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ iniciativa_id, voto, device_hash: device_hash || null, ine_hash: ine_hash || null, ip_hash, distrito: distrito || null, estado: estado || null })
+      });
+      if (!ins.ok) return res.status(500).json({ error: 'insert failed' });
+      return res.status(201).json({ ok: true });
+    }
+
+    // Firmar Iniciativa Ciudadana Nivel 3
+    if (vista === 'firmar') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { iniciativa_id, device_hash, ine_hash, distrito, estado, honeypot, tiempo_en_pagina_ms, scroll_detectado } = body;
+      if (honeypot) return res.status(400).json({ error: 'bot' });
+      if (!iniciativa_id) return res.status(400).json({ error: 'iniciativa_id requerido' });
+      if (!device_hash && !ine_hash) return res.status(400).json({ error: 'device_hash o ine_hash requerido' });
+      if (typeof tiempo_en_pagina_ms === 'number' && tiempo_en_pagina_ms < 5000) return res.status(400).json({ error: 'demasiado rapido' });
+      if (scroll_detectado === false) return res.status(400).json({ error: 'sin interaccion humana' });
+      if (ine_hash) {
+        const ya = await sb('firmas_iniciativas?ine_hash=eq.' + encodeURIComponent(ine_hash) + '&iniciativa_id=eq.' + encodeURIComponent(iniciativa_id) + '&limit=1');
+        if (ya.length > 0) return res.status(409).json({ error: 'Ya firmaste con INE esta iniciativa' });
+      }
+      if (device_hash) {
+        const ya = await sb('firmas_iniciativas?device_hash=eq.' + encodeURIComponent(device_hash) + '&iniciativa_id=eq.' + encodeURIComponent(iniciativa_id) + '&limit=1');
+        if (ya.length > 0) return res.status(409).json({ error: 'Ya firmaste desde este dispositivo' });
+      }
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+      const key = SERVICE_KEY || ANON_KEY;
+      const ins = await fetch(SUPABASE_URL + '/rest/v1/firmas_iniciativas', {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ iniciativa_id, device_hash: device_hash || null, ine_hash: ine_hash || null, ip_hash, distrito: distrito || null, estado: estado || null })
+      });
+      if (!ins.ok) return res.status(500).json({ error: 'insert failed' });
+      return res.status(201).json({ ok: true });
+    }
+
+    // Listar iniciativas con conteos
+    if (vista === 'iniciativas') {
+      const tipo = (req.query.tipo || '').trim();
+      let path = 'iniciativas?select=*&order=fecha_inicio.desc&limit=100';
+      if (tipo) path += '&tipo=eq.' + encodeURIComponent(tipo);
+      const items = await sb(path);
+      const results = await Promise.all(items.map(async (it) => {
+        if (it.tipo === 'voto_congreso') {
+          const [aFavor, enContra, abst] = await Promise.all([
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.a_favor&select=count'),
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.en_contra&select=count'),
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.abstencion&select=count')
+          ]);
+          return { ...it, votos: { a_favor: aFavor[0]?.count || 0, en_contra: enContra[0]?.count || 0, abstencion: abst[0]?.count || 0 } };
+        } else {
+          const f = await sb('firmas_iniciativas?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&select=count');
+          return { ...it, firmas: f[0]?.count || 0 };
+        }
+      }));
+      return res.status(200).json({ items: results });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
