@@ -1158,7 +1158,7 @@ export default async function handler(req, res) {
       const anio = parseInt(req.query.anio || '2026', 10);
       // Tabla ~85k filas. Usamos fetch directo con Range header para evitar limite default de 1000.
       const rfetch = async (range) => {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto`, {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto&order=ramo.asc,desc_ramo.asc,monto.desc`, {
           headers: {
             'apikey': ANON_KEY,
             'Authorization': `Bearer ${ANON_KEY}`,
@@ -1174,7 +1174,7 @@ export default async function handler(req, res) {
         return { data, contentRange: cr };
       };
       // Pedir en lotes paralelos de 5000 con Range
-      const CHUNK = 5000;
+      const CHUNK = 1000;
       // Primero descubrir total
       const first = await rfetch(`0-${CHUNK-1}`);
       const m = (first.contentRange || '').match(/\/(\d+)$/);
