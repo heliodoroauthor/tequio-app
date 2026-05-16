@@ -38,6 +38,17 @@
 </style>
 </head>
 <body>
+<script>
+(function(){
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    document.documentElement.classList.add('embedded');
+    var style = document.createElement('style');
+    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
+    document.head.appendChild(style);
+  }
+})();
+</script>
+
 <header>
   <a class="back" href="/">&larr; Tequio</a>
   <h1>Firma iniciativas ciudadanas</h1>
