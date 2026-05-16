@@ -1926,7 +1926,7 @@
       <div class="nav-item" onclick="mostrarProximamente('generador')">
         <span class="icon">📄</span> Generador de Documentos
       </div>
-      <div class="nav-item" onclick="mostrarProximamente('testigo')">
+      <div class="nav-item" onclick="cargarPanel('testigo')">
         <span class="icon">📸</span> Testigo Cívico
       </div>
       <div class="nav-item" onclick="cargarPanel('directorio')">
@@ -13673,7 +13673,8 @@ function cargarPanel(slug) {
     'sre': '/panel/sre.html?embedded=1',
     'scrapers-admin': '/admin/scrapers.html?embedded=1',
     'directorio': '/panel/directorio.html?embedded=1',
-        'servicios': '/panel/servicios.html?embedded=1'
+    'servicios': '/panel/servicios.html?embedded=1',
+    'testigo': '/panel/testigo.html?embedded=1'
   };
   const url = PANELS[slug];
   if (!url) return;
@@ -26766,3 +26767,4 @@ window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
 </script>
 </body>
 </html>
+ 
