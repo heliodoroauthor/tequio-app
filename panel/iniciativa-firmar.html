@@ -55,6 +55,102 @@
     <span id="tel-device">Device hash: calculando...</span>
   </div>
 
+  <div id="ine-zone" style="margin-bottom:1.2rem;">
+    <button id="btn-ine" type="button" style="background:#1f2937;color:#e5e7eb;border:1px solid #374151;padding:0.7rem 1rem;border-radius:0.5rem;cursor:pointer;font-size:0.95rem;">
+      🆔 Verificar con INE (opcional, peso extra a tu firma)
+    </button>
+    <span id="ine-status" style="margin-left:0.8rem;color:#9ca3af;font-size:0.85rem;"></span>
+  </div>
+
+  <div id="ine-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#111827;border:1px solid #374151;border-radius:1rem;padding:1.5rem;max-width:480px;width:90%;color:#e5e7eb;">
+      <h3 style="margin:0 0 0.8rem 0;">Verifica tu INE</h3>
+      <p style="font-size:0.85rem;color:#9ca3af;line-height:1.4;">
+        Tu foto se procesa <strong>100% en tu dispositivo</strong>. Nada se envía a un servidor.
+        Solo se guarda un hash anónimo para que tu firma pese una vez por persona.
+      </p>
+      <input type="file" id="ine-file" accept="image/*" capture="environment" style="margin:1rem 0;display:block;width:100%;color:#e5e7eb;">
+      <div id="ine-progress" style="display:none;margin:0.8rem 0;">
+        <div id="ine-progress-label" style="font-size:0.8rem;color:#9ca3af;">Preparando...</div>
+        <div style="background:#1f2937;height:6px;border-radius:3px;overflow:hidden;margin-top:0.3rem;">
+          <div id="ine-progress-bar" style="background:#a78bfa;height:100%;width:0%;transition:width 0.3s;"></div>
+        </div>
+      </div>
+      <div id="ine-result" style="margin:0.8rem 0;"></div>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;">
+        <button id="ine-cancel" type="button" style="background:transparent;color:#9ca3af;border:1px solid #374151;padding:0.5rem 1rem;border-radius:0.4rem;cursor:pointer;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const btn = document.getElementById('btn-ine');
+    const modal = document.getElementById('ine-modal');
+    const fileInput = document.getElementById('ine-file');
+    const cancelBtn = document.getElementById('ine-cancel');
+    const progressEl = document.getElementById('ine-progress');
+    const progressBar = document.getElementById('ine-progress-bar');
+    const progressLabel = document.getElementById('ine-progress-label');
+    const resultEl = document.getElementById('ine-result');
+    const statusEl = document.getElementById('ine-status');
+
+    function actualizarStatusCache() {
+      if (!window.AntiBot || !window.AntiBot.INE) return;
+      const c = window.AntiBot.INE.getCached();
+      if (c) {
+        statusEl.textContent = '✅ Verificado (' + c.preview + ')';
+        statusEl.style.color = '#10b981';
+        btn.textContent = '🆔 Cambiar INE verificada';
+        window._ineHash = c.ine_hash;
+      }
+    }
+
+    setTimeout(actualizarStatusCache, 500);
+    setTimeout(actualizarStatusCache, 1500);
+
+    btn.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      resultEl.innerHTML = '';
+      progressEl.style.display = 'none';
+      fileInput.value = '';
+    });
+
+    cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+
+    fileInput.addEventListener('change', async () => {
+      const f = fileInput.files[0];
+      if (!f) return;
+      if (!window.AntiBot || !window.AntiBot.INE) {
+        resultEl.innerHTML = '<span style="color:#ef4444;">El módulo INE aún no carga. Recarga la página.</span>';
+        return;
+      }
+      progressEl.style.display = 'block';
+      progressBar.style.width = '0%';
+      resultEl.innerHTML = '';
+      try {
+        const r = await window.AntiBot.INE.verificar(f, (p) => {
+          const labels = { preparando: 'Preparando imagen', cargando_motor_ocr: 'Cargando OCR (~10 MB, una vez)', reconociendo: 'Leyendo INE', analizando: 'Validando', ok: 'Listo', fallo: 'No detectado' };
+          progressLabel.textContent = labels[p.etapa] || p.etapa;
+          progressBar.style.width = (p.pct || 0) + '%';
+        });
+        if (r.ok) {
+          resultEl.innerHTML = '<div style="color:#10b981;padding:0.6rem;background:rgba(16,185,129,0.1);border-radius:0.4rem;">✅ Verificado: ' + r.preview + '<br><span style="font-size:0.8rem;color:#9ca3af;">Hash anónimo guardado localmente.</span></div>';
+          window._ineHash = r.ine_hash;
+          statusEl.textContent = '✅ Verificado (' + r.preview + ')';
+          statusEl.style.color = '#10b981';
+          btn.textContent = '🆔 Cambiar INE verificada';
+          setTimeout(() => { modal.style.display = 'none'; }, 1500);
+        } else {
+          resultEl.innerHTML = '<div style="color:#ef4444;padding:0.6rem;background:rgba(239,68,68,0.1);border-radius:0.4rem;">❌ ' + (r.motivo === 'no_se_detecto_clave' ? 'No detectamos la clave de elector. Intenta otra foto con mejor iluminación.' : r.motivo) + '</div>';
+        }
+      } catch (e) {
+        resultEl.innerHTML = '<div style="color:#ef4444;">Error: ' + e.message + '</div>';
+      }
+    });
+  })();
+  </script>
+
   <div id="iniciativas-container">
     <div class="loading">Cargando iniciativas...</div>
   </div>
@@ -66,6 +162,7 @@
 </main>
 
 <script src="/js/anti-bot.js"></script>
+<script src="/js/verificacion-ine.js"></script>
 <script>
 (async function() {
   'use strict';
@@ -161,7 +258,8 @@
             device_hash: ctx.device_hash,
             honeypot: ctx.honeypot,
             tiempo_en_pagina_ms: ctx.tiempo_en_pagina_ms,
-            scroll_detectado: ctx.scroll_detectado
+            scroll_detectado: ctx.scroll_detectado,
+            ine_hash: window._ineHash || null
           })
         });
         const j = await resp.json();
