@@ -1156,13 +1156,22 @@ export default async function handler(req, res) {
     // -- SHCP PEF -- Presupuesto de Egresos de la Federacion --
     if (vista === 'pef_resumen') {
       const anio = parseInt(req.query.anio || '2026', 10);
-      const ramos = await sb(`shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto`);
+      // Supabase limita 1000 por request. Tabla tiene ~85k filas.
+      // Paralelizar lotes para evitar timeout en Vercel (10s Hobby).
+      const PAGE = 1000;
+      const TOTAL_PAGES = 90; // ~85k filas / 1000 = 85, margen extra
+      const offsets = Array.from({length: TOTAL_PAGES}, (_, i) => i * PAGE);
+      const chunks = await Promise.all(
+        offsets.map(off => sb(`shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto&limit=${PAGE}&offset=${off}`).catch(() => []))
+      );
       const byRamo = {};
       let total = 0;
-      for (const r of ramos) {
-        const k = r.ramo + '|' + (r.desc_ramo || '');
-        byRamo[k] = (byRamo[k] || 0) + Number(r.monto || 0);
-        total += Number(r.monto || 0);
+      for (const chunk of chunks) {
+        for (const r of chunk) {
+          const k = r.ramo + '|' + (r.desc_ramo || '');
+          byRamo[k] = (byRamo[k] || 0) + Number(r.monto || 0);
+          total += Number(r.monto || 0);
+        }
       }
       const items = Object.entries(byRamo).map(([k, v]) => {
         const [ramo, desc_ramo] = k.split('|');
@@ -1172,7 +1181,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ anio, total, ramos: items });
     }
 
-    if (vista === 'pef_ramo') {
+        if (vista === 'pef_ramo') {
       const anio = parseInt(req.query.anio || '2026', 10);
       const ramo = (req.query.ramo || '').trim();
       if (!ramo) return res.status(400).json({ error: 'Pasa ?ramo=N' });
