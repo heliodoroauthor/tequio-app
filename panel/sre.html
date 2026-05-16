@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mexico en el mundo - Embajadas y Consulados - Tequio</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg-card: #131829;
+    --bg-card-hover: #1a2138;
+    --border: #1f2742;
+    --text: #e5e7eb;
+    --text-dim: #9ca3af;
+    --text-muted: #6b7280;
+    --gold: #fbbf24;
+    --gold-dim: #b45309;
+    --green: #10b981;
+    --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a2138 0%, #0f1424 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h2 {
+    font-size: 14px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+  .search-box {
+    margin-bottom: 16px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--gold-dim);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .card-flag { font-size: 20px; }
+  .card-type {
+    font-size: 11px;
+    background: var(--gold-dim);
+    color: var(--bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .card-type.consulado {
+    background: var(--blue);
+    color: white;
+  }
+  .card-pais {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-ciudad {
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .card-row {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  .card-row strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .card-row a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .card-row a:hover { text-decoration: underline; }
+  .loading {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-dim);
+  }
+  .empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+  }
+  .disclaimer {
+    margin-top: 24px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .disclaimer a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="/">Tequio</a>
+  <h1>Mexico en el mundo</h1>
+</header>
+<div class="container">
+  <div class="hero">
+    <h2>Embajadas y Consulados de Mexico</h2>
+    <p style="color: var(--text-dim); font-size: 13px;">Red diplomatica oficial de la Secretaria de Relaciones Exteriores.</p>
+    <div class="hero-grid">
+      <div class="stat">
+        <div class="stat-num" id="stat-emb">-</div>
+        <div class="stat-label">Embajadas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-con">-</div>
+        <div class="stat-label">Consulados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-pais">-</div>
+        <div class="stat-label">Paises</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="all">Todo</button>
+    <button class="tab" data-tab="embajadas">Embajadas</button>
+    <button class="tab" data-tab="consulados">Consulados</button>
+  </div>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Buscar por pais, ciudad o titular...">
+  </div>
+  <div id="results" class="grid">
+    <div class="loading">Cargando datos de la SRE...</div>
+  </div>
+  <div class="disclaimer">
+    Datos oficiales de la SRE. Fuente: <a href="https://sre.gob.mx" target="_blank" rel="noopener">sre.gob.mx</a>
+  </div>
+</div>
+<script>
+  const state = {
+    embajadas: [],
+    consulados: [],
+    tab: 'all',
+    query: ''
+  };
+  async function load() {
+    try {
+      const r = await fetch('/api/data?vista=sre');
+      const j = await r.json();
+      state.embajadas = j.embajadas || [];
+      state.consulados = j.consulados || [];
+      document.getElementById('stat-emb').textContent = state.embajadas.length;
+      document.getElementById('stat-con').textContent = state.consulados.length;
+      const paises = new Set();
+      state.embajadas.forEach(e => e.pais && paises.add(e.pais));
+      state.consulados.forEach(c => c.pais && paises.add(c.pais));
+      document.getElementById('stat-pais').textContent = paises.size;
+      render();
+    } catch (e) {
+      document.getElementById('results').innerHTML = '<div class="empty">Error al cargar datos.</div>';
+    }
+  }
+  function escapeHTML(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function cardHTML(item, tipo) {
+    const isEmb = tipo === 'embajada';
+    const ciudad = isEmb ? '' : (item.ciudad || '');
+    return '<div class="card">' +
+      '<div class="card-header">' +
+        '<span class="card-flag">' + (isEmb ? '🇲🇽' : '🏛️') + '</span>' +
+        '<span class="card-type' + (isEmb ? '' : ' consulado') + '">' + (isEmb ? 'Embajada' : 'Consulado') + '</span>' +
+      '</div>' +
+      '<div class="card-pais">' + escapeHTML(item.pais || 'Sin pais') + '</div>' +
+      (ciudad ? '<div class="card-ciudad">' + escapeHTML(ciudad) + '</div>' : '') +
+      (item.titular ? '<div class="card-row"><strong>Titular:</strong> ' + escapeHTML(item.titular) + '</div>' : '') +
+      (item.direccion ? '<div class="card-row"><strong>Direccion:</strong> ' + escapeHTML(item.direccion) + '</div>' : '') +
+      (item.telefono ? '<div class="card-row"><strong>Tel:</strong> ' + escapeHTML(item.telefono) + '</div>' : '') +
+      (item.email ? '<div class="card-row"><strong>Email:</strong> ' + escapeHTML(item.email) + '</div>' : '') +
+      (item.sitio_web_url ? '<div class="card-row"><a href="' + escapeHTML(item.sitio_web_url) + '" target="_blank" rel="noopener">Sitio web</a></div>' : '') +
+      '</div>';
+  }
+  function matches(item) {
+    if (!state.query) return true;
+    const q = state.query.toLowerCase();
+    return (item.pais || '').toLowerCase().includes(q) ||
+           (item.ciudad || '').toLowerCase().includes(q) ||
+           (item.titular || '').toLowerCase().includes(q);
+  }
+  function render() {
+    const root = document.getElementById('results');
+    let items = [];
+    if (state.tab === 'all' || state.tab === 'embajadas') {
+      state.embajadas.filter(matches).forEach(e => items.push(cardHTML(e, 'embajada')));
+    }
+    if (state.tab === 'all' || state.tab === 'consulados') {
+      state.consulados.filter(matches).forEach(c => items.push(cardHTML(c, 'consulado')));
+    }
+    if (items.length === 0) {
+      root.innerHTML = '<div class="empty">Sin resultados.</div>';
+    } else {
+      root.innerHTML = items.join('');
+    }
+  }
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tab = btn.dataset.tab;
+      render();
+    });
+  });
+  document.getElementById('search').addEventListener('input', e => {
+    state.query = e.target.value.trim();
+    render();
+  });
+  load();
+</script>
+</body>
+</html>
