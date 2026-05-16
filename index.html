@@ -1818,247 +1818,128 @@
       </div>
     </div>
 
-    <!-- ── INICIO ── -->
+    <!-- ── MONITOREO ── -->
     <div class="nav-section">
-      <div class="nav-label">Inicio</div>
-      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-        <span class="icon">🏠</span> Panel Principal
-      </div>
-    </div>
-
-    <!-- ── GRUPO 0: DATOS EN VIVO (REAL DATA) ── -->
-    <div class="nav-section">
-      <div class="nav-label" style="color:#22c55e;letter-spacing:1.5px">📡 Datos en Vivo</div>
-
-      <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
-        <span class="icon">🆘</span> Pide Ayuda Legal
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-      <div class="nav-item" data-page="economia" onclick="showPage('economia')">
-        <span class="icon">📈</span> Economía México
-        <span class="nav-badge green">✅ Banxico</span>
-      </div>
-      <div class="nav-item" data-page="tu-estado" onclick="showPage('tu-estado')">
-        <span class="icon">🗺️</span> Tu Estado
-        <span class="nav-badge green">✅ INEGI</span>
-      </div>
-      <div class="nav-item" data-page="clima" onclick="showPage('clima')">
-        <span class="icon">🌤️</span> Clima Hoy
-        <span class="nav-badge green">✅ SMN 32</span>
-      </div>
-      <div class="nav-item" data-page="alertas" onclick="showPage('alertas')">
-        <span class="icon">⛈️</span> Alertas Meteo
-        <span class="nav-badge green">✅ SMN</span>
-      </div>
-      <div class="nav-item" data-page="sequia" onclick="showPage('sequia')">
-        <span class="icon">🏜️</span> Monitor Sequía
-        <span class="nav-badge green">✅ CONAGUA</span>
-      </div>
-      <div class="nav-item" data-page="jurisprudencia" onclick="showPage('jurisprudencia')">
-        <span class="icon">⚖️</span> Jurisprudencia SCJN
-        <span class="nav-badge green">✅ SJF2</span>
+      <div class="nav-label">📊 Monitoreo</div>
+      <div class="nav-item" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="icon">🏠</span> Inicio
       </div>
       <div class="nav-item" data-page="presas" onclick="showPage('presas')">
         <span class="icon">💧</span> Presas y Cuencas
-        <span class="nav-badge green">✅ CONAGUA</span>
+      </div>
+      <div class="nav-item" data-page="sequia" onclick="showPage('sequia')">
+        <span class="icon">🏜️</span> Monitor de Sequía
+      </div>
+      <div class="nav-item" data-page="alertas" onclick="showPage('alertas')">
+        <span class="icon">⛈️</span> Alertas Meteorológicas
       </div>
     </div>
 
-    <!-- ── GRUPO 1: ACCIÓN CÍVICA ── -->
+    <!-- ── LEGISLATIVO ── -->
     <div class="nav-section">
-      <div class="nav-label" style="color:var(--red2);letter-spacing:1.5px">✊ Acción Cívica</div>
+      <div class="nav-label">⚖️ Legislativo</div>
+      <div class="nav-item" data-page="leyes" onclick="showPage('leyes')">
+        <span class="icon">📜</span> Leyes y Decretos
+      </div>
+      <div class="nav-item" data-page="politicos" onclick="showPage('politicos')">
+        <span class="icon">🏛️</span> Cámara de Diputados
+      </div>
+      <div class="nav-item" data-page="senadores" onclick="showPage('senadores')">
+        <span class="icon">⚖️</span> Senado
+      </div>
+      <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
+        <span class="icon">🗳️</span> Votaciones del Pleno
+      </div>
+      <div class="nav-item" data-page="jurisprudencia" onclick="showPage('jurisprudencia')">
+        <span class="icon">📚</span> Jurisprudencia SCJN
+      </div>
+    </div>
 
-      <div class="nav-item" data-page="emergencia" onclick="showPage('emergencia')">
-        <span class="icon">🚨</span> Modo Emergencia
-        <span class="nav-badge red">24/7</span>
+    <!-- ── DINERO PÚBLICO ── -->
+    <div class="nav-section">
+      <div class="nav-label">💰 Dinero Público</div>
+      <div class="nav-item" onclick="cargarPanel('pef')">
+        <span class="icon">📊</span> PEF 2026
       </div>
-      <div class="nav-item" data-page="derechos" onclick="showPage('derechos')">
-        <span class="icon">🛡️</span> Mis Derechos
+      <div class="nav-item" onclick="mostrarProximamente('deuda')">
+        <span class="icon">💳</span> Deuda Pública
       </div>
-      <div class="nav-item" data-page="directorio" onclick="showPage('directorio')">
-        <span class="icon">📋</span> Directorio de Servicios
-        <span class="nav-badge green">32 estados</span>
+      <div class="nav-item" data-page="mapacontratos" onclick="showPage('mapacontratos')">
+        <span class="icon">📋</span> Contratos Públicos
       </div>
-      <div class="nav-item" data-page="offline" onclick="showPage('offline')">
-        <span class="icon">📵</span> Info sin conexión
+      <div class="nav-item" onclick="cargarPanel('asf')">
+        <span class="icon">🔍</span> Auditorías ASF
       </div>
+      <div class="nav-item" onclick="cargarPanel('buscador-sat')">
+        <span class="icon">🕵️</span> Buscador SAT
+      </div>
+    </div>
 
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
+    <!-- ── MUNICIPIOS Y ESTADOS ── -->
+    <div class="nav-section">
+      <div class="nav-label">🏙️ Municipios y Estados</div>
+      <div class="nav-item" onclick="cargarPanel('buscador')">
+        <span class="icon">🔎</span> Buscar Municipio
+      </div>
+      <div class="nav-item" onclick="cargarPanel('estado')">
+        <span class="icon">🗺️</span> Panel Estatal
+      </div>
+    </div>
 
-      <div class="nav-item" data-page="iniciativas" onclick="showPage('iniciativas')">
-        <span class="icon">✊</span> Iniciativas Ciudadanas
-        <span class="nav-badge green">✅ Votación</span>
+    <!-- ── PARTICIPA ── -->
+    <div class="nav-section">
+      <div class="nav-label">🗳️ Participa</div>
+      <div class="nav-item" onclick="cargarPanel('votar')">
+        <span class="icon">🗳️</span> Vota antes del Congreso
       </div>
-      <div class="nav-item" data-page="acciones" onclick="showPage('acciones')">
-        <span class="icon">⚡</span> Generador de Acciones
-        <span class="nav-badge green">✅ 13 plantillas</span>
-      </div>
-      <div class="nav-item" data-page="organizacion" onclick="showPage('organizacion')">
-        <span class="icon">🤝</span> Organízate
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
+      <div class="nav-item" onclick="cargarPanel('iniciativa-firmar')">
+        <span class="icon">✍️</span> Firma Iniciativas
       </div>
       <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
         <span class="icon">💬</span> Chat Comunitario
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
       </div>
-
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-      <div class="nav-item" data-page="verificacion" onclick="showPage('verificacion')">
-        <span class="icon">✅</span> Verificación Ciudadana
-        <span class="nav-badge" style="background:linear-gradient(135deg,#065f46,#047857);color:#a7f3d0">Beta</span>
-      </div>
-      <div class="nav-item" data-page="testigo" onclick="showPage('testigo')">
-        <span class="icon">📸</span> Testigo Cívico
-        <span class="nav-badge" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#bfdbfe">Legal</span>
+      <div class="nav-item" onclick="mostrarProximamente('debates')">
+        <span class="icon">🎤</span> Debates
       </div>
     </div>
 
-    <!-- ── GRUPO 2: INFORMACIÓN PÚBLICA ── -->
+    <!-- ── MÉXICO ── -->
     <div class="nav-section">
-      <div class="nav-label" style="color:var(--accent3);letter-spacing:1.5px">📜 Información Pública</div>
-
-      <div class="nav-item" data-page="leyes" onclick="showPage('leyes')">
-        <span class="icon">📜</span> Leyes y Decretos
-        <span class="nav-badge green">✅ Cám. Dip.</span>
-      </div>
-      <div class="nav-item" data-page="politicos" onclick="showPage('politicos')">
-        <span class="icon">🏛️</span> Diputados
-        <span class="nav-badge green">✅ SITL 500</span>
-      </div>
-      <div class="nav-item" data-page="senadores" onclick="showPage('senadores')">
-        <span class="icon">⚖️</span> Senadores
-        <span class="nav-badge green">✅ Senado 128</span>
-      </div>
-      <div class="nav-item" data-page="votar" onclick="showPage('votar')">
-        <span class="icon">🗳️</span> Vota tú primero
-        <span class="nav-badge green">✅ Gaceta</span>
-      </div>
-      <div class="nav-item" data-page="quemones" onclick="showPage('quemones')">
-        <span class="icon">📊</span> Diferencias de voto
-        <span class="nav-badge green">✅ Cruzado</span>
-      </div>
-      <div class="nav-item" data-page="votaciones" onclick="showPage('votaciones')">
-        <span class="icon">🗳️</span> Votaciones del Congreso
-        <span class="nav-badge green">✅ SITL Pleno</span>
-      </div>
-      <div class="nav-item" data-page="mi-rep" onclick="showPage('mi-rep')">
-        <span class="icon">👤</span> Mi Representante
-        <span class="nav-badge green">✅ SITL</span>
-      </div>
-      <div class="nav-item" data-page="dinero" onclick="showPage('dinero')">
-        <span class="icon">💰</span> Dinero Público
-        <span class="nav-badge" style="background:#22c55e;color:#fff">✅ SHCP</span>
-      </div>
-      <div class="nav-item" data-page="mapacontratos" onclick="showPage('mapacontratos')">
-        <span class="icon">🔥</span> Mapa de Contratos
-        <span class="nav-badge green">✅ datos.gob.mx</span>
-      </div>
-      <div class="nav-item" data-page="redes" onclick="showPage('redes')">
-        <span class="icon">🕸️</span> Redes de Influencia
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-      <div class="nav-item" data-page="municipio" onclick="showPage('municipio')">
-        <span class="icon">🏘️</span> Panel Municipal
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/buscador-sat.html'">
-        <span class="icon">🔎</span> Buscador SAT
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/asf.html'">
-        <span class="icon">🔍</span> Auditorías ASF
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/pef.html'">
-        <span class="icon">💰</span> PEF 2026
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/estado.html'">
-        <span class="icon">🗺️</span> Panel Estatal
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/sre.html'">
-        <span class="icon">🌎</span> México en el mundo
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/votar.html'">
-        <span class="icon">🗳️</span> Vota antes del Congreso
-      </div>
-      <div class="nav-item" onclick="window.location.href='/panel/iniciativa-firmar.html'">
-        <span class="icon">✍️</span> Firma iniciativas
-      </div>
-      <div class="nav-item" data-page="mun-representantes" onclick="showPage('mun-representantes')" style="padding-left:28px">
-        <span class="icon" style="font-size:13px">👥</span> <span style="font-size:12px">Representantes</span>
-      </div>
-      <div class="nav-item" data-page="mun-leyes" onclick="showPage('mun-leyes')" style="padding-left:28px">
-        <span class="icon" style="font-size:13px">📜</span> <span style="font-size:12px">Leyes Locales</span>
-      </div>
-      <div class="nav-item" data-page="mun-presupuesto" onclick="showPage('mun-presupuesto')" style="padding-left:28px">
-        <span class="icon" style="font-size:13px">💰</span> <span style="font-size:12px">Presupuesto</span>
-      </div>
-      <div class="nav-item" data-page="mun-contratos" onclick="showPage('mun-contratos')" style="padding-left:28px">
-        <span class="icon" style="font-size:13px">📋</span> <span style="font-size:12px">Contratos</span>
-      </div>
-      <div class="nav-item" data-page="mun-noticias" onclick="showPage('mun-noticias')" style="padding-left:28px">
-        <span class="icon" style="font-size:13px">📰</span> <span style="font-size:12px">Noticias Locales</span>
-      </div>
-
-      <div style="height:1px;background:var(--border);margin:6px 12px"></div>
-
-      <div class="nav-item" data-page="noticias" onclick="showPage('noticias')">
-        <span class="icon">📰</span> Noticias Cívicas
-        <span class="nav-badge green">✅ DOF+SCJN</span>
-      </div>
-      <div class="nav-item" data-page="diariocivico" onclick="showPage('diariocivico')">
-        <span class="icon">🗞️</span> Diario Cívico
-        <span class="nav-badge green">✅ DOF feed</span>
-      </div>
-      <div class="nav-item" data-page="geopolitica" onclick="showPage('geopolitica')">
+      <div class="nav-label">🌎 México</div>
+      <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🌐</span> México en el Mundo
-        <span class="nav-badge green">✅ SRE</span>
       </div>
-      <div class="nav-item" data-page="diplomatica" onclick="showPage('diplomatica')">
-        <span class="icon">🏛️</span> Red Diplomática
-        <span class="nav-badge green">✅ 68 sedes</span>
-      </div>
-    </div>
-
-    <!-- ── GRUPO 3: HERRAMIENTAS IA ── -->
-    <div class="nav-section">
-      <div class="nav-label" style="color:#a78bfa;letter-spacing:1.5px">🧠 Herramientas IA</div>
-
-      <div class="nav-item" data-page="ia" onclick="showPage('ia')">
-        <span class="icon">🧠</span> Asistente Legal IA
-        <span class="nav-badge green">✅ RAG 800+</span>
-      </div>
-      <div class="nav-item" data-page="comparador" onclick="showPage('comparador')">
-        <span class="icon">⚖️</span> Comparar Propuestas
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-      <div class="nav-item" data-page="simulador" onclick="showPage('simulador')">
-        <span class="icon">🔬</span> Simulador de Impacto
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-      <div class="nav-item" data-page="votosim" onclick="showPage('votosim')">
-        <span class="icon">🗳️</span> Simulador de Voto
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ 2027</span>
-      </div>
-      <div class="nav-item" data-page="debates" onclick="showPage('debates')">
-        <span class="icon">💬</span> Debates Estructurados
-        <span class="nav-badge" style="background:#f59e0b;color:#fff">⏳ Próx</span>
-      </div>
-    </div>
-
-    <!-- ── GRUPO 4: MEMORIA ── -->
-    <div class="nav-section">
-      <div class="nav-label" style="color:var(--green2);letter-spacing:1.5px">🌀 Memoria</div>
-
       <div class="nav-item" data-page="ombligo" onclick="showPage('ombligo')">
-        <span class="icon">🌀</span> Ombligo · Raíces
-        <span class="nav-badge green">✅ INAH 195</span>
+        <span class="icon">🏺</span> Cultura
       </div>
     </div>
 
-    <!-- ── FOOTER: PERFIL ── -->
+    <!-- ── ACCIÓN ── -->
+    <div class="nav-section">
+      <div class="nav-label">🛡️ Acción</div>
+      <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
+        <span class="icon">🤝</span> Pide Ayuda Legal
+      </div>
+      <div class="nav-item" onclick="mostrarProximamente('generador')">
+        <span class="icon">📄</span> Generador de Documentos
+      </div>
+      <div class="nav-item" onclick="mostrarProximamente('testigo')">
+        <span class="icon">📸</span> Testigo Cívico
+      </div>
+      <div class="nav-item" onclick="mostrarProximamente('directorio')">
+        <span class="icon">📞</span> Directorio 32 Estados
+      </div>
+    </div>
+
+    <!-- ── ADMIN ── -->
+    <div class="nav-section">
+      <div class="nav-label">⚙️ Admin</div>
+      <div class="nav-item" onclick="cargarPanel('scrapers-admin')">
+        <span class="icon">🔧</span> Scrapers Health
+      </div>
+    </div>
+
+        <!-- ── FOOTER: PERFIL ── -->
     <div class="sidebar-footer">
       <div class="user-chip" onclick="showPage('perfil');setTimeout(()=>perfilSetTab('resumen'),100)" style="cursor:pointer">
         <div class="avatar">CM</div>
@@ -13776,6 +13657,93 @@ function switchTab(el) {
 }
 
 // ─── Navigation ───
+// ─── Panel iframe loader & Próximamente placeholder ───
+function cargarPanel(slug) {
+  const PANELS = {
+    'pef': '/panel/pef.html?embedded=1',
+    'asf': '/panel/asf.html?embedded=1',
+    'buscador-sat': '/panel/buscador-sat.html?embedded=1',
+    'buscador': '/panel/buscador.html?embedded=1',
+    'estado': '/panel/estado.html?embedded=1',
+    'votar': '/panel/votar.html?embedded=1',
+    'iniciativa-firmar': '/panel/iniciativa-firmar.html?embedded=1',
+    'sre': '/panel/sre.html?embedded=1',
+    'scrapers-admin': '/admin/scrapers.html?embedded=1'
+  };
+  const url = PANELS[slug];
+  if (!url) return;
+  const pageId = 'page-iframe-' + slug;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  let host = document.getElementById(pageId);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = pageId;
+    host.className = 'page';
+    host.style.padding = '0';
+    host.innerHTML = '<iframe src="' + url + '" style="width:100%;height:calc(100vh - 60px);border:0;display:block;background:var(--bg,#0b0f1a);" loading="lazy"></iframe>';
+    const mainEl = document.querySelector('main.main') || document.querySelector('main');
+    if (mainEl) mainEl.appendChild(host);
+  }
+  host.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) {
+    const TITLES = {
+      'pef': 'PEF 2026',
+      'asf': 'Auditorías ASF',
+      'buscador-sat': 'Buscador SAT',
+      'buscador': 'Buscar Municipio',
+      'estado': 'Panel Estatal',
+      'votar': 'Vota antes del Congreso',
+      'iniciativa-firmar': 'Firma Iniciativas',
+      'sre': 'México en el Mundo',
+      'scrapers-admin': 'Scrapers Health'
+    };
+    titleEl.textContent = TITLES[slug] || 'Panel';
+  }
+}
+
+function mostrarProximamente(slug) {
+  const TITULOS = {
+    'deuda': '💳 Deuda Pública',
+    'debates': '🎤 Debates Estructurados',
+    'generador': '📄 Generador de Documentos',
+    'testigo': '📸 Testigo Cívico',
+    'directorio': '📞 Directorio 32 Estados'
+  };
+  const DESCRIPCIONES = {
+    'deuda': 'Próximamente: Dashboard de la deuda pública mexicana con desglose por entidad federativa, tipo (interna/externa) y comportamiento histórico.',
+    'debates': 'Próximamente: Debates estructurados entre ciudadanos sobre temas legislativos. Argumentación con anti-bot Nivel 2.',
+    'generador': 'Próximamente: Generador automático de denuncias, oficios y solicitudes de transparencia (formato PDF).',
+    'testigo': 'Próximamente: Reporta hechos de interés público desde tu teléfono con evidencia geolocalizada.',
+    'directorio': 'Próximamente: Directorio completo de oficinas de gobierno en los 32 estados con teléfonos verificados.'
+  };
+  const pageId = 'page-proximamente-' + slug;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  let host = document.getElementById(pageId);
+  if (!host) {
+    host = document.createElement('div');
+    host.id = pageId;
+    host.className = 'page';
+    const mainEl = document.querySelector('main.main') || document.querySelector('main');
+    if (mainEl) mainEl.appendChild(host);
+  }
+  host.innerHTML = '<div style="padding:3rem 2rem;text-align:center;color:var(--text,#e5e7eb);">' +
+    '<div style="font-size:4rem;margin-bottom:1rem;opacity:0.6;">⏳</div>' +
+    '<h2 style="margin:0 0 0.5rem 0;">' + (TITULOS[slug] || 'Próximamente') + '</h2>' +
+    '<p style="color:var(--text2,#9ca3af);max-width:520px;margin:0 auto;line-height:1.5;">' +
+    (DESCRIPCIONES[slug] || 'Módulo en desarrollo.') + '</p>' +
+    '<p style="color:#fbbf24;margin-top:1.5rem;font-size:0.9rem;">Estamos trabajando en esto. Vuelve pronto.</p>' +
+    '</div>';
+  host.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) titleEl.textContent = TITULOS[slug] || 'Próximamente';
+}
+
+window.cargarPanel = cargarPanel;
+window.mostrarProximamente = mostrarProximamente;
+
 function showPage(id) {
   // Hide all pages, remove nav active states
   document.querySelectorAll('.page').forEach(p => {
