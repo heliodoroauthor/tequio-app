@@ -1156,9 +1156,11 @@ export default async function handler(req, res) {
     // -- SHCP PEF -- Presupuesto de Egresos de la Federacion --
     if (vista === 'pef_resumen') {
       const anio = parseInt(req.query.anio || '2026', 10);
-      // Tabla ~85k filas. Usamos fetch directo con Range header para evitar limite default de 1000.
+      // Estrategia: paginar todos los rows con Range header (Supabase cap=1000 por chunk)
+      // Hacer fetches paralelos en lotes para evitar timeout (Vercel 10s Hobby, 60s Pro).
+      const CHUNK = 1000;
       const rfetch = async (range) => {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto&order=ramo.asc,desc_ramo.asc,monto.desc`, {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto&order=ramo.asc`, {
           headers: {
             'apikey': ANON_KEY,
             'Authorization': `Bearer ${ANON_KEY}`,
@@ -1173,19 +1175,21 @@ export default async function handler(req, res) {
         const data = await r.json();
         return { data, contentRange: cr };
       };
-      // Pedir en lotes paralelos de 5000 con Range
-      const CHUNK = 1000;
-      // Primero descubrir total
       const first = await rfetch(`0-${CHUNK-1}`);
       const m = (first.contentRange || '').match(/\/(\d+)$/);
       const totalRows = m ? parseInt(m[1], 10) : first.data.length;
       const all = first.data.slice();
-      const promises = [];
+      // Lanzar resto en lotes de 10 concurrentes para no saturar
+      const ranges = [];
       for (let off = CHUNK; off < totalRows; off += CHUNK) {
-        promises.push(rfetch(`${off}-${off + CHUNK - 1}`).then(x => x.data));
+        ranges.push(`${off}-${off + CHUNK - 1}`);
       }
-      const more = await Promise.all(promises);
-      for (const c of more) all.push(...c);
+      const BATCH = 10;
+      for (let b = 0; b < ranges.length; b += BATCH) {
+        const slice = ranges.slice(b, b + BATCH);
+        const results = await Promise.all(slice.map(rg => rfetch(rg).then(x => x.data).catch(() => [])));
+        for (const c of results) all.push(...c);
+      }
       const byRamo = {};
       let total = 0;
       for (const r of all) {
