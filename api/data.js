@@ -1156,29 +1156,49 @@ export default async function handler(req, res) {
     // -- SHCP PEF -- Presupuesto de Egresos de la Federacion --
     if (vista === 'pef_resumen') {
       const anio = parseInt(req.query.anio || '2026', 10);
-      // Supabase limita 1000 por request. Tabla tiene ~85k filas.
-      // Paralelizar lotes para evitar timeout en Vercel (10s Hobby).
-      const PAGE = 1000;
-      const TOTAL_PAGES = 90; // ~85k filas / 1000 = 85, margen extra
-      const offsets = Array.from({length: TOTAL_PAGES}, (_, i) => i * PAGE);
-      const chunks = await Promise.all(
-        offsets.map(off => sb(`shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto&limit=${PAGE}&offset=${off}`).catch(() => []))
-      );
+      // Tabla ~85k filas. Usamos fetch directo con Range header para evitar limite default de 1000.
+      const rfetch = async (range) => {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto`, {
+          headers: {
+            'apikey': ANON_KEY,
+            'Authorization': `Bearer ${ANON_KEY}`,
+            'Accept': 'application/json',
+            'Range-Unit': 'items',
+            'Range': range,
+            'Prefer': 'count=exact',
+          },
+        });
+        if (!r.ok && r.status !== 206) throw new Error(`Supabase ${r.status}`);
+        const cr = r.headers.get('content-range') || '';
+        const data = await r.json();
+        return { data, contentRange: cr };
+      };
+      // Pedir en lotes paralelos de 5000 con Range
+      const CHUNK = 5000;
+      // Primero descubrir total
+      const first = await rfetch(`0-${CHUNK-1}`);
+      const m = (first.contentRange || '').match(/\/(\d+)$/);
+      const totalRows = m ? parseInt(m[1], 10) : first.data.length;
+      const all = first.data.slice();
+      const promises = [];
+      for (let off = CHUNK; off < totalRows; off += CHUNK) {
+        promises.push(rfetch(`${off}-${off + CHUNK - 1}`).then(x => x.data));
+      }
+      const more = await Promise.all(promises);
+      for (const c of more) all.push(...c);
       const byRamo = {};
       let total = 0;
-      for (const chunk of chunks) {
-        for (const r of chunk) {
-          const k = r.ramo + '|' + (r.desc_ramo || '');
-          byRamo[k] = (byRamo[k] || 0) + Number(r.monto || 0);
-          total += Number(r.monto || 0);
-        }
+      for (const r of all) {
+        const k = r.ramo + '|' + (r.desc_ramo || '');
+        byRamo[k] = (byRamo[k] || 0) + Number(r.monto || 0);
+        total += Number(r.monto || 0);
       }
       const items = Object.entries(byRamo).map(([k, v]) => {
         const [ramo, desc_ramo] = k.split('|');
         return { ramo, desc_ramo, monto: v };
       }).sort((a, b) => b.monto - a.monto);
       res.setHeader('Cache-Control', 's-maxage=3600');
-      return res.status(200).json({ anio, total, ramos: items });
+      return res.status(200).json({ anio, total, ramos: items, rowsFetched: all.length, totalRowsServer: totalRows });
     }
 
         if (vista === 'pef_ramo') {
