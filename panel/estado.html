@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0b0f1a">
+<title>Panel estatal · Tequio</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+  :root {
+    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
+    --text:#e8eef9; --muted:#8a98b3; --hint:#6b7a96;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#3b82f6;
+    --accent:#a78bfa; --gold:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .wrap{max-width:980px;margin:0 auto;padding:18px 16px 80px}
+  a{color:var(--gold);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .back{display:inline-block;margin:6px 0 18px;color:var(--muted);font-size:14px}
+  .back:hover{color:var(--gold)}
+  .hero{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid var(--border);border-radius:18px;padding:28px 22px;margin-bottom:22px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(251,191,36,.08),transparent 60%);pointer-events:none}
+  .hero h1{margin:0 0 6px;font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .hero .clave-badge{display:inline-block;background:var(--gold);color:#0b0f1a;font-weight:700;padding:3px 10px;border-radius:8px;font-size:12px;margin-right:8px;vertical-align:middle}
+  .hero .total-historico{font-size:34px;font-weight:800;color:var(--gold);margin:14px 0 4px;letter-spacing:-.02em}
+  .hero .sub{color:var(--muted);font-size:14px;margin-top:4px}
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .stat-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .stat-card .value{font-size:24px;font-weight:800;margin-top:6px;color:var(--text);letter-spacing:-.01em}
+  .stat-card .sub{font-size:12px;color:var(--hint);margin-top:4px}
+  .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px}
+  .section h2{margin:0 0 14px;font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+  .section h2 .icon{font-size:18px}
+  .bar-chart{display:flex;align-items:flex-end;gap:4px;height:160px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .bar-chart .bar{flex:1;background:linear-gradient(180deg,var(--gold) 0%,#d97706 100%);border-radius:3px 3px 0 0;min-height:2px;position:relative;cursor:pointer;transition:opacity .15s}
+  .bar-chart .bar:hover{opacity:.8}
+  .bar-chart .bar .tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#0b0f1a;border:1px solid var(--border);padding:6px 8px;border-radius:6px;font-size:11px;white-space:nowrap;color:var(--text);margin-bottom:6px;z-index:10}
+  .bar-chart .bar:hover .tip{display:block}
+  .bar-labels{display:flex;gap:4px;margin-top:4px}
+  .bar-labels span{flex:1;text-align:center;font-size:10px;color:var(--hint)}
+  .row-list{display:flex;flex-direction:column;gap:8px}
+  .row-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0b0f1a;border-radius:8px;border:1px solid var(--border)}
+  .row-item .name{font-size:13px;color:var(--text);font-weight:500}
+  .row-item .val{font-size:13px;font-weight:700;color:var(--gold)}
+  .partido-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+  .partido-chip{background:#0b0f1a;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+  .partido-chip .p-name{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase}
+  .partido-chip .p-count{font-size:22px;font-weight:800;color:var(--gold);margin-top:2px}
+  .muni-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .muni-card{background:#0b0f1a;border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s,transform .1s}
+  .muni-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .muni-card .m-name{font-size:14px;font-weight:600;color:var(--text)}
+  .muni-card .m-pob{font-size:12px;color:var(--muted);margin-top:3px}
+  .rep-list{display:flex;flex-direction:column;gap:6px}
+  .rep-card{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#0b0f1a;border-radius:8px;border:1px solid var(--border);font-size:13px}
+  .rep-card .r-name{color:var(--text);font-weight:500}
+  .rep-card .r-meta{color:var(--muted);font-size:11px}
+  .partido-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--border);color:var(--text);margin-left:6px}
+  .estado-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .estado-tile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:border-color .15s,transform .1s;text-align:center}
+  .estado-tile:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .estado-tile .t-clave{font-size:11px;color:var(--gold);font-weight:700}
+  .estado-tile .t-name{font-size:13px;color:var(--text);font-weight:600;margin-top:4px}
+  .disclaimer{font-size:12px;color:var(--hint);margin-top:24px;padding:14px;background:#0b0f1a;border-radius:10px;border:1px solid var(--border);line-height:1.5}
+  .loading{text-align:center;padding:60px 20px;color:var(--muted)}
+  .loading .spin{display:inline-block;width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+  @media(max-width:560px){
+    .hero h1{font-size:24px}
+    .hero .total-historico{font-size:26px}
+    .stat-card .value{font-size:18px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← Tequio</a>
+  <div id="content">
+    <div class="loading"><div class="spin"></div><div style="margin-top:14px">Cargando panel estatal…</div></div>
+  </div>
+</div>
+<script>
+const ESTADOS = {
+  "01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche",
+  "05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de Mexico",
+  "10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco",
+  "15":"Estado de Mexico","16":"Michoacan","17":"Morelos","18":"Nayarit","19":"Nuevo Leon",
+  "20":"Oaxaca","21":"Puebla","22":"Queretaro","23":"Quintana Roo","24":"San Luis Potosi",
+  "25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala",
+  "30":"Veracruz","31":"Yucatan","32":"Zacatecas"
+};
+function fmt(n) {
+  n = Number(n || 0);
+  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + ' bn';
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + ' mmdp';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + ' mdp';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + ' mil';
+  return new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN', maximumFractionDigits: 0}).format(n);
+}
+function fmtNum(n) {
+  return new Intl.NumberFormat('es-MX').format(Number(n || 0));
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderLanding() {
+  const tiles = Object.entries(ESTADOS).map(([clave, nombre]) =>
+    `<div class="estado-tile" onclick="location.href='?clave=${clave}'">
+      <div class="t-clave">${clave}</div>
+      <div class="t-name">${esc(nombre)}</div>
+    </div>`
+  ).join('');
+  document.getElementById('content').innerHTML = `
+    <div class="hero">
+      <h1>Panel Estatal</h1>
+      <div class="sub">32 entidades federativas · Transferencias federales 2011-2026</div>
+      <div class="total-historico" style="font-size:18px;color:var(--muted);font-weight:500">Selecciona un estado para explorar</div>
+    </div>
+    <div class="section">
+      <h2><span class="icon">🗺️</span> Entidades federativas</h2>
+      <div class="estado-grid">${tiles}</div>
+    </div>
+    <div class="disclaimer">
+      Datos de Transferencias Federales a Entidades Federativas (SHCP) y Censo de Población y Vivienda (INEGI). Selecciona una entidad para ver el detalle de transferencias, municipios principales, presidentes municipales y representantes federales.
+    </div>
+  `;
+}
+
+function renderPanel(data) {
+  const c = document.getElementById('content');
+  const nombre = data.nombre_estado || ESTADOS[data.clave] || '';
+  const total = data.total_transferencias_historicas || 0;
+  const porAnio = data.transferencias_por_anio || [];
+  const ultimoAnio = data.ultimo_anio_con_datos;
+  const totalUltimo = porAnio.length ? porAnio[porAnio.length - 1].total : 0;
+  const maxVal = Math.max(...porAnio.map(r => r.total), 1);
+  const topFondos = data.top_fondos || [];
+  const topRamos = data.top_ramos || [];
+  const munis = data.municipios_top || [];
+  const partidos = data.presidentes_partido || [];
+  const dips = data.diputados_federales || [];
+  const sens = data.senadores || [];
+
+  const bars = porAnio.map(r => {
+    const h = Math.max(2, (r.total / maxVal) * 100);
+    return `<div class="bar" style="height:${h}%"><span class="tip">${r.anio}: ${fmt(r.total)}</span></div>`;
+  }).join('');
+  const barLabels = porAnio.map(r => `<span>${String(r.anio).slice(2)}</span>`).join('');
+
+  const fondosHtml = topFondos.length
+    ? topFondos.slice(0, 8).map(f => `<div class="row-item"><span class="name">${esc(f.fondo)}</span><span class="val">${fmt(f.total)}</span></div>`).join('')
+    : '<div class="empty">Sin datos de fondos.</div>';
+
+  const ramosHtml = topRamos.length
+    ? topRamos.map(r => `<div class="row-item"><span class="name">${esc(r.ramo)}</span><span class="val">${fmt(r.total)}</span></div>`).join('')
+    : '<div class="empty">Sin datos de ramos.</div>';
+
+  const partidosHtml = partidos.length
+    ? `<div class="partido-grid">${partidos.slice(0, 8).map(p => `<div class="partido-chip"><div class="p-name">${esc(p.partido)}</div><div class="p-count">${p.num}</div></div>`).join('')}</div>`
+    : '<div class="empty">Sin datos de presidentes municipales.</div>';
+
+  const munisHtml = munis.length
+    ? `<div class="muni-grid">${munis.map(m => `<div class="muni-card" onclick="location.href='/panel/municipio.html?clave_inegi=${esc(m.clave_inegi)}'"><div class="m-name">${esc(m.nombre)}</div><div class="m-pob">${m.poblacion_total ? fmtNum(m.poblacion_total) + ' habs.' : 'Sin datos de población'}</div></div>`).join('')}</div>`
+    : '<div class="empty">Sin municipios disponibles.</div>';
+
+  const dipsHtml = dips.length
+    ? `<div class="rep-list">${dips.slice(0, 15).map(d => `<div class="rep-card"><span class="r-name">${esc(d.nombre)}<span class="partido-tag">${esc(d.partido_codigo || d.partido || '')}</span></span><span class="r-meta">${esc(d.distrito || '')}</span></div>`).join('')}</div>${dips.length > 15 ? `<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">+${dips.length - 15} más</div>` : ''}`
+    : '<div class="empty">Sin diputados federales asociados.</div>';
+
+  const sensHtml = sens.length
+    ? `<div class="rep-list">${sens.map(s => `<div class="rep-card"><span class="r-name">${esc(s.nombre_completo || s.nombre || '')}<span class="partido-tag">${esc(s.partido || '')}</span></span><span class="r-meta">${esc(s.tipo_eleccion || s.principio || '')}</span></div>`).join('')}</div>`
+    : '<div class="empty">Sin senadores asociados directamente en datos.</div>';
+
+  c.innerHTML = `
+    <div class="hero">
+      <span class="clave-badge">${data.clave}</span>
+      <h1>${esc(nombre || 'Estado ' + data.clave)}</h1>
+      <div class="total-historico">${fmt(total)}</div>
+      <div class="sub">Transferencias federales acumuladas (2011-${ultimoAnio || '2026'}) · ${porAnio.length} años con datos</div>
+    </div>
+
+    <div class="grid-stats">
+      <div class="stat-card">
+        <div class="label">Total ${ultimoAnio || ''}</div>
+        <div class="value">${fmt(totalUltimo)}</div>
+        <div class="sub">Año más reciente con datos</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Municipios</div>
+        <div class="value">${data.num_municipios || 0}</div>
+        <div class="sub">En la base de datos</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Diputados federales</div>
+        <div class="value">${data.num_diputados || dips.length}</div>
+        <div class="sub">Del estado</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Senadores</div>
+        <div class="value">${data.num_senadores || sens.length}</div>
+        <div class="sub">Del estado</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">📊</span> Transferencias federales por año</h2>
+      <div class="bar-chart">${bars}</div>
+      <div class="bar-labels">${barLabels}</div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">💰</span> Top fondos / programas</h2>
+      <div class="row-list">${fondosHtml}</div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">🏛️</span> Top ramos (origen)</h2>
+      <div class="row-list">${ramosHtml}</div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">🎨</span> Distribución partidista de alcaldías</h2>
+      ${partidosHtml}
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">🏙️</span> Municipios principales</h2>
+      ${munisHtml}
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">👥</span> Diputados federales del estado</h2>
+      ${dipsHtml}
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">🎖️</span> Senadores</h2>
+      ${sensHtml}
+    </div>
+
+    <div class="disclaimer">
+      Fuentes: <strong>SHCP</strong> (Transferencias Federales a Entidades Federativas, ramos 23/28/33). <strong>INAFED</strong> (presidentes municipales). <strong>Cámara de Diputados / Senado de la República</strong> (representantes). <strong>INEGI</strong> (datos de población). Datos del periodo 2011-2026.
+    </div>
+  `;
+}
+
+async function loadPanel(clave) {
+  try {
+    const r = await fetch('/api/data?vista=estado_panel&clave=' + encodeURIComponent(clave));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    renderPanel(data);
+    document.title = (data.nombre_estado || ESTADOS[clave] || 'Estado') + ' · Panel · Tequio';
+  } catch (e) {
+    document.getElementById('content').innerHTML = `
+      <div class="hero">
+        <h1>Error al cargar</h1>
+        <div class="sub" style="color:var(--bad)">${esc(e.message)}</div>
+        <div style="margin-top:14px"><a href="/panel/estado.html">← Ver todos los estados</a></div>
+      </div>
+    `;
+  }
+}
+
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const clave = (params.get('clave') || '').padStart(2, '0');
+  if (clave && clave !== '00' && ESTADOS[clave]) {
+    loadPanel(clave);
+  } else {
+    renderLanding();
+  }
+})();
+</script>
+</body>
+</html>
