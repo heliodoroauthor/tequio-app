@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firma iniciativas ciudadanas · Tequio</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0a0a;color:#e5e5e5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;line-height:1.5}
+  header{background:linear-gradient(135deg,#1a1a1a,#0a0a0a);padding:16px 20px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+  header a.back{color:#9ca3af;text-decoration:none;font-size:14px;padding:6px 12px;border-radius:8px;background:#1f1f1f;border:1px solid #2a2a2a;transition:.15s}
+  header a.back:hover{background:#2a2a2a;color:#fff}
+  header h1{font-size:18px;font-weight:600;color:#fff}
+  main{max-width:880px;margin:0 auto;padding:20px}
+  .intro{background:#13131a;border:1px solid #2a2a2a;border-radius:12px;padding:18px;margin-bottom:20px}
+  .intro h2{color:#a78bfa;font-size:16px;margin-bottom:6px}
+  .intro p{font-size:13px;color:#9ca3af}
+  .telemetria{display:flex;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#0f1419;border:1px solid #1f2937;border-radius:10px;margin-bottom:20px;font-size:12px;color:#94a3b8}
+  .telemetria span.ok{color:#10b981}
+  .telemetria span.warn{color:#f59e0b}
+  .card{background:#13131a;border:1px solid #2a2a2a;border-radius:14px;padding:20px;margin-bottom:18px;transition:.2s}
+  .card.bloqueada{opacity:.6;pointer-events:none}
+  .card h3{font-size:18px;color:#fff;margin-bottom:8px}
+  .card .resumen{color:#9ca3af;font-size:14px;margin-bottom:14px}
+  .meta{display:flex;gap:14px;font-size:12px;color:#64748b;margin-bottom:14px;flex-wrap:wrap}
+  .progreso-box{margin-bottom:14px;padding:12px;background:#0f1419;border-radius:10px}
+  .progreso-meta{display:flex;justify-content:space-between;font-size:13px;color:#cbd5e1;margin-bottom:8px}
+  .progreso-bar{height:14px;background:#1f2937;border-radius:7px;overflow:hidden}
+  .progreso-fill{height:100%;background:linear-gradient(90deg,#a78bfa,#8b5cf6);border-radius:7px;transition:width .4s}
+  .progreso-pct{font-size:12px;color:#9ca3af;margin-top:6px;text-align:right}
+  .botones button{width:100%;padding:14px 18px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s;color:#fff;background:#8b5cf6}
+  .botones button:hover{background:#7c3aed}
+  .botones button:disabled{opacity:.4;cursor:not-allowed}
+  .error{color:#ef4444;font-size:13px;margin-top:10px;padding:8px 12px;background:#3f0d0d;border-radius:8px;display:none}
+  .exito{color:#10b981;font-size:13px;margin-top:10px;padding:8px 12px;background:#0f2f1d;border-radius:8px;display:none}
+  .disclaimer{font-size:12px;color:#64748b;text-align:center;padding:20px;margin-top:30px;border-top:1px solid #2a2a2a}
+  .loading{text-align:center;padding:40px;color:#9ca3af}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="/">&larr; Tequio</a>
+  <h1>Firma iniciativas ciudadanas</h1>
+</header>
+<main>
+  <div class="intro">
+    <h2>Tu firma impulsa el cambio</h2>
+    <p>Las iniciativas ciudadanas necesitan apoyo masivo para entrar al proceso legislativo. Firma de forma anonima las que apoyas.</p>
+  </div>
+
+  <div class="telemetria">
+    <span id="tel-tiempo">Tiempo en pagina: <strong>0s</strong></span>
+    <span id="tel-scroll" class="warn">Scroll: pendiente</span>
+    <span id="tel-pointer" class="warn">Interaccion: pendiente</span>
+    <span id="tel-device">Device hash: calculando...</span>
+  </div>
+
+  <div id="iniciativas-container">
+    <div class="loading">Cargando iniciativas...</div>
+  </div>
+
+  <div class="disclaimer">
+    Tu firma es anonima. Usamos hash de dispositivo, IP y opcionalmente INE - nunca tu identidad.
+    <br>Tequio.app &middot; Mexico
+  </div>
+</main>
+
+<script src="/js/anti-bot.js"></script>
+<script>
+(async function() {
+  'use strict';
+  const elContainer = document.getElementById('iniciativas-container');
+  const elTiempo = document.getElementById('tel-tiempo');
+  const elScroll = document.getElementById('tel-scroll');
+  const elPointer = document.getElementById('tel-pointer');
+  const elDevice = document.getElementById('tel-device');
+
+  setInterval(() => {
+    const ms = AntiBot.tiempoEnPagina();
+    elTiempo.innerHTML = 'Tiempo en pagina: <strong>' + Math.floor(ms/1000) + 's</strong>';
+  }, 1000);
+
+  setInterval(async () => {
+    const ctx = await AntiBot.contextoNivel2({});
+    if (ctx.scroll_detectado) { elScroll.textContent = 'Scroll: detectado'; elScroll.className = 'ok'; }
+    if (ctx.pointer_detectado) { elPointer.textContent = 'Interaccion: detectada'; elPointer.className = 'ok'; }
+    if (ctx.device_hash) elDevice.textContent = 'Device: ' + ctx.device_hash.slice(0,12) + '...';
+  }, 500);
+
+  let iniciativas = [];
+  try {
+    const r = await fetch('/api/data?vista=iniciativas&tipo=iniciativa_ciudadana');
+    const j = await r.json();
+    iniciativas = (j.items || []).filter(it => it.tipo === 'iniciativa_ciudadana');
+  } catch (e) {
+    elContainer.innerHTML = '<div class="card"><p style="color:#ef4444">Error: ' + e.message + '</p></div>';
+    return;
+  }
+
+  if (iniciativas.length === 0) {
+    elContainer.innerHTML = '<div class="card"><p>No hay iniciativas ciudadanas activas.</p></div>';
+    return;
+  }
+
+  elContainer.innerHTML = iniciativas.map(it => {
+    const firmas = it.firmas || 0;
+    const meta = it.meta_firmas || 100000;
+    const pct = Math.min(100, Math.round(firmas * 100 / meta));
+    const fechaCierre = it.fecha_cierre ? new Date(it.fecha_cierre).toLocaleDateString('es-MX') : 'Sin fecha limite';
+    return '<div class="card" data-id="' + it.id + '">'
+      + '<h3>' + escapeHtml(it.titulo) + '</h3>'
+      + '<p class="resumen">' + escapeHtml(it.resumen || '') + '</p>'
+      + '<div class="meta">'
+      +   '<span>Cierra: ' + fechaCierre + '</span>'
+      +   (it.fuente_url ? '<span><a href="' + it.fuente_url + '" target="_blank" rel="noopener" style="color:#a78bfa">Fuente</a></span>' : '')
+      + '</div>'
+      + '<div class="progreso-box">'
+      +   '<div class="progreso-meta"><span><strong>' + firmas.toLocaleString('es-MX') + '</strong> firmas</span><span>Meta: ' + meta.toLocaleString('es-MX') + '</span></div>'
+      +   '<div class="progreso-bar"><div class="progreso-fill" style="width:' + pct + '%"></div></div>'
+      +   '<div class="progreso-pct">' + pct + '%</div>'
+      + '</div>'
+      + '<div class="botones"><button data-firmar>Firmar iniciativa</button></div>'
+      + '<div class="error" data-error></div>'
+      + '<div class="exito" data-exito></div>'
+      + '</div>';
+  }).join('');
+
+  const hps = {};
+  document.querySelectorAll('.card').forEach(card => {
+    hps[card.dataset.id] = AntiBot.inyectarHoneypot(card);
+  });
+
+  document.querySelectorAll('.card button[data-firmar]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const card = btn.closest('.card');
+      const id = card.dataset.id;
+      const errEl = card.querySelector('[data-error]');
+      const okEl = card.querySelector('[data-exito]');
+      errEl.style.display = 'none'; okEl.style.display = 'none';
+
+      const ctx = await AntiBot.contextoNivel3({ honeypot: hps[id], minTiempoMs: 30000 });
+      const v = AntiBot.validarNivel3(ctx);
+      if (!v.ok) {
+        let msg = 'No se pudo validar: ' + v.motivo;
+        if (v.motivo === 'tiempo') msg = 'Lee la iniciativa con calma. Faltan ' + v.falta_seg + 's.';
+        if (v.motivo === 'sin_scroll') msg = 'Necesitas hacer scroll en la pagina.';
+        if (v.motivo === 'sin_pointer') msg = 'Mueve el mouse o toca la pantalla.';
+        if (v.motivo === 'idioma_no_es') msg = 'Tu navegador no esta en espanol.';
+        if (v.motivo === 'timezone_no_mx') msg = 'Tu zona horaria no parece ser de Mexico.';
+        errEl.textContent = msg;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const resp = await fetch('/api/data?vista=firmar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            iniciativa_id: id,
+            device_hash: ctx.device_hash,
+            honeypot: ctx.honeypot,
+            tiempo_en_pagina_ms: ctx.tiempo_en_pagina_ms,
+            scroll_detectado: ctx.scroll_detectado
+          })
+        });
+        const j = await resp.json();
+        if (!resp.ok) {
+          errEl.textContent = j.error || ('Error ' + resp.status);
+          errEl.style.display = 'block';
+        } else {
+          okEl.textContent = 'Firma registrada de forma anonima. Gracias por participar.';
+          okEl.style.display = 'block';
+          card.classList.add('bloqueada');
+        }
+      } catch (err) {
+        errEl.textContent = 'Error de red: ' + err.message;
+        errEl.style.display = 'block';
+      }
+    });
+  });
+
+  function escapeHtml(s) {
+    return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+})();
+</script>
+</body>
+</html>
