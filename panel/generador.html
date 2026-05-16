@@ -91,8 +91,21 @@ a:hover { text-decoration: underline; }
   <a href="/" class="back-link" id="backLink">&larr; Tequio</a>
   <div class="header">
     <h1>📄 Generador de Documentos</h1>
-    <p>Plantillas legales oficiales. Llenas tus datos, descargas el PDF. <strong>Tus datos nunca salen de tu dispositivo.</strong></p>
+    <p>Convierte tu situación en un documento legal listo para presentar.</p>
   </div>
+  <div id="docs-counter" style="position: absolute; top: 1rem; right: 1rem; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 999px; padding: 0.4rem 0.9rem; font-size: 0.78rem; color: #fbbf24; display: flex; gap: 0.4rem; align-items: center;">
+    <span>📄</span><span id="docs-count">0</span><span style="color:#9ca3af;font-weight:normal;">docs generados</span>
+  </div>
+  <div class="defensoria-banner" style="background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03)); border: 1px solid rgba(251,191,36,0.3); border-radius: 0.75rem; padding: 1rem 1.25rem; margin: 1rem 0; color: #fbbf24; display: flex; gap: 0.8rem; align-items: flex-start;">
+    <div style="font-size: 1.5rem;">⚖️</div>
+    <div style="flex:1; line-height: 1.5; font-size: 0.92rem;">
+      <span style="color:#e5e7eb;">Documentos orientativos basados en ley mexicana vigente.</span> <strong>Revisa siempre con un abogado o defensor público antes de presentar.</strong> <span style="color:#e5e7eb;">La Defensoría Pública Federal es gratuita: </span><a href="tel:8002003030" style="color:#fbbf24; font-weight:700; text-decoration:underline;">800 200 3030</a>
+    </div>
+  </div>
+  <section id="viewSituaciones" class="situaciones" style="margin-bottom: 2rem;">
+    <h2 class="section-title" style="font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; text-transform: uppercase; margin: 1.5rem 0 1rem 0;">⚡ Situaciones frecuentes</h2>
+    <div class="situaciones-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;"></div>
+  </section>
 
   <div id="viewLanding"></div>
   <div id="viewForm" class="hidden"></div>
@@ -434,6 +447,457 @@ TESTIGO                                                        TESTIGO
 NOTA: Este modelo es de uso común. Para actos jurídicos importantes (compra-venta de inmuebles, donaciones, mandatos amplios), se requiere PODER NOTARIAL otorgado ante Notario Público.`;
     }
   }
+
+  ,
+  'queja-cndh': {
+    icono: '🚨',
+    titulo: 'Queja ante CNDH',
+    descripcion: 'Denuncia violaciones a derechos humanos cometidas por autoridades federales.',
+    fundamento: 'Ley de la CNDH, artículos 25-33. CNDH: 800 715 2000.',
+    fields: [
+      { id: 'quejoso_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'quejoso_direccion', label: 'Tu dirección para notificaciones', tipo: 'text', required: true },
+      { id: 'quejoso_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'autoridad', label: 'Autoridad federal responsable', tipo: 'text', required: true },
+      { id: 'servidor', label: 'Servidor público involucrado (si lo conoces)', tipo: 'text', required: false },
+      { id: 'derecho', label: 'Derecho humano violado (vida, integridad, libertad, igualdad, seguridad jurídica, etc.)', tipo: 'text', required: true },
+      { id: 'fecha', label: 'Fecha de los hechos', tipo: 'date', required: true },
+      { id: 'lugar', label: 'Lugar', tipo: 'text', required: true },
+      { id: 'hechos', label: 'Descripción de los hechos', tipo: 'textarea', required: true, rows: 8 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `QUEJA POR VIOLACIÓN A DERECHOS HUMANOS
+
+A: COMISIÓN NACIONAL DE LOS DERECHOS HUMANOS
+P R E S E N T E.
+
+${d.quejoso_nombre || '[NOMBRE]'}, con domicilio en ${d.quejoso_direccion || '[DIRECCIÓN]'} y correo electrónico ${d.quejoso_email || '[EMAIL]'}, con fundamento en los artículos 102 apartado B de la Constitución Política de los Estados Unidos Mexicanos y 25 a 33 de la Ley de la Comisión Nacional de los Derechos Humanos, presento la siguiente QUEJA:
+
+AUTORIDAD RESPONSABLE: ${d.autoridad || '[AUTORIDAD]'}
+${d.servidor ? `SERVIDOR PÚBLICO INVOLUCRADO: ${d.servidor}\n` : ''}DERECHO HUMANO VIOLADO: ${d.derecho || '[DERECHO]'}
+
+H E C H O S
+
+El día ${d.fecha || '[FECHA]'}, en ${d.lugar || '[LUGAR]'}, ocurrieron los siguientes hechos:
+
+${d.hechos || '[DESCRIPCIÓN DETALLADA]'}
+
+P E T I C I Ó N
+
+PRIMERO. Tener por presentada esta queja en términos del artículo 25 de la Ley de la CNDH.
+SEGUNDO. Iniciar la investigación correspondiente.
+TERCERO. En su momento, emitir Recomendación a la autoridad responsable.
+CUARTO. Notificarme las actuaciones a mi domicilio o correo electrónico.
+
+ATENTAMENTE
+${fecha}
+
+${d.quejoso_nombre || '[NOMBRE]'}
+QUEJOSO(A)
+
+————————————————————
+CNDH: 800 715 2000 · www.cndh.org.mx
+También puedes acudir a la Comisión Estatal de Derechos Humanos de tu entidad.`;
+    }
+  },
+  'demanda-laboral': {
+    icono: '⚙️',
+    titulo: 'Demanda laboral por despido injustificado',
+    descripcion: 'Reclama indemnización constitucional o reinstalación tras despido sin causa justificada.',
+    fundamento: 'Ley Federal del Trabajo (LFT) artículos 47, 48 y 49. PROFEDET: 800 911 7877 (asesoría gratuita).',
+    fields: [
+      { id: 'trabajador_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'trabajador_direccion', label: 'Tu dirección', tipo: 'text', required: true },
+      { id: 'trabajador_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'patron', label: 'Nombre del patrón / empresa', tipo: 'text', required: true },
+      { id: 'patron_direccion', label: 'Dirección del patrón / centro de trabajo', tipo: 'text', required: true },
+      { id: 'puesto', label: 'Puesto que desempeñabas', tipo: 'text', required: true },
+      { id: 'fecha_ingreso', label: 'Fecha de ingreso', tipo: 'date', required: true },
+      { id: 'fecha_despido', label: 'Fecha del despido', tipo: 'date', required: true },
+      { id: 'salario', label: 'Salario diario (MXN)', tipo: 'number', required: true },
+      { id: 'circunstancias', label: 'Circunstancias del despido', tipo: 'textarea', required: true, rows: 6 },
+      { id: 'opta_por', label: 'Optas por', tipo: 'select', required: true, opciones: ['Reinstalación', 'Indemnización constitucional'] }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const salario = d.salario ? `$${Number(d.salario).toLocaleString('es-MX')}` : '[SALARIO]';
+      return `DEMANDA LABORAL POR DESPIDO INJUSTIFICADO
+
+A: JUNTA / TRIBUNAL LABORAL COMPETENTE
+P R E S E N T E.
+
+${d.trabajador_nombre || '[NOMBRE]'}, con domicilio en ${d.trabajador_direccion || '[DIRECCIÓN]'}, correo ${d.trabajador_email || '[EMAIL]'}, con fundamento en los artículos 47, 48 y 49 de la Ley Federal del Trabajo, presento DEMANDA LABORAL en contra de:
+
+PATRÓN DEMANDADO: ${d.patron || '[PATRÓN]'}
+DOMICILIO DEL PATRÓN: ${d.patron_direccion || '[DIRECCIÓN PATRÓN]'}
+
+H E C H O S
+
+1. Ingresé a laborar para el patrón el día ${d.fecha_ingreso || '[FECHA INGRESO]'} desempeñando el puesto de ${d.puesto || '[PUESTO]'}.
+
+2. Mi salario diario era de ${salario} MXN.
+
+3. El día ${d.fecha_despido || '[FECHA DESPIDO]'} fui despedido(a) injustificadamente bajo las siguientes circunstancias:
+
+${d.circunstancias || '[CIRCUNSTANCIAS DEL DESPIDO]'}
+
+4. El patrón no señaló causa justificada de las contempladas en el artículo 47 de la LFT, por lo que el despido es INJUSTIFICADO.
+
+P E T I C I Ó N
+
+Con fundamento en el artículo 48 LFT, OPTO POR ${(d.opta_por || 'INDEMNIZACIÓN CONSTITUCIONAL').toUpperCase()}, reclamando las siguientes prestaciones:
+
+${d.opta_por === 'Reinstalación' ? `
+- REINSTALACIÓN en el mismo puesto y condiciones de trabajo
+- Pago de SALARIOS CAÍDOS desde la fecha del despido (con tope de 12 meses, art. 48 LFT)
+- Aguinaldo proporcional, vacaciones, prima vacacional
+- Cuotas IMSS, INFONAVIT no enteradas
+` : `
+- INDEMNIZACIÓN CONSTITUCIONAL (3 meses de salario, art. 48 LFT)
+- Prima de antigüedad (12 días por año, art. 162 LFT)
+- 20 días por año laborado (art. 50 fracc II LFT)
+- Salarios caídos (con tope de 12 meses, art. 48 LFT)
+- Aguinaldo, vacaciones, prima vacacional proporcionales
+`}
+
+OFREZCO LAS SIGUIENTES PRUEBAS:
+- Documental (recibos de nómina, contrato, gafete, CFDI nómina)
+- Testimonial (testigos del despido)
+- Confesional a cargo del patrón
+
+ATENTAMENTE
+${fecha}
+
+${d.trabajador_nombre || '[NOMBRE]'}
+DEMANDANTE
+
+————————————————————
+ASESORÍA GRATUITA: PROFEDET 800 911 7877
+Defensoría Pública Federal: 800 200 3030`;
+    }
+  },
+  'amparo-guia': {
+    icono: '⚖️',
+    titulo: 'Guía de Amparo (orientativa)',
+    descripcion: 'Orientación paso a paso para promover juicio de amparo. NO es la demanda final — esa requiere abogado.',
+    fundamento: 'Ley de Amparo. Art. 103 y 107 Constitucionales. Plazo: 15 días hábiles desde notificación del acto.',
+    fields: [
+      { id: 'quejoso_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'quejoso_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'autoridad_responsable', label: 'Autoridad que emitió el acto que reclamas', tipo: 'text', required: true },
+      { id: 'acto_reclamado', label: 'Acto reclamado (qué te están haciendo)', tipo: 'textarea', required: true, rows: 4 },
+      { id: 'fecha_notificacion', label: 'Fecha en que te notificaron del acto', tipo: 'date', required: true },
+      { id: 'derecho_violado', label: 'Derecho fundamental violado', tipo: 'text', required: true }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const dias15 = d.fecha_notificacion ? new Date(new Date(d.fecha_notificacion).getTime() + 15*24*60*60*1000).toLocaleDateString('es-MX') : '[FECHA + 15 DÍAS]';
+      return `GUÍA ORIENTATIVA — JUICIO DE AMPARO
+
+⚠️ IMPORTANTE: Este documento es una GUÍA. La demanda de amparo formal DEBE ser presentada por un abogado o por ti con asesoría legal. La Defensoría Pública Federal te asesora GRATIS al 800 200 3030.
+
+DATOS DEL CASO:
+- Quejoso: ${d.quejoso_nombre || '[NOMBRE]'}
+- Contacto: ${d.quejoso_email || '[EMAIL]'}
+- Autoridad responsable: ${d.autoridad_responsable || '[AUTORIDAD]'}
+- Acto reclamado: ${d.acto_reclamado || '[QUÉ TE HACEN]'}
+- Fecha notificación: ${d.fecha_notificacion || '[FECHA]'}
+- Derecho violado: ${d.derecho_violado || '[DERECHO]'}
+
+P L A Z O   C R Í T I C O
+
+Tienes hasta el ${dias15} para presentar tu demanda (15 días hábiles desde la notificación, art. 17 Ley de Amparo). Después de esa fecha, pierdes el derecho.
+
+P A S O S
+
+1. CONSULTA INMEDIATA con Defensoría Pública Federal (800 200 3030) — ES GRATUITO.
+
+2. IDENTIFICA EL JUEZ DE DISTRITO competente según el domicilio de la autoridad responsable o donde se ejecutó el acto.
+
+3. RECOPILA LAS PRUEBAS: copia del acto reclamado (orden, notificación, oficio), tu identificación, comprobante de domicilio.
+
+4. LA DEMANDA DEBE CONTENER (Art. 108 Ley de Amparo):
+   - Nombre y domicilio del quejoso
+   - Nombre y domicilio del tercero interesado (si lo hay)
+   - Autoridad responsable
+   - Acto reclamado
+   - Fecha y lugar de notificación
+   - Derechos humanos violados (con artículo constitucional)
+   - Conceptos de violación (POR QUÉ se violó tu derecho)
+   - Pruebas que ofreces
+
+5. PRESENTA en la Oficina de Correspondencia Común de Juzgados de Distrito o en línea (Portal de Servicios en Línea PJF).
+
+6. SUSPENSIÓN: si el acto es grave (te van a ejecutar algo), PIDE SUSPENSIÓN DEL ACTO RECLAMADO (Art. 125-158 Ley de Amparo).
+
+D E R E C H O S   M Á S   C O M U N E S   E N   A M P A R O
+
+- Libertad (Art. 14, 16, 19 Const.)
+- Audiencia y debido proceso (Art. 14)
+- Legalidad (Art. 16)
+- Igualdad y no discriminación (Art. 1)
+- Acceso a la justicia (Art. 17)
+- Propiedad (Art. 14, 27)
+- Salud (Art. 4)
+- Educación (Art. 3)
+
+———————————————————
+Generado en Tequio.app · ${fecha}
+Este documento NO es una demanda. Acude a Defensoría Pública: 800 200 3030 (gratis).`;
+    }
+  },
+  'carta-diputado': {
+    icono: '🏛️',
+    titulo: 'Carta a Diputado / Senador',
+    descripcion: 'Comunícate con tu representante para exigir acción sobre un tema específico.',
+    fundamento: 'Art. 8 Constitucional (derecho de petición). Tu representante TIENE OBLIGACIÓN de responder.',
+    fields: [
+      { id: 'ciudadano_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'ciudadano_direccion', label: 'Tu domicilio (distrito que representa)', tipo: 'text', required: true },
+      { id: 'ciudadano_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'representante', label: 'Nombre del representante', tipo: 'text', required: true },
+      { id: 'camara', label: 'Cámara', tipo: 'select', required: true, opciones: ['Diputados', 'Senadores'] },
+      { id: 'tema', label: 'Tema sobre el que escribes', tipo: 'text', required: true },
+      { id: 'exigencia', label: 'Qué le exiges (acción concreta)', tipo: 'textarea', required: true, rows: 6 },
+      { id: 'motivos', label: 'Motivos / por qué importa', tipo: 'textarea', required: true, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `CARTA A REPRESENTANTE — EXIGENCIA CIUDADANA
+
+A: ${d.camara === 'Senadores' ? 'SENADOR(A)' : 'DIPUTADO(A)'} ${d.representante || '[NOMBRE]'}
+H. ${d.camara === 'Senadores' ? 'CÁMARA DE SENADORES' : 'CÁMARA DE DIPUTADOS'}
+P R E S E N T E.
+
+Su representado(a) ${d.ciudadano_nombre || '[CIUDADANO]'}, con domicilio en ${d.ciudadano_direccion || '[DOMICILIO]'}, correo ${d.ciudadano_email || '[EMAIL]'}, ejerciendo mi derecho de petición consagrado en el Artículo 8º Constitucional, me dirijo a usted respecto al siguiente:
+
+T E M A:  ${d.tema || '[TEMA]'}
+
+E X I G E N C I A   C I U D A D A N A
+
+${d.exigencia || '[QUÉ LE PIDES QUE HAGA]'}
+
+M O T I V O S
+
+${d.motivos || '[POR QUÉ IMPORTA]'}
+
+Le recuerdo que:
+
+1. USTED ES MI REPRESENTANTE. Su mandato proviene de la voluntad ciudadana expresada en las urnas.
+
+2. EL ARTÍCULO 8 CONSTITUCIONAL le obliga a responder por escrito en breve término.
+
+3. SU VOTO Y POSTURA SON PÚBLICOS. Tequio.app y otros medios civiles le damos seguimiento. Su respuesta o silencio quedarán en el registro histórico.
+
+S O L I C I T O:
+
+PRIMERO. Acuse de recibo de esta comunicación.
+SEGUNDO. Respuesta por escrito sobre la acción que tomará.
+TERCERO. Que su voto en las votaciones relacionadas con este tema sea consistente con su respuesta.
+
+Atentamente,
+${fecha}
+
+${d.ciudadano_nombre || '[NOMBRE]'}
+CIUDADANO(A) MEXICANO(A)
+
+———————————————————
+Generado en Tequio.app — la plataforma cívica que da seguimiento a tu representante.`;
+    }
+  },
+  'iniciativa-ciudadana': {
+    icono: '📜',
+    titulo: 'Iniciativa Ciudadana (propuesta de reforma)',
+    descripcion: 'Propón una reforma de ley con respaldo ciudadano. Requiere 0.13% de la lista nominal (~130 mil firmas).',
+    fundamento: 'Art. 71 fracción IV Constitucional. Ley General de Instituciones y Procedimientos Electorales, art. 132 LGSMME.',
+    fields: [
+      { id: 'promotor_nombre', label: 'Nombre del promotor responsable', tipo: 'text', required: true },
+      { id: 'promotor_email', label: 'Correo electrónico de contacto', tipo: 'email', required: true },
+      { id: 'titulo_propuesta', label: 'Título de la propuesta', tipo: 'text', required: true },
+      { id: 'ley_a_modificar', label: 'Ley/Código a modificar (o nueva ley)', tipo: 'text', required: true },
+      { id: 'articulos', label: 'Artículos específicos afectados', tipo: 'text', required: false },
+      { id: 'expo_motivos', label: 'Exposición de motivos (problema que resuelve)', tipo: 'textarea', required: true, rows: 8 },
+      { id: 'texto_propuesto', label: 'Texto propuesto (cómo quedarían los artículos)', tipo: 'textarea', required: true, rows: 8 },
+      { id: 'impacto', label: 'Impacto esperado', tipo: 'textarea', required: true, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `INICIATIVA CIUDADANA DE REFORMA
+
+A: H. CONGRESO DE LA UNIÓN
+PRESIDENTE DE LA MESA DIRECTIVA
+P R E S E N T E.
+
+Los suscritos ciudadanos mexicanos, con fundamento en el ARTÍCULO 71 FRACCIÓN IV de la Constitución Política de los Estados Unidos Mexicanos, presentamos la siguiente:
+
+INICIATIVA CON PROYECTO DE DECRETO POR LA QUE SE ${d.ley_a_modificar?.toLowerCase().includes('nueva') ? 'EXPIDE' : 'REFORMA'} LA ${(d.ley_a_modificar || '[LEY]').toUpperCase()}
+
+TÍTULO: ${d.titulo_propuesta || '[TÍTULO]'}
+
+PROMOTOR RESPONSABLE: ${d.promotor_nombre || '[NOMBRE]'}
+CONTACTO: ${d.promotor_email || '[EMAIL]'}
+
+${d.articulos ? `ARTÍCULOS AFECTADOS: ${d.articulos}\n` : ''}
+E X P O S I C I Ó N   D E   M O T I V O S
+
+${d.expo_motivos || '[POR QUÉ ES NECESARIA ESTA REFORMA]'}
+
+T E X T O   P R O P U E S T O
+
+${d.texto_propuesto || '[CÓMO DEBE QUEDAR EL ARTÍCULO]'}
+
+I M P A C T O   E S P E R A D O
+
+${d.impacto || '[QUÉ MEJORA TRAE]'}
+
+———————————————————
+
+R E Q U I S I T O S   F O R M A L E S   P E N D I E N T E S
+
+Para que esta iniciativa sea presentada formalmente ante el Congreso, se requiere:
+
+1. RESPALDO CIUDADANO: 0.13% de la lista nominal de electores (aprox. 132,000 firmas con copia de credencial).
+2. REGISTRO ANTE EL INE: La iniciativa debe ser registrada y validada por el INE (Art. 11 Ley Federal de Consulta Popular).
+3. PRESENTACIÓN: Una vez validadas las firmas, el INE remite la iniciativa al Congreso.
+
+P R O M U E V E
+
+${fecha}
+
+${d.promotor_nombre || '[PROMOTOR]'}
+PROMOTOR(A) DE LA INICIATIVA
+
+———————————————————
+Esta plantilla es la versión orientativa del texto. Para una iniciativa con peso jurídico, busca asesoría con la Defensoría Pública Federal (800 200 3030) o un abogado especializado. Tequio.app facilita el flujo de firmas — busca tu iniciativa en /panel/iniciativa-firmar.html`;
+    }
+  },
+  'queja-imss': {
+    icono: '🏥',
+    titulo: 'Queja IMSS / CONAMED',
+    descripcion: 'Reclama por negativa de atención médica, mala praxis o mal trato en IMSS, ISSSTE o sector salud.',
+    fundamento: 'Ley General de Salud, Ley del Seguro Social art. 295. CONAMED: 55 5420 7000.',
+    fields: [
+      { id: 'paciente_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'paciente_nss', label: 'Número de Seguridad Social (NSS) o CURP', tipo: 'text', required: true },
+      { id: 'paciente_direccion', label: 'Tu dirección', tipo: 'text', required: true },
+      { id: 'paciente_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'unidad', label: 'Unidad médica involucrada (UMF, hospital)', tipo: 'text', required: true },
+      { id: 'institucion', label: 'Institución', tipo: 'select', required: true, opciones: ['IMSS', 'ISSSTE', 'Hospital privado', 'Centro de Salud SSA', 'Otra'] },
+      { id: 'fecha_hechos', label: 'Fecha de los hechos', tipo: 'date', required: true },
+      { id: 'medico', label: 'Médico/personal involucrado (si lo conoces)', tipo: 'text', required: false },
+      { id: 'hechos', label: 'Descripción de los hechos', tipo: 'textarea', required: true, rows: 7 },
+      { id: 'peticion', label: '¿Qué pides?', tipo: 'textarea', required: true, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `QUEJA POR PRESUNTA MALA ATENCIÓN MÉDICA
+
+A: COMISIÓN NACIONAL DE ARBITRAJE MÉDICO (CONAMED)
+${d.institucion === 'IMSS' ? 'Y/O OFICINA DE QUEJAS DEL IMSS' : d.institucion === 'ISSSTE' ? 'Y/O ÓRGANO INTERNO DE CONTROL ISSSTE' : ''}
+P R E S E N T E.
+
+${d.paciente_nombre || '[NOMBRE]'}, paciente con ${d.paciente_nss ? `NSS/CURP ${d.paciente_nss}` : '[NSS]'}, domicilio en ${d.paciente_direccion || '[DIRECCIÓN]'}, correo ${d.paciente_email || '[EMAIL]'}, presento formal QUEJA contra:
+
+INSTITUCIÓN: ${d.institucion || '[INSTITUCIÓN]'}
+UNIDAD MÉDICA: ${d.unidad || '[UNIDAD]'}
+${d.medico ? `MÉDICO/PERSONAL: ${d.medico}\n` : ''}
+H E C H O S
+
+El día ${d.fecha_hechos || '[FECHA]'} ocurrieron los siguientes hechos en la unidad médica señalada:
+
+${d.hechos || '[DESCRIPCIÓN DETALLADA]'}
+
+P E T I C I Ó N
+
+${d.peticion || '[QUÉ PIDES]'}
+
+F U N D A M E N T O   L E G A L
+
+- Art. 4 Constitucional: derecho a la protección de la salud.
+- Ley General de Salud, artículos 51 (derecho a recibir atención profesional y éticamente responsable), 51 Bis.
+- ${d.institucion === 'IMSS' ? 'Ley del Seguro Social, art. 295 (queja administrativa).' : d.institucion === 'ISSSTE' ? 'Ley del ISSSTE.' : 'Norma Oficial NOM-004-SSA3.'}
+- Reglamento de la Ley General de Salud en materia de Prestación de Servicios de Atención Médica.
+
+S O L I C I T O:
+
+PRIMERO. Tener por presentada esta queja.
+SEGUNDO. Iniciar el procedimiento conciliatorio ante CONAMED.
+TERCERO. En caso de mala praxis, proceder al arbitraje médico (Art. 4 Reglamento CONAMED).
+CUARTO. Notificarme las actuaciones.
+
+ATENTAMENTE
+${fecha}
+
+${d.paciente_nombre || '[NOMBRE]'}
+QUEJOSO(A)
+
+———————————————————
+CONAMED: 55 5420 7000 · www.gob.mx/conamed
+IMSS Queja: 800 623 2323
+ISSSTE: 800 800 4477`;
+    }
+  },
+  'queja-conapred': {
+    icono: '🤝',
+    titulo: 'Queja ante CONAPRED (Discriminación)',
+    descripcion: 'Denuncia actos de discriminación por origen étnico, género, edad, discapacidad, condición social, religión, orientación sexual u otra causa.',
+    fundamento: 'Ley Federal para Prevenir y Eliminar la Discriminación (LFPED), Art. 1 Constitucional. CONAPRED: 800 543 0033.',
+    fields: [
+      { id: 'denunciante_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'denunciante_direccion', label: 'Tu domicilio', tipo: 'text', required: true },
+      { id: 'denunciante_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'discriminado_por', label: 'Categoría protegida (origen étnico, género, edad, discapacidad, religión, orientación sexual, etc.)', tipo: 'text', required: true },
+      { id: 'agresor', label: 'Persona/empresa/institución que discriminó', tipo: 'text', required: true },
+      { id: 'fecha_hechos', label: 'Fecha de los hechos', tipo: 'date', required: true },
+      { id: 'lugar', label: 'Lugar', tipo: 'text', required: true },
+      { id: 'hechos', label: 'Descripción del acto discriminatorio', tipo: 'textarea', required: true, rows: 8 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `QUEJA POR DISCRIMINACIÓN
+
+A: CONSEJO NACIONAL PARA PREVENIR LA DISCRIMINACIÓN (CONAPRED)
+P R E S E N T E.
+
+${d.denunciante_nombre || '[NOMBRE]'}, con domicilio en ${d.denunciante_direccion || '[DIRECCIÓN]'}, correo ${d.denunciante_email || '[EMAIL]'}, con fundamento en el Artículo 1º Constitucional y en la Ley Federal para Prevenir y Eliminar la Discriminación, presento formal QUEJA por DISCRIMINACIÓN.
+
+DISCRIMINADO(A) POR: ${d.discriminado_por || '[CATEGORÍA]'}
+
+PERSONA/INSTITUCIÓN AGRESORA: ${d.agresor || '[AGRESOR]'}
+
+H E C H O S
+
+El día ${d.fecha_hechos || '[FECHA]'}, en ${d.lugar || '[LUGAR]'}, se cometió el siguiente acto de discriminación:
+
+${d.hechos || '[DESCRIPCIÓN]'}
+
+F U N D A M E N T O   L E G A L
+
+- ARTÍCULO 1º CONSTITUCIONAL, párrafo quinto: "Queda prohibida toda discriminación motivada por origen étnico o nacional, el género, la edad, las discapacidades, la condición social, las condiciones de salud, la religión, las opiniones, las preferencias sexuales, el estado civil o cualquier otra que atente contra la dignidad humana y tenga por objeto anular o menoscabar los derechos y libertades de las personas."
+
+- LFPED Art. 1, 2, 9 (conductas discriminatorias).
+- LFPED Art. 43-66 (procedimiento de queja ante CONAPRED).
+- Convención Americana sobre Derechos Humanos, art. 1.1.
+
+S O L I C I T O:
+
+PRIMERO. Tener por presentada esta queja en términos del Art. 43 LFPED.
+SEGUNDO. Iniciar el procedimiento conciliatorio.
+TERCERO. En caso de no conciliación, emitir la resolución correspondiente con medidas administrativas y de reparación.
+CUARTO. Notificarme actuaciones.
+
+ATENTAMENTE
+${fecha}
+
+${d.denunciante_nombre || '[NOMBRE]'}
+QUEJOSO(A)
+
+———————————————————
+CONAPRED: 800 543 0033 · www.conapred.org.mx
+También puedes presentar la queja en línea: conapred.org.mx`;
+    }
+  }
 };
 
 // === ROUTER ===
@@ -607,8 +1071,67 @@ function descargarPDF(plantillaId) {
   }
 
   doc.save(`${tipo}-${Date.now()}.pdf`);
+  incrementarCounter();
   showToast('PDF generado');
 }
+
+// === SITUACIONES FRECUENTES, COUNTER (Tequio upgrade) ===
+const SITUACIONES = [
+  { id: 'sit-despido', icono: '💼', titulo: 'Me despidieron', subtitulo: 'sin liquidar', sugiere: ['demanda-laboral'], color: 'rgba(239,68,68,0.15)' },
+  { id: 'sit-abuso', icono: '🚨', titulo: 'Abuso de autoridad', subtitulo: 'policía/funcionario', sugiere: ['denuncia-oic', 'queja-cndh'], color: 'rgba(249,115,22,0.15)' },
+  { id: 'sit-cobro', icono: '💳', titulo: 'Cobro excesivo', subtitulo: 'empresa/servicio', sugiere: ['profeco'], color: 'rgba(59,130,246,0.15)' },
+  { id: 'sit-medica', icono: '🏥', titulo: 'Negaron atención', subtitulo: 'médica', sugiere: ['queja-imss'], color: 'rgba(16,185,129,0.15)' },
+  { id: 'sit-info', icono: '🔍', titulo: 'Pedir información', subtitulo: 'al gobierno', sugiere: ['transparencia'], color: 'rgba(168,85,247,0.15)' },
+  { id: 'sit-discrim', icono: '⚖️', titulo: 'Discriminación', subtitulo: 'laboral o de servicios', sugiere: ['queja-conapred'], color: 'rgba(20,184,166,0.15)' }
+];
+
+function renderSituaciones() {
+  const grid = document.querySelector('.situaciones-grid');
+  if (!grid) return;
+  grid.innerHTML = SITUACIONES.map(s => `
+    <div class="situacion-card" onclick="elegirSituacion('${s.id}')" style="background: ${s.color}; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 1.2rem 1rem; cursor: pointer; transition: transform 0.15s, border-color 0.15s; text-align: center;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='rgba(251,191,36,0.5)';" onmouseout="this.style.transform='translateY(0)';this.style.borderColor='rgba(255,255,255,0.1)';">
+      <div style="font-size: 2rem; margin-bottom: 0.4rem;">${s.icono}</div>
+      <div style="font-weight: 600; color: #f3f4f6; font-size: 0.95rem;">${s.titulo}</div>
+      <div style="font-size: 0.78rem; color: #9ca3af; margin-top: 0.2rem;">${s.subtitulo}</div>
+    </div>
+  `).join('');
+}
+
+function elegirSituacion(sitId) {
+  const s = SITUACIONES.find(x => x.id === sitId);
+  if (!s || !s.sugiere.length) return;
+  const primerTipo = s.sugiere[0];
+  window.location.href = '?tipo=' + primerTipo + (window.location.search.includes('embedded=1') ? '&embedded=1' : '');
+}
+
+const COUNTER_KEY = 'tequio_docs_generados';
+
+function incrementarCounter() {
+  let n = parseInt(localStorage.getItem(COUNTER_KEY) || '0', 10);
+  n += 1;
+  localStorage.setItem(COUNTER_KEY, String(n));
+  renderCounter();
+}
+
+function renderCounter() {
+  const n = parseInt(localStorage.getItem(COUNTER_KEY) || '0', 10);
+  const el = document.getElementById('docs-count');
+  if (el) el.textContent = n;
+}
+
+// Wrap render() so situaciones toggle with landing view
+const __origRender = render;
+render = function() {
+  const ret = __origRender.apply(this, arguments);
+  const sit = document.getElementById('viewSituaciones');
+  if (sit) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tipo')) sit.classList.add('hidden'); else sit.classList.remove('hidden');
+  }
+  renderSituaciones();
+  renderCounter();
+  return ret;
+};
 
 window.addEventListener('popstate', render);
 render();
