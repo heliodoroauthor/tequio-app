@@ -188,11 +188,26 @@ def parsear_senador(sid, url):
     out['partido'] = detectar_partido(bloque)
 
     # Entidad federativa: viene de "Lista Nacional" o nombre de estado
-    estado_match = re.search(r'(?:Senador[a]?\s+(?:Electo[a]?\s+)?por\s+(?:Mayoría|Primera).*?\n)([A-ZÁÉÍÓÚÑ ][^\n]+)', bloque)
+    ESTADOS_MX = [
+        'Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua',
+        'Ciudad de México','Coahuila','Colima','Durango','Guanajuato','Guerrero','Hidalgo',
+        'Jalisco','México','Michoacán','Morelos','Nayarit','Nuevo León','Oaxaca','Puebla',
+        'Querétaro','Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas',
+        'Tlaxcala','Veracruz','Yucatán','Zacatecas'
+    ]
     if 'Lista Nacional' in bloque:
         out['entidad_federativa'] = 'LISTA NACIONAL'
-    elif estado_match:
-        out['entidad_federativa'] = estado_match.group(1).strip()[:100]
+    else:
+        # Intentar regex original (estado en linea siguiente)
+        estado_match = re.search(r'(?:Senador[a]?\s+(?:Electo[a]?\s+)?por\s+(?:Mayoría|Primera).*?\n)([A-ZÁÉÍÓÚÑ ][^\n]+)', bloque)
+        if estado_match:
+            out['entidad_federativa'] = estado_match.group(1).strip()[:100]
+        else:
+            # Fallback: buscar nombre de estado directamente en el bloque
+            for est in ESTADOS_MX:
+                if est in bloque:
+                    out['entidad_federativa'] = est.upper()
+                    break
 
     # Foto: buscar img que mencione el ID o "senadores"
     for img in soup.find_all('img'):
