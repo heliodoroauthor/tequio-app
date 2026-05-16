@@ -1439,6 +1439,44 @@ export default async function handler(req, res) {
       }));
       return res.status(200).json({ items: results });
     }
+    // ── Directorio 32 Estados ──
+    if (vista === 'directorio_estado') {
+      const clave = (req.query.clave || '').trim().padStart(2, '0');
+      if (!clave || clave === '00') return res.status(400).json({ error: 'Pasa ?clave=NN' });
+
+      const muni = await sb(`municipios?clave_entidad=eq.${clave}&select=nombre_estado&limit=1`);
+      const nombreEstado = muni[0]?.nombre_estado || '';
+
+      const variantes = [nombreEstado];
+      if (nombreEstado === 'Ciudad de Mexico') variantes.push('Ciudad de México', 'CDMX', 'Distrito Federal');
+      if (nombreEstado === 'Estado de Mexico') variantes.push('México', 'Estado de México');
+      if (nombreEstado === 'Nuevo Leon') variantes.push('Nuevo León');
+      if (nombreEstado === 'Yucatan') variantes.push('Yucatán');
+      if (nombreEstado === 'Queretaro') variantes.push('Querétaro');
+      if (nombreEstado === 'San Luis Potosi') variantes.push('San Luis Potosí');
+      if (nombreEstado === 'Michoacan') variantes.push('Michoacán');
+
+      const dipFilter = variantes.map(v => `entidad.ilike.*${encodeURIComponent(v)}*`).join(',');
+      const senFilter = variantes.map(v => `entidad_federativa.ilike.*${encodeURIComponent(v)}*`).join(',');
+
+      const [presidentes, diputados, senadores] = await Promise.all([
+        sb(`presidentes_municipales?clave_entidad=eq.${clave}&select=nombre,apellido_paterno,apellido_materno,nombre_municipio,partido,periodo_label,direccion,pagina_web,lada,telefono&order=nombre_municipio.asc&limit=500`),
+        sb(`politicos_diputados?or=(${dipFilter})&select=nombre,partido,entidad,distrito,principio_eleccion,email,telefono,foto_url&order=nombre.asc&limit=200`).catch(_ => []),
+        sb(`politicos_senadores?or=(${senFilter})&select=nombre_completo,partido,entidad_federativa,tipo_eleccion,telefono,direccion_oficina,email,foto_url&limit=20`).catch(_ => [])
+      ]);
+
+      return res.status(200).json({
+        clave,
+        nombre_estado: nombreEstado,
+        num_municipios: presidentes.length,
+        num_municipios_con_telefono: presidentes.filter(p => p.telefono && p.telefono.trim()).length,
+        presidentes,
+        diputados_federales: diputados,
+        senadores,
+        senadores_disponibles: senadores.length > 0
+      });
+    }
+
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
@@ -1447,10 +1485,11 @@ export default async function handler(req, res) {
       'quemones_ranking','quemon_detalle','mi_rep_vs_yo',
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
-      'banxico_historico','inegi_estado','inegi_comparador','leyes_lista',
+      'banxico_historico','inegi_estado','inegi_comparador','leyes_lista','directorio_estado',
       'chat','chat_publicar','chat_votar','chat_reportar'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
         }
+ 
