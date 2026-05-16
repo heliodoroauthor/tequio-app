@@ -76,6 +76,15 @@ NOMBRES_ESTADO = {
     "27": "Tabasco", "28": "Tamaulipas", "29": "Tlaxcala", "30": "Veracruz",
     "31": "Yucatan", "32": "Zacatecas",
 }
+CDMX_ALCALDIAS = {
+    "002": "Azcapotzalco", "003": "Coyoacan", "004": "Cuajimalpa de Morelos",
+    "005": "Gustavo A. Madero", "006": "Iztacalco", "007": "Iztapalapa",
+    "008": "La Magdalena Contreras", "009": "Milpa Alta", "010": "Alvaro Obregon",
+    "011": "Tlahuac", "012": "Tlalpan", "013": "Xochimilco",
+    "014": "Benito Juarez", "015": "Cuauhtemoc", "016": "Miguel Hidalgo",
+    "017": "Venustiano Carranza",
+}
+
 
 
 def normalize_capitulo(rubro):
@@ -121,6 +130,8 @@ def map_row(rec, year_hint=None):
 
     nombre_estado = NOMBRES_ESTADO.get(cve_ent) or (pick(rec, "entidad", "nom_entidad") or "").strip() or None
     nombre_municipio = (pick(rec, "municipio", "nom_municipio", "nommun") or "").strip().title() or None
+    if not nombre_municipio and cve_ent == "09":
+        nombre_municipio = CDMX_ALCALDIAS.get(cve_mun)
 
     anio = parse_int(pick(rec, "anio", "ano", "ciclo", "year"))
     if not anio and year_hint:
