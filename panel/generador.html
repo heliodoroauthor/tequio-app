@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Documentos | Tequio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0b0f1a;
+  --bg-card: #131825;
+  --bg-elev: #1a2032;
+  --border: #232a3d;
+  --text: #e6e8ee;
+  --text-muted: #8a93a8;
+  --gold: #fbbf24;
+  --gold-dim: #d99a14;
+  --accent: #60a5fa;
+  --danger: #ef4444;
+  --success: #22c55e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; line-height: 1.55; min-height: 100%; }
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 14px; margin-bottom: 14px; }
+.back-link:hover { color: var(--gold); }
+.header { margin-bottom: 22px; }
+.header h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.header p { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
+.header p strong { color: var(--text); }
+
+/* LANDING — grid de cards */
+.grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 16px; }
+@media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease; display: flex; flex-direction: column; gap: 10px; }
+.card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.card-icon { font-size: 32px; line-height: 1; }
+.card-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.card-desc { font-size: 13.5px; color: var(--text-muted); }
+.chip { display: inline-block; font-size: 11.5px; padding: 4px 9px; border-radius: 999px; background: rgba(251,191,36,0.10); color: var(--gold); border: 1px solid rgba(251,191,36,0.30); margin-top: 4px; font-weight: 500; line-height: 1.4; }
+
+/* FORM VIEW */
+.btn-back { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-elev); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 16px; font-family: inherit; }
+.btn-back:hover { border-color: var(--gold); }
+.hero { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+.hero-row { display: flex; gap: 14px; align-items: flex-start; }
+.hero-icon { font-size: 38px; line-height: 1; }
+.hero h2 { font-size: 19px; font-weight: 700; }
+.hero-fundamento { font-size: 13px; color: var(--text-muted); margin-top: 6px; padding: 8px 12px; background: rgba(251,191,36,0.06); border-left: 3px solid var(--gold); border-radius: 4px; }
+
+.layout { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 920px) { .layout { grid-template-columns: 1fr 1fr; } }
+.panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.panel h3 { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+.field label .req { color: var(--danger); margin-left: 3px; }
+.field input, .field textarea, .field select { width: 100%; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; color: var(--text); font-family: inherit; font-size: 14px; line-height: 1.45; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--gold); }
+.field textarea { resize: vertical; min-height: 80px; }
+
+.preview { background: #fdfcf7; color: #1a1a1a; border-radius: 8px; padding: 22px; font-family: 'Times New Roman', serif; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; max-height: 600px; overflow-y: auto; border: 1px solid var(--border); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.btn { background: var(--gold); color: #0b0f1a; border: none; padding: 11px 18px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { background: var(--gold-dim); }
+.btn-secondary { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--gold); }
+
+.disclaimer { margin-top: 32px; padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+.disclaimer strong { color: var(--text); }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+.toast.show { opacity: 1; }
+.hidden { display: none !important; }
+@media print {
+  body { background: white; color: black; }
+  .header, .btn-back, .panel:first-child, .actions, .disclaimer, .back-link { display: none !important; }
+  .preview { background: white; color: black; border: none; padding: 0; max-height: none; overflow: visible; }
+  .panel { border: none; background: white; padding: 0; }
+  .layout { grid-template-columns: 1fr; }
+  .hero { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back-link" id="backLink">&larr; Tequio</a>
+  <div class="header">
+    <h1>📄 Generador de Documentos</h1>
+    <p>Plantillas legales oficiales. Llenas tus datos, descargas el PDF. <strong>Tus datos nunca salen de tu dispositivo.</strong></p>
+  </div>
+
+  <div id="viewLanding"></div>
+  <div id="viewForm" class="hidden"></div>
+
+  <div class="disclaimer">
+    Plantillas basadas en legislación mexicana vigente. Los textos sugeridos son orientativos; revisa con un abogado para casos complejos. <strong>Tequio no almacena ni envía tus datos</strong> &mdash; todo el procesamiento ocurre en tu navegador.
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Embedded mode handling
+const params = new URLSearchParams(location.search);
+if (params.get('embedded') === '1') {
+  const back = document.getElementById('backLink');
+  if (back) back.style.display = 'none';
+}
+
+const PLANTILLAS = {
+  'denuncia-oic': {
+    icono: '⚖️',
+    titulo: 'Denuncia ante Órgano Interno de Control',
+    descripcion: 'Denuncia contra servidor público por abuso de poder, corrupción, omisión o cualquier falta administrativa.',
+    fundamento: 'Ley General de Responsabilidades Administrativas (LGRA), artículos 91, 93 y 94.',
+    fields: [
+      { id: 'denunciante_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'denunciante_direccion', label: 'Tu dirección para notificaciones', tipo: 'text', required: true },
+      { id: 'denunciante_telefono', label: 'Teléfono (opcional)', tipo: 'tel', required: false },
+      { id: 'denunciante_email', label: 'Correo electrónico (opcional)', tipo: 'email', required: false },
+      { id: 'servidor_nombre', label: 'Nombre del servidor público denunciado', tipo: 'text', required: true },
+      { id: 'servidor_cargo', label: 'Cargo del servidor (si lo conoces)', tipo: 'text', required: false },
+      { id: 'servidor_dependencia', label: 'Dependencia o institución', tipo: 'text', required: true },
+      { id: 'hecho_fecha', label: 'Fecha aproximada del hecho', tipo: 'date', required: true },
+      { id: 'hecho_lugar', label: 'Lugar donde ocurrió', tipo: 'text', required: true },
+      { id: 'hechos', label: 'Descripción detallada de los hechos', tipo: 'textarea', required: true, rows: 8 },
+      { id: 'pruebas', label: 'Pruebas o evidencias (si las tienes)', tipo: 'textarea', required: false, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `DENUNCIA POR PRESUNTA FALTA ADMINISTRATIVA
+
+A: TITULAR DEL ÓRGANO INTERNO DE CONTROL DE ${d.servidor_dependencia || '[DEPENDENCIA]'}
+P R E S E N T E.
+
+${d.denunciante_nombre || '[NOMBRE]'}, por mi propio derecho, con domicilio para oír y recibir notificaciones en ${d.denunciante_direccion || '[DIRECCIÓN]'}${d.denunciante_telefono ? `, teléfono ${d.denunciante_telefono}` : ''}${d.denunciante_email ? `, correo electrónico ${d.denunciante_email}` : ''}, ante usted con respeto comparezco y EXPONGO:
+
+Que con fundamento en los artículos 91, 93 y 94 de la Ley General de Responsabilidades Administrativas (LGRA), vengo a presentar formal DENUNCIA en contra de:
+
+NOMBRE DEL SERVIDOR PÚBLICO: ${d.servidor_nombre || '[NOMBRE]'}
+${d.servidor_cargo ? `CARGO: ${d.servidor_cargo}\n` : ''}DEPENDENCIA: ${d.servidor_dependencia || '[DEPENDENCIA]'}
+
+H E C H O S
+
+El día ${d.hecho_fecha || '[FECHA]'}, en ${d.hecho_lugar || '[LUGAR]'}, ocurrieron los siguientes hechos:
+
+${d.hechos || '[DESCRIPCIÓN DETALLADA DE LOS HECHOS]'}
+
+${d.pruebas ? `P R U E B A S\n\nAdjunto las siguientes pruebas:\n\n${d.pruebas}\n` : ''}
+F U N D A M E N T O   J U R Í D I C O
+
+Los hechos narrados encuadran en lo dispuesto por la Ley General de Responsabilidades Administrativas, particularmente en sus artículos relativos a las faltas administrativas no graves y/o graves de los servidores públicos.
+
+Por lo anteriormente expuesto, atentamente solicito:
+
+PRIMERO. Tener por presentada en tiempo y forma la presente denuncia.
+SEGUNDO. Iniciar el procedimiento de investigación correspondiente.
+TERCERO. En su momento, imponer las sanciones que correspondan conforme a derecho.
+CUARTO. Notificarme el resultado de la investigación.
+
+PROTESTO LO NECESARIO
+${fecha}
+
+${d.denunciante_nombre || '[NOMBRE]'}
+DENUNCIANTE`;
+    }
+  },
+
+  'peticion-art8': {
+    icono: '✉️',
+    titulo: 'Oficio de Petición (Artículo 8 Constitucional)',
+    descripcion: 'Solicita a cualquier autoridad información, trámite o acción. Derecho fundamental garantizado por la Constitución.',
+    fundamento: 'Artículo 8º Constitucional. La autoridad debe responder en breve término por escrito.',
+    fields: [
+      { id: 'peticionario_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'peticionario_direccion', label: 'Tu dirección', tipo: 'text', required: true },
+      { id: 'peticionario_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'autoridad', label: 'Autoridad destinataria (cargo + dependencia)', tipo: 'text', required: true },
+      { id: 'asunto', label: 'Asunto breve', tipo: 'text', required: true },
+      { id: 'peticion', label: 'Petición concreta (qué solicitas)', tipo: 'textarea', required: true, rows: 6 },
+      { id: 'motivos', label: 'Motivos / razones', tipo: 'textarea', required: true, rows: 6 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `OFICIO DE PETICIÓN
+
+ASUNTO: ${d.asunto || '[ASUNTO]'}
+
+A: ${d.autoridad || '[AUTORIDAD]'}
+P R E S E N T E.
+
+${d.peticionario_nombre || '[NOMBRE]'}, mexicano por nacimiento, con domicilio en ${d.peticionario_direccion || '[DIRECCIÓN]'}, correo electrónico ${d.peticionario_email || '[EMAIL]'}, con fundamento en el artículo 8º de la Constitución Política de los Estados Unidos Mexicanos, vengo a formular la siguiente PETICIÓN:
+
+P E T I C I Ó N
+
+${d.peticion || '[QUÉ SOLICITAS]'}
+
+M O T I V O S
+
+${d.motivos || '[POR QUÉ LO SOLICITAS]'}
+
+F U N D A M E N T O
+
+El Artículo 8º Constitucional establece: "Los funcionarios y empleados públicos respetarán el ejercicio del derecho de petición, siempre que ésta se formule por escrito, de manera pacífica y respetuosa, pero en materia política sólo podrán hacer uso de ese derecho los ciudadanos de la República. A toda petición deberá recaer un acuerdo escrito de la autoridad a quien se haya dirigido, la cual tiene obligación de hacerlo conocer en breve término al peticionario."
+
+Por lo anteriormente expuesto, solicito atentamente:
+
+PRIMERO. Tener por presentada esta petición en términos del Artículo 8º Constitucional.
+SEGUNDO. Recibir respuesta por escrito en breve término, conforme lo ordena la Constitución.
+TERCERO. Que dicha respuesta me sea notificada al domicilio o correo electrónico indicados.
+
+ATENTAMENTE
+${fecha}
+
+${d.peticionario_nombre || '[NOMBRE]'}
+PETICIONARIO`;
+    }
+  },
+
+  'transparencia': {
+    icono: '🔍',
+    titulo: 'Solicitud de Información Pública (Transparencia)',
+    descripcion: 'Solicita información pública a cualquier sujeto obligado del gobierno. Respuesta obligatoria en 20 días hábiles.',
+    fundamento: 'Ley General de Transparencia y Acceso a la Información Pública (LGTAIP), artículos 122 a 141. INAI: 800 835 4324.',
+    fields: [
+      { id: 'solicitante_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'solicitante_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'sujeto_obligado', label: 'Sujeto obligado (dependencia/institución)', tipo: 'text', required: true },
+      { id: 'informacion', label: 'Información solicitada (sé específico)', tipo: 'textarea', required: true, rows: 8 },
+      { id: 'periodo', label: 'Período de la información (fechas)', tipo: 'text', required: false },
+      { id: 'formato', label: 'Formato preferido (PDF, Excel, copia simple, etc.)', tipo: 'text', required: false }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `SOLICITUD DE ACCESO A LA INFORMACIÓN PÚBLICA
+
+A: UNIDAD DE TRANSPARENCIA DE ${d.sujeto_obligado || '[SUJETO OBLIGADO]'}
+P R E S E N T E.
+
+${d.solicitante_nombre || '[NOMBRE]'}, con correo electrónico ${d.solicitante_email || '[EMAIL]'}, con fundamento en los artículos 122 a 141 de la Ley General de Transparencia y Acceso a la Información Pública, presento la siguiente:
+
+S O L I C I T U D   D E   I N F O R M A C I Ó N
+
+Solicito acceso a la siguiente información:
+
+${d.informacion || '[INFORMACIÓN SOLICITADA]'}
+
+${d.periodo ? `PERÍODO: ${d.periodo}\n` : ''}${d.formato ? `FORMATO PREFERIDO: ${d.formato}\n` : ''}
+F U N D A M E N T O
+
+Esta solicitud se formula con base en los artículos 6º Constitucional y 122-141 de la Ley General de Transparencia y Acceso a la Información Pública, que garantizan el derecho fundamental de acceso a la información pública gubernamental.
+
+Recordatorio del plazo legal: el sujeto obligado debe responder en un plazo no mayor a 20 días hábiles, prorrogable por 10 días más previa notificación fundada (Art. 132 LGTAIP).
+
+Si la solicitud es declarada confidencial o reservada, podré interponer Recurso de Revisión ante el INAI (800 835 4324) dentro de los 15 días hábiles siguientes (Art. 142 LGTAIP).
+
+NOTIFÍQUESEME al correo electrónico señalado.
+
+ATENTAMENTE
+${fecha}
+
+${d.solicitante_nombre || '[NOMBRE]'}
+SOLICITANTE`;
+    }
+  },
+
+  'arco': {
+    icono: '🔐',
+    titulo: 'Solicitud de Derechos ARCO (Datos Personales)',
+    descripcion: 'Ejerce tus derechos de Acceso, Rectificación, Cancelación u Oposición sobre tus datos personales.',
+    fundamento: 'Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO), artículos 43 a 56.',
+    fields: [
+      { id: 'titular_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'titular_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'titular_identificacion', label: 'Tipo y número de identificación (INE/Pasaporte)', tipo: 'text', required: true },
+      { id: 'responsable', label: 'Responsable del tratamiento (empresa/institución)', tipo: 'text', required: true },
+      { id: 'derecho', label: 'Derecho ARCO que ejerces', tipo: 'select', required: true, opciones: ['Acceso', 'Rectificación', 'Cancelación', 'Oposición'] },
+      { id: 'datos', label: 'Datos específicos sobre los que ejerces el derecho', tipo: 'textarea', required: true, rows: 5 },
+      { id: 'motivo', label: 'Motivo (especialmente para Rectificación/Cancelación/Oposición)', tipo: 'textarea', required: false, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const derecho = d.derecho || '[DERECHO]';
+      return `SOLICITUD PARA EJERCER DERECHO DE ${derecho.toUpperCase()} DE DATOS PERSONALES
+
+A: ${d.responsable || '[RESPONSABLE]'}
+ÁREA DE PROTECCIÓN DE DATOS PERSONALES
+P R E S E N T E.
+
+${d.titular_nombre || '[NOMBRE]'}, identificado(a) con ${d.titular_identificacion || '[IDENTIFICACIÓN]'}, con correo electrónico ${d.titular_email || '[EMAIL]'}, con fundamento en los artículos 43 a 56 de la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO), comparezco para ejercer mi derecho de ${derecho.toUpperCase()}.
+
+D A T O S   P E R S O N A L E S   I N V O L U C R A D O S
+
+${d.datos || '[DATOS SOBRE LOS QUE SE EJERCE EL DERECHO]'}
+
+${d.motivo ? `M O T I V O\n\n${d.motivo}\n` : ''}
+F U N D A M E N T O
+
+- Artículo 16, párrafo segundo, de la Constitución Política de los Estados Unidos Mexicanos.
+- Artículos 43 a 56 de la LGPDPPSO.
+- El derecho de ${derecho} forma parte del bloque de derechos ARCO (Acceso, Rectificación, Cancelación, Oposición).
+
+El responsable cuenta con 20 días hábiles para responder (Art. 51 LGPDPPSO). En caso de inconformidad, puedo acudir al INAI (800 835 4324) para presentar Recurso de Revisión.
+
+ANEXO: Copia simple de identificación oficial para acreditar mi titularidad.
+
+NOTIFÍQUESEME al correo electrónico señalado.
+
+ATENTAMENTE
+${fecha}
+
+${d.titular_nombre || '[NOMBRE]'}
+TITULAR DE LOS DATOS PERSONALES`;
+    }
+  },
+
+  'profeco': {
+    icono: '🛒',
+    titulo: 'Queja ante Profeco',
+    descripcion: 'Denuncia un proveedor por cobros indebidos, mala calidad, publicidad engañosa, o cualquier violación a la LFPC.',
+    fundamento: 'Ley Federal de Protección al Consumidor (LFPC), artículos 24, 99 y 110. Profeco: 800 468 8722.',
+    fields: [
+      { id: 'consumidor_nombre', label: 'Tu nombre completo', tipo: 'text', required: true },
+      { id: 'consumidor_direccion', label: 'Tu dirección', tipo: 'text', required: true },
+      { id: 'consumidor_telefono', label: 'Tu teléfono', tipo: 'tel', required: true },
+      { id: 'consumidor_email', label: 'Correo electrónico', tipo: 'email', required: true },
+      { id: 'proveedor', label: 'Nombre del proveedor (empresa/comercio)', tipo: 'text', required: true },
+      { id: 'proveedor_direccion', label: 'Dirección del proveedor', tipo: 'text', required: false },
+      { id: 'fecha_compra', label: 'Fecha de compra/contratación', tipo: 'date', required: true },
+      { id: 'monto', label: 'Monto involucrado (MXN)', tipo: 'number', required: true },
+      { id: 'hechos', label: 'Descripción de los hechos', tipo: 'textarea', required: true, rows: 6 },
+      { id: 'peticion', label: '¿Qué pides? (devolución, reposición, indemnización...)', tipo: 'textarea', required: true, rows: 4 }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const monto = d.monto ? `$${Number(d.monto).toLocaleString('es-MX')} MXN` : '[MONTO]';
+      return `QUEJA ANTE LA PROCURADURÍA FEDERAL DEL CONSUMIDOR
+
+A: PROFECO — DELEGACIÓN CORRESPONDIENTE
+P R E S E N T E.
+
+${d.consumidor_nombre || '[NOMBRE]'}, con domicilio en ${d.consumidor_direccion || '[DIRECCIÓN]'}, teléfono ${d.consumidor_telefono || '[TELÉFONO]'} y correo electrónico ${d.consumidor_email || '[EMAIL]'}, con fundamento en los artículos 24, 99 y 110 de la Ley Federal de Protección al Consumidor (LFPC), formulo formal QUEJA en contra de:
+
+P R O V E E D O R: ${d.proveedor || '[PROVEEDOR]'}
+${d.proveedor_direccion ? `DIRECCIÓN: ${d.proveedor_direccion}\n` : ''}
+H E C H O S
+
+El día ${d.fecha_compra || '[FECHA]'} adquirí/contraté con el proveedor el bien/servicio por un monto de ${monto}.
+
+${d.hechos || '[DESCRIPCIÓN]'}
+
+P E T I C I Ó N
+
+${d.peticion || '[QUÉ PIDES]'}
+
+F U N D A M E N T O   L E G A L
+
+- Art. 1 LFPC: La protección al consumidor es de orden público e interés social.
+- Art. 24 LFPC: Profeco tiene facultades para conciliar y atender quejas.
+- Art. 99 LFPC: Procedimiento conciliatorio.
+- Art. 110 LFPC: Procedimiento arbitral.
+
+Por lo anterior, solicito:
+
+PRIMERO. Tener por presentada esta queja.
+SEGUNDO. Iniciar procedimiento conciliatorio con el proveedor.
+TERCERO. En caso de no llegar a acuerdo, proceder al procedimiento arbitral.
+CUARTO. Notificarme las actuaciones a mi domicilio o correo electrónico.
+
+ATENTAMENTE
+${fecha}
+
+${d.consumidor_nombre || '[NOMBRE]'}
+CONSUMIDOR
+
+————————————————————
+TELÉFONO PROFECO: 800 468 8722
+Plataforma en línea: concilianet.profeco.gob.mx`;
+    }
+  },
+
+  'carta-poder': {
+    icono: '📝',
+    titulo: 'Carta-poder simple',
+    descripcion: 'Documento para autorizar a otra persona a realizar trámites en tu nombre (no notarial).',
+    fundamento: 'Modelo de uso común. Para actos jurídicos importantes (compra-venta, donaciones, mandatos amplios) requieres poder ante Notario Público.',
+    fields: [
+      { id: 'poderdante_nombre', label: 'Tu nombre completo (POR PODER)', tipo: 'text', required: true },
+      { id: 'poderdante_identificacion', label: 'Tu identificación (INE/Pasaporte)', tipo: 'text', required: true },
+      { id: 'apoderado_nombre', label: 'Nombre de quien recibirá el poder', tipo: 'text', required: true },
+      { id: 'apoderado_identificacion', label: 'Identificación del apoderado', tipo: 'text', required: true },
+      { id: 'tramite', label: 'Trámite específico a realizar', tipo: 'textarea', required: true, rows: 4 },
+      { id: 'institucion', label: 'Institución donde se realizará el trámite', tipo: 'text', required: true },
+      { id: 'testigo1_nombre', label: 'Nombre del Testigo 1', tipo: 'text', required: true },
+      { id: 'testigo2_nombre', label: 'Nombre del Testigo 2', tipo: 'text', required: true },
+      { id: 'lugar', label: 'Lugar', tipo: 'text', required: true }
+    ],
+    plantilla: function(d) {
+      const fecha = new Date().toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      return `CARTA - PODER
+
+${d.lugar || '[LUGAR]'}, ${fecha}
+
+POR LA PRESENTE CARTA-PODER, YO, ${d.poderdante_nombre || '[PODERDANTE]'}, identificado(a) con ${d.poderdante_identificacion || '[ID]'}, autorizo amplia y suficientemente al señor(a) ${d.apoderado_nombre || '[APODERADO]'}, identificado(a) con ${d.apoderado_identificacion || '[ID]'}, para que en mi nombre y representación realice el siguiente trámite ante ${d.institucion || '[INSTITUCIÓN]'}:
+
+${d.tramite || '[TRÁMITE A REALIZAR]'}
+
+El presente poder se otorga única y exclusivamente para el trámite arriba descrito, y queda revocado a su conclusión.
+
+Estando presentes los testigos abajo firmantes que dan fe del otorgamiento de la presente carta-poder.
+
+ATENTAMENTE
+
+
+___________________________________
+${d.poderdante_nombre || '[PODERDANTE]'}
+PODERDANTE
+
+
+___________________________________
+${d.apoderado_nombre || '[APODERADO]'}
+ACEPTANDO EL PODER
+
+
+___________________________________            ___________________________________
+${d.testigo1_nombre || '[TESTIGO 1]'}                            ${d.testigo2_nombre || '[TESTIGO 2]'}
+TESTIGO                                                        TESTIGO
+
+————————————————————
+NOTA: Este modelo es de uso común. Para actos jurídicos importantes (compra-venta de inmuebles, donaciones, mandatos amplios), se requiere PODER NOTARIAL otorgado ante Notario Público.`;
+    }
+  }
+};
+
+// === ROUTER ===
+function render() {
+  const tipo = new URLSearchParams(location.search).get('tipo');
+  if (tipo && PLANTILLAS[tipo]) {
+    renderForm(tipo);
+  } else {
+    renderLanding();
+  }
+}
+
+function renderLanding() {
+  document.getElementById('viewForm').classList.add('hidden');
+  const v = document.getElementById('viewLanding');
+  v.classList.remove('hidden');
+  let html = '<div class="grid">';
+  for (const id in PLANTILLAS) {
+    const p = PLANTILLAS[id];
+    html += `
+      <div class="card" onclick="abrir('${id}')">
+        <div class="card-icon">${p.icono}</div>
+        <div class="card-title">${p.titulo}</div>
+        <div class="card-desc">${p.descripcion}</div>
+        <span class="chip">${p.fundamento}</span>
+      </div>`;
+  }
+  html += '</div>';
+  v.innerHTML = html;
+}
+
+function abrir(id) {
+  const u = new URL(location.href);
+  u.searchParams.set('tipo', id);
+  history.pushState({}, '', u.toString());
+  render();
+  window.scrollTo(0, 0);
+}
+
+function volver() {
+  const u = new URL(location.href);
+  u.searchParams.delete('tipo');
+  history.pushState({}, '', u.toString());
+  render();
+  window.scrollTo(0, 0);
+}
+
+function renderForm(tipo) {
+  document.getElementById('viewLanding').classList.add('hidden');
+  const v = document.getElementById('viewForm');
+  v.classList.remove('hidden');
+  const p = PLANTILLAS[tipo];
+  let formHtml = '';
+  for (const f of p.fields) {
+    const req = f.required ? '<span class="req">*</span>' : '';
+    let input = '';
+    if (f.tipo === 'textarea') {
+      input = `<textarea id="f_${f.id}" rows="${f.rows || 4}" oninput="onChange()"></textarea>`;
+    } else if (f.tipo === 'select') {
+      input = `<select id="f_${f.id}" onchange="onChange()"><option value="">— Selecciona —</option>` +
+        f.opciones.map(o => `<option value="${o}">${o}</option>`).join('') + '</select>';
+    } else {
+      input = `<input id="f_${f.id}" type="${f.tipo}" oninput="onChange()" />`;
+    }
+    formHtml += `<div class="field"><label for="f_${f.id}">${f.label} ${req}</label>${input}</div>`;
+  }
+
+  v.innerHTML = `
+    <button class="btn-back" onclick="volver()">&larr; Volver a plantillas</button>
+    <div class="hero">
+      <div class="hero-row">
+        <div class="hero-icon">${p.icono}</div>
+        <div>
+          <h2>${p.titulo}</h2>
+          <div class="hero-fundamento"><strong>Fundamento legal:</strong> ${p.fundamento}</div>
+        </div>
+      </div>
+    </div>
+    <div class="layout">
+      <div class="panel">
+        <h3>Tus datos</h3>
+        <form id="formData" onsubmit="return false;">${formHtml}</form>
+      </div>
+      <div class="panel">
+        <h3>Vista previa</h3>
+        <div class="preview" id="preview"></div>
+        <div class="actions">
+          <button class="btn" onclick="descargarPDF('${tipo}')">📥 Descargar PDF</button>
+          <button class="btn btn-secondary" onclick="copiarTexto()">📋 Copiar texto</button>
+          <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+        </div>
+      </div>
+    </div>`;
+  onChange();
+}
+
+function getData(tipo) {
+  const p = PLANTILLAS[tipo];
+  const d = {};
+  for (const f of p.fields) {
+    const el = document.getElementById('f_' + f.id);
+    if (el) d[f.id] = el.value || '';
+  }
+  return d;
+}
+
+function getTipoActual() {
+  return new URLSearchParams(location.search).get('tipo');
+}
+
+function onChange() {
+  const tipo = getTipoActual();
+  if (!tipo || !PLANTILLAS[tipo]) return;
+  const d = getData(tipo);
+  const texto = PLANTILLAS[tipo].plantilla(d);
+  const prev = document.getElementById('preview');
+  if (prev) prev.textContent = texto;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function copiarTexto() {
+  const tipo = getTipoActual();
+  if (!tipo) return;
+  const texto = PLANTILLAS[tipo].plantilla(getData(tipo));
+  navigator.clipboard.writeText(texto).then(() => showToast('Texto copiado al portapapeles'));
+}
+
+function descargarPDF(plantillaId) {
+  const tipo = plantillaId || getTipoActual();
+  if (!tipo || !PLANTILLAS[tipo]) return;
+  const textoCompleto = PLANTILLAS[tipo].plantilla(getData(tipo));
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+
+  doc.setFont('helvetica');
+  doc.setFontSize(11);
+
+  const marginLeft = 25;
+  const marginTop = 25;
+  const pageWidth = 215.9;
+  const usableWidth = pageWidth - marginLeft * 2;
+
+  const lineas = doc.splitTextToSize(textoCompleto, usableWidth);
+
+  let y = marginTop;
+  const lineHeight = 5;
+  const pageHeight = 279.4;
+  const bottomMargin = 25;
+
+  for (const linea of lineas) {
+    if (y + lineHeight > pageHeight - bottomMargin) {
+      doc.addPage();
+      y = marginTop;
+    }
+    doc.text(linea, marginLeft, y);
+    y += lineHeight;
+  }
+
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(`Generado en Tequio.app · Plantilla legal mexicana · ${i}/${totalPages}`, marginLeft, pageHeight - 12);
+  }
+
+  doc.save(`${tipo}-${Date.now()}.pdf`);
+  showToast('PDF generado');
+}
+
+window.addEventListener('popstate', render);
+render();
+</script>
+</body>
+</html>
