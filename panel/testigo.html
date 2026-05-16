@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Testigo Civico | Tequio</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root{
+    --bg:#0b0f1a;
+    --bg2:#111827;
+    --card:#1f2937;
+    --border:#334155;
+    --text:#f3f4f6;
+    --muted:#94a3b8;
+    --gold:#fbbf24;
+    --gold2:#f59e0b;
+    --red:#ef4444;
+    --orange:#f97316;
+    --blue:#3b82f6;
+    --green:#22c55e;
+    --purple:#a855f7;
+    --yellow:#eab308;
+    --gray:#6b7280;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.embedded header .back{display:none}
+  header{
+    background:var(--bg2);
+    border-bottom:1px solid var(--border);
+    padding:16px 20px;
+    position:sticky;top:0;z-index:100;
+  }
+  header .row{display:flex;align-items:center;gap:12px;max-width:900px;margin:0 auto}
+  header .back{
+    color:var(--gold);
+    text-decoration:none;
+    font-size:14px;
+    padding:6px 10px;
+    border:1px solid var(--gold);
+    border-radius:6px;
+    background:transparent;
+    cursor:pointer;
+  }
+  header h1{margin:0;font-size:20px;color:var(--gold);font-weight:700}
+  header .sub{color:var(--muted);font-size:13px;margin:4px 0 0;max-width:900px;margin-left:auto;margin-right:auto}
+  main{max-width:900px;margin:0 auto;padding:16px 12px 80px}
+  .tabs{
+    display:flex;
+    gap:4px;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:4px;
+    margin-bottom:16px;
+    overflow-x:auto;
+  }
+  .tab{
+    flex:1;
+    background:transparent;
+    color:var(--muted);
+    border:none;
+    padding:10px 8px;
+    font-size:13px;
+    cursor:pointer;
+    border-radius:7px;
+    white-space:nowrap;
+    transition:all .15s;
+  }
+  .tab.active{background:var(--gold);color:#0b0f1a;font-weight:600}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  input[type=text],input[type=file],select,textarea{
+    width:100%;
+    padding:10px 12px;
+    background:var(--bg);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+  }
+  input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+  textarea{resize:vertical;min-height:90px}
+  .chars{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+  .chars.bad{color:var(--red)}
+  .btn{
+    background:var(--gold);
+    color:#0b0f1a;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+    font-size:14px;
+    width:100%;
+    transition:opacity .15s;
+  }
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.alt{background:var(--bg);color:var(--gold);border:1px solid var(--gold);width:auto;padding:8px 14px;font-size:13px}
+  .telemetry{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .telemetry.ready{border-color:var(--green);color:var(--green)}
+  .honeypot{position:absolute;left:-9999px;opacity:0;pointer-events:none}
+  .ok-msg{
+    background:rgba(34,197,94,.1);
+    border:1px solid var(--green);
+    color:var(--green);
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+  .err-msg{
+    background:rgba(239,68,68,.1);
+    border:1px solid var(--red);
+    color:#fca5a5;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .filters select{flex:1;min-width:140px}
+  .badge{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:12px;
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+  }
+  .badge.corrupcion{background:var(--red);color:#fff}
+  .badge.seguridad{background:var(--orange);color:#fff}
+  .badge.infraestructura{background:var(--blue);color:#fff}
+  .badge.ambiental{background:var(--green);color:#fff}
+  .badge.salud{background:var(--purple);color:#fff}
+  .badge.servicios{background:var(--yellow);color:#000}
+  .badge.otro{background:var(--gray);color:#fff}
+  .reporte{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .reporte h3{margin:8px 0 6px;font-size:16px;color:var(--text)}
+  .reporte .desc{color:var(--muted);font-size:14px;line-height:1.5;margin:6px 0}
+  .reporte .meta{font-size:12px;color:var(--muted);margin-top:8px}
+  .reporte img{max-width:100%;border-radius:8px;margin-top:8px;display:block}
+  .reporte .actions{margin-top:10px;display:flex;gap:8px;justify-content:flex-end}
+  .reporte .flag{
+    background:transparent;
+    border:1px solid var(--red);
+    color:var(--red);
+    padding:5px 10px;
+    border-radius:6px;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .leer-mas{color:var(--gold);cursor:pointer;font-size:13px;background:none;border:none;padding:0;margin-left:4px}
+  #mapa{height:520px;border-radius:12px;border:1px solid var(--border);background:var(--bg2)}
+  .placeholder{
+    text-align:center;
+    color:var(--muted);
+    padding:40px 20px;
+    font-size:14px;
+  }
+  .disclaimer{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:16px;
+    line-height:1.5;
+  }
+  .geo-info{font-size:12px;color:var(--green);margin-top:6px}
+  .leaflet-popup-content{color:#111}
+  .leaflet-popup-content img{max-width:200px;display:block;margin-top:6px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <a href="/" class="back">&larr; Tequio</a>
+    <h1>Testigo Civico</h1>
+  </div>
+  <div class="sub">Reporta hechos de interes publico. Tu evidencia visible para todos.</div>
+</header>
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="crear">Crear reporte</button>
+    <button class="tab" data-tab="feed">Feed reciente</button>
+    <button class="tab" data-tab="mapa">Mapa</button>
+  </div>
+
+  <!-- Panel: Crear -->
+  <section id="panel-crear" class="panel active">
+    <div id="telemetry" class="telemetry">Tiempo en pagina: 0s &middot; Necesitas 30s para publicar</div>
+    <div id="form-msg"></div>
+    <form id="form-reporte" class="card" autocomplete="off">
+      <input type="text" name="website" class="honeypot" tabindex="-1" aria-hidden="true">
+
+      <div style="margin-bottom:12px">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" required>
+          <option value="">-- Elige una --</option>
+          <option value="corrupcion">Corrupcion</option>
+          <option value="infraestructura">Infraestructura</option>
+          <option value="seguridad">Seguridad</option>
+          <option value="salud">Salud</option>
+          <option value="ambiental">Ambiental</option>
+          <option value="servicios">Servicios</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label for="titulo">Titulo (5-200)</label>
+        <input type="text" id="titulo" maxlength="200" placeholder="Resumen breve del hecho">
+        <div class="chars" id="ch-titulo">0 / 200</div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label for="descripcion">Descripcion (10-5000)</label>
+        <textarea id="descripcion" maxlength="5000" placeholder="Describe lo ocurrido con detalle"></textarea>
+        <div class="chars" id="ch-desc">0 / 5000</div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label>Foto (opcional, max 3MB)</label>
+        <input type="file" id="foto" accept="image/jpeg,image/png,image/webp" capture="environment">
+        <div id="foto-info" class="geo-info" style="display:none"></div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label>Ubicacion (opcional, redondeada a ~10m)</label>
+        <button type="button" id="btn-geo" class="btn alt">Capturar ubicacion</button>
+        <div id="geo-info" class="geo-info"></div>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn" disabled>Publicar reporte</button>
+    </form>
+    <div class="disclaimer">
+      Los reportes son anonimos. Tu ubicacion se redondea a ~10m para proteger tu privacidad. La foto se sube tal cual &mdash; no incluyas informacion personal en ella. Si encuentras contenido abusivo, marcalo con la bandera.
+    </div>
+  </section>
+
+  <!-- Panel: Feed -->
+  <section id="panel-feed" class="panel">
+    <div class="filters">
+      <select id="f-cat">
+        <option value="">Todas las categorias</option>
+        <option value="corrupcion">Corrupcion</option>
+        <option value="infraestructura">Infraestructura</option>
+        <option value="seguridad">Seguridad</option>
+        <option value="salud">Salud</option>
+        <option value="ambiental">Ambiental</option>
+        <option value="servicios">Servicios</option>
+        <option value="otro">Otro</option>
+      </select>
+      <select id="f-edo">
+        <option value="">Todos los estados</option>
+      </select>
+    </div>
+    <div id="feed-list"></div>
+    <button id="btn-more" class="btn alt" style="margin:14px auto;display:block;display:none">Cargar mas</button>
+  </section>
+
+  <!-- Panel: Mapa -->
+  <section id="panel-mapa" class="panel">
+    <div class="filters">
+      <select id="m-cat">
+        <option value="">Todas las categorias</option>
+        <option value="corrupcion">Corrupcion</option>
+        <option value="infraestructura">Infraestructura</option>
+        <option value="seguridad">Seguridad</option>
+        <option value="salud">Salud</option>
+        <option value="ambiental">Ambiental</option>
+        <option value="servicios">Servicios</option>
+        <option value="otro">Otro</option>
+      </select>
+      <select id="m-edo">
+        <option value="">Todos los estados</option>
+      </select>
+    </div>
+    <div id="mapa"></div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/anti-bot.js"></script>
+<script>
+// ============================================================
+// Testigo Civico - logica
+// ============================================================
+(function(){
+  // Embedded mode
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    document.body.classList.add('embedded');
+  }
+
+  const ESTADOS = [
+    {c:'01',n:'Aguascalientes'},{c:'02',n:'Baja California'},{c:'03',n:'Baja California Sur'},
+    {c:'04',n:'Campeche'},{c:'05',n:'Coahuila'},{c:'06',n:'Colima'},{c:'07',n:'Chiapas'},
+    {c:'08',n:'Chihuahua'},{c:'09',n:'Ciudad de Mexico'},{c:'10',n:'Durango'},
+    {c:'11',n:'Guanajuato'},{c:'12',n:'Guerrero'},{c:'13',n:'Hidalgo'},{c:'14',n:'Jalisco'},
+    {c:'15',n:'Mexico'},{c:'16',n:'Michoacan'},{c:'17',n:'Morelos'},{c:'18',n:'Nayarit'},
+    {c:'19',n:'Nuevo Leon'},{c:'20',n:'Oaxaca'},{c:'21',n:'Puebla'},{c:'22',n:'Queretaro'},
+    {c:'23',n:'Quintana Roo'},{c:'24',n:'San Luis Potosi'},{c:'25',n:'Sinaloa'},{c:'26',n:'Sonora'},
+    {c:'27',n:'Tabasco'},{c:'28',n:'Tamaulipas'},{c:'29',n:'Tlaxcala'},{c:'30',n:'Veracruz'},
+    {c:'31',n:'Yucatan'},{c:'32',n:'Zacatecas'}
+  ];
+
+  const CAT_COLORS = {
+    corrupcion:'#ef4444', seguridad:'#f97316', infraestructura:'#3b82f6',
+    ambiental:'#22c55e', salud:'#a855f7', servicios:'#eab308', otro:'#6b7280'
+  };
+
+  // Device hash (persistent in localStorage)
+  function getDeviceHash(){
+    let h = localStorage.getItem('tequio_device_hash');
+    if (!h) {
+      const seed = navigator.userAgent + navigator.language + screen.width + 'x' + screen.height + (Date.now() + Math.random());
+      let hash = 0;
+      for (let i=0;i<seed.length;i++) hash = ((hash<<5)-hash) + seed.charCodeAt(i) | 0;
+      h = 'd' + Math.abs(hash).toString(36) + Math.random().toString(36).slice(2,12) + Date.now().toString(36);
+      localStorage.setItem('tequio_device_hash', h);
+    }
+    return h;
+  }
+
+  function escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function timeAgo(iso){
+    if (!iso) return '';
+    const d = new Date(iso);
+    const s = Math.floor((Date.now()-d.getTime())/1000);
+    if (s<60) return 'hace ' + s + 's';
+    if (s<3600) return 'hace ' + Math.floor(s/60) + ' min';
+    if (s<86400) return 'hace ' + Math.floor(s/3600) + ' h';
+    if (s<2592000) return 'hace ' + Math.floor(s/86400) + ' d';
+    return d.toLocaleDateString('es-MX');
+  }
+
+  // Llenar selects de estado
+  ['f-edo','m-edo'].forEach(id => {
+    const sel = document.getElementById(id);
+    ESTADOS.forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.c; o.textContent = e.n;
+      sel.appendChild(o);
+    });
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(b => {
+    b.addEventListener('click', () => switchTab(b.dataset.tab));
+  });
+  function switchTab(name){
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab===name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id==='panel-'+name));
+    if (name==='feed') cargarFeed();
+    if (name==='mapa') setTimeout(initMapa, 50);
+  }
+  window.__testigoSwitchTab = switchTab;
+
+  // Telemetry
+  const T0 = Date.now();
+  const telEl = document.getElementById('telemetry');
+  let formReady = false;
+  function tickTel(){
+    const ms = Date.now() - T0;
+    const s = Math.floor(ms/1000);
+    if (s >= 30) {
+      telEl.textContent = 'Tiempo en pagina: ' + s + 's (listo para publicar)';
+      telEl.classList.add('ready');
+      formReady = true;
+    } else {
+      telEl.textContent = 'Tiempo en pagina: ' + s + 's &middot; faltan ' + (30 - s) + 's para publicar';
+      telEl.innerHTML = telEl.textContent.replace('&middot;','&middot;');
+    }
+    updateSubmit();
+  }
+  setInterval(tickTel, 1000);
+  tickTel();
+
+  // Form: chars
+  const tit = document.getElementById('titulo');
+  const desc = document.getElementById('descripcion');
+  const cat = document.getElementById('categoria');
+  const chTit = document.getElementById('ch-titulo');
+  const chDesc = document.getElementById('ch-desc');
+  function updateChars(){
+    chTit.textContent = tit.value.length + ' / 200';
+    chTit.classList.toggle('bad', tit.value.length>0 && (tit.value.length<5 || tit.value.length>200));
+    chDesc.textContent = desc.value.length + ' / 5000';
+    chDesc.classList.toggle('bad', desc.value.length>0 && (desc.value.length<10 || desc.value.length>5000));
+    updateSubmit();
+  }
+  tit.addEventListener('input', updateChars);
+  desc.addEventListener('input', updateChars);
+  cat.addEventListener('change', updateSubmit);
+  updateChars();
+
+  // Geolocation
+  let geoData = { lat: null, lng: null, edo: null, edoClave: null, mun: null };
+  document.getElementById('btn-geo').addEventListener('click', () => {
+    const g = document.getElementById('geo-info');
+    if (!navigator.geolocation) { g.textContent = 'Tu navegador no soporta geolocalizacion.'; return; }
+    g.textContent = 'Solicitando ubicacion...';
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = Math.round(pos.coords.latitude*10000)/10000;
+      const lng = Math.round(pos.coords.longitude*10000)/10000;
+      geoData.lat = lat; geoData.lng = lng;
+      g.textContent = 'Latitud ' + lat.toFixed(4) + ', Longitud ' + lng.toFixed(4);
+    }, err => {
+      g.textContent = 'No se pudo obtener: ' + err.message;
+    }, { timeout: 10000, maximumAge: 60000 });
+  });
+
+  // Foto
+  let fotoFile = null;
+  let fotoB64 = null;
+  document.getElementById('foto').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    const info = document.getElementById('foto-info');
+    info.style.display = 'block';
+    if (!f) { fotoFile = null; fotoB64 = null; info.textContent = ''; return; }
+    if (f.size > 3 * 1024 * 1024) {
+      info.style.color = '#fca5a5';
+      info.textContent = 'Archivo demasiado grande (max 3MB). Tamano: ' + (f.size/1024/1024).toFixed(2) + ' MB';
+      fotoFile = null; fotoB64 = null;
+      return;
+    }
+    fotoFile = f;
+    info.style.color = '#22c55e';
+    info.textContent = 'Foto: ' + f.name + ' (' + (f.size/1024).toFixed(0) + ' KB)';
+    const reader = new FileReader();
+    reader.onload = () => { fotoB64 = reader.result; };
+    reader.readAsDataURL(f);
+  });
+
+  // Submit
+  function updateSubmit(){
+    const btn = document.getElementById('btn-submit');
+    const ok = formReady && cat.value && tit.value.length>=5 && tit.value.length<=200 && desc.value.length>=10 && desc.value.length<=5000;
+    btn.disabled = !ok;
+  }
+
+  function showMsg(msg, isErr){
+    const m = document.getElementById('form-msg');
+    m.innerHTML = '<div class="' + (isErr?'err-msg':'ok-msg') + '">' + escapeHtml(msg) + '</div>';
+    if (!isErr) setTimeout(() => { m.innerHTML = ''; }, 6000);
+  }
+
+  document.getElementById('form-reporte').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.textContent = 'Publicando...';
+    try {
+      let foto_url = null;
+      if (fotoFile && fotoB64) {
+        btn.textContent = 'Subiendo foto...';
+        const ext = (fotoFile.name.split('.').pop() || 'jpg').toLowerCase();
+        const upRes = await fetch('/api/data?vista=testigo_foto', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ foto_base64: fotoB64, device_hash: getDeviceHash(), ext })
+        });
+        const upJson = await upRes.json();
+        if (!upRes.ok) throw new Error(upJson.error || 'fallo al subir foto');
+        foto_url = upJson.foto_url;
+      }
+
+      const honeypot = document.querySelector('input[name=website]').value;
+      btn.textContent = 'Publicando...';
+      const body = {
+        titulo: tit.value.trim(),
+        descripcion: desc.value.trim(),
+        categoria: cat.value,
+        foto_url,
+        foto_thumb_url: foto_url,
+        lat: geoData.lat,
+        lng: geoData.lng,
+        nombre_estado: geoData.edo,
+        clave_entidad: geoData.edoClave,
+        nombre_municipio: geoData.mun,
+        device_hash: getDeviceHash(),
+        honeypot,
+        tiempo_en_pagina_ms: Date.now() - T0
+      };
+
+      const res = await fetch('/api/data?vista=testigo_crear', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'error desconocido');
+      showMsg('Reporte publicado. Gracias por contribuir.', false);
+      e.target.reset();
+      fotoFile = null; fotoB64 = null;
+      document.getElementById('foto-info').style.display='none';
+      document.getElementById('geo-info').textContent='';
+      geoData = { lat:null, lng:null, edo:null, edoClave:null, mun:null };
+      updateChars();
+      setTimeout(() => switchTab('feed'), 1200);
+    } catch(err) {
+      showMsg('Error: ' + err.message, true);
+    } finally {
+      btn.textContent = 'Publicar reporte';
+      updateSubmit();
+    }
+  });
+
+  // ============================================================
+  // Feed
+  // ============================================================
+  let feedItems = [];
+  let feedLimit = 50;
+  async function cargarFeed(append){
+    const cont = document.getElementById('feed-list');
+    if (!append) {
+      cont.innerHTML = '<div class="placeholder">Cargando reportes...</div>';
+      feedLimit = 50;
+    }
+    const fc = document.getElementById('f-cat').value;
+    const fe = document.getElementById('f-edo').value;
+    const qs = new URLSearchParams({ vista: 'testigo_listar', limit: String(feedLimit) });
+    if (fc) qs.set('categoria', fc);
+    if (fe) qs.set('estado', fe);
+    try {
+      const res = await fetch('/api/data?' + qs.toString());
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'error');
+      feedItems = json.items || [];
+      renderFeed();
+    } catch(e) {
+      cont.innerHTML = '<div class="placeholder">Error: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+  function renderFeed(){
+    const cont = document.getElementById('feed-list');
+    if (!feedItems.length) {
+      cont.innerHTML = '<div class="placeholder">Sin reportes aun. Se el primero en publicar.</div>';
+      document.getElementById('btn-more').style.display = 'none';
+      return;
+    }
+    cont.innerHTML = feedItems.map(r => renderReporte(r)).join('');
+    document.getElementById('btn-more').style.display = feedItems.length >= feedLimit ? 'block' : 'none';
+    // Wire flag buttons + leer mas
+    cont.querySelectorAll('.flag').forEach(b => b.addEventListener('click', () => flagReporte(b.dataset.id, b)));
+    cont.querySelectorAll('.leer-mas').forEach(b => b.addEventListener('click', () => {
+      const t = b.previousElementSibling;
+      t.textContent = b.dataset.full;
+      b.style.display='none';
+    }));
+  }
+  function renderReporte(r){
+    const cat = r.categoria || 'otro';
+    const fullDesc = r.descripcion || '';
+    const trunc = fullDesc.length > 200;
+    const shortDesc = trunc ? fullDesc.slice(0,200) + '...' : fullDesc;
+    const foto = r.foto_thumb_url || r.foto_url;
+    const lugar = [r.nombre_estado, r.nombre_municipio].filter(Boolean).join(' &middot; ');
+    return [
+      '<div class="reporte">',
+      '  <span class="badge ' + cat + '">' + cat + '</span>',
+      '  <h3>' + escapeHtml(r.titulo || '(sin titulo)') + '</h3>',
+      '  <div class="desc"><span>' + escapeHtml(shortDesc) + '</span>',
+      trunc ? '<button class="leer-mas" data-full="' + escapeHtml(fullDesc) + '">leer mas</button>' : '',
+      '  </div>',
+      foto ? '  <img loading="lazy" src="' + escapeHtml(foto) + '" alt="">' : '',
+      '  <div class="meta">' + (lugar ? escapeHtml(lugar) + ' &middot; ' : '') + escapeHtml(timeAgo(r.created_at)) + '</div>',
+      '  <div class="actions"><button class="flag" data-id="' + escapeHtml(r.id) + '">Reportar</button></div>',
+      '</div>'
+    ].join('');
+  }
+  async function flagReporte(id, btn){
+    if (!confirm('Marcar este reporte como abusivo o inapropiado?')) return;
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      const res = await fetch('/api/data?vista=testigo_flag', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ reporte_id: id, device_hash: getDeviceHash() })
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || 'error');
+      btn.textContent = j.oculto ? 'Oculto' : 'Reportado';
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Reportar';
+      alert('Error: ' + e.message);
+    }
+  }
+  document.getElementById('f-cat').addEventListener('change', () => cargarFeed());
+  document.getElementById('f-edo').addEventListener('change', () => cargarFeed());
+  document.getElementById('btn-more').addEventListener('click', () => { feedLimit += 50; cargarFeed(); });
+
+  // ============================================================
+  // Mapa
+  // ============================================================
+  let mapaInst = null;
+  let mapaMarkers = [];
+  async function initMapa(){
+    if (!mapaInst) {
+      mapaInst = L.map('mapa').setView([23, -102], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(mapaInst);
+    } else {
+      mapaInst.invalidateSize();
+    }
+    await cargarMapa();
+  }
+  async function cargarMapa(){
+    const mc = document.getElementById('m-cat').value;
+    const me = document.getElementById('m-edo').value;
+    const qs = new URLSearchParams({ vista: 'testigo_listar', limit: '200' });
+    if (mc) qs.set('categoria', mc);
+    if (me) qs.set('estado', me);
+    try {
+      const res = await fetch('/api/data?' + qs.toString());
+      const json = await res.json();
+      const items = json.items || [];
+      mapaMarkers.forEach(m => mapaInst.removeLayer(m));
+      mapaMarkers = [];
+      items.forEach(r => {
+        if (typeof r.lat !== 'number' || typeof r.lng !== 'number') return;
+        const color = CAT_COLORS[r.categoria] || '#6b7280';
+        const icon = L.divIcon({
+          html: '<div style="background:'+color+';width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.5)"></div>',
+          className: '', iconSize: [18,18], iconAnchor: [9,9]
+        });
+        const m = L.marker([r.lat, r.lng], { icon }).addTo(mapaInst);
+        const foto = r.foto_thumb_url || r.foto_url;
+        const html = [
+          '<div style="max-width:240px">',
+          '<strong>' + escapeHtml(r.titulo || '') + '</strong><br>',
+          '<small>' + escapeHtml(r.categoria || '') + '</small>',
+          foto ? '<img src="'+escapeHtml(foto)+'">' : '',
+          '</div>'
+        ].join('');
+        m.bindPopup(html);
+        mapaMarkers.push(m);
+      });
+    } catch(e) {
+      console.error('cargarMapa error', e);
+    }
+  }
+  document.getElementById('m-cat').addEventListener('change', cargarMapa);
+  document.getElementById('m-edo').addEventListener('change', cargarMapa);
+
+})();
+</script>
+</body>
+</html>
