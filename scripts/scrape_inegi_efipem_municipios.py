@@ -40,19 +40,10 @@ def normkey(s):
     return "".join(ch for ch in s if ch.isalnum())
 
 
-def download_zip():
-    url = URL_OVERRIDE or EFIPEM_ZIP
-    print(f"[efipem] descargando {url}")
-    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=600)
-    r.raise_for_status()
-    print(f"[efipem] bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
-    return r.content, url
-
-
 def parse_num(v):
     if v is None or v == "": return None
     s = str(v).replace(",", "").replace("$", "").strip()
-    if not s or s.lower() in ("nan", "null", "none", "n/d", "n.d."):
+    if not s or s.lower() in ("nan", "null", "none", "n/d", "n.d.", "-"):
         return None
     try: return float(s)
     except: return None
@@ -85,8 +76,16 @@ NOMBRES_ESTADO = {
 }
 
 
+def download_zip():
+    url = URL_OVERRIDE or EFIPEM_ZIP
+    print(f"[efipem] descargando {url}")
+    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=600)
+    r.raise_for_status()
+    print(f"[efipem] bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
+    return r.content, url
+
+
 def normalize_capitulo(rubro):
-    """Mapea rubros INEGI a categorias estandar."""
     if not rubro: return None
     t = deaccent(rubro).lower()
     if "impuesto" in t: return "impuestos"
@@ -104,15 +103,19 @@ def normalize_capitulo(rubro):
     if "obra publica" in t or "inversion" in t: return "obra_publica_inversion"
     if "subsidio" in t or "ayuda" in t: return "subsidios_ayudas"
     if "bienes muebles" in t or "inmueble" in t: return "bienes_muebles_inmuebles"
-    if "egreso" in t and "total" in t: return "egreso_total"
-    if "ingreso" in t and "total" in t: return "ingreso_total"
     return None
 
 
-def map_row(rec, anio_col=None, year_hint=None):
-    """Mapea row CSV INEGI EFIPEM."""
-    cve_ent_raw = pick(rec, "cve_entidad", "id_entidad", "entidad_id", "cve_ent", "ent", "claveent", "cveentidad", "identidad")
-    cve_mun_raw = pick(rec, "cve_municipio", "id_municipio", "cve_mun", "mun", "clavemunicipio", "cvemunicipio", "idmunicipio")
+def detect_flujo(concepto):
+    t = deaccent(concepto or "").lower()
+    if "ingreso" in t: return "ingreso"
+    if "egreso" in t or "gasto" in t: return "egreso"
+    return None
+
+
+def map_row(rec, year_hint=None):
+    cve_ent_raw = pick(rec, "id_entidad", "cve_entidad", "cve_ent", "ent", "claveent", "cveentidad", "identidad")
+    cve_mun_raw = pick(rec, "id_municipio", "cve_municipio", "cve_mun", "mun", "clavemunicipio", "cvemunicipio", "idmunicipio")
     if not cve_ent_raw or not cve_mun_raw:
         return None
     cve_ent = str(cve_ent_raw).strip().zfill(2)
@@ -121,33 +124,26 @@ def map_row(rec, anio_col=None, year_hint=None):
     if len(cve_mun) > 3: cve_mun = cve_mun[-3:]
     clave_inegi = f"{cve_ent}{cve_mun}"
     if cve_mun == "000":
-        return None  # estado-level, skip (lo tenemos en transferencias_estatales)
+        return None  # estado nivel
 
-    nombre_estado = NOMBRES_ESTADO.get(cve_ent) or (pick(rec, "entidad", "nomentidad", "nom_entidad") or "").strip() or None
-    nombre_municipio = (pick(rec, "municipio", "nommun", "nom_municipio", "nomunicipio") or "").strip().title() or None
+    nombre_estado = NOMBRES_ESTADO.get(cve_ent) or (pick(rec, "entidad", "nom_entidad") or "").strip() or None
+    nombre_municipio = (pick(rec, "municipio", "nom_municipio", "nommun") or "").strip().title() or None
 
-    anio = parse_int(pick(rec, "anio", "ano", "ano_estadistico", "anio_estadistico", "ciclo", "year"))
+    anio = parse_int(pick(rec, "anio", "ano", "ciclo", "year"))
     if not anio and year_hint:
         anio = year_hint
     if not anio:
         return None
 
-    # Detectar flujo (ingreso vs egreso)
-    flujo_raw = (pick(rec, "flujo", "tipo", "tipo_movimiento", "movimiento", "tipoinformacion") or "").strip().lower()
-    flujo = None
-    if "ingreso" in flujo_raw or "ingreso" in deaccent(pick(rec, "concepto", "rubro", "descripcion") or "").lower():
+    concepto = (pick(rec, "rubro", "concepto", "descripcion", "capitulo", "descapitulo", "estimacion") or "").strip() or None
+    flujo = detect_flujo(concepto)
+    # Heuristic: si concepto incluye "ingresos brutos" o "egresos brutos"
+    if not flujo:
         flujo = "ingreso"
-    elif "egreso" in flujo_raw or "egreso" in deaccent(pick(rec, "concepto", "rubro", "descripcion") or "").lower() or "gasto" in flujo_raw:
-        flujo = "egreso"
-    else:
-        # Heuristic: usar codigo del concepto si esta disponible
-        flujo = "ingreso"  # default
 
-    rubro = (pick(rec, "rubro", "concepto", "descripcion", "capitulo", "descapitulo") or "").strip() or None
-    capitulo = normalize_capitulo(rubro)
-    concepto = rubro
+    capitulo = normalize_capitulo(concepto)
 
-    monto = parse_num(pick(rec, "valor", "monto", "importe", "valor_anual", "total", "anual"))
+    monto = parse_num(pick(rec, "valor", "monto", "importe", "total"))
     if monto is None:
         return None
 
@@ -160,7 +156,7 @@ def map_row(rec, anio_col=None, year_hint=None):
         "anio": anio,
         "flujo": flujo,
         "capitulo": capitulo,
-        "concepto": (concepto or "")[:500] or None,
+        "concepto": concepto[:500] if concepto else None,
         "monto": monto,
         "unidad": "MXN",
         "fuente": "INEGI EFIPEM",
@@ -208,37 +204,31 @@ def log_scraper(status, summary, error_msg, started_at, fuente_url):
         print(f"[efipem] no log: {exc}", file=sys.stderr)
 
 
-def process_csv_inner(blob, year_hint=None):
-    """Parsea un CSV del ZIP y devuelve lista de rows mapeados."""
-    text = None
-    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
-        try:
-            text = blob.decode(enc)
-            break
-        except UnicodeDecodeError:
-            continue
-    if text is None:
-        text = blob.decode("latin-1")
-
+def parse_csv_text(text):
     sample = text[:5000]
     sep = "," if sample.count(",") > sample.count(";") else ";"
     reader = csv.reader(io.StringIO(text), delimiter=sep)
-    all_rows = list(reader)
-    if not all_rows: return []
-    raw_headers = [(c or "").strip() for c in all_rows[0]]
-    nh = [normkey(h) for h in raw_headers]
-    print(f"[efipem]   sep={sep!r} headers ({len(raw_headers)}): {raw_headers[:15]}")
+    return list(reader)
 
+
+def parse_xlsx_blob(blob):
+    from openpyxl import load_workbook
+    wb = load_workbook(io.BytesIO(blob), read_only=True, data_only=True)
+    sheet = wb.active
     rows = []
-    for row in all_rows[1:]:
-        if not row or not any((c or "").strip() for c in row): continue
-        rec = dict(zip(nh, [(c or "").strip() for c in row]))
-        m = map_row(rec, year_hint=year_hint)
-        if m:
-            if ANIOS_SET and m["anio"] not in ANIOS_SET:
-                continue
-            rows.append(m)
+    for row in sheet.iter_rows(values_only=True):
+        rows.append([("" if v is None else str(v)) for v in row])
+    wb.close()
     return rows
+
+
+def blob_to_text(blob):
+    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
+        try:
+            return blob.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return blob.decode("latin-1")
 
 
 def year_from_filename(name):
@@ -246,9 +236,36 @@ def year_from_filename(name):
     return int(m.group(1)) if m else None
 
 
+def process_blob(blob, ext, year_hint=None):
+    """Parsea CSV/TXT/XLSX y devuelve filas mapeadas."""
+    ext = ext.lower()
+    if ext in (".xlsx", ".xls"):
+        rows_raw = parse_xlsx_blob(blob)
+    else:
+        # CSV or TXT — INEGI a veces usa TXT con tab/coma
+        text = blob_to_text(blob)
+        rows_raw = parse_csv_text(text)
+
+    if not rows_raw: return []
+    raw_headers = [str(c or "").strip() for c in rows_raw[0]]
+    nh = [normkey(h) for h in raw_headers]
+    print(f"[efipem]   headers ({len(raw_headers)}): {raw_headers[:15]}")
+
+    out = []
+    for row in rows_raw[1:]:
+        if not row or not any(str(c or "").strip() for c in row): continue
+        rec = dict(zip(nh, [str(c or "").strip() for c in row]))
+        m = map_row(rec, year_hint=year_hint)
+        if m:
+            if ANIOS_SET and m["anio"] not in ANIOS_SET:
+                continue
+            out.append(m)
+    return out
+
+
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
-    summary = {"inserted": 0, "skipped": 0, "errors": [], "files": {}}
+    summary = {"inserted": 0, "skipped": 0, "errors": [], "files": {}, "zip_contents": []}
     src_url = ""
     try:
         blob, src_url = download_zip()
@@ -257,22 +274,27 @@ def main():
 
         with zipfile.ZipFile(io.BytesIO(blob)) as zf:
             names = zf.namelist()
-            print(f"[efipem] ZIP contiene {len(names)} archivos")
-            csv_files = [n for n in names if n.lower().endswith(".csv")]
-            print(f"[efipem] {len(csv_files)} CSV files")
-            for name in csv_files[:20]:
-                print(f"  - {name}")
+            print(f"[efipem] ZIP contiene {len(names)} archivos:")
+            for n in names:
+                print(f"  - {n}")
+            summary["zip_contents"] = names
 
+            # Procesar todos los archivos con extensiones procesables
             all_mapped = []
-            for name in csv_files:
+            for name in names:
+                if name.endswith("/"): continue
+                ext = os.path.splitext(name)[1].lower() or ""
+                if ext not in (".csv", ".txt", ".xlsx", ".xls"):
+                    print(f"[efipem] SKIP {name} (ext={ext})")
+                    continue
                 year_hint = year_from_filename(name)
                 if ANIOS_SET and year_hint and year_hint not in ANIOS_SET:
                     print(f"[efipem] SKIP {name} (anio {year_hint} fuera de filtro)")
                     continue
-                print(f"[efipem] procesando {name} (year_hint={year_hint})")
+                print(f"[efipem] procesando {name} (year_hint={year_hint}, ext={ext})")
                 try:
                     inner = zf.read(name)
-                    rows = process_csv_inner(inner, year_hint=year_hint)
+                    rows = process_blob(inner, ext, year_hint=year_hint)
                     summary["files"][name] = len(rows)
                     all_mapped.extend(rows)
                     print(f"[efipem]   {name}: +{len(rows)} rows")
@@ -281,10 +303,8 @@ def main():
                     print(f"[efipem]   FAIL {name}: {exc}", file=sys.stderr)
 
         print(f"[efipem] total mapeados: {len(all_mapped)}")
-        if all_mapped:
-            print(f"[efipem] sample: {all_mapped[0]}")
+        if all_mapped: print(f"[efipem] sample: {all_mapped[0]}")
 
-        # Dedup
         seen = set()
         deduped = []
         for m in all_mapped:
@@ -296,10 +316,13 @@ def main():
             deduped.append(m)
         print(f"[efipem] dedup: {len(all_mapped)} -> {len(deduped)}")
 
-        ins = sb_upsert("finanzas_municipales_inegi", deduped,
-                        on_conflict="clave_inegi,anio,flujo,capitulo,concepto")
-        summary["inserted"] = ins
-        status = "ok" if ins > 0 else "fail"
+        if deduped:
+            ins = sb_upsert("finanzas_municipales_inegi", deduped,
+                            on_conflict="clave_inegi,anio,flujo,capitulo,concepto")
+            summary["inserted"] = ins
+            status = "ok"
+        else:
+            status = "fail"
     except Exception as exc:
         import traceback; traceback.print_exc()
         summary["errors"].append(str(exc))
