@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEF 2026 - Presupuesto Federal | Tequio</title>
+<meta name="description" content="Presupuesto de Egresos de la Federacion 2026: 8.07 billones MXN. Desglose por ramo y unidad responsable.">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --card: #131826;
+    --card2: #1a2032;
+    --border: #232a3d;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --gold: #fbbf24;
+    --gold-dim: #b88a17;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header { display: flex; align-items: center; gap: 14px; padding: 14px 0 18px; flex-wrap: wrap; }
+  .back-link { color: var(--muted); font-size: 14px; }
+  .back-link:hover { color: var(--gold); }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .hero {
+    background: linear-gradient(135deg, #1a2032 0%, #131826 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 22px;
+    margin-bottom: 22px;
+    text-align: center;
+  }
+  .hero .total {
+    font-size: clamp(40px, 8vw, 64px);
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .hero .subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .hero .description {
+    font-size: 14px;
+    color: var(--text);
+    margin-top: 12px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin: 28px 0 14px;
+  }
+  .top-bars { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .bar-row:hover { border-color: var(--gold-dim); transform: translateX(2px); }
+  .bar-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .bar-label { font-size: 14px; font-weight: 600; flex: 1; }
+  .bar-label .ramo-num { color: var(--muted); margin-right: 6px; font-weight: 500; }
+  .bar-monto { font-size: 16px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+  .bar-pct { color: var(--muted); font-size: 13px; margin-left: 6px; font-weight: 500; }
+  .bar-track {
+    background: var(--card2);
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold) 100%);
+    border-radius: 6px;
+    transition: width 0.4s ease-out;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--card2);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tbody tr { cursor: pointer; transition: background 0.12s; }
+  tbody tr:hover { background: var(--card2); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num { text-align: right; font-weight: 600; color: var(--gold); white-space: nowrap; }
+  td.pct { text-align: right; color: var(--muted); width: 80px; }
+  td.ramo-col { color: var(--muted); width: 60px; font-weight: 500; }
+  .drill {
+    background: var(--card2);
+    border-top: 2px solid var(--gold);
+  }
+  .drill-content {
+    padding: 16px;
+  }
+  .drill h4 { font-size: 14px; margin-bottom: 10px; color: var(--gold); }
+  .drill ul { list-style: none; }
+  .drill li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    gap: 12px;
+  }
+  .drill li:last-child { border-bottom: 0; }
+  .drill .ur-label { flex: 1; color: var(--text); }
+  .drill .ur-monto { color: var(--gold); font-weight: 600; white-space: nowrap; }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .error { text-align: center; padding: 20px; color: var(--red); background: var(--card); border-radius: 12px; }
+  .disclaimer {
+    margin-top: 36px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .disclaimer a { color: var(--gold); }
+  @media (max-width: 600px) {
+    .container { padding: 12px; }
+    th, td { padding: 10px 8px; font-size: 13px; }
+    td.ramo-col { width: 40px; }
+    td.pct { width: 50px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="back-link">&larr; Tequio</a>
+      <h1>PEF 2026 &mdash; Presupuesto Federal</h1>
+    </header>
+
+    <div id="hero" class="hero">
+      <div class="total" id="total-monto">Cargando...</div>
+      <div class="subtitle">Presupuesto de Egresos de la Federacion 2026</div>
+      <div class="description">Esto es lo que el gobierno federal mexicano gastara este ano.</div>
+    </div>
+
+    <div class="section-title">Top 5 Ramos</div>
+    <div class="top-bars" id="top-bars"><div class="loading">Cargando barras...</div></div>
+
+    <div class="section-title">Todos los Ramos</div>
+    <div id="tabla-wrap"><div class="loading">Cargando tabla...</div></div>
+
+    <div class="disclaimer">
+      Datos del Presupuesto de Egresos de la Federacion 2026 aprobado, publicado por SHCP.
+      Fuente: <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener">pef.hacienda.gob.mx</a>.
+      Tequio recopila y normaliza estos datos para hacerlos accesibles a la ciudadania.
+    </div>
+  </div>
+
+<script>
+function fmt(n) {
+  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + ' bn';
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + ' mmdp';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + ' mdp';
+  return new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN', maximumFractionDigits: 0}).format(n);
+}
+
+function pct(n, total) {
+  if (!total) return '0%';
+  return (n / total * 100).toFixed(1) + '%';
+}
+
+let DRILL_CACHE = {};
+
+async function loadResumen() {
+  try {
+    const r = await fetch('/api/data?vista=pef_resumen&anio=2026');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    renderAll(data);
+  } catch (e) {
+    document.getElementById('total-monto').textContent = 'Error';
+    document.getElementById('top-bars').innerHTML = '<div class="error">No se pudo cargar el resumen: ' + e.message + '</div>';
+    document.getElementById('tabla-wrap').innerHTML = '';
+  }
+}
+
+function renderAll(data) {
+  const total = data.total || 0;
+  const ramos = data.ramos || [];
+  document.getElementById('total-monto').textContent = fmt(total);
+
+  // Top 5 bars
+  const top5 = ramos.slice(0, 5);
+  const maxMonto = top5.length ? top5[0].monto : 1;
+  const barsHtml = top5.map(function(r) {
+    const widthPct = (r.monto / maxMonto * 100).toFixed(1);
+    const sharePct = pct(r.monto, total);
+    return '<div class="bar-row" data-ramo="' + escapeAttr(r.ramo) + '">' +
+      '<div class="bar-header">' +
+        '<div class="bar-label"><span class="ramo-num">Ramo ' + escapeHtml(r.ramo) + '</span>' + escapeHtml(r.desc_ramo || '') + '</div>' +
+        '<div class="bar-monto">' + fmt(r.monto) + '<span class="bar-pct">' + sharePct + '</span></div>' +
+      '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + widthPct + '%"></div></div>' +
+      '<div class="drill-slot"></div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('top-bars').innerHTML = barsHtml;
+
+  // Full table
+  let rowsHtml = '';
+  ramos.forEach(function(r) {
+    rowsHtml += '<tr data-ramo="' + escapeAttr(r.ramo) + '">' +
+      '<td class="ramo-col">' + escapeHtml(r.ramo) + '</td>' +
+      '<td>' + escapeHtml(r.desc_ramo || '') + '</td>' +
+      '<td class="num">' + fmt(r.monto) + '</td>' +
+      '<td class="pct">' + pct(r.monto, total) + '</td>' +
+    '</tr>' +
+    '<tr class="drill-row" id="drill-row-' + escapeAttr(r.ramo) + '" style="display:none"><td colspan="4" class="drill"><div class="drill-content" id="drill-content-' + escapeAttr(r.ramo) + '"></div></td></tr>';
+  });
+  const tableHtml = '<table><thead><tr><th>Ramo</th><th>Dependencia</th><th style="text-align:right">Monto</th><th style="text-align:right">%</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+  document.getElementById('tabla-wrap').innerHTML = tableHtml;
+
+  // Wire clicks
+  document.querySelectorAll('.bar-row').forEach(function(el) {
+    el.addEventListener('click', function() {
+      const ramo = el.getAttribute('data-ramo');
+      const slot = el.querySelector('.drill-slot');
+      if (slot.innerHTML) { slot.innerHTML = ''; return; }
+      slot.innerHTML = '<div class="drill"><div class="drill-content">Cargando...</div></div>';
+      loadDrill(ramo).then(function(html) { slot.innerHTML = '<div class="drill"><div class="drill-content">' + html + '</div></div>'; });
+    });
+  });
+  document.querySelectorAll('tbody tr[data-ramo]').forEach(function(tr) {
+    tr.addEventListener('click', function() {
+      const ramo = tr.getAttribute('data-ramo');
+      const drillRow = document.getElementById('drill-row-' + ramo);
+      const content = document.getElementById('drill-content-' + ramo);
+      if (drillRow.style.display !== 'none') { drillRow.style.display = 'none'; return; }
+      drillRow.style.display = '';
+      content.innerHTML = 'Cargando...';
+      loadDrill(ramo).then(function(html) { content.innerHTML = html; });
+    });
+  });
+}
+
+async function loadDrill(ramo) {
+  if (DRILL_CACHE[ramo]) return DRILL_CACHE[ramo];
+  try {
+    const r = await fetch('/api/data?vista=pef_ramo&ramo=' + encodeURIComponent(ramo) + '&anio=2026');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const items = (data.items || []).slice(0, 10);
+    if (!items.length) {
+      DRILL_CACHE[ramo] = '<em>Sin desglose disponible.</em>';
+      return DRILL_CACHE[ramo];
+    }
+    let h = '<h4>Top 10 unidades responsables &mdash; Ramo ' + escapeHtml(ramo) + '</h4><ul>';
+    items.forEach(function(it) {
+      const label = (it.desc_ur || it.unidad_responsable || 'N/D');
+      h += '<li><span class="ur-label">' + escapeHtml(label) + '</span><span class="ur-monto">' + fmt(it.monto) + '</span></li>';
+    });
+    h += '</ul>';
+    DRILL_CACHE[ramo] = h;
+    return h;
+  } catch (e) {
+    return '<em>Error: ' + escapeHtml(e.message) + '</em>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  });
+}
+function escapeAttr(s) { return escapeHtml(s).replace(/\s/g, '_'); }
+
+loadResumen();
+</script>
+</body>
+</html>
