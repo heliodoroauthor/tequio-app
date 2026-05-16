@@ -1144,6 +1144,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ items: rows, total: rows.length, query: q });
     }
 
+    // ── ASF — Auditoría Superior de la Federación ──
+    if (vista === 'asf') {
+      const cuenta = req.query.cuenta_publica;
+      let path = 'asf_auditorias?select=*&order=cuenta_publica.desc,fecha_entrega.desc';
+      if (cuenta) path += `&cuenta_publica=eq.${encodeURIComponent(cuenta)}`;
+      const rows = await sb(path);
+      return res.status(200).json({ items: rows, total: rows.length });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
