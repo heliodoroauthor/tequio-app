@@ -1917,6 +1917,9 @@
     <!-- ── ACCIÓN ── -->
     <div class="nav-section">
       <div class="nav-label">🛡️ Acción</div>
+      <div class="nav-item" onclick="cargarPanel('emergencia')" style="background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(127,29,29,0.05)); border-left: 3px solid #dc2626;">
+        <span class="icon">🚨</span> Modo Emergencia
+      </div>
       <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
         <span class="icon">🤝</span> Pide Ayuda Legal
       </div>
@@ -13663,6 +13666,7 @@ function switchTab(el) {
 // ─── Panel iframe loader & Próximamente placeholder ───
 function cargarPanel(slug) {
   const PANELS = {
+    'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
     'generador': '/panel/generador.html?embedded=1',
     'pef': '/panel/pef.html?embedded=1',
