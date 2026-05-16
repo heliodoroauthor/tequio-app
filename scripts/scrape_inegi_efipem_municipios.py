@@ -25,7 +25,7 @@ SCRAPER_SLUG = "inegi_efipem"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 EFIPEM_ZIP = "https://www.inegi.org.mx/contenidos/programas/finanzas/datosabiertos/efipem.zip"
 # Solo procesamos archivos del ZIP municipal
-TARGET_INNER_ZIPS = {"efipem_municipal_csv.zip"}
+TARGET_INNER_ZIPS = {"efipem_municipal_csv.zip", "efipem_alcaldias_csv.zip"}
 
 ANIOS_SET = set()
 if ANIOS_FILTRO:
