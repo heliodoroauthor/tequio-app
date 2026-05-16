@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0b0f1a">
+<title>Panel municipal · Tequio</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root {
+    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
+    --text:#e8eef9; --muted:#8a98b3; --hint:#6b7a96;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#3b82f6;
+    --accent:#a78bfa; --gold:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .wrap{max-width:920px;margin:0 auto;padding:12px}
+  a{color:var(--info);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;margin-bottom:8px}
+  .back:hover{color:var(--text)}
+
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#1e2a52,#1a2236);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+  .hero h1{margin:0 0 4px;font-size:26px;font-weight:800;letter-spacing:-0.02em}
+  .hero .estado{color:var(--muted);font-size:14px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600}
+  .hero .clave{display:inline-block;background:#1f2a3d;padding:2px 8px;border-radius:6px;font-size:11px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;margin-left:8px}
+  .hero .pob{margin-top:10px;font-size:34px;font-weight:800;line-height:1;color:var(--text)}
+  .hero .pob span{font-size:14px;color:var(--muted);font-weight:500}
+
+  /* Stats grid */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+  .stat .n{font-size:20px;font-weight:700;line-height:1.1;color:var(--text)}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.04em}
+  .stat .sub{font-size:10px;color:var(--hint);margin-top:2px}
+  @media (max-width:520px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .hero h1{font-size:22px}
+    .hero .pob{font-size:28px}
+  }
+
+  /* Sections */
+  section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+  section h2{margin:0 0 12px;font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+  section h2 .badge{background:#1f2a3d;color:var(--muted);font-size:11px;padding:2px 8px;border-radius:6px;font-weight:500}
+  section .src{color:var(--hint);font-size:11px;margin-top:8px}
+
+  /* Mapa */
+  #mapa{height:280px;border-radius:10px;background:#0a0e16}
+
+  /* Presidente */
+  .pres{display:flex;align-items:center;gap:12px}
+  .pres .avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--info));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+  .pres .info{flex:1;min-width:0}
+  .pres .nom{font-size:17px;font-weight:700;line-height:1.2}
+  .pres .partido{color:var(--muted);font-size:13px;margin-top:2px}
+  .pres .periodo{display:inline-block;background:#1f2a3d;padding:2px 8px;border-radius:6px;font-size:11px;color:var(--text);margin-top:4px}
+
+  /* Tipos delitos */
+  .delitos-list{display:flex;flex-direction:column;gap:6px}
+  .delito-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 10px;background:#0a0e16;border-radius:8px;align-items:center;font-size:13px}
+  .delito-row .tipo{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .delito-row .n{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums;font-size:14px}
+
+  /* Chart */
+  .chart-wrap{position:relative;height:200px}
+
+  /* Vecinos */
+  .vecinos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .vecinos a{background:#1f2a3d;color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;text-decoration:none}
+  .vecinos a:hover{background:#2a3654}
+  .vecinos a strong{color:var(--muted);font-weight:500;margin-left:6px;font-size:11px}
+
+  /* Loading / empty */
+  .loading{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty{padding:14px;color:var(--muted);font-size:13px;text-align:center;background:#0a0e16;border-radius:8px}
+
+  /* Footer */
+  footer{text-align:center;color:var(--hint);font-size:11px;padding:16px;margin-top:8px}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/panel/buscador.html" class="back">← Otro municipio</a>
+
+  <div id="content">
+    <div class="loading">Cargando datos del municipio…</div>
+  </div>
+
+  <footer>Datos: INEGI Censo 2020, INAFED, SESNSP, SHCP · <a href="https://tequio.app">Tequio.app</a></footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const clave = params.get('clave_inegi') || params.get('clave');
+const slug = params.get('slug');
+const estado = params.get('estado');
+
+const fmtNum = (n) => n == null ? '—' : new Intl.NumberFormat('es-MX').format(n);
+const fmtMon = (n) => n == null ? '—' : '$' + new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n);
+const fmtCurr = (n) => {
+  if (n == null) return '—';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + ' mil mdp';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + ' mdp';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'k';
+  return '$' + n.toFixed(0);
+};
+const initials = (s) => {
+  if (!s) return '?';
+  const parts = s.trim().split(/\s+/);
+  return ((parts[0]||'')[0] + (parts[1]||'')[0]).toUpperCase();
+};
+
+async function load() {
+  let url = '/api/data?vista=municipio_panel';
+  if (clave) url += '&clave_inegi=' + encodeURIComponent(clave);
+  else if (slug) { url += '&slug=' + encodeURIComponent(slug); if (estado) url += '&estado=' + encodeURIComponent(estado); }
+  else { document.getElementById('content').innerHTML = '<div class="empty">Falta ?clave_inegi=XXXXX</div>'; return; }
+
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    render(data);
+  } catch (e) {
+    document.getElementById('content').innerHTML = '<div class="empty" style="color:var(--bad)">Error: ' + e.message + '</div>';
+  }
+}
+
+function render(data) {
+  const m = data.municipio;
+  const pres = data.presidente;
+  const del = data.delitos || {por_tipo:[], por_mes:[], total_periodo:0};
+  const fin = data.finanzas || [];
+  const vec = data.vecinos || [];
+
+  // Ultimo ingreso bruto
+  const ingresoUltimo = fin.filter(f => f.flujo === 'ingreso').sort((a,b) => b.anio - a.anio)[0];
+
+  // Densidad poblacional aproximada (si tuvieramos superficie, no la tenemos aun)
+  const pobHomb = m.poblacion_hombres ? Math.round(m.poblacion_hombres/m.poblacion_total*100) : null;
+  const pobMuj = m.poblacion_mujeres ? Math.round(m.poblacion_mujeres/m.poblacion_total*100) : null;
+
+  const html = `
+    <div class="hero">
+      <div class="estado">${m.nombre_estado || ''}</div>
+      <h1>${m.nombre} <span class="clave">${m.clave_inegi}</span></h1>
+      <div class="pob">${fmtNum(m.poblacion_total)} <span>habitantes</span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="n">${fmtNum(m.viviendas_totales)}</div>
+        <div class="l">Viviendas</div>
+      </div>
+      <div class="stat">
+        <div class="n">${pobHomb ? pobHomb + '%' : '—'}<span style="color:var(--muted);font-size:13px"> / ${pobMuj ? pobMuj + '%' : '—'}</span></div>
+        <div class="l">Hombres / Mujeres</div>
+      </div>
+      <div class="stat">
+        <div class="n">${m.altitud_msnm ? fmtNum(m.altitud_msnm) + 'm' : '—'}</div>
+        <div class="l">Altitud</div>
+      </div>
+      <div class="stat">
+        <div class="n">${del.total_periodo ? fmtNum(del.total_periodo) : '—'}</div>
+        <div class="l">Delitos registrados</div>
+        <div class="sub">2023–2025</div>
+      </div>
+    </div>
+
+    ${pres ? `
+      <section>
+        <h2>Presidente municipal <span class="badge">${pres.periodo_label || ''}</span></h2>
+        <div class="pres">
+          <div class="avatar">${initials(pres.nombre_completo || pres.nombre)}</div>
+          <div class="info">
+            <div class="nom">${(pres.nombre_completo || [pres.nombre, pres.apellido_paterno, pres.apellido_materno].filter(Boolean).join(' '))}</div>
+            <div class="partido">${pres.partido || '—'}</div>
+            ${pres.periodo_inicio ? '<div class="periodo">' + pres.periodo_inicio + ' a ' + (pres.periodo_fin || '?') + '</div>' : ''}
+          </div>
+        </div>
+        <div class="src">Fuente: INAFED · datos.gob.mx</div>
+      </section>
+    ` : ''}
+
+    ${m.latitud && m.longitud ? `
+      <section>
+        <h2>Ubicación ${m.cabecera_municipal ? '<span class="badge">' + m.cabecera_municipal + '</span>' : ''}</h2>
+        <div id="mapa"></div>
+        <div class="src">Lat ${m.latitud}, Lng ${m.longitud} · INEGI wscatgeo</div>
+      </section>
+    ` : ''}
+
+    ${del.por_tipo && del.por_tipo.length ? `
+      <section>
+        <h2>Delitos más comunes <span class="badge">Top 10 · 2023–2025</span></h2>
+        <div class="delitos-list">
+          ${del.por_tipo.map(t => `
+            <div class="delito-row"><span class="tipo">${t.tipo}</span><span class="n">${fmtNum(t.cantidad)}</span></div>
+          `).join('')}
+        </div>
+        <div class="src">Fuente: SESNSP Incidencia Delictiva Municipal</div>
+      </section>
+    ` : '<section><h2>Delitos</h2><div class="empty">Sin registros para este municipio.</div></section>'}
+
+    ${del.por_mes && del.por_mes.length ? `
+      <section>
+        <h2>Tendencia mensual de delitos <span class="badge">${del.por_mes.length} meses</span></h2>
+        <div class="chart-wrap"><canvas id="chartDelitos"></canvas></div>
+        <div class="src">SESNSP · Carpetas de investigación</div>
+      </section>
+    ` : ''}
+
+    ${ingresoUltimo ? `
+      <section>
+        <h2>Ingreso bruto municipal <span class="badge">${ingresoUltimo.anio}</span></h2>
+        <div style="font-size:32px;font-weight:800;color:var(--gold);line-height:1.1">${fmtCurr(ingresoUltimo.monto)}</div>
+        ${fin.length > 1 ? '<div class="chart-wrap" style="margin-top:14px;height:160px"><canvas id="chartFinanzas"></canvas></div>' : ''}
+        <div class="src">Fuente: INEGI EFIPEM (último dato disponible)</div>
+      </section>
+    ` : ''}
+
+    ${vec.length ? `
+      <section>
+        <h2>Municipios cercanos del mismo estado</h2>
+        <div class="vecinos">
+          ${vec.map(v => `<a href="/panel/municipio.html?clave_inegi=${v.clave_inegi}">${v.nombre} <strong>${fmtNum(v.poblacion_total)}</strong></a>`).join('')}
+        </div>
+      </section>
+    ` : ''}
+  `;
+
+  document.getElementById('content').innerHTML = html;
+  document.title = `${m.nombre}, ${m.nombre_estado} · Tequio`;
+
+  // Render mapa
+  if (m.latitud && m.longitud) {
+    setTimeout(() => {
+      const map = L.map('mapa', {zoomControl: true, attributionControl: false}).setView([m.latitud, m.longitud], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+      L.marker([m.latitud, m.longitud]).addTo(map).bindPopup(`<b>${m.nombre}</b><br>${m.cabecera_municipal || ''}`).openPopup();
+    }, 100);
+  }
+
+  // Render chart delitos
+  if (del.por_mes && del.por_mes.length > 1 && window.Chart) {
+    const ctx = document.getElementById('chartDelitos');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: del.por_mes.map(p => p.periodo),
+          datasets: [{label: 'Delitos', data: del.por_mes.map(p => p.cantidad), borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', tension:0.3, fill:true, pointRadius:2}]
+        },
+        options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{color:'#8a98b3',maxTicksLimit:6}, grid:{color:'#1f2a3d'}}, y:{ticks:{color:'#8a98b3'}, grid:{color:'#1f2a3d'}}}}
+      });
+    }
+  }
+
+  // Render chart finanzas
+  if (fin.length > 1 && window.Chart) {
+    const ctx = document.getElementById('chartFinanzas');
+    if (ctx) {
+      const ingresos = fin.filter(f => f.flujo === 'ingreso').sort((a,b) => a.anio - b.anio);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ingresos.map(f => f.anio),
+          datasets: [{label: 'Ingreso bruto', data: ingresos.map(f => f.monto), backgroundColor:'#fbbf24'}]
+        },
+        options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:(ctx)=> fmtCurr(ctx.parsed.y)}}}, scales:{x:{ticks:{color:'#8a98b3'}, grid:{color:'#1f2a3d'}}, y:{ticks:{color:'#8a98b3', callback:(v)=>fmtCurr(v)}, grid:{color:'#1f2a3d'}}}}
+      });
+    }
+  }
+}
+
+load();
+</script>
+</body>
+</html>
