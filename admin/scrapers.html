@@ -48,6 +48,18 @@
 </style>
 </head>
 <body>
+<script>
+(function () {
+  const KEY = 'tequio_admin_v1';
+  if (localStorage.getItem(KEY) === 'ok') return;
+  const pw = prompt('Acceso admin Tequio. Contrase\u00f1a:');
+  if (pw === 'tequio2026') {
+    localStorage.setItem(KEY, 'ok');
+  } else {
+    window.location.href = '/';
+  }
+})();
+</script>
 <div class="wrap">
   <header>
     <div>
