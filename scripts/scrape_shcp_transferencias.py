@@ -39,7 +39,7 @@ def candidate_urls():
         return [URL_OVERRIDE]
     now = datetime.utcnow()
     urls = []
-    for offset in range(0, 6):
+    for offset in range(1, 7):
         m = now.month - offset
         y = now.year
         while m <= 0:
