@@ -1153,6 +1153,42 @@ export default async function handler(req, res) {
       return res.status(200).json({ items: rows, total: rows.length });
     }
 
+    // -- SHCP PEF -- Presupuesto de Egresos de la Federacion --
+    if (vista === 'pef_resumen') {
+      const anio = parseInt(req.query.anio || '2026', 10);
+      const ramos = await sb(`shcp_pef?ciclo=eq.${anio}&select=ramo,desc_ramo,monto`);
+      const byRamo = {};
+      let total = 0;
+      for (const r of ramos) {
+        const k = r.ramo + '|' + (r.desc_ramo || '');
+        byRamo[k] = (byRamo[k] || 0) + Number(r.monto || 0);
+        total += Number(r.monto || 0);
+      }
+      const items = Object.entries(byRamo).map(([k, v]) => {
+        const [ramo, desc_ramo] = k.split('|');
+        return { ramo, desc_ramo, monto: v };
+      }).sort((a, b) => b.monto - a.monto);
+      res.setHeader('Cache-Control', 's-maxage=3600');
+      return res.status(200).json({ anio, total, ramos: items });
+    }
+
+    if (vista === 'pef_ramo') {
+      const anio = parseInt(req.query.anio || '2026', 10);
+      const ramo = (req.query.ramo || '').trim();
+      if (!ramo) return res.status(400).json({ error: 'Pasa ?ramo=N' });
+      const rows = await sb(`shcp_pef?ciclo=eq.${anio}&ramo=eq.${encodeURIComponent(ramo)}&select=unidad_responsable,desc_ur,desc_pp,desc_og,monto&order=monto.desc.nullslast&limit=500`);
+      const byUR = {};
+      for (const r of rows) {
+        const k = (r.unidad_responsable || '') + '|' + (r.desc_ur || '');
+        if (!byUR[k]) byUR[k] = { unidad_responsable: r.unidad_responsable, desc_ur: r.desc_ur, monto: 0, programas: [] };
+        byUR[k].monto += Number(r.monto || 0);
+        if (r.desc_pp) byUR[k].programas.push({ desc_pp: r.desc_pp, desc_og: r.desc_og, monto: Number(r.monto || 0) });
+      }
+      const items = Object.values(byUR).sort((a, b) => b.monto - a.monto);
+      res.setHeader('Cache-Control', 's-maxage=3600');
+      return res.status(200).json({ anio, ramo, items });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
