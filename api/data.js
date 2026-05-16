@@ -1231,34 +1231,22 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Pasa ?clave=NN (clave INEGI de la entidad, ej. 09 para CDMX)' });
       }
       // Paralelizar las queries
-      const [transfRows, municipios, presidentes, diputados, senadores] = await Promise.all([
-        sb(`transferencias_estatales?clave_entidad=eq.${clave}&select=anio,mes,ramo,fondo,concepto,tipo_dato,monto,nombre_estado&order=anio.desc,mes.desc&limit=10000`).catch(_ => []),
-        sb(`municipios?clave_entidad=eq.${clave}&select=clave_inegi,nombre,nombre_estado,municipio_slug,poblacion_total,latitud,longitud&order=poblacion_total.desc.nullslast&limit=200`).catch(_ => []),
-        sb(`presidentes_municipales?clave_entidad=eq.${clave}&select=nombre,apellido_paterno,apellido_materno,nombre_municipio,partido,periodo_label&limit=500`).catch(_ => []),
-        sb(`politicos_diputados?select=nombre,partido,partido_codigo,entidad,distrito,foto_url&limit=500`).catch(_ => []),
-        sb(`politicos_senadores?select=nombre_completo,partido,entidad_federativa,tipo_eleccion,foto_url&limit=200`).catch(_ => [])
+      const [transfAgg, municipios, presidentes, diputados, senadores] = await Promise.all([
+        sb(`rpc/agg_transferencias_estado?p_clave=${encodeURIComponent(clave)}`),
+        sb(`municipios?clave_entidad=eq.${clave}&select=clave_inegi,nombre,municipio_slug,poblacion_total,latitud,longitud&order=poblacion_total.desc.nullslast&limit=20`),
+        sb(`presidentes_municipales?clave_entidad=eq.${clave}&select=nombre,apellido_paterno,apellido_materno,nombre_municipio,partido,periodo_label&limit=300`),
+        sb(`politicos_diputados?select=nombre,partido,entidad,distrito&limit=500`).catch(_ => []),
+        sb(`politicos_senadores?select=nombre,partido,entidad,principio&limit=200`).catch(_ => [])
       ]);
 
-      // Agregar transferencias por anio, fondo, ramo (usar tipo_dato pagado o aprobado)
-      const porAnio = {};
-      const porFondo = {};
-      const porRamo = {};
-      let totalRecibido = 0;
-      for (const r of transfRows) {
-        const m = Number(r.monto || 0);
-        if (r.tipo_dato === 'pagado' || r.tipo_dato === 'aprobado' || r.tipo_dato === 'monto' || !r.tipo_dato) {
-          porAnio[r.anio] = (porAnio[r.anio] || 0) + m;
-          if (r.fondo) porFondo[r.fondo] = (porFondo[r.fondo] || 0) + m;
-          if (r.ramo) porRamo[r.ramo] = (porRamo[r.ramo] || 0) + m;
-          totalRecibido += m;
-        }
-      }
-      const transferencias_por_anio = Object.entries(porAnio).map(([anio, total]) => ({ anio: Number(anio), total })).sort((a, b) => a.anio - b.anio);
-      const top_fondos = Object.entries(porFondo).map(([fondo, total]) => ({ fondo, total })).sort((a, b) => b.total - a.total).slice(0, 10);
-      const top_ramos = Object.entries(porRamo).map(([ramo, total]) => ({ ramo, total })).sort((a, b) => b.total - a.total).slice(0, 5);
-
-      // Nombre del estado: usar municipios o transferencias
-      const nombreEstado = (municipios[0] && municipios[0].nombre_estado) || (transfRows[0] && transfRows[0].nombre_estado) || '';
+      // El RPC retorna [{ ... }] (PostgREST envuelve scalar functions en array)
+      const aggRow = Array.isArray(transfAgg) ? transfAgg[0] : transfAgg;
+      const aggData = aggRow && (aggRow.agg_transferencias_estado || aggRow);
+      const totalRecibido = Number(aggData?.total || 0);
+      const transferencias_por_anio = aggData?.transferencias_por_anio || [];
+      const top_fondos = aggData?.top_fondos || [];
+      const top_ramos = aggData?.top_ramos || [];
+      const nombreEstado = aggData?.nombre_estado || municipios[0]?.nombre_estado || '';
 
       // Filtrar diputados por estado (entidad ILIKE) - normalizar acentos
       const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
