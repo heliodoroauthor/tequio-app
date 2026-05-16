@@ -108,7 +108,7 @@ def detect_flujo(concepto):
 
 def map_row(rec, year_hint=None):
     cve_ent_raw = pick(rec, "id_entidad", "cve_entidad", "cve_ent", "ent", "claveent", "cveentidad", "identidad")
-    cve_mun_raw = pick(rec, "id_municipio", "cve_municipio", "cve_mun", "mun", "clavemunicipio", "cvemunicipio", "idmunicipio")
+    cve_mun_raw = pick(rec, "id_municipio", "id_alcaldia", "cve_municipio", "cve_alcaldia", "cve_mun", "mun", "clavemunicipio", "clavealcaldia", "cvemunicipio", "cvealcaldia", "idmunicipio", "idalcaldia")
     if not cve_ent_raw or not cve_mun_raw:
         return None
     cve_ent = str(cve_ent_raw).strip().zfill(2)
