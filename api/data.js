@@ -1640,6 +1640,117 @@ export default async function handler(req, res) {
       return res.status(201).json({ ok: true, foto_url: public_url });
     }
 
+    // ── Debates — listar ──
+    if (vista === 'debates_listar') {
+      const estatus = req.query.estatus || 'abierto';
+      const items = await sb(`debates?estatus=eq.${encodeURIComponent(estatus)}&select=*&order=destacado.desc,argumentos_count.desc,fecha_inicio.desc&limit=100`);
+      return res.status(200).json({ items, total: items.length });
+    }
+
+    // ── Debates — detalle con argumentos por posición ──
+    if (vista === 'debates_detalle') {
+      const id = req.query.id;
+      const slug = (req.query.slug || '').trim();
+      if (!id && !slug) return res.status(400).json({ error: 'id o slug requerido' });
+      const debQuery = id 
+        ? `debates?id=eq.${encodeURIComponent(id)}&select=*&limit=1`
+        : `debates?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`;
+      const debs = await sb(debQuery);
+      if (!debs.length) return res.status(404).json({ error: 'debate no encontrado' });
+      const debate = debs[0];
+      const argumentos = await sb(`debate_argumentos?debate_id=eq.${debate.id}&estatus=eq.publicado&select=*&order=score.desc,created_at.desc&limit=200`);
+      const porPosicion = { a_favor: [], en_contra: [], matiz: [] };
+      for (const a of argumentos) porPosicion[a.posicion]?.push(a);
+      return res.status(200).json({ debate, argumentos: porPosicion });
+    }
+
+    // ── Debates — agregar argumento (Nivel 2, rate limit 5min) ──
+    if (vista === 'debate_argumentar') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { debate_id, posicion, argumento, device_hash, honeypot, tiempo_en_pagina_ms } = body;
+      
+      if (honeypot) return res.status(400).json({ error: 'bot' });
+      if (typeof tiempo_en_pagina_ms === 'number' && tiempo_en_pagina_ms < 10000) {
+        return res.status(400).json({ error: 'Espera al menos 10 segundos' });
+      }
+      if (!debate_id || !posicion || !argumento) return res.status(400).json({ error: 'debate_id, posicion y argumento requeridos' });
+      if (!['a_favor','en_contra','matiz'].includes(posicion)) return res.status(400).json({ error: 'posicion invalida' });
+      if (argumento.length < 50 || argumento.length > 2000) return res.status(400).json({ error: 'argumento debe tener entre 50 y 2000 caracteres' });
+      if (!device_hash || device_hash.length < 10) return res.status(400).json({ error: 'device_hash requerido' });
+      
+      // Rate limit: 1 cada 5 min por device
+      const cincoMin = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const recientes = await sb(`debate_argumentos?device_hash=eq.${encodeURIComponent(device_hash)}&created_at=gte.${encodeURIComponent(cincoMin)}&select=id`);
+      if (recientes.length > 0) {
+        return res.status(429).json({ error: 'Espera 5 minutos entre argumentos' });
+      }
+      
+      // IP hash
+      const ipRaw = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+      
+      const ins = await fetch(`${SUPABASE_URL}/rest/v1/debate_argumentos`, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY || ANON_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          debate_id: parseInt(debate_id, 10),
+          posicion,
+          argumento: argumento.trim(),
+          device_hash,
+          ip_hash
+        })
+      });
+      
+      if (!ins.ok) {
+        const err = await ins.text();
+        return res.status(500).json({ error: 'insert failed', detail: err.slice(0, 200) });
+      }
+      const data = await ins.json();
+      return res.status(201).json({ ok: true, argumento: Array.isArray(data) ? data[0] : data });
+    }
+
+    // ── Debates — votar argumento ──
+    if (vista === 'debate_votar_arg') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { argumento_id, voto, device_hash } = body;
+      
+      if (!argumento_id || !voto || !device_hash) return res.status(400).json({ error: 'argumento_id, voto y device_hash requeridos' });
+      if (!['arriba','abajo'].includes(voto)) return res.status(400).json({ error: 'voto invalido' });
+      
+      const ins = await fetch(`${SUPABASE_URL}/rest/v1/debate_votos`, {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE_KEY || ANON_KEY,
+          'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          argumento_id: parseInt(argumento_id, 10),
+          device_hash,
+          voto
+        })
+      });
+      
+      if (!ins.ok) {
+        const errText = await ins.text();
+        // 409 = ya votó (UNIQUE constraint violation)
+        if (ins.status === 409 || errText.includes('duplicate')) {
+          return res.status(409).json({ error: 'Ya votaste este argumento' });
+        }
+        return res.status(500).json({ error: 'vote failed', detail: errText.slice(0, 200) });
+      }
+      
+      return res.status(201).json({ ok: true });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
