@@ -24,6 +24,8 @@ if not SB_URL or not SB_KEY:
 SCRAPER_SLUG = "inegi_efipem"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 EFIPEM_ZIP = "https://www.inegi.org.mx/contenidos/programas/finanzas/datosabiertos/efipem.zip"
+# Solo procesamos archivos del ZIP municipal
+TARGET_INNER_ZIPS = {"efipem_municipal_csv.zip"}
 
 ANIOS_SET = set()
 if ANIOS_FILTRO:
@@ -76,15 +78,6 @@ NOMBRES_ESTADO = {
 }
 
 
-def download_zip():
-    url = URL_OVERRIDE or EFIPEM_ZIP
-    print(f"[efipem] descargando {url}")
-    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=600)
-    r.raise_for_status()
-    print(f"[efipem] bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
-    return r.content, url
-
-
 def normalize_capitulo(rubro):
     if not rubro: return None
     t = deaccent(rubro).lower()
@@ -124,7 +117,7 @@ def map_row(rec, year_hint=None):
     if len(cve_mun) > 3: cve_mun = cve_mun[-3:]
     clave_inegi = f"{cve_ent}{cve_mun}"
     if cve_mun == "000":
-        return None  # estado nivel
+        return None
 
     nombre_estado = NOMBRES_ESTADO.get(cve_ent) or (pick(rec, "entidad", "nom_entidad") or "").strip() or None
     nombre_municipio = (pick(rec, "municipio", "nom_municipio", "nommun") or "").strip().title() or None
@@ -136,11 +129,7 @@ def map_row(rec, year_hint=None):
         return None
 
     concepto = (pick(rec, "rubro", "concepto", "descripcion", "capitulo", "descapitulo", "estimacion") or "").strip() or None
-    flujo = detect_flujo(concepto)
-    # Heuristic: si concepto incluye "ingresos brutos" o "egresos brutos"
-    if not flujo:
-        flujo = "ingreso"
-
+    flujo = detect_flujo(concepto) or "ingreso"
     capitulo = normalize_capitulo(concepto)
 
     monto = parse_num(pick(rec, "valor", "monto", "importe", "total"))
@@ -236,20 +225,19 @@ def year_from_filename(name):
     return int(m.group(1)) if m else None
 
 
-def process_blob(blob, ext, year_hint=None):
-    """Parsea CSV/TXT/XLSX y devuelve filas mapeadas."""
+def process_blob_data(blob, ext, year_hint=None):
+    """Procesa un CSV/TXT/XLSX y devuelve filas."""
     ext = ext.lower()
     if ext in (".xlsx", ".xls"):
         rows_raw = parse_xlsx_blob(blob)
     else:
-        # CSV or TXT — INEGI a veces usa TXT con tab/coma
         text = blob_to_text(blob)
         rows_raw = parse_csv_text(text)
 
     if not rows_raw: return []
     raw_headers = [str(c or "").strip() for c in rows_raw[0]]
     nh = [normkey(h) for h in raw_headers]
-    print(f"[efipem]   headers ({len(raw_headers)}): {raw_headers[:15]}")
+    print(f"[efipem]     headers ({len(raw_headers)}): {raw_headers[:15]}")
 
     out = []
     for row in rows_raw[1:]:
@@ -263,45 +251,60 @@ def process_blob(blob, ext, year_hint=None):
     return out
 
 
+def process_zip(zip_blob, name_path=""):
+    """Procesa un ZIP recursivamente. Devuelve filas mapeadas."""
+    all_rows = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(zip_blob)) as zf:
+            inner_names = zf.namelist()
+            print(f"[efipem] [{name_path}] contiene {len(inner_names)} archivos")
+            for inner in inner_names:
+                if inner.endswith("/"): continue
+                inner_ext = os.path.splitext(inner)[1].lower()
+                year_hint = year_from_filename(inner)
+                if inner_ext == ".zip":
+                    # Recurse only if it's a target file
+                    if not name_path and inner not in TARGET_INNER_ZIPS:
+                        print(f"[efipem] SKIP {inner} (no es target)")
+                        continue
+                    print(f"[efipem] recursing into {inner}")
+                    inner_blob = zf.read(inner)
+                    all_rows.extend(process_zip(inner_blob, name_path=inner))
+                elif inner_ext in (".csv", ".txt", ".xlsx", ".xls"):
+                    if ANIOS_SET and year_hint and year_hint not in ANIOS_SET:
+                        print(f"[efipem]   SKIP {inner} (anio {year_hint} fuera)")
+                        continue
+                    print(f"[efipem]   procesando {inner} (year_hint={year_hint})")
+                    inner_blob = zf.read(inner)
+                    rows = process_blob_data(inner_blob, inner_ext, year_hint=year_hint)
+                    print(f"[efipem]   {inner}: +{len(rows)} rows")
+                    all_rows.extend(rows)
+                else:
+                    print(f"[efipem]   SKIP {inner} (ext {inner_ext})")
+    except Exception as exc:
+        print(f"[efipem] FAIL procesando {name_path}: {exc}", file=sys.stderr)
+        raise
+    return all_rows
+
+
+def download_zip():
+    url = URL_OVERRIDE or EFIPEM_ZIP
+    print(f"[efipem] descargando {url}")
+    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=600)
+    r.raise_for_status()
+    print(f"[efipem] bytes={len(r.content)} content-type={r.headers.get('Content-Type','')}")
+    return r.content, url
+
+
 def main():
     started_at = datetime.now(timezone.utc).isoformat()
-    summary = {"inserted": 0, "skipped": 0, "errors": [], "files": {}, "zip_contents": []}
+    summary = {"inserted": 0, "skipped": 0, "errors": []}
     src_url = ""
     try:
         blob, src_url = download_zip()
         if blob[:2] != b"PK":
             raise RuntimeError(f"No es ZIP (header={blob[:8]!r})")
-
-        with zipfile.ZipFile(io.BytesIO(blob)) as zf:
-            names = zf.namelist()
-            print(f"[efipem] ZIP contiene {len(names)} archivos:")
-            for n in names:
-                print(f"  - {n}")
-            summary["zip_contents"] = names
-
-            # Procesar todos los archivos con extensiones procesables
-            all_mapped = []
-            for name in names:
-                if name.endswith("/"): continue
-                ext = os.path.splitext(name)[1].lower() or ""
-                if ext not in (".csv", ".txt", ".xlsx", ".xls"):
-                    print(f"[efipem] SKIP {name} (ext={ext})")
-                    continue
-                year_hint = year_from_filename(name)
-                if ANIOS_SET and year_hint and year_hint not in ANIOS_SET:
-                    print(f"[efipem] SKIP {name} (anio {year_hint} fuera de filtro)")
-                    continue
-                print(f"[efipem] procesando {name} (year_hint={year_hint}, ext={ext})")
-                try:
-                    inner = zf.read(name)
-                    rows = process_blob(inner, ext, year_hint=year_hint)
-                    summary["files"][name] = len(rows)
-                    all_mapped.extend(rows)
-                    print(f"[efipem]   {name}: +{len(rows)} rows")
-                except Exception as exc:
-                    summary["errors"].append(f"{name}: {exc}")
-                    print(f"[efipem]   FAIL {name}: {exc}", file=sys.stderr)
-
+        all_mapped = process_zip(blob)
         print(f"[efipem] total mapeados: {len(all_mapped)}")
         if all_mapped: print(f"[efipem] sample: {all_mapped[0]}")
 
