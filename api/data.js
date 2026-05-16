@@ -1222,6 +1222,80 @@ export default async function handler(req, res) {
       return res.status(200).json({ anio, ramo, items });
     }
 
+    // ── Panel Estatal — todo lo de un estado en una sola call ──
+    if (vista === 'estado_panel') {
+      const clave = (req.query.clave || '').trim().padStart(2, '0');
+      if (!clave || clave === '00') {
+        return res.status(400).json({ error: 'Pasa ?clave=NN (clave INEGI de la entidad, ej. 09 para CDMX)' });
+      }
+      // Paralelizar las queries
+      const [transfRows, municipios, presidentes, diputados, senadores] = await Promise.all([
+        sb(`transferencias_estatales?clave_entidad=eq.${clave}&select=anio,mes,ramo,fondo,concepto,tipo_dato,monto,nombre_estado&order=anio.desc,mes.desc&limit=10000`).catch(_ => []),
+        sb(`municipios?clave_entidad=eq.${clave}&select=clave_inegi,nombre,nombre_estado,municipio_slug,poblacion_total,latitud,longitud&order=poblacion_total.desc.nullslast&limit=200`).catch(_ => []),
+        sb(`presidentes_municipales?clave_entidad=eq.${clave}&select=nombre,apellido_paterno,apellido_materno,nombre_municipio,partido,periodo_label&limit=500`).catch(_ => []),
+        sb(`politicos_diputados?select=nombre,partido,partido_codigo,entidad,distrito,foto_url&limit=500`).catch(_ => []),
+        sb(`politicos_senadores?select=nombre_completo,partido,entidad_federativa,tipo_eleccion,foto_url&limit=200`).catch(_ => [])
+      ]);
+
+      // Agregar transferencias por anio, fondo, ramo (usar tipo_dato pagado o aprobado)
+      const porAnio = {};
+      const porFondo = {};
+      const porRamo = {};
+      let totalRecibido = 0;
+      for (const r of transfRows) {
+        const m = Number(r.monto || 0);
+        if (r.tipo_dato === 'pagado' || r.tipo_dato === 'aprobado') {
+          porAnio[r.anio] = (porAnio[r.anio] || 0) + m;
+          if (r.fondo) porFondo[r.fondo] = (porFondo[r.fondo] || 0) + m;
+          if (r.ramo) porRamo[r.ramo] = (porRamo[r.ramo] || 0) + m;
+          totalRecibido += m;
+        }
+      }
+      const transferencias_por_anio = Object.entries(porAnio).map(([anio, total]) => ({ anio: Number(anio), total })).sort((a, b) => a.anio - b.anio);
+      const top_fondos = Object.entries(porFondo).map(([fondo, total]) => ({ fondo, total })).sort((a, b) => b.total - a.total).slice(0, 10);
+      const top_ramos = Object.entries(porRamo).map(([ramo, total]) => ({ ramo, total })).sort((a, b) => b.total - a.total).slice(0, 5);
+
+      // Nombre del estado: usar municipios o transferencias
+      const nombreEstado = (municipios[0] && municipios[0].nombre_estado) || (transfRows[0] && transfRows[0].nombre_estado) || '';
+
+      // Filtrar diputados por estado (entidad ILIKE) - normalizar acentos
+      const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const nEstado = norm(nombreEstado);
+      const dipFiltrados = diputados.filter(d => {
+        const e = norm(d.entidad);
+        if (!e || !nEstado) return false;
+        return e.includes(nEstado.slice(0, 8)) || nEstado.includes(e.slice(0, 8));
+      });
+      const senFiltrados = senadores.filter(s => {
+        const e = norm(s.entidad_federativa);
+        return e && nEstado && (e.includes(nEstado.slice(0, 8)) || nEstado.includes(e.slice(0, 8)));
+      });
+
+      // Distribucion partidista de presidentes municipales
+      const porPartido = {};
+      for (const p of presidentes) {
+        const k = (p.partido || 'SIN_DATO').split(',')[0].trim();
+        porPartido[k] = (porPartido[k] || 0) + 1;
+      }
+
+      return res.status(200).json({
+        clave,
+        nombre_estado: nombreEstado,
+        total_transferencias_historicas: totalRecibido,
+        ultimo_anio_con_datos: transferencias_por_anio.length ? transferencias_por_anio[transferencias_por_anio.length - 1].anio : null,
+        transferencias_por_anio,
+        top_fondos,
+        top_ramos,
+        municipios_top: municipios.slice(0, 10),
+        num_municipios: municipios.length,
+        presidentes_partido: Object.entries(porPartido).map(([partido, num]) => ({ partido, num })).sort((a, b) => b.num - a.num),
+        diputados_federales: dipFiltrados.slice(0, 50),
+        senadores: senFiltrados.slice(0, 5),
+        num_diputados: dipFiltrados.length,
+        num_senadores: senFiltrados.length
+      });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
