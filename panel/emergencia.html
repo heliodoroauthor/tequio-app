@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modo Emergencia - Tequio</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --red: #dc2626;
+    --red-dark: #991b1b;
+    --red-darker: #7f1d1d;
+    --red-soft: #fca5a5;
+    --red-softer: #fecaca;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --line: rgba(220,38,38,0.3);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  a.back-link {
+    color: var(--red-soft);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+  a.back-link:hover { text-decoration: underline; }
+  h1 {
+    font-size: 1.6rem;
+    margin: 0.3rem 0 0.3rem 0;
+    color: var(--text);
+  }
+  .subtitle {
+    color: var(--muted);
+    margin: 0 0 1.2rem 0;
+    font-size: 0.95rem;
+  }
+  .btn-derecho:hover {
+    background: rgba(220,38,38,0.15) !important;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link" id="back-link">&larr; Tequio</a>
+  <h1>&#x1F6A8; Modo Emergencia</h1>
+  <p class="subtitle">Tus derechos en tiempo real. Audio en voz alta si no puedes leer.</p>
+
+  <div id="main-view">
+    <div style="background: linear-gradient(135deg, #7f1d1d, #991b1b); border: 2px solid #dc2626; border-radius: 1rem; padding: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <div style="font-size: 2.5rem;">&#x1F6A8;</div>
+      <div style="flex:1; min-width: 200px;">
+        <div style="font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 0.3rem;">MODO EMERGENCIA</div>
+        <div style="color: #fecaca; font-size: 0.95rem; line-height: 1.4;">
+          En peligro f&iacute;sico inmediato: <strong style="color: white;">llama al 911 ahora</strong>.
+          Esta secci&oacute;n orienta sobre tus derechos legales en situaciones urgentes.
+        </div>
+      </div>
+      <a href="tel:911" style="background: white; color: #991b1b; padding: 1rem 1.5rem; border-radius: 0.75rem; font-weight: 900; font-size: 1.4rem; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+        <span>&#x1F4DE;</span> 911
+      </a>
+    </div>
+
+    <section style="background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.3); border-radius: 1rem; padding: 1.5rem; margin-top: 1rem;">
+      <h3 style="margin: 0 0 0.3rem 0; color: #fca5a5; font-size: 1rem;">&#x1F3A4; ASISTENTE DE VOZ &middot; EMERGENCIAS</h3>
+      <p style="color: #9ca3af; font-size: 0.88rem; margin: 0 0 1.2rem 0; line-height: 1.4;">
+        Si no puedes leer la pantalla &mdash; presiona el bot&oacute;n y el tel&eacute;fono leer&aacute; tus derechos en voz alta.
+      </p>
+
+      <button id="btn-leer-derechos" style="width: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; padding: 1.2rem; border-radius: 0.75rem; font-size: 1.05rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.6rem; box-shadow: 0 4px 12px rgba(220,38,38,0.3);">
+        <span>&#x1F3A4;</span> LEER MIS DERECHOS FUNDAMENTALES EN VOZ ALTA
+      </button>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; margin-top: 1rem;">
+        <button class="btn-derecho" data-derecho="silencio" style="background: rgba(0,0,0,0.3); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3); padding: 0.8rem 1rem; border-radius: 0.6rem; cursor: pointer; text-align: left; font-size: 0.92rem; transition: background 0.15s;">
+          &#x1F507; Derecho al silencio
+        </button>
+        <button class="btn-derecho" data-derecho="abogado" style="background: rgba(0,0,0,0.3); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3); padding: 0.8rem 1rem; border-radius: 0.6rem; cursor: pointer; text-align: left; font-size: 0.92rem;">
+          &#x2696;&#xFE0F; Exijo abogado
+        </button>
+        <button class="btn-derecho" data-derecho="no-firmar" style="background: rgba(0,0,0,0.3); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3); padding: 0.8rem 1rem; border-radius: 0.6rem; cursor: pointer; text-align: left; font-size: 0.92rem;">
+          &#x270B; No firmo nada
+        </button>
+        <button class="btn-derecho" data-derecho="motivo" style="background: rgba(0,0,0,0.3); color: #fca5a5; border: 1px solid rgba(220,38,38,0.3); padding: 0.8rem 1rem; border-radius: 0.6rem; cursor: pointer; text-align: left; font-size: 0.92rem;">
+          &#x2753; Motivo de detenci&oacute;n
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; gap: 1rem; flex-wrap: wrap;">
+        <button id="btn-detener" style="background: #1f2937; color: #e5e7eb; border: 1px solid #374151; padding: 0.6rem 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem;">
+          &#x23F9; Detener
+        </button>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #9ca3af;">
+          Velocidad:
+          <select id="velocidad" style="background: #1f2937; color: #e5e7eb; border: 1px solid #374151; border-radius: 0.4rem; padding: 0.4rem 0.6rem;">
+            <option value="0.8">&#x1F422; Lento</option>
+            <option value="1.0" selected>&#x1F6B6; Normal</option>
+            <option value="1.2">&#x1F3C3; R&aacute;pido</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section style="margin-top: 2rem;">
+      <h3 style="margin: 0 0 1rem 0; color: #fca5a5; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;">
+        &#x26A1; &iquest;QU&Eacute; EST&Aacute; PASANDO AHORA MISMO?
+      </h3>
+      <div id="situaciones-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;">
+      </div>
+    </section>
+  </div>
+
+  <div id="detail-view" style="display:none;"></div>
+</div>
+
+<script>
+  // ?embedded=1 handling
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    var bl = document.getElementById('back-link');
+    if (bl) bl.style.display = 'none';
+  }
+
+  // ============================================
+  // VOICE ASSISTANT
+  // ============================================
+  var synth = window.speechSynthesis;
+  var currentUtterance = null;
+
+  function hablar(texto) {
+    if (!synth) { alert('Tu navegador no soporta sintesis de voz.'); return; }
+    if (synth.speaking) synth.cancel();
+    var u = new SpeechSynthesisUtterance(texto);
+    u.lang = 'es-MX';
+    var vel = document.getElementById('velocidad');
+    u.rate = vel ? parseFloat(vel.value) : 1.0;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    var voices = synth.getVoices();
+    var voz = voices.find(function(v){ return v.lang.indexOf('es') === 0; }) || voices[0];
+    if (voz) u.voice = voz;
+    currentUtterance = u;
+    synth.speak(u);
+  }
+
+  function detenerVoz() {
+    if (synth && synth.speaking) synth.cancel();
+  }
+
+  // ============================================
+  // DERECHOS FUNDAMENTALES (Art. 20 Constitucional)
+  // ============================================
+  var DERECHOS_COMPLETOS = "Atencion: estos son tus derechos fundamentales segun el Articulo 20 de la Constitucion Politica de los Estados Unidos Mexicanos. Manten la calma y escucha con atencion.\n\n"
+    + "Uno. Tienes derecho a la presuncion de inocencia. Eres inocente hasta que se demuestre tu culpabilidad mediante sentencia firme.\n\n"
+    + "Dos. Tienes derecho a guardar silencio. No estas obligado a declarar. Lo que digas puede usarse en tu contra. Permanece en silencio hasta tener tu abogado presente.\n\n"
+    + "Tres. Tienes derecho a un abogado desde el momento de tu detencion. Si no puedes pagar uno, la Defensoria Publica Federal te asignara uno gratuito. El telefono es ochocientos doscientos treinta treinta.\n\n"
+    + "Cuatro. Tienes derecho a no autoincriminarte. No estas obligado a declarar contra ti mismo. No firmes ningun documento sin antes leerlo y consultarlo con tu abogado.\n\n"
+    + "Cinco. Tienes derecho a saber el motivo de tu detencion. La autoridad debe informarte por que te detienen, que delito se te imputa, y que pruebas existen en tu contra.\n\n"
+    + "Seis. Tienes derecho a comunicarte con tu familia o persona de confianza. Pide hacer una llamada telefonica.\n\n"
+    + "Siete. Tienes derecho a un trato digno. Esta prohibida la tortura, tratos crueles, inhumanos o degradantes. Si te torturan o maltratan, reportalo a la Comision Nacional de Derechos Humanos al ochocientos setecientos quince dos mil.\n\n"
+    + "Ocho. Si eres detenido por delitos en flagrancia, deben presentarte ante el Ministerio Publico sin demora. No pueden retenerte arbitrariamente.\n\n"
+    + "Nueve. Tienes derecho a un proceso publico y oral. Las audiencias no son secretas.\n\n"
+    + "Diez. Tienes derecho a un juez imparcial. Si crees que el juez es parcial, puedes recusarlo.\n\n"
+    + "Recuerda: manten la calma. Tu silencio es tu derecho. Exige a tu abogado.";
+
+  var DERECHOS_RAPIDOS = {
+    'silencio': 'Tengo derecho a guardar silencio segun el Articulo 20 de la Constitucion. No voy a declarar hasta tener un abogado presente. Repito: no voy a declarar sin abogado.',
+    'abogado': 'Exijo mi derecho a un abogado garantizado por el Articulo 20 Constitucional. Tengo derecho a la Defensoria Publica Federal gratuita en el telefono ochocientos doscientos treinta treinta. No respondo mas preguntas hasta tener mi abogado presente.',
+    'no-firmar': 'No voy a firmar ningun documento sin antes leerlo completo y consultarlo con mi abogado. Este es mi derecho constitucional. Repito: no firmo nada sin abogado.',
+    'motivo': 'Exijo conocer el motivo concreto de mi detencion. Segun el Articulo 16 Constitucional, ustedes estan obligados a decirme por que me detienen, que delito se me imputa, y mostrar el fundamento legal de la detencion.'
+  };
+
+  document.getElementById('btn-leer-derechos').addEventListener('click', function(){ hablar(DERECHOS_COMPLETOS); });
+  document.getElementById('btn-detener').addEventListener('click', detenerVoz);
+  Array.prototype.slice.call(document.querySelectorAll('.btn-derecho')).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.dataset.derecho;
+      if (DERECHOS_RAPIDOS[k]) hablar(DERECHOS_RAPIDOS[k]);
+    });
+  });
+
+  // ============================================
+  // SITUACIONES CRITICAS
+  // ============================================
+  var SITUACIONES = [
+    {
+      id: 'detencion',
+      icono: '🚔',
+      titulo: 'Me esta deteniendo un policia',
+      color: 'linear-gradient(135deg, rgba(220,38,38,0.2), rgba(127,29,29,0.1))',
+      guia: {
+        audio: 'Manten la calma. Pon las manos visibles. No corras. No discutas. Tu silencio es tu derecho. Exige saber por que te detienen. Exige un abogado. No firmes nada. Llama a la Defensoria Publica Federal al ochocientos doscientos treinta treinta cuando puedas.',
+        pasos: [
+          'Manten la calma. Pon las manos a la vista. No corras. No discutas.',
+          'Pregunta firme y respetuosamente: "Cual es el motivo de mi detencion? Que delito se me imputa?"',
+          'Si te esposan o te suben a la patrulla, ejerce tu DERECHO AL SILENCIO. No declares nada.',
+          'Exige llamada telefonica a familiar o abogado. Es tu derecho constitucional.',
+          'Defensoria Publica Federal (GRATUITA): 800 200 3030',
+          'Si te torturan o maltratan: CNDH 800 715 2000',
+          'Si te llevan al MP, exige el abogado AHI MISMO antes de declarar.'
+        ],
+        telefonos: [
+          { nombre: 'Defensoria Publica Federal', num: '800 200 3030' },
+          { nombre: 'CNDH (quejas contra autoridad)', num: '800 715 2000' },
+          { nombre: 'Emergencias', num: '911' }
+        ],
+        plantilla: 'denuncia-oic'
+      }
+    },
+    {
+      id: 'violencia',
+      icono: '🆘',
+      titulo: 'Estoy en peligro / violencia',
+      color: 'linear-gradient(135deg, rgba(244,63,94,0.2), rgba(159,18,57,0.1))',
+      guia: {
+        audio: 'Llama al 911 ahora mismo. Si no puedes hablar, deja la llamada abierta. Si eres mujer en violencia de genero, la Linea SOS Mujer es el ochocientos ciento ocho cuarenta cincuenta y tres, atendida veinticuatro horas. Alejate del agresor si puedes. Pide ayuda a vecinos, comercio, oficina publica. Tu vida importa.',
+        pasos: [
+          'LLAMA AL 911 - Si no puedes hablar, manten la linea abierta.',
+          'Si es violencia de genero: Linea SOS Mujer 800 108 4053 (CONAVIM, 24/7)',
+          'Alejate del agresor. Busca refugio en comercio, oficina publica, casa vecina.',
+          'Toma video o audio con tu celular si es seguro.',
+          'No te culpes. La violencia nunca es tu culpa.',
+          'Cuando estes a salvo: presenta denuncia en la Fiscalia de tu estado.',
+          'Tequio tiene Directorio de 32 Fiscalias Estatales con telefono.'
+        ],
+        telefonos: [
+          { nombre: '911 Emergencias', num: '911' },
+          { nombre: 'Linea SOS Mujer Conavim', num: '800 108 4053' },
+          { nombre: 'Linea de la Vida (salud mental)', num: '800 911 2000' }
+        ],
+        plantilla: 'denuncia-oic'
+      }
+    },
+    {
+      id: 'desalojo',
+      icono: '🏠',
+      titulo: 'Desalojo forzado ahora',
+      color: 'linear-gradient(135deg, rgba(251,146,60,0.2), rgba(154,52,18,0.1))',
+      guia: {
+        audio: 'El desalojo sin orden judicial es ilegal. Pide ver la orden firmada por un juez. Si no la tienen, es DESPOJO, un delito. Llama al 911. Graba todo. Pide ayuda a vecinos como testigos. Tienes derecho a juicio justo antes de ser desalojado.',
+        pasos: [
+          'EXIGE ORDEN JUDICIAL POR ESCRITO. Sin ella, es DESPOJO (delito grave, art. 395 CP Federal).',
+          'GRABA con tu celular: quienes son, que dicen, hora, fecha.',
+          'Llama al 911 si hay violencia o ingresan sin orden.',
+          'PIDE TESTIGOS: vecinos, presta atencion a placas de vehiculos.',
+          'Si tienen orden, pide tiempo razonable para sacar tus pertenencias.',
+          'NUNCA firmes documento que digan "consentimiento de desalojo".',
+          'Tras los hechos: denuncia ante FGR/Fiscalia y solicita AMPARO inmediato.',
+          'Defensoria Publica Federal: 800 200 3030'
+        ],
+        telefonos: [
+          { nombre: 'Emergencias', num: '911' },
+          { nombre: 'Defensoria Publica', num: '800 200 3030' },
+          { nombre: 'CNDH', num: '800 715 2000' }
+        ],
+        plantilla: 'amparo-guia'
+      }
+    },
+    {
+      id: 'medica',
+      icono: '🏥',
+      titulo: 'Me niegan atencion medica',
+      color: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(20,83,45,0.1))',
+      guia: {
+        audio: 'El acceso a la salud es un derecho constitucional segun el Articulo cuatro. Si te niegan atencion de URGENCIA, es ILEGAL. Exige hablar con el director del hospital. Pide por escrito la negativa. Llama al ochocientos seiscientos veintitres veintitres veintitres si eres del IMSS, o al ochocientos ochocientos cuarenta cuarenta y siete siete si eres del ISSSTE.',
+        pasos: [
+          'En urgencia, NINGUNA institucion (IMSS, ISSSTE, privada, SSA) puede negar atencion (Art. 4 Const., Ley General de Salud).',
+          'Exige hablar con el DIRECTOR del hospital o el medico responsable de turno.',
+          'PIDE POR ESCRITO la negativa con sello del hospital - eso es evidencia.',
+          'IMSS: 800 623 2323 - quejas',
+          'ISSSTE: 800 800 4477',
+          'CONAMED (queja medica): 55 5420 7000',
+          'Una vez estabilizado: presenta queja formal con la plantilla del Generador Tequio.'
+        ],
+        telefonos: [
+          { nombre: 'IMSS', num: '800 623 2323' },
+          { nombre: 'ISSSTE', num: '800 800 4477' },
+          { nombre: 'CONAMED', num: '55 5420 7000' },
+          { nombre: 'Linea de la Vida (salud mental)', num: '800 911 2000' }
+        ],
+        plantilla: 'queja-imss'
+      }
+    },
+    {
+      id: 'despido',
+      icono: '💼',
+      titulo: 'Me despidieron hoy',
+      color: 'linear-gradient(135deg, rgba(234,179,8,0.2), rgba(133,77,14,0.1))',
+      guia: {
+        audio: 'Si te despidieron sin causa justificada, tienes derecho a indemnizacion constitucional de tres meses, prima de antiguedad y salarios caidos. Tienes dos meses para demandar. No firmes el finiquito sin revisarlo con un abogado. PROFEDET te asesora GRATIS al ochocientos novecientos once setenta ocho setenta y siete.',
+        pasos: [
+          'NO FIRMES finiquito sin abogado. Pueden estar pagandote menos de lo que te corresponde.',
+          'Recopila evidencias: contrato, recibos de nomina, CFDI, mensajes, testigos.',
+          'TIENES 2 MESES para demandar (Art. 518 LFT).',
+          'PROFEDET (asesoria laboral GRATUITA): 800 911 7877',
+          'Tienes derecho a: 3 meses indemnizacion + prima antiguedad + salarios caidos + 20 dias por anio (si elegiste indemnizacion) o reinstalacion.',
+          'Genera tu Demanda Laboral con la plantilla Tequio.',
+          'Defensoria Publica Federal: 800 200 3030'
+        ],
+        telefonos: [
+          { nombre: 'PROFEDET', num: '800 911 7877' },
+          { nombre: 'Defensoria Publica', num: '800 200 3030' }
+        ],
+        plantilla: 'demanda-laboral'
+      }
+    },
+    {
+      id: 'robo-fraude',
+      icono: '🔓',
+      titulo: 'Robo / fraude digital',
+      color: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(88,28,135,0.1))',
+      guia: {
+        audio: 'Actua rapido. Llama de inmediato a tu banco para reportar el cargo y bloquear la tarjeta. Cambia tus contrasenas. Si fue suplantacion de identidad, reportalo a CONDUSEF al cincuenta y cinco cinco trescientos cuarenta sesenta y cuatro setenta. Presenta denuncia ante la Fiscalia Cibernetica.',
+        pasos: [
+          'LLAMA A TU BANCO YA - reporta movimiento no reconocido y bloquea la tarjeta.',
+          'Si fue robo de identidad: CONDUSEF 55 5340 0999 (queja gratuita).',
+          'Si fue fraude digital: Policia Cibernetica 088 (Federal) o Fiscalia Cibernetica de tu estado.',
+          'CAMBIA contrasenas de banco, correo, redes sociales.',
+          'Activa autenticacion de 2 factores en todas tus cuentas.',
+          'CONDUSEF: 24 dias habiles para responder segun Ley de Transparencia y Ordenamiento de los Servicios Financieros.',
+          'Banco DEBE devolver el dinero si fue cargo no reconocido (Reglas de CONDUSEF).',
+          'Documenta TODO: capturas, correos, fechas.'
+        ],
+        telefonos: [
+          { nombre: 'CONDUSEF', num: '55 5340 0999' },
+          { nombre: 'Policia Cibernetica', num: '088' },
+          { nombre: 'Profeco', num: '800 468 8722' }
+        ],
+        plantilla: 'profeco'
+      }
+    }
+  ];
+
+  function renderSituaciones() {
+    var grid = document.getElementById('situaciones-grid');
+    grid.innerHTML = SITUACIONES.map(function(s){
+      return '<div onclick="abrirSituacion(\'' + s.id + '\')" style="background: ' + s.color + '; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 1.2rem; cursor: pointer; transition: transform 0.15s;" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'translateY(0)\'">'
+        + '<div style="font-size: 2rem; margin-bottom: 0.4rem;">' + s.icono + '</div>'
+        + '<div style="font-weight: 600; color: #f3f4f6; font-size: 1rem;">' + s.titulo + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function abrirSituacion(id) {
+    var s = SITUACIONES.find(function(x){ return x.id === id; });
+    if (!s) return;
+
+    document.getElementById('main-view').style.display = 'none';
+    var detail = document.getElementById('detail-view');
+    detail.style.display = 'block';
+
+    var audioJson = JSON.stringify(s.guia.audio);
+    var audioBtn = "<button onclick='hablar(" + audioJson + ")' style=\"background: linear-gradient(135deg, #dc2626, #991b1b); color: white; border: none; padding: 1rem; border-radius: 0.6rem; width: 100%; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;\">🎤 Escuchar guia en voz alta</button>";
+
+    var embeddedParam = new URLSearchParams(location.search).get('embedded') === '1' ? '&embedded=1' : '';
+
+    var html = ''
+      + '<button onclick="volver()" style="background: transparent; border: 1px solid #374151; color: #9ca3af; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; margin-bottom: 1rem;">← Volver</button>'
+      + '<div style="background: ' + s.color + '; border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1rem;">'
+      +   '<div style="font-size: 3rem;">' + s.icono + '</div>'
+      +   '<h2 style="color: #f3f4f6; margin: 0.4rem 0;">' + s.titulo + '</h2>'
+      + '</div>'
+      + audioBtn
+      + '<h3 style="color: #fca5a5; margin: 1.5rem 0 0.8rem 0; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;">✅ QUE HACER AHORA</h3>'
+      + '<ol style="color: #e5e7eb; line-height: 1.7; padding-left: 1.5rem;">'
+      +   s.guia.pasos.map(function(p){ return '<li style="margin-bottom: 0.5rem;">' + p + '</li>'; }).join('')
+      + '</ol>'
+      + '<h3 style="color: #fca5a5; margin: 1.5rem 0 0.8rem 0; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;">📞 TELEFONOS DE URGENCIA</h3>'
+      + '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.6rem;">'
+      +   s.guia.telefonos.map(function(t){
+            return '<a href="tel:' + t.num.replace(/\s/g, '') + '" style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; padding: 0.8rem 1rem; border-radius: 0.5rem; text-decoration: none; display: block;">'
+              + '<div style="font-size: 0.8rem; color: #9ca3af;">' + t.nombre + '</div>'
+              + '<div style="font-weight: 700; font-size: 1.1rem; color: #fca5a5;">' + t.num + '</div>'
+              + '</a>';
+          }).join('')
+      + '</div>'
+      + '<h3 style="color: #fca5a5; margin: 1.5rem 0 0.8rem 0; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase;">📄 GENERA DOCUMENTO LEGAL</h3>'
+      + '<a href="/panel/generador.html?tipo=' + s.guia.plantilla + embeddedParam + '" style="background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.4); color: #fbbf24; padding: 1rem; border-radius: 0.5rem; text-decoration: none; display: block; text-align: center; font-weight: 600;">📄 Abrir Generador de Documentos con plantilla pre-seleccionada</a>';
+
+    detail.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function volver() {
+    detenerVoz();
+    document.getElementById('main-view').style.display = 'block';
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('detail-view').innerHTML = '';
+  }
+
+  window.abrirSituacion = abrirSituacion;
+  window.volver = volver;
+  window.hablar = hablar;
+
+  renderSituaciones();
+
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = function(){};
+  }
+</script>
+</body>
+</html>
