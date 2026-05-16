@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debates | Tequio</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg-card: #131a2b;
+    --bg-card-2: #1a2236;
+    --border: #2a3656;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-mute: #64748b;
+    --gold: #fbbf24;
+    --gold-dim: #d97706;
+    --green: #10b981;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; }
+  body.embedded { background: transparent; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .top-bar { display: flex; align-items: center; gap: 12px; padding: 8px 0 16px; }
+  .back-link { color: var(--text-dim); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--gold); }
+  body.embedded .top-bar { display: none; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .subtitle { color: var(--text-dim); margin: 0 0 20px; font-size: 14px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge.destacado { background: var(--gold); color: #1a1300; }
+  .badge.estatus { background: var(--bg-card-2); color: var(--text-dim); border: 1px solid var(--border); }
+  /* Grid de debates */
+  .debates-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 720px) { .debates-grid { grid-template-columns: repeat(2, 1fr); } }
+  .debate-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: transform .15s, border-color .15s; }
+  .debate-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .debate-card h3 { margin: 8px 0 6px; font-size: 16px; }
+  .debate-card .desc { color: var(--text-dim); font-size: 13px; margin: 0 0 12px; }
+  .debate-card .meta { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-mute); }
+  /* Detalle */
+  .detalle-hero { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .detalle-hero h2 { margin: 0 0 8px; font-size: 22px; }
+  .detalle-hero .desc { color: var(--text-dim); margin: 8px 0; }
+  .detalle-hero .contexto { color: var(--text-mute); font-size: 13px; margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--border); }
+  .telemetry { font-size: 11px; color: var(--text-mute); margin: 8px 0 0; }
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin: 0 0 16px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 16px; background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-count { font-size: 11px; opacity: .7; margin-left: 4px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  /* Argumento card */
+  .arg-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 0 0 10px; display: flex; gap: 12px; }
+  .arg-votes { display: flex; flex-direction: column; align-items: center; min-width: 44px; gap: 4px; }
+  .vote-btn { background: var(--bg-card-2); border: 1px solid var(--border); color: var(--text-dim); width: 36px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .vote-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .vote-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .vote-btn.voted { background: var(--gold); color: #1a1300; border-color: var(--gold); }
+  .arg-score { font-weight: 700; font-size: 16px; color: var(--text); }
+  .arg-body { flex: 1; }
+  .arg-body p { margin: 0 0 6px; font-size: 14px; color: var(--text); }
+  .arg-meta { font-size: 11px; color: var(--text-mute); }
+  /* Form */
+  .form-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 20px 0; }
+  .form-box h3 { margin: 0 0 12px; font-size: 16px; }
+  .form-row { margin: 0 0 12px; }
+  label { display: block; font-size: 13px; color: var(--text-dim); margin: 0 0 6px; }
+  select, textarea { width: 100%; background: var(--bg-card-2); border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 14px; }
+  textarea { min-height: 100px; resize: vertical; }
+  .char-counter { font-size: 11px; color: var(--text-mute); text-align: right; }
+  .char-counter.warn { color: var(--red); }
+  .hp-field { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+  button.submit-btn { background: var(--gold); color: #1a1300; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+  button.submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .disclaimer { color: var(--text-mute); font-size: 12px; margin: 12px 0 0; font-style: italic; }
+  .loading { text-align: center; padding: 40px; color: var(--text-dim); }
+  .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 10px 0; }
+  .msg.ok { background: rgba(16, 185, 129, .15); color: var(--green); border: 1px solid var(--green); }
+  .msg.err { background: rgba(239, 68, 68, .15); color: var(--red); border: 1px solid var(--red); }
+  .empty { text-align: center; color: var(--text-mute); padding: 30px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="/" class="back-link">&larr; Tequio</a>
+  </div>
+  <div id="header-area">
+    <h1>🎤 Debates</h1>
+    <p class="subtitle">Argumenta. Convence con razones. Vota los mejores argumentos.</p>
+  </div>
+  <div id="content"><div class="loading">Cargando…</div></div>
+</div>
+
+<script src="/js/anti-bot.js"></script>
+<script>
+(function() {
+  const params = new URLSearchParams(location.search);
+  const isEmbedded = params.get('embedded') === '1';
+  if (isEmbedded) document.body.classList.add('embedded');
+  const debateId = params.get('id');
+  const VOTES_KEY = 'tequio_debate_votos';
+  const pageStart = Date.now();
+
+  function getVoted() { try { return JSON.parse(localStorage.getItem(VOTES_KEY) || '{}'); } catch(e) { return {}; } }
+  function setVoted(o) { localStorage.setItem(VOTES_KEY, JSON.stringify(o)); }
+
+  function timeAgo(iso) {
+    const ms = Date.now() - new Date(iso).getTime();
+    const sec = Math.floor(ms / 1000);
+    if (sec < 60) return 'hace ' + sec + 's';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return 'hace ' + min + ' min';
+    const h = Math.floor(min / 60);
+    if (h < 24) return 'hace ' + h + 'h';
+    const d = Math.floor(h / 24);
+    return 'hace ' + d + 'd';
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function loadLanding() {
+    try {
+      const r = await fetch('/api/data?vista=debates_listar');
+      const j = await r.json();
+      const items = j.items || [];
+      if (!items.length) { document.getElementById('content').innerHTML = '<div class="empty">No hay debates abiertos.</div>'; return; }
+      const cards = items.map(d => {
+        const dest = d.destacado ? '<span class="badge destacado">⭐ Destacado</span>' : '';
+        const est = '<span class="badge estatus">' + escapeHtml(d.estatus) + '</span>';
+        return '<div class="debate-card" onclick="goDebate(' + d.id + ')">' +
+          dest + ' ' + est +
+          '<h3>' + escapeHtml(d.titulo) + '</h3>' +
+          '<p class="desc">' + escapeHtml(d.descripcion || '') + '</p>' +
+          '<div class="meta">💬 ' + (d.argumentos_count || 0) + ' argumentos</div>' +
+          '</div>';
+      }).join('');
+      document.getElementById('content').innerHTML = '<div class="debates-grid">' + cards + '</div>';
+    } catch(e) {
+      document.getElementById('content').innerHTML = '<div class="msg err">Error: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  window.goDebate = function(id) {
+    const url = new URL(location.href);
+    url.searchParams.set('id', id);
+    location.href = url.toString();
+  };
+
+  window.goBack = function() {
+    const url = new URL(location.href);
+    url.searchParams.delete('id');
+    location.href = url.toString();
+  };
+
+  window.activarTab = function(pos) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelector('.tab[data-pos="' + pos + '"]').classList.add('active');
+    document.querySelector('.tab-pane[data-pos="' + pos + '"]').classList.add('active');
+  };
+
+  function renderArgumento(a, voted) {
+    const yaVoto = !!voted[a.id];
+    return '<div class="arg-card" data-arg-id="' + a.id + '">' +
+      '<div class="arg-votes">' +
+        '<button class="vote-btn ' + (voted[a.id]==='arriba'?'voted':'') + '" ' + (yaVoto?'disabled':'') + ' onclick="votar(' + a.id + ',\'arriba\')">▲</button>' +
+        '<div class="arg-score">' + (a.score || 0) + '</div>' +
+        '<button class="vote-btn ' + (voted[a.id]==='abajo'?'voted':'') + '" ' + (yaVoto?'disabled':'') + ' onclick="votar(' + a.id + ',\'abajo\')">▼</button>' +
+      '</div>' +
+      '<div class="arg-body">' +
+        '<p>' + escapeHtml(a.argumento) + '</p>' +
+        '<div class="arg-meta">' + timeAgo(a.created_at) + ' · ▲ ' + (a.votos_arriba || 0) + ' / ▼ ' + (a.votos_abajo || 0) + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  async function loadDetalle(id) {
+    try {
+      const r = await fetch('/api/data?vista=debates_detalle&id=' + encodeURIComponent(id));
+      const j = await r.json();
+      if (!r.ok) { document.getElementById('content').innerHTML = '<div class="msg err">' + escapeHtml(j.error || 'Error') + '</div>'; return; }
+      const d = j.debate;
+      const args = j.argumentos || { a_favor:[], en_contra:[], matiz:[] };
+      const voted = getVoted();
+      document.getElementById('header-area').innerHTML = '<button class="back-link" style="background:none;border:none;cursor:pointer;font-size:14px" onclick="goBack()">&larr; Volver a debates</button>';
+
+      const hero = '<div class="detalle-hero">' +
+        (d.destacado ? '<span class="badge destacado">⭐ Destacado</span> ' : '') +
+        '<span class="badge estatus">' + escapeHtml(d.estatus) + '</span>' +
+        '<h2>' + escapeHtml(d.titulo) + '</h2>' +
+        '<p class="desc">' + escapeHtml(d.descripcion || '') + '</p>' +
+        (d.contexto ? '<p class="contexto">' + escapeHtml(d.contexto) + '</p>' : '') +
+        '<p class="telemetry" id="telemetry">Tiempo en página: 0s</p>' +
+      '</div>';
+
+      const buildPane = (pos, list) => {
+        const inner = list.length ? list.map(a => renderArgumento(a, voted)).join('') : '<div class="empty">Sin argumentos aún. Sé el primero.</div>';
+        return '<div class="tab-pane ' + (pos==='a_favor'?'active':'') + '" data-pos="' + pos + '">' + inner + '</div>';
+      };
+
+      const tabs = '<div class="tabs">' +
+        '<button class="tab active" data-pos="a_favor" onclick="activarTab(\'a_favor\')">A favor <span class="tab-count">' + args.a_favor.length + '</span></button>' +
+        '<button class="tab" data-pos="en_contra" onclick="activarTab(\'en_contra\')">En contra <span class="tab-count">' + args.en_contra.length + '</span></button>' +
+        '<button class="tab" data-pos="matiz" onclick="activarTab(\'matiz\')">Matiz <span class="tab-count">' + args.matiz.length + '</span></button>' +
+      '</div>';
+
+      const panes = buildPane('a_favor', args.a_favor) + buildPane('en_contra', args.en_contra) + buildPane('matiz', args.matiz);
+
+      const form = '<div class="form-box">' +
+        '<h3>Tu argumento</h3>' +
+        '<div id="form-msg"></div>' +
+        '<div class="form-row">' +
+          '<label>Posición</label>' +
+          '<select id="posicion">' +
+            '<option value="a_favor">A favor</option>' +
+            '<option value="en_contra">En contra</option>' +
+            '<option value="matiz">Matiz</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<label>Argumento (50–2000 caracteres)</label>' +
+          '<textarea id="argumento" maxlength="2000" placeholder="Comparte tu razonamiento con evidencia y respeto…"></textarea>' +
+          '<div class="char-counter" id="counter">0 / 2000</div>' +
+        '</div>' +
+        '<input type="text" id="hp" class="hp-field" tabindex="-1" autocomplete="off">' +
+        '<button class="submit-btn" id="submitBtn" disabled onclick="enviar(' + d.id + ')">Publicar argumento (espera 10s)</button>' +
+        '<p class="disclaimer">Argumenta con respeto. Cero ad hominem. Los mejores argumentos suben por votos comunitarios.</p>' +
+      '</div>';
+
+      document.getElementById('content').innerHTML = hero + tabs + panes + form;
+
+      // Telemetry
+      setInterval(() => {
+        const el = document.getElementById('telemetry');
+        if (el) el.textContent = 'Tiempo en página: ' + Math.floor((Date.now() - pageStart) / 1000) + 's';
+      }, 1000);
+
+      // Char counter
+      const ta = document.getElementById('argumento');
+      const counter = document.getElementById('counter');
+      ta.addEventListener('input', () => {
+        const len = ta.value.length;
+        counter.textContent = len + ' / 2000';
+        counter.classList.toggle('warn', len < 50 || len > 2000);
+      });
+
+      // Enable submit after 10s
+      setTimeout(() => {
+        const btn = document.getElementById('submitBtn');
+        if (btn) { btn.disabled = false; btn.textContent = 'Publicar argumento'; }
+      }, 10000);
+    } catch(e) {
+      document.getElementById('content').innerHTML = '<div class="msg err">Error: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  window.enviar = async function(debate_id) {
+    const msgEl = document.getElementById('form-msg');
+    msgEl.innerHTML = '';
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    try {
+      const argumento = document.getElementById('argumento').value.trim();
+      const posicion = document.getElementById('posicion').value;
+      if (argumento.length < 50 || argumento.length > 2000) {
+        msgEl.innerHTML = '<div class="msg err">Argumento debe tener entre 50 y 2000 caracteres.</div>';
+        btn.disabled = false; return;
+      }
+      const ctx = await window.AntiBot.contextoNivel2({ honeypot: () => document.getElementById('hp').value });
+      const payload = Object.assign({ debate_id, posicion, argumento }, ctx);
+      const r = await fetch('/api/data?vista=debate_argumentar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        msgEl.innerHTML = '<div class="msg err">' + escapeHtml(j.error || 'Error') + '</div>';
+        btn.disabled = false; return;
+      }
+      msgEl.innerHTML = '<div class="msg ok">¡Argumento publicado!</div>';
+      setTimeout(() => location.reload(), 1200);
+    } catch(e) {
+      msgEl.innerHTML = '<div class="msg err">' + escapeHtml(e.message) + '</div>';
+      btn.disabled = false;
+    }
+  };
+
+  window.votar = async function(argumento_id, voto) {
+    try {
+      const ctx = await window.AntiBot.contextoNivel2({ honeypot: () => '' });
+      const r = await fetch('/api/data?vista=debate_votar_arg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ argumento_id, voto, device_hash: ctx.device_hash })
+      });
+      if (r.ok || r.status === 409) {
+        const voted = getVoted();
+        voted[argumento_id] = voto;
+        setVoted(voted);
+        // Disable buttons for this card
+        const card = document.querySelector('.arg-card[data-arg-id="' + argumento_id + '"]');
+        if (card) card.querySelectorAll('.vote-btn').forEach(b => b.disabled = true);
+        // Reload after short delay to refresh score
+        setTimeout(() => location.reload(), 600);
+      } else {
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || 'Error al votar');
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  };
+
+  // Bootstrap
+  if (debateId) loadDetalle(debateId);
+  else loadLanding();
+})();
+</script>
+</body>
+</html>
