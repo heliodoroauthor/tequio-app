@@ -1244,7 +1244,7 @@ export default async function handler(req, res) {
       let totalRecibido = 0;
       for (const r of transfRows) {
         const m = Number(r.monto || 0);
-        if (r.tipo_dato === 'pagado' || r.tipo_dato === 'aprobado') {
+        if (r.tipo_dato === 'pagado' || r.tipo_dato === 'aprobado' || r.tipo_dato === 'monto' || !r.tipo_dato) {
           porAnio[r.anio] = (porAnio[r.anio] || 0) + m;
           if (r.fondo) porFondo[r.fondo] = (porFondo[r.fondo] || 0) + m;
           if (r.ramo) porRamo[r.ramo] = (porRamo[r.ramo] || 0) + m;
