@@ -1296,6 +1296,24 @@ export default async function handler(req, res) {
       });
     }
 
+    // -- SRE -- Embajadas y Consulados de Mexico --
+    if (vista === 'sre') {
+      const tipo = (req.query.tipo || 'all').toLowerCase();
+      const q = (req.query.q || '').trim();
+      const out = { embajadas: [], consulados: [] };
+      if (tipo === 'all' || tipo === 'embajadas') {
+        let path = 'sre_embajadas?select=*&order=pais.asc.nullslast&limit=200';
+        if (q && q.length > 2) path += `&or=(pais.ilike.*${encodeURIComponent(q)}*,titular.ilike.*${encodeURIComponent(q)}*)`;
+        out.embajadas = await sb(path);
+      }
+      if (tipo === 'all' || tipo === 'consulados') {
+        let path = 'sre_consulados?select=*&order=pais.asc.nullslast,ciudad.asc.nullslast&limit=200';
+        if (q && q.length > 2) path += `&or=(pais.ilike.*${encodeURIComponent(q)}*,ciudad.ilike.*${encodeURIComponent(q)}*,titular.ilike.*${encodeURIComponent(q)}*)`;
+        out.consulados = await sb(path);
+      }
+      return res.status(200).json(out);
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
