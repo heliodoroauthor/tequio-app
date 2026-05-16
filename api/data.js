@@ -1477,6 +1477,29 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── Servicios Públicos: federales + por estado ──
+    if (vista === 'servicios') {
+      const clave = (req.query.clave || '').trim();
+      const categoria = (req.query.categoria || '').trim();
+      let federalPath = 'servicios_publicos?nivel=eq.federal&select=*&order=categoria.asc,nombre.asc';
+      if (categoria) federalPath += `&categoria=eq.${encodeURIComponent(categoria)}`;
+      let estatalPath = null;
+      if (clave) {
+        const c = clave.padStart(2, '0');
+        estatalPath = `servicios_publicos?nivel=eq.estatal&clave_entidad=eq.${c}&select=*&order=categoria.asc,nombre.asc`;
+      }
+      const [federales, estatales] = await Promise.all([
+        sb(federalPath),
+        estatalPath ? sb(estatalPath) : Promise.resolve([])
+      ]);
+      return res.status(200).json({
+        federales,
+        estatales,
+        clave: clave || null,
+        total_federales: federales.length,
+        total_estatales: estatales.length
+      });
+    }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
