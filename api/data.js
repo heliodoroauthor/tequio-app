@@ -903,6 +903,73 @@ export default async function handler(req, res) {
       return res.status(200).json({ municipio: rows[0], matches: rows.length, otros: rows.length > 1 ? rows.slice(1) : [] });
     }
 
+    if (vista === 'municipio_panel') {
+      // Devuelve toda la info de un municipio para el panel: datos, presidente, delitos, finanzas
+      const clave = (req.query.clave_inegi || req.query.clave || '').trim();
+      const slug = (req.query.slug || '').trim();
+      const estado = (req.query.estado || '').trim();
+
+      // 1. Localizar municipio
+      let muniUrl;
+      if (clave) {
+        muniUrl = `municipios?clave_inegi=eq.${encodeURIComponent(clave)}&select=*`;
+      } else if (slug) {
+        const filt = estado ? `&estado_slug=eq.${encodeURIComponent(estado)}` : '';
+        muniUrl = `municipios?municipio_slug=eq.${encodeURIComponent(slug)}${filt}&select=*`;
+      } else {
+        return res.status(400).json({ error: 'Se requiere ?clave_inegi=XXXXX o ?slug=municipio[&estado=estado-slug]' });
+      }
+      const munis = await sb(muniUrl);
+      if (!munis || !munis.length) return res.status(404).json({ error: 'Municipio no encontrado' });
+      const m = munis[0];
+      const cveInegi = m.clave_inegi;
+
+      // 2. Llamadas paralelas a tablas relacionadas
+      const [pres, delitosAnual, delitosMes, finanzas, transferEstado, vecinos] = await Promise.all([
+        // Presidente actual (último periodo)
+        sb(`presidentes_municipales?clave_inegi=eq.${cveInegi}&order=periodo_inicio.desc&limit=1&select=nombre_completo,nombre,apellido_paterno,apellido_materno,sexo,partido,coalicion,periodo_inicio,periodo_fin,periodo_label,direccion,pagina_web,telefono`),
+        // Delitos por tipo último año disponible
+        sb(`delitos_municipios?clave_inegi=eq.${cveInegi}&order=anio.desc,mes.desc&limit=2000&select=anio,mes,tipo_delito,subtipo_delito,modalidad,cantidad`),
+        // Top delitos por tipo y total anual
+        null,
+        // Finanzas históricas
+        sb(`finanzas_municipales_inegi?clave_inegi=eq.${cveInegi}&order=anio.asc&select=anio,flujo,capitulo,concepto,monto,unidad`),
+        // Transferencias estatales último año del estado
+        sb(`transferencias_estatales?clave_entidad=eq.${m.clave_entidad}&anio=eq.2025&tipo_dato=eq.pagado&order=monto.desc&limit=20&select=ramo,fondo,concepto,mes,monto`),
+        // Otros municipios del mismo estado (para context)
+        sb(`municipios?estado_slug=eq.${encodeURIComponent(m.estado_slug)}&order=poblacion_total.desc&limit=10&select=clave_inegi,nombre,municipio_slug,poblacion_total`),
+      ]);
+
+      // Agregar delitos: total anual + breakdown
+      const delitosByAnio = {};
+      const delitosByTipo = {};
+      const delitosByMes = {};
+      for (const d of (delitosAnual || [])) {
+        delitosByAnio[d.anio] = (delitosByAnio[d.anio] || 0) + (d.cantidad || 0);
+        const t = d.tipo_delito || 'Otro';
+        delitosByTipo[t] = (delitosByTipo[t] || 0) + (d.cantidad || 0);
+        const ymKey = `${d.anio}-${String(d.mes).padStart(2,'0')}`;
+        delitosByMes[ymKey] = (delitosByMes[ymKey] || 0) + (d.cantidad || 0);
+      }
+      const tiposOrdenados = Object.entries(delitosByTipo).sort((a,b) => b[1]-a[1]).slice(0,10).map(([t,c]) => ({tipo:t, cantidad:c}));
+      const mesesOrdenados = Object.entries(delitosByMes).sort().map(([ym,c]) => ({periodo:ym, cantidad:c}));
+
+      return res.status(200).json({
+        municipio: m,
+        presidente: pres && pres[0] || null,
+        delitos: {
+          por_anio: delitosByAnio,
+          por_tipo: tiposOrdenados,
+          por_mes: mesesOrdenados,
+          total_periodo: Object.values(delitosByAnio).reduce((a,b)=>a+b, 0),
+        },
+        finanzas: finanzas || [],
+        transferencias_estado: transferEstado || [],
+        vecinos: (vecinos || []).filter(v => v.clave_inegi !== cveInegi).slice(0, 5),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     if (vista === 'inegi_estado') {
       const estado = req.query.estado || '0700';
       const rows = await sb(`demograficos_inegi?area_geografica=eq.${estado}&order=indicador_id.asc&select=indicador_id,nombre,valor,unidad,fecha,ubicacion`);
@@ -1050,4 +1117,4 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-  }
+        }
