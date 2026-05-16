@@ -1923,7 +1923,7 @@
       <div class="nav-item" onclick="cargarPanel('servicios')">
         <span class="icon">🆘</span> Servicios Públicos
       </div>
-      <div class="nav-item" onclick="mostrarProximamente('generador')">
+      <div class="nav-item" onclick="cargarPanel('generador')">
         <span class="icon">📄</span> Generador de Documentos
       </div>
       <div class="nav-item" onclick="cargarPanel('testigo')">
@@ -13664,6 +13664,7 @@ function switchTab(el) {
 function cargarPanel(slug) {
   const PANELS = {
     'debates': '/panel/debates.html?embedded=1',
+    'generador': '/panel/generador.html?embedded=1',
     'pef': '/panel/pef.html?embedded=1',
     'asf': '/panel/asf.html?embedded=1',
     'buscador-sat': '/panel/buscador-sat.html?embedded=1',
