@@ -2234,7 +2234,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('simulador')">
         <span class="icon">🔬</span> Simulador Impacto
       </div>
-      <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
+      <div class="nav-item" onclick="cargarPanel('chat')">
         <span class="icon">💬</span> Chat Comunitario
       </div>
       <div class="nav-item" onclick="cargarPanel('debates')">
@@ -14015,6 +14015,7 @@ function switchTab(el) {
 // ─── Panel iframe loader & Próximamente placeholder ───
 function cargarPanel(slug) {
   const PANELS = {
+    'chat': '/panel/chat.html?embedded=1',
     'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
