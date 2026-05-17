@@ -1757,6 +1757,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ items, total: items.length });
     }
 
+    // ── Mapa de Poder ──
+    if (vista === 'mapa_poder') {
+      const [actores, vinculos] = await Promise.all([
+        sb('actores_poder?activo=eq.true&select=*&order=influencia_score.desc&limit=100'),
+        sb('vinculos_poder?vigente=eq.true&select=*&limit=300')
+      ]);
+      return res.status(200).json({ actores, vinculos, total_actores: actores.length, total_vinculos: vinculos.length });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
@@ -1771,4 +1780,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
         }
- 
+
