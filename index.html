@@ -2143,6 +2143,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" data-page="dashboard" onclick="showPage('dashboard')">
         <span class="icon">🏠</span> Inicio
       </div>
+      <div class="nav-item" onclick="cargarPanel('diario')"><span class="icon">🗞️</span> Diario Cívico</div>
       <div class="nav-item" data-page="presas" onclick="showPage('presas')">
         <span class="icon">💧</span> Presas y Cuencas
       </div>
@@ -14016,6 +14017,7 @@ function cargarPanel(slug) {
     'servicios': '/panel/servicios.html?embedded=1',
     'testigo': '/panel/testigo.html?embedded=1',
     'timeline': '/panel/timeline.html?embedded=1',
+    'diario': '/panel/diario.html?embedded=1',
     'poder': '/panel/poder.html?embedded=1',
     'perfil': '/panel/perfil.html?embedded=1'
   };
