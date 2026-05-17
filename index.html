@@ -6,7 +6,7 @@
 <title>Tequio — Plataforma Cívica Digital</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<!-- TEQUIO splash failsafe — debe ir antes de TODO para garantizar que se ejecute incluso si scripts posteriores fallan por syntax errors -->
+<!-- TEQUIO splash failsafe — debe ir antes de TODO parha garantizar que se ejecute incluso si scripts posteriores fallan por syntax errors -->
 <script>
 (function(){
   var attempts = 0;
@@ -2220,6 +2220,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       </div>
       <div class="nav-item" onclick="cargarPanel('comparador')">
         <span class="icon">⚖️</span> Comparador Electoral
+      </div>
+      <div class="nav-item" onclick="cargarPanel('simulador')">
+        <span class="icon">🔬</span> Simulador Impacto
       </div>
       <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
         <span class="icon">💬</span> Chat Comunitario
@@ -14014,7 +14017,7 @@ function cargarPanel(slug) {
     'votar': '/panel/votar.html?embedded=1',
     'iniciativa-firmar': '/panel/iniciativa-firmar.html?embedded=1',
       'votosim': '/panel/votosim.html?embedded=1',
-    'comparador': '/panel/comparador.html?embedded=1',
+    'comparador': '/panel/comparador.html?embedded=1',      'simulador': '/panel/simulador.html?embedded=1',
     'sre': '/panel/sre.html?embedded=1',
     'scrapers-admin': '/admin/scrapers.html?embedded=1',
     'directorio': '/panel/directorio.html?embedded=1',
