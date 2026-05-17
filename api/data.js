@@ -1789,6 +1789,35 @@ export default async function handler(req, res) {
     }
 
     // ── Deuda Pública — Serie SHRFSP histórica ──
+    // ── Chat Comunitario — listar mensajes recientes ──
+    if (vista === 'chat_listar') {
+      const estado = (req.query.estado || '').trim();
+      const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      let path = `chat_mensajes?oculto=eq.false&select=*&order=timestamp.desc&limit=${limit}`;
+      if (estado && estado !== 'todos') path += `&estado=eq.${encodeURIComponent(estado)}`;
+      const items = await sb(path);
+      return res.status(200).json({ items: items.reverse(), total: items.length });
+    }
+
+    // ── Chat Comunitario — flag abusivo ──
+    if (vista === 'chat_flag') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { mensaje_id, device_hash } = body;
+      if (!mensaje_id || !device_hash) return res.status(400).json({ error: 'mensaje_id y device_hash requeridos' });
+      const rows = await sb(`chat_mensajes?id=eq.${encodeURIComponent(mensaje_id)}&select=reportado`);
+      if (!rows.length) return res.status(404).json({ error: 'no encontrado' });
+      const nuevoCount = (rows[0].reportado || 0) + 1;
+      const oculto = nuevoCount >= 3;
+      const patch = await fetch(`${SUPABASE_URL}/rest/v1/chat_mensajes?id=eq.${encodeURIComponent(mensaje_id)}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SERVICE_KEY || ANON_KEY, 'Authorization': `Bearer ${SERVICE_KEY || ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ reportado: nuevoCount, oculto })
+      });
+      if (!patch.ok) return res.status(500).json({ error: 'flag failed' });
+      return res.status(200).json({ ok: true, oculto });
+    }
+
     if (vista === 'deuda') {
       const items = await sb('deuda_publica_historico?select=*&order=anio.asc');
       const ultimo = items[items.length - 1];
