@@ -2234,6 +2234,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('timeline')">
         <span class="icon">📜</span> Memoria Histórica
       </div>
+      <div class="nav-item" onclick="cargarPanel('poder')">
+        <span class="icon">🕸️</span> Mapa de Poder
+      </div>
       <div class="nav-item" data-page="ombligo" onclick="showPage('ombligo')">
         <span class="icon">🏺</span> Cultura
       </div>
@@ -14013,6 +14016,7 @@ function cargarPanel(slug) {
     'servicios': '/panel/servicios.html?embedded=1',
     'testigo': '/panel/testigo.html?embedded=1',
     'timeline': '/panel/timeline.html?embedded=1',
+    'poder': '/panel/poder.html?embedded=1',
     'perfil': '/panel/perfil.html?embedded=1'
   };
   const url = PANELS[slug];
@@ -27220,4 +27224,4 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
 </script>
 </body>
 </html>
- 
+
