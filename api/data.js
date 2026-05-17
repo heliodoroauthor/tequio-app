@@ -1,4 +1,4 @@
-import nodeCrypto from 'node:crypto';
+ import nodeCrypto from 'node:crypto';
 
 export const config = { api: { bodyParser: { sizeLimit: '5mb' } } };
 
@@ -1764,6 +1764,28 @@ export default async function handler(req, res) {
         sb('vinculos_poder?vigente=eq.true&select=*&limit=300')
       ]);
       return res.status(200).json({ actores, vinculos, total_actores: actores.length, total_vinculos: vinculos.length });
+    }
+
+
+    // ── Diario Civico — resumen personalizado ──
+    if (vista === 'diario') {
+      const clave = (req.query.estado || '').padStart(2, '0');
+      const today = new Date().toISOString().slice(0, 10);
+      const queries = [
+        sb('noticias_civicas?select=*&order=fecha_publicacion.desc&limit=10').catch(() => []),
+        sb('votaciones_pendientes?select=*&order=fecha.desc&limit=5').catch(() => []),
+        sb('iniciativas?estatus=eq.abierta&select=*&order=fecha_inicio.desc&limit=5').catch(() => []),
+        clave && clave !== '00' 
+          ? sb(`municipios?clave_entidad=eq.${clave}&select=clave_inegi,nombre,poblacion_total&order=poblacion_total.desc.nullslast&limit=5`).catch(() => [])
+          : Promise.resolve([]),
+        sb('econ_banxico?select=*&order=fecha.desc&limit=3').catch(() => []),
+        sb('presas_cuencas?select=*&order=fecha.desc&limit=3').catch(() => [])
+      ];
+      const [noticias, votaciones, iniciativas, municipios_estado, banxico, presas] = await Promise.all(queries);
+      return res.status(200).json({
+        fecha: today, estado_usuario: clave || null,
+        noticias, votaciones, iniciativas, municipios_estado, banxico, presas
+      });
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
