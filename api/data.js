@@ -60,7 +60,15 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && vista === 'crear_lead') {
       const body = req.body || {};
       if (!body.descripcion || body.descripcion.length < 10) {
-        return res.status(400).json({ error: 'descripcion requerida' });
+        // ── Deuda Pública — Serie SHRFSP histórica ──
+    if (vista === 'deuda') {
+      const items = await sb('deuda_publica_historico?select=*&order=anio.asc');
+      const ultimo = items[items.length - 1];
+      const total = items.length;
+      return res.status(200).json({ items, ultimo, total });
+    }
+
+    return res.status(400).json({ error: 'descripcion requerida' });
       }
       await sbWrite('leads_legales', {
         descripcion: String(body.descripcion).slice(0, 5000),
