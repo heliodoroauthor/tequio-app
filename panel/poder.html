@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mapa de Poder — Tequio</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #0a0e14; color: #e5e7eb; font-family: Inter, -apple-system, system-ui, Segoe UI, Roboto, sans-serif; }
+  body { min-height: 100vh; }
+  a { color: #60a5fa; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+  .back { display: inline-block; color: #9ca3af; text-decoration: none; font-size: 0.9rem; margin-bottom: 1rem; }
+  .back:hover { color: #f3f4f6; }
+  h1 { margin: 0 0 0.3rem 0; font-size: 1.7rem; color: #f3f4f6; letter-spacing: -0.02em; }
+  .subtitle { color: #9ca3af; margin: 0 0 1rem 0; font-size: 0.95rem; line-height: 1.4; }
+  .disclaimer { background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 0.5rem; padding: 0.75rem 1rem; font-size: 0.82rem; line-height: 1.5; color: #fcd34d; margin-bottom: 1.2rem; }
+  .disclaimer strong { color: #fde68a; }
+  .filtros { display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.8rem; scrollbar-width: thin; }
+  .filtros::-webkit-scrollbar { height: 4px; }
+  .filtros::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+  .chip { flex-shrink: 0; padding: 0.4rem 0.85rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; font-size: 0.82rem; color: #d1d5db; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .chip:hover { background: rgba(255,255,255,0.08); }
+  .chip.active { background: #fbbf24; color: #0a0e14; border-color: #fbbf24; font-weight: 600; }
+  .tabs { display: flex; gap: 0.3rem; margin-bottom: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .tab { padding: 0.6rem 1rem; background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab.active { color: #fbbf24; border-bottom-color: #fbbf24; }
+  .canvas-wrap { position: relative; background: radial-gradient(ellipse at center, #111827 0%, #0a0e14 100%); border: 1px solid rgba(255,255,255,0.06); border-radius: 0.6rem; overflow: hidden; height: 600px; }
+  .canvas-wrap canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  .canvas-wrap canvas:active { cursor: grabbing; }
+  .zoom-controls { position: absolute; bottom: 0.8rem; right: 0.8rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .zoom-btn { width: 36px; height: 36px; background: rgba(0,0,0,0.6); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.4rem; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .zoom-btn:hover { background: rgba(0,0,0,0.85); }
+  .legend { position: absolute; top: 0.8rem; left: 0.8rem; background: rgba(0,0,0,0.65); padding: 0.6rem 0.8rem; border-radius: 0.4rem; font-size: 0.75rem; color: #d1d5db; line-height: 1.7; backdrop-filter: blur(4px); max-width: 180px; }
+  .legend-row { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .detail-card { background: linear-gradient(180deg, #1f2937 0%, #111827 100%); border: 1px solid rgba(251,191,36,0.3); border-radius: 0.6rem; padding: 1.2rem; margin-top: 1rem; position: relative; display: none; }
+  .lista { display: none; }
+  .lista.active { display: block; }
+  .canvas-section.hidden { display: none; }
+  .lista-card { background: #111827; border: 1px solid rgba(255,255,255,0.06); border-radius: 0.5rem; padding: 0.8rem 1rem; margin-bottom: 0.6rem; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: all 0.15s; }
+  .lista-card:hover { background: #1f2937; border-color: rgba(251,191,36,0.3); }
+  .lista-init { width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+  .lista-info { flex: 1; min-width: 0; }
+  .lista-nombre { color: #f3f4f6; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .lista-cargo { color: #9ca3af; font-size: 0.78rem; margin-bottom: 0.4rem; }
+  .lista-bar { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .lista-bar > div { height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+  .lista-score { color: #fbbf24; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; min-width: 35px; text-align: right; }
+  .loading { text-align: center; padding: 3rem 1rem; color: #6b7280; }
+  body.embedded .back { display: none; }
+  @media (max-width: 640px) {
+    .wrap { padding: 0.7rem; }
+    h1 { font-size: 1.35rem; }
+    .canvas-wrap { height: 500px; }
+    .legend { font-size: 0.7rem; padding: 0.5rem 0.6rem; max-width: 130px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">&larr; Tequio</a>
+  <h1>&#x1F578;&#xFE0F; Mapa de Poder</h1>
+  <p class="subtitle">Quien manda y como se conectan. Datos verificables de fuentes publicas.</p>
+  <div class="disclaimer">
+    Informacion basada en cargos publicos documentados y vinculos institucionales reportados en fuentes oficiales (DOF, INE, BMV, gob.mx).
+    <strong>No implica acusacion de ilegalidad ni juicio sobre la persona.</strong>
+  </div>
+
+  <div class="filtros" id="filtros">
+    <button class="chip active" data-tipo="todos">Todos</button>
+    <button class="chip" data-tipo="politico">&#x1F3DB;&#xFE0F; Politicos</button>
+    <button class="chip" data-tipo="empresa">&#x1F3E2; Empresas</button>
+    <button class="chip" data-tipo="medio">&#x1F4FA; Medios</button>
+    <button class="chip" data-tipo="sociedad">&#x270A; Sociedad civil</button>
+    <button class="chip" data-tipo="militar">&#x1FA96; Militar</button>
+    <button class="chip" data-tipo="religioso">&#x26EA; Religioso</button>
+    <button class="chip" data-tipo="academico">&#x1F393; Academico</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-vista="canvas">Red</button>
+    <button class="tab" data-vista="lista">Piramide de poder</button>
+  </div>
+
+  <div class="canvas-section" id="canvasSection">
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <div class="legend" id="legend"></div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()">+</button>
+        <button class="zoom-btn" onclick="zoomOut()">&minus;</button>
+        <button class="zoom-btn" onclick="resetView()" title="Centrar" style="font-size:0.7rem;">&#x2316;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="lista" id="listaSection">
+    <div id="listaContent" class="loading">Cargando...</div>
+  </div>
+
+  <div class="detail-card" id="detail-card"></div>
+</div>
+
+<script>
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    document.body.classList.add('embedded');
+  }
+
+  const TIPO_COLOR = {
+    politico: '#dc2626',
+    empresa: '#3b82f6',
+    medio: '#f59e0b',
+    sociedad: '#22c55e',
+    militar: '#737373',
+    religioso: '#a855f7',
+    academico: '#06b6d4'
+  };
+  const VINCULO_COLOR = {
+    institucional: '#60a5fa',
+    financiero: '#a855f7',
+    politico: '#22c55e',
+    mediatico: '#f59e0b',
+    familiar: '#ec4899',
+    contractual: '#06b6d4'
+  };
+  const TIPO_LABEL = {
+    politico: 'Politico',
+    empresa: 'Empresa',
+    medio: 'Medio',
+    sociedad: 'Sociedad',
+    militar: 'Militar',
+    religioso: 'Religioso',
+    academico: 'Academico'
+  };
+
+  let actores = [];
+  let vinculos = [];
+  let nodos = [];
+  let canvas, ctx;
+  let zoom = 1, panX = 0, panY = 0;
+  let dragging = false, dragStart = null;
+  let hoveredNode = null, selectedNode = null;
+  let filtroTipo = 'todos';
+  let lastTouchDist = null;
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function canvasW() { return canvas.width / (window.devicePixelRatio || 1); }
+  function canvasH() { return canvas.height / (window.devicePixelRatio || 1); }
+
+  async function loadData() {
+    try {
+      const r = await fetch('/api/data?vista=mapa_poder');
+      const data = await r.json();
+      actores = data.actores || [];
+      vinculos = data.vinculos || [];
+      initNodos();
+      renderLista();
+      buildLegend();
+      requestAnimationFrame(animate);
+    } catch (e) {
+      console.error('Error cargando datos:', e);
+      document.getElementById('listaContent').textContent = 'Error cargando datos.';
+    }
+  }
+
+  function buildLegend() {
+    const tipos = [...new Set(actores.map(a => a.tipo))];
+    const html = tipos.map(t => `<div class="legend-row"><span class="legend-dot" style="background:${TIPO_COLOR[t]||'#6b7280'}"></span><span>${TIPO_LABEL[t]||t}</span></div>`).join('');
+    document.getElementById('legend').innerHTML = html;
+  }
+
+  function initNodos() {
+    const W = canvasW(), H = canvasH();
+    nodos = actores.map((a, i) => {
+      const angle = (i / actores.length) * Math.PI * 2;
+      const radius = Math.min(W, H) * 0.32;
+      return {
+        actor: a,
+        x: W / 2 + Math.cos(angle) * radius,
+        y: H / 2 + Math.sin(angle) * radius,
+        vx: 0, vy: 0,
+        r: 7 + ((a.influencia_score || 0) / 100) * 18
+      };
+    });
+  }
+
+  function simStep() {
+    const W = canvasW(), H = canvasH();
+    for (let i = 0; i < nodos.length; i++) {
+      for (let j = i + 1; j < nodos.length; j++) {
+        const dx = nodos[j].x - nodos[i].x;
+        const dy = nodos[j].y - nodos[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = 1000 / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        nodos[i].vx -= fx;
+        nodos[i].vy -= fy;
+        nodos[j].vx += fx;
+        nodos[j].vy += fy;
+      }
+    }
+    for (const v of vinculos) {
+      const a = nodos.find(n => n.actor.slug === v.origen_slug);
+      const b = nodos.find(n => n.actor.slug === v.destino_slug);
+      if (!a || !b) continue;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const targetDist = 130;
+      const force = (dist - targetDist) * 0.012;
+      a.vx += (dx / dist) * force;
+      a.vy += (dy / dist) * force;
+      b.vx -= (dx / dist) * force;
+      b.vy -= (dy / dist) * force;
+    }
+    for (const n of nodos) {
+      const dx = W / 2 - n.x;
+      const dy = H / 2 - n.y;
+      n.vx += dx * 0.0015;
+      n.vy += dy * 0.0015;
+      n.vx *= 0.85;
+      n.vy *= 0.85;
+      n.x += n.vx;
+      n.y += n.vy;
+    }
+  }
+
+  function render() {
+    const W = canvasW(), H = canvasH();
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(panX, panY);
+    ctx.scale(zoom, zoom);
+
+    for (const v of vinculos) {
+      const a = nodos.find(n => n.actor.slug === v.origen_slug);
+      const b = nodos.find(n => n.actor.slug === v.destino_slug);
+      if (!a || !b) continue;
+      const dim = filtroTipo !== 'todos' && a.actor.tipo !== filtroTipo && b.actor.tipo !== filtroTipo;
+      ctx.strokeStyle = VINCULO_COLOR[v.tipo] || '#475569';
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = dim ? 0.08 : 0.55;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    for (const n of nodos) {
+      const dim = filtroTipo !== 'todos' && n.actor.tipo !== filtroTipo;
+      ctx.globalAlpha = dim ? 0.2 : 1;
+      ctx.fillStyle = TIPO_COLOR[n.actor.tipo] || '#6b7280';
+      ctx.strokeStyle = n === selectedNode ? '#fbbf24' : (n === hoveredNode ? '#ffffff' : 'rgba(0,0,0,0.5)');
+      ctx.lineWidth = n === selectedNode ? 3 : 1.5;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (n.r > 14 || n === hoveredNode || n === selectedNode) {
+        ctx.fillStyle = '#f3f4f6';
+        ctx.font = 'bold 11px Inter, system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const label = (n.actor.nombre || '').split(' ').slice(0, 2).join(' ');
+        ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+        ctx.lineWidth = 3;
+        ctx.strokeText(label, n.x, n.y + n.r + 4);
+        ctx.fillText(label, n.x, n.y + n.r + 4);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function animate() {
+    simStep();
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  function getCanvasCoords(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left - panX) / zoom,
+      y: (clientY - rect.top - panY) / zoom
+    };
+  }
+
+  function pickNode(cx, cy) {
+    let best = null, bestD = Infinity;
+    for (const n of nodos) {
+      const d = Math.hypot(n.x - cx, n.y - cy);
+      if (d < n.r && d < bestD) { best = n; bestD = d; }
+    }
+    return best;
+  }
+
+  function setupCanvasEvents() {
+    canvas.addEventListener('mousedown', (e) => {
+      const { x, y } = getCanvasCoords(e.clientX, e.clientY);
+      const clicked = pickNode(x, y);
+      if (clicked) {
+        selectedNode = clicked;
+        mostrarDetalle(clicked.actor);
+      } else {
+        dragging = true;
+        dragStart = { x: e.clientX, y: e.clientY };
+      }
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      if (dragging && dragStart) {
+        panX += e.clientX - dragStart.x;
+        panY += e.clientY - dragStart.y;
+        dragStart = { x: e.clientX, y: e.clientY };
+      } else {
+        const { x, y } = getCanvasCoords(e.clientX, e.clientY);
+        hoveredNode = pickNode(x, y);
+        canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
+      }
+    });
+    window.addEventListener('mouseup', () => { dragging = false; dragStart = null; });
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.3, Math.min(3, zoom * delta));
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      panX = mx - (mx - panX) * (newZoom / zoom);
+      panY = my - (my - panY) * (newZoom / zoom);
+      zoom = newZoom;
+    }, { passive: false });
+
+    // touch
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const t = e.touches[0];
+        const { x, y } = getCanvasCoords(t.clientX, t.clientY);
+        const clicked = pickNode(x, y);
+        if (clicked) {
+          selectedNode = clicked;
+          mostrarDetalle(clicked.actor);
+        } else {
+          dragging = true;
+          dragStart = { x: t.clientX, y: t.clientY };
+        }
+      } else if (e.touches.length === 2) {
+        dragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+      }
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && dragging && dragStart) {
+        const t = e.touches[0];
+        panX += t.clientX - dragStart.x;
+        panY += t.clientY - dragStart.y;
+        dragStart = { x: t.clientX, y: t.clientY };
+      } else if (e.touches.length === 2 && lastTouchDist != null) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        const factor = d / lastTouchDist;
+        zoom = Math.max(0.3, Math.min(3, zoom * factor));
+        lastTouchDist = d;
+      }
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => { dragging = false; dragStart = null; lastTouchDist = null; });
+  }
+
+  function zoomIn() { zoom = Math.min(3, zoom * 1.2); }
+  function zoomOut() { zoom = Math.max(0.3, zoom / 1.2); }
+  function resetView() { zoom = 1; panX = 0; panY = 0; }
+
+  function mostrarDetalle(actor) {
+    const detail = document.getElementById('detail-card');
+    const vinculosDelActor = vinculos.filter(v => v.origen_slug === actor.slug || v.destino_slug === actor.slug);
+    const conectados = vinculosDelActor.map(v => {
+      const otherSlug = v.origen_slug === actor.slug ? v.destino_slug : v.origen_slug;
+      const other = actores.find(a => a.slug === otherSlug);
+      if (!other) return '';
+      const tipoLabel = v.tipo ? `<span style="color:${VINCULO_COLOR[v.tipo]||'#9ca3af'};font-weight:600;">[${v.tipo}]</span> ` : '';
+      return `<li>${tipoLabel}<strong>${escapeHtml(other.nombre)}</strong> &mdash; ${escapeHtml(v.descripcion || '')}</li>`;
+    }).join('');
+    const initials = (actor.nombre || '').split(' ').slice(0, 2).map(s => (s[0] || '').toUpperCase()).join('');
+    detail.innerHTML = `
+      <button onclick="cerrarDetalle()" style="position:absolute;top:0.5rem;right:0.5rem;background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.5rem;line-height:1;">&times;</button>
+      <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:0.8rem;">
+        <div style="width:60px;height:60px;border-radius:50%;background:${TIPO_COLOR[actor.tipo]||'#6b7280'};display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:white;flex-shrink:0;">${escapeHtml(initials)}</div>
+        <div style="min-width:0;">
+          <h3 style="margin:0;color:#f3f4f6;font-size:1.1rem;">${escapeHtml(actor.nombre)}</h3>
+          <div style="color:#9ca3af;font-size:0.88rem;margin-top:0.2rem;">${escapeHtml(actor.cargo_actual || '')}${actor.organizacion ? ' &middot; ' + escapeHtml(actor.organizacion) : ''}</div>
+          <div style="margin-top:0.45rem;display:inline-block;padding:0.2rem 0.6rem;background:rgba(255,255,255,0.05);border-radius:0.3rem;font-size:0.75rem;color:#d1d5db;">Influencia: ${actor.influencia_score || 0}/100 &middot; ${TIPO_LABEL[actor.tipo]||actor.tipo||''}</div>
+        </div>
+      </div>
+      ${actor.bio_corta ? `<p style="color:#d1d5db;line-height:1.5;margin:0 0 0.6rem 0;font-size:0.92rem;">${escapeHtml(actor.bio_corta)}</p>` : ''}
+      ${conectados ? `<div style="margin-top:0.8rem;"><strong style="color:#fbbf24;font-size:0.78rem;letter-spacing:0.06em;">CONEXIONES (${vinculosDelActor.length}):</strong><ul style="color:#e5e7eb;font-size:0.85rem;line-height:1.7;margin:0.5rem 0 0 1.2rem;padding:0;">${conectados}</ul></div>` : '<div style="color:#6b7280;font-size:0.82rem;margin-top:0.5rem;">Sin vinculos registrados.</div>'}
+      ${actor.fuente_url ? `<a href="${escapeHtml(actor.fuente_url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:0.9rem;color:#60a5fa;font-size:0.85rem;text-decoration:underline;">Fuente oficial &#x2197;</a>` : ''}
+    `;
+    detail.style.display = 'block';
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function cerrarDetalle() {
+    document.getElementById('detail-card').style.display = 'none';
+    selectedNode = null;
+  }
+
+  function renderLista() {
+    const top = [...actores].sort((a, b) => (b.influencia_score || 0) - (a.influencia_score || 0)).slice(0, 10);
+    const html = top.map((a, i) => {
+      const initials = (a.nombre || '').split(' ').slice(0, 2).map(s => (s[0] || '').toUpperCase()).join('');
+      const score = a.influencia_score || 0;
+      return `
+        <div class="lista-card" onclick='mostrarDetalle(${JSON.stringify(a).replace(/'/g,"&#39;")})'>
+          <div style="color:#fbbf24;font-weight:800;font-size:1.1rem;width:24px;text-align:center;">${i+1}</div>
+          <div class="lista-init" style="background:${TIPO_COLOR[a.tipo]||'#6b7280'};">${escapeHtml(initials)}</div>
+          <div class="lista-info">
+            <div class="lista-nombre">${escapeHtml(a.nombre)}</div>
+            <div class="lista-cargo">${escapeHtml(a.cargo_actual || '')}${a.organizacion ? ' &middot; ' + escapeHtml(a.organizacion) : ''}</div>
+            <div class="lista-bar"><div style="width:${score}%;"></div></div>
+          </div>
+          <div class="lista-score">${score}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('listaContent').innerHTML = html || '<div style="color:#6b7280;text-align:center;padding:2rem;">Sin datos.</div>';
+  }
+
+  // Filtros
+  document.getElementById('filtros').addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    filtroTipo = btn.dataset.tipo;
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const vista = t.dataset.vista;
+      if (vista === 'canvas') {
+        document.getElementById('canvasSection').classList.remove('hidden');
+        document.getElementById('listaSection').classList.remove('active');
+        resizeCanvas();
+      } else {
+        document.getElementById('canvasSection').classList.add('hidden');
+        document.getElementById('listaSection').classList.add('active');
+      }
+    });
+  });
+
+  window.addEventListener('load', () => {
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+    setupCanvasEvents();
+    window.addEventListener('resize', () => { resizeCanvas(); });
+    loadData();
+  });
+</script>
+</body>
+</html>
