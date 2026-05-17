@@ -2231,6 +2231,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🌐</span> México en el Mundo
       </div>
+      <div class="nav-item" onclick="cargarPanel('timeline')">
+        <span class="icon">📜</span> Memoria Histórica
+      </div>
       <div class="nav-item" data-page="ombligo" onclick="showPage('ombligo')">
         <span class="icon">🏺</span> Cultura
       </div>
@@ -14009,6 +14012,7 @@ function cargarPanel(slug) {
     'directorio': '/panel/directorio.html?embedded=1',
     'servicios': '/panel/servicios.html?embedded=1',
     'testigo': '/panel/testigo.html?embedded=1',
+    'timeline': '/panel/timeline.html?embedded=1',
     'perfil': '/panel/perfil.html?embedded=1'
   };
   const url = PANELS[slug];
