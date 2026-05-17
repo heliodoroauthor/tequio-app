@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sin Internet — Contenido Crítico | Tequio</title>
+<meta name="description" content="Página de emergencia con derechos, teléfonos y plantillas legales. Funciona sin internet.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #131826;
+    --bg3: #1a2235;
+    --fg: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #fbbf24;
+    --danger: #ef4444;
+    --success: #10b981;
+    --border: #2a3447;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 16px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  header {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  header h1 { font-size: 1.4rem; margin-bottom: 6px; color: var(--accent); }
+  header p { color: var(--muted); font-size: 0.9rem; }
+  .search-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+  .card h2 {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  .card-911 {
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    border: 2px solid var(--danger);
+    text-align: center;
+    padding: 22px;
+  }
+  .card-911 h2 { color: #fff; font-size: 1.3rem; border: none; }
+  .card-911 a {
+    display: inline-block;
+    background: #fff;
+    color: var(--danger);
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  .phone-list { list-style: none; padding: 0; }
+  .phone-list li {
+    background: var(--bg3);
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+  }
+  .phone-list a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .phone-list small { color: var(--muted); }
+  .template {
+    background: var(--bg3);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+  }
+  .template pre {
+    white-space: pre-wrap;
+    font-family: ui-monospace, 'SF Mono', Monaco, monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .copy-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .disclaimer {
+    background: var(--bg2);
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border: 1px dashed var(--border);
+    margin-top: 20px;
+  }
+  .hidden { display: none !important; }
+  @media (max-width: 480px) {
+    body { padding: 10px; }
+    header h1 { font-size: 1.2rem; }
+    .card-911 a { font-size: 1.2rem; padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📵 Sin Internet — Contenido crítico cacheado</h1>
+  <p>Esta página funciona aunque pierdas conexión. Datos verificados al cierre del caché.</p>
+</header>
+
+<div class="search-box">
+  <input type="search" id="filtro" placeholder="🔍 Buscar (derecho, teléfono, plantilla...)" aria-label="Buscar contenido">
+</div>
+
+<div class="card card-911" data-tags="emergencia 911 policia ambulancia bomberos auxilio">
+  <h2>🚨 Emergencia inmediata</h2>
+  <p style="color:#fff;margin:6px 0;">Llama ya. Marca <strong>911</strong> desde cualquier teléfono.</p>
+  <a href="tel:911">📞 Marcar 911</a>
+</div>
+
+<div class="card" data-tags="derechos detencion arresto policia abogado silencio constitucion articulo 20">
+  <h2>⚖️ Tus derechos en detención (Art. 20 Constitucional)</h2>
+  <ul>
+    <li><strong>Guardar silencio.</strong> Nada de lo que digas mejorará tu situación sin abogado.</li>
+    <li><strong>Exige tu abogado.</strong> Si no tienes, el Estado debe darte uno gratuito (Defensoría Pública).</li>
+    <li><strong>No firmes nada.</strong> No declaraciones, no actas, no consentimientos — hasta que tu abogado las lea.</li>
+    <li><strong>Pide saber el motivo.</strong> Tienes derecho a que te informen los hechos y el delito que te imputan.</li>
+    <li><strong>Aviso a familiares.</strong> Tienes derecho a comunicarte con tu familia o persona de confianza.</li>
+    <li><strong>Examen médico.</strong> Si hay golpes o lesiones, exige certificado médico independiente.</li>
+    <li><strong>Plazo máximo ante Ministerio Público:</strong> 48 horas (96 si es delincuencia organizada). Después, juez.</li>
+    <li><strong>Presunción de inocencia.</strong> Eres inocente hasta sentencia firme.</li>
+    <li><strong>No autoincriminación.</strong> Nadie puede obligarte a declarar contra ti mismo.</li>
+    <li><strong>Denuncia tortura/abuso.</strong> Cualquier maltrato es delito — denuncia ante CNDH (800 715 2000).</li>
+  </ul>
+</div>
+
+<div class="card" data-tags="telefonos contacto emergencia ayuda cndh defensoria mujer adicciones consumidor trabajo">
+  <h2>📞 Teléfonos clave (24/7 o amplios)</h2>
+  <ul class="phone-list">
+    <li><a href="tel:911">911</a><small>Emergencias generales (policía, ambulancia, bomberos)</small></li>
+    <li><a href="tel:8007152000">800 715 2000</a><small>CNDH — Comisión Nacional de Derechos Humanos</small></li>
+    <li><a href="tel:8002003030">800 200 3030</a><small>Defensoría Pública Federal (abogado gratuito)</small></li>
+    <li><a href="tel:8001084053">800 108 4053</a><small>Línea SOS Mujer — Conavim (violencia de género)</small></li>
+    <li><a href="tel:8009112000">800 911 2000</a><small>Línea de la Vida (adicciones, crisis emocional, suicidio)</small></li>
+    <li><a href="tel:8009117877">800 911 7877</a><small>PROFEDET (defensa laboral)</small></li>
+    <li><a href="tel:8004688722">800 468 8722</a><small>Profeco (defensa del consumidor)</small></li>
+  </ul>
+</div>
+
+<div class="card" data-tags="plantilla denuncia oic queja servidor publico corrupcion">
+  <h2>📄 Plantilla: Denuncia ante OIC</h2>
+  <p style="color:var(--muted);font-size:0.9rem;">Órgano Interno de Control — para denunciar a un servidor público.</p>
+  <div class="template">
+<pre id="tpl-oic">DENUNCIA ANTE ÓRGANO INTERNO DE CONTROL
+
+C. Titular del Órgano Interno de Control de [DEPENDENCIA]
+P r e s e n t e.
+
+El que suscribe, [NOMBRE COMPLETO], con domicilio para oír y recibir notificaciones en [DOMICILIO], teléfono [TEL] y correo [EMAIL], con fundamento en los artículos 8 y 109 fracción III de la Constitución, y 10 de la Ley General de Responsabilidades Administrativas, vengo a DENUNCIAR los siguientes hechos:
+
+HECHOS:
+1. El día [FECHA], en [LUGAR], el servidor público [NOMBRE Y CARGO] realizó la siguiente conducta: [DESCRIBIR DETALLADAMENTE].
+2. Lo anterior consta en [PRUEBAS: documentos, testigos, audios, fotografías].
+3. Estos hechos pueden constituir falta administrativa grave/no grave conforme a los artículos 51 a 64 de la Ley General de Responsabilidades Administrativas.
+
+PRUEBAS:
+- [Anexar copias simples]
+- Testigos: [nombres y datos]
+
+Por lo expuesto, solicito:
+PRIMERO. Tener por presentada esta denuncia.
+SEGUNDO. Iniciar investigación y, en su caso, procedimiento de responsabilidad.
+TERCERO. Mantenerme informado del expediente.
+
+Protesto lo necesario.
+[CIUDAD], a [FECHA].
+______________________
+[NOMBRE Y FIRMA]</pre>
+    <button class="copy-btn" data-copy="tpl-oic">📋 Copiar plantilla</button>
+  </div>
+</div>
+
+<div class="card" data-tags="plantilla peticion articulo 8 constitucional autoridad respuesta">
+  <h2>📄 Plantilla: Petición Art. 8 Constitucional</h2>
+  <p style="color:var(--muted);font-size:0.9rem;">Derecho de petición — toda autoridad debe responder por escrito en plazo razonable.</p>
+  <div class="template">
+<pre id="tpl-art8">EJERCICIO DEL DERECHO DE PETICIÓN
+(Artículo 8 Constitucional)
+
+[CIUDAD], a [FECHA].
+
+C. [TITULAR / AUTORIDAD]
+[DEPENDENCIA]
+P r e s e n t e.
+
+El que suscribe, [NOMBRE COMPLETO], mexicano(a), mayor de edad, con domicilio en [DOMICILIO], teléfono [TEL] y correo [EMAIL], con fundamento en el artículo 8 de la Constitución Política de los Estados Unidos Mexicanos, vengo a formular la siguiente PETICIÓN, expresada de manera pacífica y respetuosa:
+
+PETICIÓN:
+[DESCRIBIR CLARAMENTE LO QUE SE PIDE: información, documento, acción administrativa, etc.]
+
+FUNDAMENTOS:
+[Citar artículos legales aplicables si se conocen; si no, basta el Art. 8 Constitucional.]
+
+Solicito que la respuesta me sea notificada por escrito en el domicilio o correo señalados, dentro del plazo razonable que establece la jurisprudencia (generalmente entre 4 y 15 días hábiles, según el caso).
+
+Agradezco de antemano la atención prestada.
+
+Atentamente,
+______________________
+[NOMBRE Y FIRMA]
+[IDENTIFICACIÓN: INE/Pasaporte]</pre>
+    <button class="copy-btn" data-copy="tpl-art8">📋 Copiar plantilla</button>
+  </div>
+</div>
+
+<div class="card" data-tags="que hacer crisis primero pasos guia accion">
+  <h2>🧭 Primeros pasos en crisis</h2>
+  <ul>
+    <li><strong>Detención:</strong> guardar silencio + pedir abogado + no firmar nada.</li>
+    <li><strong>Accidente / lesionado:</strong> 911. No mover si hay sospecha de fractura.</li>
+    <li><strong>Violencia de género:</strong> 911 o 800 108 4053 (Línea SOS Mujer).</li>
+    <li><strong>Abuso de autoridad:</strong> CNDH 800 715 2000 + grabar si es seguro.</li>
+    <li><strong>Crisis emocional / suicidio:</strong> 800 911 2000 (Línea de la Vida).</li>
+    <li><strong>Estafa o cobro indebido:</strong> Profeco 800 468 8722.</li>
+    <li><strong>Despido injustificado:</strong> PROFEDET 800 911 7877.</li>
+  </ul>
+</div>
+
+<div class="disclaimer">
+  💾 Esta página funciona sin internet gracias al Service Worker de Tequio.<br>
+  Guárdala como marcador o <strong>instala Tequio como app</strong> (menú del navegador → "Añadir a pantalla de inicio").
+</div>
+
+<script>
+  const input = document.getElementById('filtro');
+  const cards = document.querySelectorAll('.card, .disclaimer');
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    cards.forEach(c => {
+      if (!q) { c.classList.remove('hidden'); return; }
+      const tags = (c.getAttribute('data-tags') || '').toLowerCase();
+      const text = c.textContent.toLowerCase();
+      c.classList.toggle('hidden', !tags.includes(q) && !text.includes(q));
+    });
+  });
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-copy');
+      const txt = document.getElementById(id).innerText;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = '✅ Copiado';
+          setTimeout(() => btn.textContent = orig, 1800);
+        }).catch(() => alert('No se pudo copiar. Selecciona el texto manualmente.'));
+      } else {
+        const r = document.createRange();
+        r.selectNode(document.getElementById(id));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        try { document.execCommand('copy'); btn.textContent = '✅ Copiado'; } catch(e) {}
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
