@@ -2129,7 +2129,15 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       </div>
     </div>
 
-    <!-- ── MONITOREO ── -->
+        <!-- ── MI CUENTA ── -->
+    <div class="nav-section">
+      <div class="nav-label">👤 Mi Cuenta</div>
+      <div class="nav-item" data-page="perfil" onclick="cargarPanel('perfil')">
+        <span class="icon">👤</span> Mi Perfil
+      </div>
+    </div>
+
+<!-- ── MONITOREO ── -->
     <div class="nav-section">
       <div class="nav-label">📊 Monitoreo</div>
       <div class="nav-item" data-page="dashboard" onclick="showPage('dashboard')">
@@ -14000,7 +14008,8 @@ function cargarPanel(slug) {
     'scrapers-admin': '/admin/scrapers.html?embedded=1',
     'directorio': '/panel/directorio.html?embedded=1',
     'servicios': '/panel/servicios.html?embedded=1',
-    'testigo': '/panel/testigo.html?embedded=1'
+    'testigo': '/panel/testigo.html?embedded=1',
+    'perfil': '/panel/perfil.html?embedded=1'
   };
   const url = PANELS[slug];
   if (!url) return;
