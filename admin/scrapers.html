@@ -1,156 +1,219 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Salud de scrapers · Tequio</title>
-<link rel="icon" href="/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrapers Health · Tequio Admin</title>
 <style>
-  :root {
-    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
-    --text:#e8eef9; --muted:#8a98b3;
-    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#3b82f6;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  .wrap{max-width:920px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
-  h1{font-size:18px;margin:0;font-weight:700}
-  .meta{color:var(--muted);font-size:12px}
-  button{background:var(--card);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer}
-  button:hover{background:#1a2236}
-  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-  .summary div{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
-  .summary .n{font-size:22px;font-weight:700;line-height:1}
-  .summary .l{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-  .summary .ok .n{color:var(--ok)}
-  .summary .warn .n{color:var(--warn)}
-  .summary .bad .n{color:var(--bad)}
-  .list{display:flex;flex-direction:column;gap:8px}
-  .row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
-  .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-  .dot.ok{background:var(--ok);box-shadow:0 0 8px rgba(34,197,94,.5)}
-  .dot.warn{background:var(--warn)}
-  .dot.bad{background:var(--bad)}
-  .dot.info{background:var(--info)}
-  .name{font-weight:600;font-size:14px;text-transform:capitalize}
-  .sub{color:var(--muted);font-size:12px;margin-top:2px}
-  .err{color:var(--bad);font-size:11px;margin-top:4px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all}
-  .right{text-align:right;font-size:12px;color:var(--muted)}
-  .right strong{display:block;color:var(--text);font-size:14px}
-  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
-  @media (max-width:520px){
-    .summary{grid-template-columns:repeat(2,1fr)}
-    .row{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
-    .right{grid-column:1/-1;text-align:left;border-top:1px solid var(--border);padding-top:8px}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e5e7eb; padding: 1.5rem; min-height: 100vh; }
+  body.embedded { padding: 1rem; }
+  h1 { font-size: 1.5rem; color: #fbbf24; margin-bottom: 0.5rem; }
+  .subtitle { color: #9ca3af; font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+  select, button { background: #1f2937; color: #e5e7eb; border: 1px solid #374151; padding: 0.5rem 0.85rem; border-radius: 0.4rem; font-size: 0.85rem; cursor: pointer; }
+  button.primary { background: #fbbf24; color: #111; font-weight: 700; border: none; }
+  button:hover { background: #374151; }
+  button.primary:hover { background: #f59e0b; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+  .stat { background: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 0.85rem; }
+  .stat-label { color: #9ca3af; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+  .stat.ok .stat-value { color: #10b981; }
+  .stat.fail .stat-value { color: #ef4444; }
+  .stat.partial .stat-value { color: #f59e0b; }
+  table { width: 100%; border-collapse: collapse; background: #1f2937; border-radius: 0.5rem; overflow: hidden; font-size: 0.82rem; }
+  thead { background: #111827; }
+  th { text-align: left; padding: 0.7rem 0.85rem; color: #fbbf24; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #374151; }
+  td { padding: 0.65rem 0.85rem; border-bottom: 1px solid #2d3748; vertical-align: top; }
+  tr:hover { background: rgba(251,191,36,0.04); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+  .badge.ok { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge.fail { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .badge.partial { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge.running { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .slug { font-family: 'Courier New', monospace; color: #fbbf24; font-weight: 600; }
+  .muted { color: #9ca3af; font-size: 0.78rem; }
+  .err { color: #fca5a5; font-family: 'Courier New', monospace; font-size: 0.75rem; max-width: 320px; word-break: break-word; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .loading, .empty { padding: 2rem; text-align: center; color: #9ca3af; }
+  .empty .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .err-banner { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.85rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.85rem; }
+  .table-wrap { overflow-x: auto; border-radius: 0.5rem; }
+  @media (max-width: 640px) {
+    body { padding: 0.85rem; }
+    h1 { font-size: 1.2rem; }
+    th, td { padding: 0.5rem; font-size: 0.75rem; }
   }
 </style>
 </head>
 <body>
+  <h1>Scrapers Health</h1>
+  <div class="subtitle">Monitoreo de scrapers — ultimos runs por fuente</div>
+  <div class="toolbar">
+    <label class="muted">Status:
+      <select id="filtroStatus">
+        <option value="">Todos</option>
+        <option value="ok">OK</option>
+        <option value="fail">Fail</option>
+        <option value="partial">Partial</option>
+        <option value="running">Running</option>
+      </select>
+    </label>
+    <label class="muted">Periodo:
+      <select id="filtroPeriodo">
+        <option value="24h">Ultimas 24h</option>
+        <option value="7d" selected>Ultima semana</option>
+        <option value="30d">Ultimo mes</option>
+        <option value="">Todo</option>
+      </select>
+    </label>
+    <button class="primary" id="btnRefresh">Refresh</button>
+    <span class="muted" id="lastUpdate"></span>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="contenido"><div class="loading">Cargando scrapers...</div></div>
+
 <script>
 (function(){
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.documentElement.classList.add('embedded');
-    var style = document.createElement('style');
-    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
-    document.head.appendChild(style);
+  const params = new URLSearchParams(location.search);
+  if (params.get('embedded') === '1') document.body.classList.add('embedded');
+
+  const contenido = document.getElementById('contenido');
+  const statsEl = document.getElementById('stats');
+  const fStatus = document.getElementById('filtroStatus');
+  const fPeriodo = document.getElementById('filtroPeriodo');
+  const btnRefresh = document.getElementById('btnRefresh');
+  const lastUpdate = document.getElementById('lastUpdate');
+
+  let allRows = [];
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   }
-})();
-</script>
 
-<script>
-(function () {
-  const KEY = 'tequio_admin_v1';
-  if (localStorage.getItem(KEY) === 'ok') return;
-  const pw = prompt('Acceso admin Tequio. Contrase\u00f1a:');
-  if (pw === 'tequio2026') {
-    localStorage.setItem(KEY, 'ok');
-  } else {
-    window.location.href = '/';
+  function fmtDate(s) {
+    if (!s) return '<span class="muted">-</span>';
+    try {
+      const d = new Date(s);
+      const now = Date.now();
+      const diff = (now - d.getTime()) / 1000;
+      if (diff < 60) return Math.floor(diff) + 's ago';
+      if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+      return Math.floor(diff/86400) + 'd ago';
+    } catch(e) { return s; }
   }
-})();
-</script>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Salud de scrapers</h1>
-      <div class="meta" id="meta">Cargando…</div>
-    </div>
-    <button id="reload">↻ Refrescar</button>
-  </header>
-  <div class="summary" id="summary"></div>
-  <div class="list" id="list"></div>
-</div>
-<script>
-const $ = (s) => document.querySelector(s);
-const list = $('#list'), summary = $('#summary'), meta = $('#meta');
 
-function fmtTime(secs) {
-  if (secs == null) return 'nunca';
-  const s = Math.max(0, secs);
-  if (s < 60) return 'hace ' + Math.round(s) + 's';
-  if (s < 3600) return 'hace ' + Math.round(s/60) + ' min';
-  if (s < 86400) return 'hace ' + Math.round(s/3600) + ' h';
-  return 'hace ' + Math.round(s/86400) + ' d';
-}
-function fmtNum(n) {
-  if (n == null) return '—';
-  return new Intl.NumberFormat('es-MX').format(n);
-}
-function classify(s, secs) {
-  if (s === 'fail') return 'bad';
-  if (s === 'partial') return 'warn';
-  if (s === 'ok' && secs != null && secs > 7 * 86400) return 'warn'; // stale > 7d
-  if (s === 'ok') return 'ok';
-  return 'info';
-}
+  function fmtDateFull(s) {
+    if (!s) return '';
+    try { return new Date(s).toLocaleString('es-MX'); } catch(e) { return s; }
+  }
 
-async function load() {
-  meta.textContent = 'Cargando…';
-  list.innerHTML = '';
-  try {
-    const r = await fetch('/api/data?vista=scrapers_health', {cache:'no-store'});
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    const rows = j.scrapers || [];
+  function periodoToDate(p) {
+    const now = Date.now();
+    if (p === '24h') return new Date(now - 86400000).toISOString();
+    if (p === '7d') return new Date(now - 7*86400000).toISOString();
+    if (p === '30d') return new Date(now - 30*86400000).toISOString();
+    return null;
+  }
+
+  function filtrar(rows) {
+    const st = fStatus.value;
+    const pd = periodoToDate(fPeriodo.value);
+    return rows.filter(r => {
+      if (st && r.status !== st) return false;
+      if (pd && r.started_at && r.started_at < pd) return false;
+      return true;
+    });
+  }
+
+  function renderStats(rows) {
+    const counts = { ok: 0, fail: 0, partial: 0, running: 0, total: rows.length };
+    let totalRows = 0;
+    rows.forEach(r => {
+      if (counts[r.status] != null) counts[r.status]++;
+      totalRows += (r.rows_inserted || 0) + (r.rows_updated || 0);
+    });
+    statsEl.innerHTML = `
+      <div class="stat"><div class="stat-label">Total runs</div><div class="stat-value">${counts.total}</div></div>
+      <div class="stat ok"><div class="stat-label">OK</div><div class="stat-value">${counts.ok}</div></div>
+      <div class="stat fail"><div class="stat-label">Fail</div><div class="stat-value">${counts.fail}</div></div>
+      <div class="stat partial"><div class="stat-label">Partial</div><div class="stat-value">${counts.partial}</div></div>
+      <div class="stat"><div class="stat-label">Filas (ins+upd)</div><div class="stat-value">${totalRows.toLocaleString('es-MX')}</div></div>
+    `;
+  }
+
+  function renderTabla(rows) {
     if (!rows.length) {
-      list.innerHTML = '<div class="empty">Sin runs registrados todavía.</div>';
-      summary.innerHTML = '';
-      meta.textContent = 'Sin datos · ' + new Date().toLocaleTimeString('es-MX');
+      contenido.innerHTML = '<div class="empty"><div class="icon">[--]</div>Sin runs en el periodo seleccionado.</div>';
       return;
     }
-    const counts = {ok:0, warn:0, bad:0, total:rows.length};
-    for (const r of rows) {
-      const c = classify(r.last_status, r.seconds_since_last_run);
-      if (c === 'ok') counts.ok++;
-      else if (c === 'warn') counts.warn++;
-      else if (c === 'bad') counts.bad++;
-    }
-    summary.innerHTML = [
-      ['n', counts.total, 'Total'],
-      ['ok', counts.ok, 'Sanos'],
-      ['warn', counts.warn, 'Atención'],
-      ['bad', counts.bad, 'Fallando'],
-    ].map(([cls, n, lbl]) => '<div class="' + cls + '"><div class="n">' + n + '</div><div class="l">' + lbl + '</div></div>').join('');
-    list.innerHTML = rows.map(r => {
-      const c = classify(r.last_status, r.seconds_since_last_run);
-      const time = fmtTime(r.seconds_since_last_run);
-      const slug = (r.scraper_slug || '').replace(/_/g, ' ');
-      const errLine = r.last_error ? '<div class="err">⚠ ' + r.last_error.slice(0, 120) + '</div>' : '';
-      const wfLink = r.workflow_run_id ? '<a href="https://github.com/heliodoroauthor/tequio-app/actions/runs/' + r.workflow_run_id + '" target="_blank" rel="noopener" style="color:var(--info)">run #' + r.workflow_run_id + '</a>' : '';
-      return '<div class="row"><span class="dot ' + c + '"></span><div><div class="name">' + slug + '</div><div class="sub">' + time + ' · ' + fmtNum(r.last_rows_inserted) + ' filas · ' + r.runs_30d + ' runs en 30d (' + r.failures_30d + ' fallas)</div>' + errLine + '</div><div class="right"><strong>' + (r.last_status || '?') + '</strong>' + wfLink + '</div></div>';
-    }).join('');
-    meta.textContent = rows.length + ' scrapers · Actualizado ' + new Date().toLocaleTimeString('es-MX');
-  } catch (e) {
-    list.innerHTML = '<div class="empty" style="color:var(--bad)">Error: ' + e.message + '</div>';
-    meta.textContent = 'Falló la carga';
+    const html = `
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Scraper</th>
+            <th>Status</th>
+            <th class="num">Insertadas</th>
+            <th class="num">Actualizadas</th>
+            <th class="num">Omitidas</th>
+            <th>HTTP</th>
+            <th>Iniciado</th>
+            <th>Duracion</th>
+            <th>Error / Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => {
+            const dur = (r.started_at && r.finished_at) ? Math.round((new Date(r.finished_at) - new Date(r.started_at))/1000) + 's' : '-';
+            return `<tr>
+              <td><span class="slug">${escapeHtml(r.scraper_slug)}</span>${r.fuente_url ? `<div class="muted"><a href="${escapeHtml(r.fuente_url)}" target="_blank" style="color:#9ca3af;">fuente</a></div>` : ''}</td>
+              <td><span class="badge ${escapeHtml(r.status||'')}">${escapeHtml(r.status||'-')}</span></td>
+              <td class="num">${(r.rows_inserted||0).toLocaleString('es-MX')}</td>
+              <td class="num">${(r.rows_updated||0).toLocaleString('es-MX')}</td>
+              <td class="num">${(r.rows_skipped||0).toLocaleString('es-MX')}</td>
+              <td>${r.http_status || '<span class="muted">-</span>'}</td>
+              <td title="${escapeHtml(fmtDateFull(r.started_at))}">${fmtDate(r.started_at)}</td>
+              <td>${dur}</td>
+              <td>${r.error_msg ? `<div class="err">${escapeHtml(r.error_msg)}</div>` : ''}${r.notes ? `<div class="muted">${escapeHtml(r.notes)}</div>` : ''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      </div>
+    `;
+    contenido.innerHTML = html;
   }
-}
 
-document.getElementById('reload').addEventListener('click', load);
-load();
-setInterval(load, 60000); // auto-refresh cada minuto
+  function aplicarFiltrosYRender() {
+    const filtrados = filtrar(allRows);
+    renderStats(filtrados);
+    renderTabla(filtrados);
+  }
+
+  async function cargar() {
+    contenido.innerHTML = '<div class="loading">Cargando scrapers...</div>';
+    try {
+      const r = await fetch('/api/data?vista=scrapers_health', { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      const rows = Array.isArray(data) ? data : (data.items || data.rows || data.data || []);
+      allRows = rows;
+      lastUpdate.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX');
+      aplicarFiltrosYRender();
+    } catch(e) {
+      contenido.innerHTML = '<div class="err-banner">Error al cargar /api/data?vista=scrapers_health: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
+  btnRefresh.addEventListener('click', cargar);
+  fStatus.addEventListener('change', aplicarFiltrosYRender);
+  fPeriodo.addEventListener('change', aplicarFiltrosYRender);
+
+  cargar();
+})();
 </script>
 </body>
 </html>
