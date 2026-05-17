@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Impacto Legislativo — Tequio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0e1a; color: #e4e8ef; line-height: 1.6; min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: #8b95a7; text-decoration: none; font-size: 14px; margin-bottom: 16px;
+  }
+  .back-link:hover { color: #6ee7b7; }
+  h1 { font-size: 28px; margin-bottom: 8px; color: #f8fafc; }
+  .subtitle { color: #94a3b8; font-size: 15px; margin-bottom: 20px; }
+  .disclaimer {
+    background: rgba(251, 191, 36, 0.08); border-left: 3px solid #fbbf24;
+    padding: 12px 16px; border-radius: 6px; margin-bottom: 28px;
+    font-size: 13px; color: #d4d8e0;
+  }
+  .disclaimer strong { color: #fbbf24; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; margin-bottom: 32px;
+  }
+  .card {
+    background: #141a2e; border: 1px solid #243049; border-radius: 10px;
+    padding: 20px; cursor: pointer; transition: all 0.18s;
+  }
+  .card:hover { border-color: #6ee7b7; transform: translateY(-2px); background: #182040; }
+  .card .emoji { font-size: 32px; margin-bottom: 10px; display: block; }
+  .card h3 { font-size: 16px; color: #f1f5f9; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: #94a3b8; }
+  .hidden { display: none !important; }
+  .detail-header { margin-bottom: 18px; }
+  .detail-header .emoji { font-size: 56px; }
+  .detail-header h2 { font-size: 26px; color: #f1f5f9; margin: 6px 0; }
+  .contexto {
+    background: rgba(110, 231, 183, 0.06); border-left: 3px solid #6ee7b7;
+    padding: 12px 16px; border-radius: 6px; margin-bottom: 22px;
+    font-size: 14px; color: #d4d8e0;
+  }
+  .contexto strong { color: #6ee7b7; }
+  .casos { display: grid; gap: 14px; margin-bottom: 24px; }
+  .caso {
+    background: #141a2e; border: 1px solid #243049; border-radius: 8px; padding: 16px;
+  }
+  .caso .pais { font-size: 17px; color: #f1f5f9; font-weight: 600; margin-bottom: 8px; }
+  .caso .politica {
+    font-size: 13px; color: #6ee7b7; font-weight: 500; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .caso .resultado { font-size: 14px; color: #d4d8e0; margin-bottom: 10px; }
+  .caso .fuente {
+    font-size: 12px; color: #8b95a7; padding-top: 8px;
+    border-top: 1px dashed #243049; font-style: italic;
+  }
+  .caso .fuente::before { content: "📚 Fuente: "; font-style: normal; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .btn {
+    padding: 12px 18px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    text-decoration: none; border: 1px solid; cursor: pointer; display: inline-block;
+  }
+  .btn-primary { background: #6ee7b7; color: #0a0e1a; border-color: #6ee7b7; }
+  .btn-primary:hover { background: #34d399; }
+  .btn-secondary { background: transparent; color: #94a3b8; border-color: #243049; }
+  .btn-secondary:hover { border-color: #6ee7b7; color: #6ee7b7; }
+  .footer-disclaimer {
+    margin-top: 40px; padding: 16px; background: #141a2e; border-radius: 8px;
+    font-size: 12px; color: #8b95a7; text-align: center;
+  }
+  .sugerir-box {
+    margin-top: 24px; padding: 18px; background: #141a2e;
+    border: 1px dashed #243049; border-radius: 10px; text-align: center;
+  }
+  .sugerir-box p { font-size: 14px; color: #94a3b8; margin-bottom: 12px; }
+  body.embedded .back-link { display: none; }
+  @media (max-width: 600px) {
+    h1 { font-size: 22px; }
+    .container { padding: 16px 14px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link" id="backLink">← Tequio</a>
+  <div id="listView">
+    <h1>🔬 Simulador de Impacto Legislativo</h1>
+    <p class="subtitle">Qué pasó en otros países cuando implementaron políticas similares</p>
+    <div class="disclaimer">
+      <strong>Aviso:</strong> Casos documentados de países que han implementado políticas similares. Información orientativa basada en reportes de OECD, World Bank, OIT, oficinas estadísticas nacionales. NO predice el resultado en México.
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="sugerir-box">
+      <p>¿Hay una política que te gustaría ver simulada aquí?</p>
+      <a href="/panel/generador.html?tipo=transparencia" class="btn btn-secondary">💡 Sugerir nuevo simulador</a>
+    </div>
+  </div>
+  <div id="detailView" class="hidden">
+    <a href="#" class="back-link" id="backToList">← Volver al catálogo</a>
+    <div class="detail-header">
+      <span class="emoji" id="detEmoji"></span>
+      <h2 id="detTitulo"></h2>
+    </div>
+    <div class="contexto"><strong>Contexto mexicano:</strong> <span id="detContexto"></span></div>
+    <div class="casos" id="detCasos"></div>
+    <div class="actions">
+      <a href="/panel/generador.html?tipo=carta-diputado" class="btn btn-primary">✉️ Generar carta a mi diputado sobre este tema</a>
+      <a href="#" class="btn btn-secondary" id="btnVolver">← Otro simulador</a>
+    </div>
+    <div class="footer-disclaimer">
+      Cada país tiene contextos distintos. Estos casos son orientativos. Toda política compleja tiene compensaciones.
+    </div>
+  </div>
+</div>
+<script>
+if (new URLSearchParams(location.search).get('embedded') === '1') {
+  document.body.classList.add('embedded');
+}
+
+const SIMULACIONES = {
+  jornada40h: {
+    titulo: 'Jornada laboral de 40 horas semanales',
+    emoji: '⏰',
+    contexto: 'Propuesta actual en México: reducir jornada de 48 a 40 horas semanales. México lidera la OCDE en horas trabajadas (~2,128 hrs/año vs 1,716 promedio OCDE).',
+    casos: [
+      { pais: '🇫🇷 Francia (2000)', politica: 'Ley Aubry — 35 horas semanales', resultado: 'Creación de 350,000 empleos en 5 años. Productividad por hora subió 4%. PIB sin cambios significativos. Costo fiscal: $5B EUR/año en exenciones a empresas.', fuente: 'OECD Employment Outlook, INSEE France' },
+      { pais: '🇩🇪 Alemania (1990s)', politica: 'Reducción a 35h en industria metalúrgica (sectorial)', resultado: 'Productividad subió 12% en 10 años. Salarios reales subieron 8%. Empleo industrial estable.', fuente: 'Hans-Böckler-Stiftung, IG Metall' },
+      { pais: '🇨🇱 Chile (2023)', politica: 'Reducción gradual a 40h en 5 años', resultado: 'Pendiente de evaluación (2024-2028). Apoyo del 70% de la población según encuestas CEP.', fuente: 'Ministerio del Trabajo Chile' },
+      { pais: '🇮🇸 Islandia (2015-2019)', politica: 'Experimento piloto 36h sin reducción salarial', resultado: 'Productividad MISMA o MEJOR. Satisfacción laboral ↑. Trasladado a 86% de fuerza laboral en 2022.', fuente: 'Autonomy Research, Alda (Islandia)' }
+    ]
+  },
+  cannabis: {
+    titulo: 'Regulación de cannabis para uso adulto',
+    emoji: '🌿',
+    contexto: 'La SCJN declaró inconstitucional la prohibición. Diversas iniciativas en Congreso. Sin regulación aún.',
+    casos: [
+      { pais: '🇺🇾 Uruguay (2013)', politica: 'Primer país en legalizar uso adulto a nivel nacional', resultado: 'Mercado negro reducido en 30%. Recaudación fiscal $2M USD/año. Sin aumento en consumo juvenil (estable). 70,000 usuarios registrados.', fuente: 'IRCCA Uruguay, Junta Nacional de Drogas' },
+      { pais: '🇨🇦 Canadá (2018)', politica: 'Legalización federal Cannabis Act', resultado: 'Recaudación fiscal $1.5B CAD acumulada (2024). Mercado legal supera al ilegal en 73% de ventas. Empleos: 150,000.', fuente: 'Health Canada, Statistics Canada' },
+      { pais: '🇺🇸 Colorado, EUA (2014)', politica: 'Legalización estatal', resultado: 'Recaudación: $2.6B USD acumulada (2014-2023). Empleos: 35,000. Aumento muy modesto en consumo juvenil (-2% a +3% según métrica).', fuente: 'Colorado Department of Revenue' }
+    ]
+  },
+  iva_basicos: {
+    titulo: 'IVA 0% en alimentos y medicinas',
+    emoji: '🍎',
+    contexto: 'México ya aplica tasa 0% en alimentos básicos y medicinas. Algunas propuestas amplían el listado.',
+    casos: [
+      { pais: '🇬🇧 Reino Unido', politica: 'IVA 0% en alimentos esenciales, libros, ropa infantil', resultado: 'Costo fiscal anual: $20B GBP. Reduce IVA efectivo del 15% al 9% para hogares pobres. Inflación alimentaria contenida.', fuente: 'HM Revenue & Customs UK' },
+      { pais: '🇮🇪 Irlanda', politica: 'IVA 0% en alimentos sin procesar', resultado: 'Costo fiscal: 2.4% del PIB. Mejor distribución del ingreso. Aumento limitado del consumo.', fuente: 'Department of Finance Ireland' }
+    ]
+  },
+  renta_basica: {
+    titulo: 'Renta Básica Universal (RBU)',
+    emoji: '💸',
+    contexto: 'Propuesta de algunos partidos. México tiene programas focalizados (Pensión Adulto Mayor, Becas) pero no universal.',
+    casos: [
+      { pais: '🇫🇮 Finlandia (2017-2018)', politica: 'Piloto 2,000 desempleados, €560/mes', resultado: 'Sin efecto significativo en empleo. Mejora notable en bienestar mental y salud. Cancelado por costo escalable.', fuente: 'Kela Finland Final Report 2020' },
+      { pais: '🇰🇪 Kenia (GiveDirectly 2017+)', politica: 'Programa privado a 21,000 personas', resultado: 'Reducción de pobreza 51%. Mejor educación, salud, emprendimiento. Costo: $30M USD acumulado.', fuente: 'GiveDirectly Research Studies' },
+      { pais: '🇮🇹 Italia (2019-2023)', politica: 'Reddito di Cittadinanza (universal condicionada)', resultado: 'Reducción de pobreza absoluta 25%. Costo: €8B/año. Cancelado en 2023 por gobierno Meloni.', fuente: 'INPS Italia, ISTAT' }
+    ]
+  },
+  prohibir_glifosato: {
+    titulo: 'Prohibir herbicida glifosato',
+    emoji: '🌾',
+    contexto: 'México decretó eliminación gradual 2020-2024. Otros países han tomado caminos similares o contrarios.',
+    casos: [
+      { pais: '🇪🇺 Unión Europea (debate)', politica: 'Extensión de licencia 10 años (2023) tras revisión EFSA', resultado: 'EFSA concluyó "sin áreas críticas de preocupación". 7 países (Alemania, Francia, Italia, otros) restringen uso. Productividad agrícola estable.', fuente: 'European Food Safety Authority 2023' },
+      { pais: '🇩🇪 Alemania (2024)', politica: 'Prohibición en zonas residenciales, restricciones generales', resultado: 'Costo para agricultores: €100-200/ha. Productividad cereal -5%. Alternativas más caras.', fuente: 'BfR Germany, Federal Office of Consumer Protection' },
+      { pais: '🇲🇽 México (2020-2024)', politica: 'Decreto de eliminación gradual + maíz transgénico', resultado: 'Disputa comercial con EUA bajo TMEC. Panel resolvió en contra de México (dic 2024). Algunos sectores reportan dificultades.', fuente: 'DOF, SADER, USTR Panel Report' }
+    ]
+  },
+  cuotas_genero: {
+    titulo: 'Cuotas de género en política',
+    emoji: '♀️',
+    contexto: 'México alcanzó paridad de género en Congreso (50/50) tras reformas 2014-2019. Otros países comparan.',
+    casos: [
+      { pais: '🇸🇪 Suecia', politica: 'Paridad voluntaria de partidos desde 1990s', resultado: '46% mujeres en parlamento. Sin cuota legal obligatoria. Cultura política inclusiva.', fuente: 'Riksdagen, IPU' },
+      { pais: '🇲🇽 México (2014→)', politica: 'Cuota 50/50 obligatoria', resultado: 'Primera presidenta mujer en 2024. 50% diputadas. Aumento en derechos legislados de mujeres. Sin retroceso democrático significativo.', fuente: 'INE, Cámara de Diputados' },
+      { pais: '🇩🇪 Alemania', politica: 'Cuotas internas en algunos partidos (SPD, Greens). No nacional obligatoria', resultado: '35% mujeres en Bundestag. Crece pero más lento que con cuotas.', fuente: 'Bundestag, IPU' }
+    ]
+  }
+};
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  Object.keys(SIMULACIONES).forEach(key => {
+    const s = SIMULACIONES[key];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<span class="emoji">' + s.emoji + '</span>' +
+      '<h3>' + s.titulo + '</h3>' +
+      '<p>' + s.casos.length + ' casos documentados</p>';
+    card.addEventListener('click', () => showDetail(key));
+    grid.appendChild(card);
+  });
+}
+
+function showDetail(key) {
+  const s = SIMULACIONES[key];
+  if (!s) return;
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  document.getElementById('detEmoji').textContent = s.emoji;
+  document.getElementById('detTitulo').textContent = s.titulo;
+  document.getElementById('detContexto').textContent = s.contexto;
+  const casosEl = document.getElementById('detCasos');
+  casosEl.innerHTML = '';
+  s.casos.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'caso';
+    div.innerHTML = '<div class="pais">' + c.pais + '</div>' +
+      '<div class="politica">' + c.politica + '</div>' +
+      '<div class="resultado">' + c.resultado + '</div>' +
+      '<div class="fuente">' + c.fuente + '</div>';
+    casosEl.appendChild(div);
+  });
+  window.scrollTo(0, 0);
+}
+
+function showList() {
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('backToList').addEventListener('click', e => { e.preventDefault(); showList(); });
+document.getElementById('btnVolver').addEventListener('click', e => { e.preventDefault(); showList(); });
+
+renderGrid();
+</script>
+</body>
+</html>
