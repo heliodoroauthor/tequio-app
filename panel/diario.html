@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diario Civico · Tequio</title>
+<style>
+  :root { --bg:#0b0f1a; --text:#e5e7eb; --muted:#9ca3af; --accent:#fbbf24; --border:rgba(255,255,255,0.1); }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Inter', system-ui, sans-serif; line-height:1.5; }
+  .container { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem; }
+  header { display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; }
+  header a { color:#9ca3af; text-decoration:none; font-size:0.9rem; }
+  h1 { margin:0; font-size:1.6rem; color:var(--text); }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
+  .hero { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .hero-saludo { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+  .hero-fecha { color: var(--muted); font-size: 0.95rem; text-transform: capitalize; }
+  .section { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.2rem; margin-bottom: 1rem; }
+  .section h2 { margin: 0 0 1rem 0; font-size: 1rem; color: var(--accent); letter-spacing: 0.05em; }
+  .item { padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+  .item:last-child { border-bottom: none; }
+  .item-title { color: var(--text); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .item-meta { color: var(--muted); font-size: 0.8rem; }
+  .item a { color: #60a5fa; text-decoration: none; }
+  .empty { color: var(--muted); font-style: italic; padding: 0.6rem 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
+  .stat { background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 0.5rem; }
+  .stat-num { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .stat-label { color: var(--muted); font-size: 0.78rem; margin-top: 0.2rem; }
+  .btn { background: var(--accent); color: #111; padding: 0.7rem 1.2rem; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; display: inline-block; text-decoration: none; font-family: inherit; }
+  .config-banner { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.4); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem; color: var(--accent); font-size: 0.92rem; }
+  .config-banner a { color: var(--accent); font-weight: 700; }
+</style>
+<script>
+(function(){
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    document.documentElement.classList.add('embedded');
+    var s = document.createElement('style');
+    s.textContent = '.embedded header > a:first-child { display:none !important; }';
+    document.head.appendChild(s);
+  }
+})();
+</script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="/">← Tequio</a>
+    <div>
+      <h1>🗞️ Diario Cívico</h1>
+      <div class="subtitle" id="subtitle">Tu resumen diario personalizado</div>
+    </div>
+  </header>
+
+  <div id="config-banner" class="config-banner" style="display:none">
+    ℹ️ Configura tu estado e intereses para personalizar el Diario. <a href="/">Volver a inicio</a>.
+  </div>
+
+  <div class="hero">
+    <div class="hero-saludo" id="saludo">Buenos días</div>
+    <div class="hero-fecha" id="fecha"></div>
+  </div>
+
+  <div id="contenido"></div>
+
+  <div style="text-align:center;margin:1.5rem 0;color:var(--muted);font-size:0.85rem;">
+    Datos verificados desde Banxico, INEGI, SESNSP, Cámara de Diputados, SHCP, CONAGUA.<br>
+    Tu información se guarda solo en tu dispositivo.
+  </div>
+</div>
+
+<script>
+const ESTADOS = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León","20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatán","32":"Zacatecas"};
+
+async function cargar() {
+  const estado = localStorage.getItem('tequio_estado_clave') || '';
+  const intereses = JSON.parse(localStorage.getItem('tequio_intereses') || '[]');
+  const nombreEstado = ESTADOS[estado] || 'México';
+  if (!estado) document.getElementById('config-banner').style.display = 'block';
+  
+  const hora = new Date().getHours();
+  let saludo = 'Buenos días';
+  if (hora >= 12 && hora < 19) saludo = 'Buenas tardes';
+  else if (hora >= 19 || hora < 5) saludo = 'Buenas noches';
+  
+  document.getElementById('saludo').textContent = `${saludo}, ciudadano de ${nombreEstado}`;
+  document.getElementById('fecha').textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('subtitle').textContent = `Resumen para ${nombreEstado}`;
+  
+  try {
+    const r = await fetch(`/api/data?vista=diario&estado=${estado}`);
+    if (!r.ok) throw new Error('API error');
+    const data = await r.json();
+    render(data, intereses, nombreEstado);
+  } catch (e) {
+    document.getElementById('contenido').innerHTML = '<div class="section"><div class="empty">No se pudo cargar el diario. Intenta refrescar.</div></div>';
+  }
+}
+
+function render(data, intereses, nombreEstado) {
+  const cont = document.getElementById('contenido');
+  let html = '';
+  
+  // Noticias siempre
+  html += '<div class="section"><h2>📰 NOTICIAS DE HOY</h2>';
+  if (data.noticias && data.noticias.length) {
+    html += data.noticias.slice(0, 5).map(n => `
+      <div class="item">
+        <div class="item-title">${escapeHtml(n.titulo || n.title || '')}</div>
+        <div class="item-meta">${escapeHtml(n.fuente || '')} ${n.url ? ` · <a href="${escapeHtml(n.url)}" target="_blank" rel="noopener">Leer ↗</a>` : ''}</div>
+      </div>
+    `).join('');
+  } else html += '<div class="empty">Sin noticias hoy.</div>';
+  html += '</div>';
+  
+  // Legislativo
+  if (intereses.length === 0 || intereses.includes('legislativo') || intereses.includes('participacion')) {
+    html += '<div class="section"><h2>🏛️ LEGISLATIVO</h2>';
+    if (data.iniciativas && data.iniciativas.length) {
+      html += data.iniciativas.slice(0, 3).map(i => `
+        <div class="item">
+          <div class="item-title">${escapeHtml(i.titulo)}</div>
+          <div class="item-meta">${escapeHtml(i.tipo === 'voto_congreso' ? 'Voto en Congreso' : 'Iniciativa ciudadana')}</div>
+        </div>
+      `).join('');
+    } else html += '<div class="empty">Sin iniciativas activas.</div>';
+    html += '</div>';
+  }
+  
+  // Dinero
+  if (intereses.length === 0 || intereses.includes('dinero')) {
+    if (data.banxico && data.banxico.length) {
+      html += '<div class="section"><h2>💰 DINERO PÚBLICO HOY</h2><div class="stat-grid">';
+      data.banxico.slice(0, 3).forEach(b => {
+        const val = b.valor != null ? Number(b.valor).toLocaleString('es-MX', { maximumFractionDigits: 4 }) : '—';
+        html += `<div class="stat"><div class="stat-num">${val}</div><div class="stat-label">${escapeHtml(b.titulo || b.serie || 'Indicador')}</div></div>`;
+      });
+      html += '</div></div>';
+    }
+  }
+  
+  // En tu estado
+  if (data.estado_usuario && data.municipios_estado && data.municipios_estado.length) {
+    html += `<div class="section"><h2>📍 EN ${nombreEstado.toUpperCase()}</h2>`;
+    html += '<div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.6rem;">Municipios más poblados:</div>';
+    html += data.municipios_estado.slice(0, 3).map(m => `
+      <div class="item">
+        <div class="item-title">${escapeHtml(m.nombre)}</div>
+        <div class="item-meta">${m.poblacion_total ? Number(m.poblacion_total).toLocaleString('es-MX') + ' habitantes' : ''}</div>
+      </div>
+    `).join('');
+    html += '</div>';
+  }
+  
+  // Ambiente
+  if (intereses.includes('medioambiente') && data.presas && data.presas.length) {
+    html += '<div class="section"><h2>🌿 PRESAS Y AGUA</h2>';
+    html += data.presas.slice(0, 3).map(p => `
+      <div class="item">
+        <div class="item-title">${escapeHtml(p.nombre || 'Presa')}</div>
+        <div class="item-meta">Almacenamiento: ${p.almacenamiento || '—'}%</div>
+      </div>
+    `).join('');
+    html += '</div>';
+  }
+  
+  // Derechos
+  if (intereses.length === 0 || intereses.includes('derechos') || intereses.includes('participacion')) {
+    const derechos = [
+      { titulo: 'Tu derecho a la transparencia', desc: 'Cualquier autoridad responde solicitudes INAI en 20 días hábiles.', accion: 'Generar solicitud', link: '/panel/generador.html?tipo=transparencia' },
+      { titulo: 'Tu derecho a no firmar nada', desc: 'En cualquier detención, exige tu abogado ANTES de firmar.', accion: 'Modo Emergencia', link: '/panel/emergencia.html' },
+      { titulo: 'Sabe con qué partido coincides', desc: 'Antes de votar 2027, prueba el quiz de 10 preguntas.', accion: 'Hacer quiz', link: '/panel/votosim.html' }
+    ];
+    const idx = new Date().getDate() % derechos.length;
+    const d = derechos[idx];
+    html += `<div class="section" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.04);">
+      <h2>🛡️ DERECHO DEL DÍA</h2>
+      <div class="item-title" style="margin-bottom:0.4rem;">${d.titulo}</div>
+      <div class="item-meta" style="margin-bottom:0.8rem;">${d.desc}</div>
+      <a href="${d.link}" class="btn">${d.accion} →</a>
+    </div>`;
+  }
+  
+  cont.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+window.addEventListener('DOMContentLoaded', cargar);
+</script>
+</body>
+</html>
