@@ -1751,6 +1751,12 @@ export default async function handler(req, res) {
       return res.status(201).json({ ok: true });
     }
 
+    // ── Ombligo Timeline — Eras históricas de México ──
+    if (vista === 'eras_historicas') {
+      const items = await sb('historia_mexico_eras?select=*&order=orden.asc');
+      return res.status(200).json({ items, total: items.length });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
