@@ -1727,6 +1727,139 @@
 </style>
 </head>
 <body>
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
+  <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
+    <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div class="ob-step-bar active" id="ob-bar-1" style="flex:1;height:4px;border-radius:4px;background:#fbbf24;"></div>
+        <div class="ob-step-bar" id="ob-bar-2" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
+        <div class="ob-step-bar" id="ob-bar-3" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;color:#9ca3af;" id="ob-step-label">Paso 1 de 3</div>
+        <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
+      </div>
+    </div>
+    <div id="ob-step-1" style="padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿De dónde eres?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Personalizamos tu Tequio según tu estado.</p>
+      <div id="ob-estados-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
+      <div id="ob-estado-selected" style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;color:#fbbf24;display:none;">
+        <strong>Tu estado:</strong> <span id="ob-estado-txt"></span>
+      </div>
+      <button onclick="obGoStep(2)" id="ob-step1-next" disabled style="margin-top:20px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-2" style="display:none;padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿Qué te importa?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Selecciona los temas que más te interesan (mín. 1).</p>
+      <div id="ob-intereses-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;"></div>
+      <button onclick="obGoStep(3)" id="ob-step2-next" disabled style="margin-top:24px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-3" style="display:none;padding:28px 4px 40px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¡Listo, ciudadano!</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;line-height:1.6;">Tequio queda personalizado para ti. Toda tu información se guarda <strong>solo en tu dispositivo</strong> — cero servidores externos.</p>
+      <div id="ob-preview" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:18px;margin-bottom:20px;"></div>
+      <button onclick="obComplete()" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🚀 Entrar a Tequio</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+const OB_ESTADOS = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León","20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatán","32":"Zacatecas"};
+const OB_INTERESES = [
+  { id:'legislativo', emoji:'⚖️', titulo:'Legislativo', desc:'Leyes y votaciones del Congreso' },
+  { id:'dinero', emoji:'💰', titulo:'Dinero Público', desc:'PEF, deuda, contratos, ASF' },
+  { id:'seguridad', emoji:'🚨', titulo:'Seguridad', desc:'Delitos en tu municipio' },
+  { id:'derechos', emoji:'🛡️', titulo:'Derechos', desc:'Tus derechos como ciudadano' },
+  { id:'medioambiente', emoji:'🌿', titulo:'Medio ambiente', desc:'Presas, sequía, clima' },
+  { id:'cultura', emoji:'🏺', titulo:'Cultura', desc:'Memoria histórica, INAH, UNESCO' },
+  { id:'participacion', emoji:'🗳️', titulo:'Participación', desc:'Votar, firmar iniciativas, debatir' },
+  { id:'organizacion', emoji:'✊', titulo:'Organización', desc:'Protestas, sindicatos, colectivos' }
+];
+let _obEstado = null;
+let _obIntereses = new Set();
+function obShow() {
+  if (localStorage.getItem('tequio_onboarding_done') === '1') return;
+  document.getElementById('onboarding-overlay').style.display = 'block';
+  obRenderEstados();
+  obRenderIntereses();
+}
+function obRenderEstados() {
+  const grid = document.getElementById('ob-estados-grid');
+  grid.innerHTML = Object.entries(OB_ESTADOS).map(([k,v]) => '<button onclick="obSelectEstado(\''+k+'\')" class="ob-estado-btn" data-clave="'+k+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.15s;">'+v+'</button>').join('');
+}
+function obSelectEstado(clave) {
+  _obEstado = clave;
+  document.querySelectorAll('.ob-estado-btn').forEach(b => {
+    b.style.background = b.dataset.clave === clave ? '#fbbf24' : '#1f2937';
+    b.style.color = b.dataset.clave === clave ? '#111827' : '#e5e7eb';
+    b.style.borderColor = b.dataset.clave === clave ? '#fbbf24' : '#374151';
+  });
+  const sel = document.getElementById('ob-estado-selected');
+  sel.style.display = 'block';
+  document.getElementById('ob-estado-txt').textContent = OB_ESTADOS[clave];
+  const btn = document.getElementById('ob-step1-next');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+function obRenderIntereses() {
+  const grid = document.getElementById('ob-intereses-grid');
+  grid.innerHTML = OB_INTERESES.map(i => '<button onclick="obToggleInteres(\''+i.id+'\')" class="ob-interes-btn" data-id="'+i.id+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:14px;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.15s;"><div style="font-size:24px;margin-bottom:6px;">'+i.emoji+'</div><div style="font-size:14px;font-weight:600;margin-bottom:2px;">'+i.titulo+'</div><div style="font-size:11px;color:#9ca3af;line-height:1.4;">'+i.desc+'</div></button>').join('');
+}
+function obToggleInteres(id) {
+  const btn = document.querySelector('.ob-interes-btn[data-id="'+id+'"]');
+  if (_obIntereses.has(id)) {
+    _obIntereses.delete(id);
+    btn.style.background = '#1f2937';
+    btn.style.borderColor = '#374151';
+  } else {
+    _obIntereses.add(id);
+    btn.style.background = 'rgba(251,191,36,0.15)';
+    btn.style.borderColor = '#fbbf24';
+  }
+  const next = document.getElementById('ob-step2-next');
+  next.disabled = _obIntereses.size === 0;
+  next.style.opacity = _obIntereses.size === 0 ? '0.5' : '1';
+}
+function obGoStep(n) {
+  document.querySelectorAll('[id^="ob-step-"]').forEach(s => s.style.display = 'none');
+  document.getElementById('ob-step-' + n).style.display = 'block';
+  document.querySelectorAll('.ob-step-bar').forEach((b,i) => {
+    b.style.background = (i + 1 <= n) ? '#fbbf24' : '#1f2937';
+  });
+  document.getElementById('ob-step-label').textContent = 'Paso ' + n + ' de 3';
+  if (n === 3) obBuildPreview();
+}
+function obBuildPreview() {
+  const intereses = Array.from(_obIntereses).map(id => {
+    const i = OB_INTERESES.find(x => x.id === id);
+    return '<span style="display:inline-block;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;padding:4px 10px;border-radius:20px;font-size:12px;margin:3px;">'+i.emoji+' '+i.titulo+'</span>';
+  }).join('');
+  document.getElementById('ob-preview').innerHTML = '<div style="color:#9ca3af;font-size:11px;letter-spacing:1px;margin-bottom:8px;">TU PERFIL</div><div style="color:#f3f4f6;font-size:14px;margin-bottom:12px;">📍 <strong>'+OB_ESTADOS[_obEstado]+'</strong></div><div>'+intereses+'</div>';
+}
+function obComplete() {
+  localStorage.setItem('tequio_estado_clave', _obEstado);
+  localStorage.setItem('tequio_estado_nombre', OB_ESTADOS[_obEstado]);
+  localStorage.setItem('tequio_intereses', JSON.stringify(Array.from(_obIntereses)));
+  localStorage.setItem('tequio_onboarding_done', '1');
+  document.getElementById('onboarding-overlay').style.display = 'none';
+}
+function obSkip() {
+  if (confirm('¿Saltar configuración? Puedes hacerla luego desde tu perfil.')) {
+    localStorage.setItem('tequio_onboarding_done', '1');
+    document.getElementById('onboarding-overlay').style.display = 'none';
+  }
+}
+window.obShow = obShow;
+window.obSelectEstado = obSelectEstado;
+window.obToggleInteres = obToggleInteres;
+window.obGoStep = obGoStep;
+window.obComplete = obComplete;
+window.obSkip = obSkip;
+window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
+})();
+</script>
+
 <!-- ════════ SPLASH SCREEN ════════ -->
 <div id="splash-screen" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#060c1a 0%,#0d1528 60%,#080f1e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
 
