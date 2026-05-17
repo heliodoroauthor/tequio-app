@@ -2218,6 +2218,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('votosim')">
         <span class="icon">🗳️</span> Quiz Electoral
       </div>
+      <div class="nav-item" onclick="cargarPanel('comparador')">
+        <span class="icon">⚖️</span> Comparador Electoral
+      </div>
       <div class="nav-item" data-page="comunidad" onclick="showPage('comunidad')">
         <span class="icon">💬</span> Chat Comunitario
       </div>
@@ -14011,6 +14014,7 @@ function cargarPanel(slug) {
     'votar': '/panel/votar.html?embedded=1',
     'iniciativa-firmar': '/panel/iniciativa-firmar.html?embedded=1',
       'votosim': '/panel/votosim.html?embedded=1',
+    'comparador': '/panel/comparador.html?embedded=1',
     'sre': '/panel/sre.html?embedded=1',
     'scrapers-admin': '/admin/scrapers.html?embedded=1',
     'directorio': '/panel/directorio.html?embedded=1',
