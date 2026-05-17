@@ -2191,7 +2191,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('pef')">
         <span class="icon">📊</span> PEF 2026
       </div>
-      <div class="nav-item" onclick="mostrarProximamente('deuda')">
+      <div class="nav-item" onclick="cargarPanel('deuda')">
         <span class="icon">💳</span> Deuda Pública
       </div>
       <div class="nav-item" data-page="mapacontratos" onclick="showPage('mapacontratos')">
@@ -14015,6 +14015,7 @@ function switchTab(el) {
 // ─── Panel iframe loader & Próximamente placeholder ───
 function cargarPanel(slug) {
   const PANELS = {
+    'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
     'organizacion': '/panel/organizacion.html?embedded=1',
