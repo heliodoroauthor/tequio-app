@@ -76,7 +76,29 @@ export default async function handler(req, res) {
       return res.status(201).json({ ok: true });
     }
 
-    if (vista === 'dashboard') {
+// -- Buscador global --
+    if (vista === 'buscador_global') {
+      const q = (req.query.q || '').trim();
+      if (!q || q.length < 2) return res.status(200).json({ items: [] });
+      const pattern = '*' + encodeURIComponent(q) + '*';
+      const [leyes, dips, muns, iniciativas, debates] = await Promise.all([
+        sb(`leyes?titulo=ilike.${pattern}&select=id,titulo,tipo&limit=5`).catch(() => []),
+        sb(`politicos_diputados?nombre=ilike.${pattern}&select=nombre,partido,entidad&limit=5`).catch(() => []),
+        sb(`municipios?nombre=ilike.${pattern}&select=clave_inegi,nombre,nombre_estado&limit=5`).catch(() => []),
+        sb(`iniciativas?titulo=ilike.${pattern}&select=id,titulo,tipo&limit=3`).catch(() => []),
+        sb(`debates?titulo=ilike.${pattern}&select=id,slug,titulo&limit=3`).catch(() => [])
+      ]);
+      const items = [
+        ...(leyes || []).map(l => ({ tipo: 'ley', titulo: l.titulo, sub: l.tipo, link: '/panel/buscador-sat.html' })),
+        ...(dips || []).map(d => ({ tipo: 'diputado', titulo: d.nombre, sub: (d.partido || '') + ' \u00b7 ' + (d.entidad || ''), link: '#' })),
+        ...(muns || []).map(m => ({ tipo: 'municipio', titulo: m.nombre, sub: m.nombre_estado, link: '/panel/municipio.html?clave_inegi=' + m.clave_inegi + '&embedded=1' })),
+        ...(iniciativas || []).map(i => ({ tipo: 'iniciativa', titulo: i.titulo, sub: i.tipo, link: i.tipo === 'voto_congreso' ? '/panel/votar.html?embedded=1' : '/panel/iniciativa-firmar.html?embedded=1' })),
+        ...(debates || []).map(db => ({ tipo: 'debate', titulo: db.titulo, sub: 'Debate', link: '/panel/debates.html?id=' + db.id + '&embedded=1' }))
+      ];
+      return res.status(200).json({ items, total: items.length, query: q });
+    }
+
+        if (vista === 'dashboard') {
       const [dolar, inflacion, tasa, leyesCount] = await Promise.all([
         sb('econ_banxico?serie_id=eq.SF43718&order=fecha.desc&limit=2&select=valor,fecha'),
         sb('econ_banxico?serie_id=eq.SP30577&order=fecha.desc&limit=1&select=valor,fecha'),
@@ -1839,4 +1861,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
         }
-
