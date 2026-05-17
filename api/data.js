@@ -60,15 +60,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST' && vista === 'crear_lead') {
       const body = req.body || {};
       if (!body.descripcion || body.descripcion.length < 10) {
-        // ── Deuda Pública — Serie SHRFSP histórica ──
-    if (vista === 'deuda') {
-      const items = await sb('deuda_publica_historico?select=*&order=anio.asc');
-      const ultimo = items[items.length - 1];
-      const total = items.length;
-      return res.status(200).json({ items, ultimo, total });
-    }
-
-    return res.status(400).json({ error: 'descripcion requerida' });
+        return res.status(400).json({ error: 'descripcion requerida' });
       }
       await sbWrite('leads_legales', {
         descripcion: String(body.descripcion).slice(0, 5000),
@@ -1794,6 +1786,14 @@ export default async function handler(req, res) {
         fecha: today, estado_usuario: clave || null,
         noticias, votaciones, iniciativas, municipios_estado, banxico, presas
       });
+    }
+
+    // ── Deuda Pública — Serie SHRFSP histórica ──
+    if (vista === 'deuda') {
+      const items = await sb('deuda_publica_historico?select=*&order=anio.asc');
+      const ultimo = items[items.length - 1];
+      const total = items.length;
+      return res.status(200).json({ items, ultimo, total });
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
