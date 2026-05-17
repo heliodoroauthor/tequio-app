@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil — Tequio</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #060c1a 0%, #0e1525 60%, #0a1628 100%);
+    color: #e5e7eb; min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: #fbbf24; text-decoration: none; font-size: 14px;
+    margin-bottom: 16px; padding: 8px 12px;
+    background: rgba(251,191,36,0.08); border-radius: 8px;
+    border: 1px solid rgba(251,191,36,0.2);
+  }
+  h1 { font-size: 24px; font-weight: 800; margin: 0 0 18px 0; color: #f3f4f6; }
+  h2 { font-size: 16px; font-weight: 700; margin: 24px 0 12px 0; color: #f3f4f6; }
+  .card {
+    background: rgba(31,41,55,0.5); border: 1px solid #374151;
+    border-radius: 12px; padding: 16px; margin-bottom: 14px;
+  }
+  .avatar-row { display: flex; align-items: center; gap: 14px; }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    display: flex; align-items: center; justify-content: center;
+    color: #111827; font-weight: 800; font-size: 26px;
+    flex-shrink: 0;
+  }
+  .name-input {
+    background: #111827; border: 1px solid #374151;
+    color: #f3f4f6; padding: 10px 12px; border-radius: 8px;
+    font-size: 15px; width: 100%; font-family: inherit;
+  }
+  .label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; margin-bottom: 4px; }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+  }
+  .stat-card {
+    background: rgba(31,41,55,0.5); border: 1px solid #374151;
+    border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .stat-icon { font-size: 24px; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 800; color: #fbbf24; }
+  .stat-label { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .tabs {
+    display: flex; gap: 4px; background: rgba(31,41,55,0.4);
+    border-radius: 10px; padding: 4px; margin: 18px 0 12px 0;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1; min-width: 110px; background: none; border: none;
+    color: #9ca3af; padding: 10px 8px; border-radius: 7px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; white-space: nowrap;
+  }
+  .tab-btn.active { background: #fbbf24; color: #111827; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .pill {
+    display: inline-block;
+    background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3);
+    color: #fbbf24; padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; margin: 3px;
+  }
+  .btn {
+    background: #fbbf24; color: #111827; border: none;
+    padding: 12px 16px; border-radius: 8px; font-weight: 700;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .btn-outline {
+    background: transparent; color: #fbbf24;
+    border: 1px solid #fbbf24;
+  }
+  .btn-danger {
+    background: #dc2626; color: #fff;
+  }
+  .btn-block { display: block; width: 100%; margin-top: 10px; }
+  .privacy-box {
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 10px; padding: 14px; margin: 18px 0;
+    font-size: 13px; line-height: 1.6;
+  }
+  .privacy-box strong { color: #10b981; }
+  .empty-state {
+    text-align: center; padding: 24px 12px; color: #6b7280;
+    font-size: 14px;
+  }
+  .quick-link {
+    display: block; padding: 12px 14px; background: rgba(31,41,55,0.4);
+    border: 1px solid #374151; border-radius: 8px;
+    color: #e5e7eb; text-decoration: none; margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .quick-link:hover { background: rgba(31,41,55,0.7); }
+  @media (min-width: 640px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link" id="back-link">← Tequio</a>
+  <h1>👤 Mi Perfil</h1>
+
+  <div class="card">
+    <div class="avatar-row">
+      <div class="avatar" id="avatar">?</div>
+      <div style="flex:1;">
+        <div class="label">TU NOMBRE</div>
+        <input type="text" id="nombre-input" class="name-input" placeholder="Tu nombre" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">TU ESTADO</div>
+    <div id="estado-display" style="font-size:18px;font-weight:700;color:#f3f4f6;margin:6px 0 10px 0;">No configurado</div>
+    <button class="btn btn-outline" onclick="cambiarEstado()">📍 Cambiar estado</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📄</div>
+      <div class="stat-value" id="stat-docs">0</div>
+      <div class="stat-label">Docs generados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🗳️</div>
+      <div class="stat-value" id="stat-votos">0</div>
+      <div class="stat-label">Votos emitidos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💬</div>
+      <div class="stat-value" id="stat-args">0</div>
+      <div class="stat-label">Argumentos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📸</div>
+      <div class="stat-value" id="stat-testigos">0</div>
+      <div class="stat-label">Reportes Testigo</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('resumen')">👤 Resumen</button>
+    <button class="tab-btn" onclick="showTab('representante')">🏛️ Mi Representante</button>
+    <button class="tab-btn" onclick="showTab('casos')">📂 Mis Casos</button>
+  </div>
+
+  <div id="tab-resumen" class="tab-panel active">
+    <h2>Tus intereses</h2>
+    <div id="intereses-display"></div>
+    <h2>Accesos rápidos</h2>
+    <div id="quick-links"></div>
+  </div>
+
+  <div id="tab-representante" class="tab-panel">
+    <h2>Tu representante</h2>
+    <div class="card">
+      <div class="label">CÓDIGO POSTAL</div>
+      <input type="text" id="cp-input" class="name-input" placeholder="Ej. 06700" maxlength="5" inputmode="numeric" />
+      <button class="btn btn-block" onclick="guardarCP()" style="margin-top:10px;">Guardar CP</button>
+    </div>
+    <div id="rep-info"></div>
+  </div>
+
+  <div id="tab-casos" class="tab-panel">
+    <h2>Casos que sigues</h2>
+    <div id="casos-list"></div>
+  </div>
+
+  <div class="privacy-box">
+    🔒 Todos tus datos se guardan <strong>solo en tu dispositivo</strong>. Tequio nunca envía datos personales a servidores externos.
+  </div>
+
+  <h2>Respaldo de tus datos</h2>
+  <button class="btn btn-outline btn-block" onclick="descargarDatos()">📥 Exportar mis datos (JSON)</button>
+  <label class="btn btn-outline btn-block" style="text-align:center;cursor:pointer;">
+    📤 Importar respaldo
+    <input type="file" accept="application/json" onchange="importarDatos(this.files[0])" style="display:none;" />
+  </label>
+
+  <h2>Zona peligrosa</h2>
+  <button class="btn btn-danger btn-block" onclick="borrarDatos()">🗑️ Borrar todos mis datos</button>
+
+  <div style="height:40px;"></div>
+</div>
+
+<script>
+// Handle embedded mode
+const isEmbedded = new URLSearchParams(location.search).get('embedded') === '1';
+if (isEmbedded) {
+  document.getElementById('back-link').style.display = 'none';
+}
+
+// Estados map
+const ESTADOS = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León","20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatán","32":"Zacatecas"};
+
+const INTERES_LABELS = {
+  legislativo:{emoji:'⚖️',titulo:'Legislativo'},
+  dinero:{emoji:'💰',titulo:'Dinero Público'},
+  seguridad:{emoji:'🚨',titulo:'Seguridad'},
+  derechos:{emoji:'🛡️',titulo:'Derechos'},
+  medioambiente:{emoji:'🌿',titulo:'Medio ambiente'},
+  cultura:{emoji:'🏺',titulo:'Cultura'},
+  participacion:{emoji:'🗳️',titulo:'Participación'},
+  organizacion:{emoji:'✊',titulo:'Organización'}
+};
+
+const QUICK_LINKS = {
+  legislativo: [{url:'/panel/votar.html',label:'🗳️ Votar iniciativas'},{url:'/panel/debates.html',label:'💬 Debates'}],
+  dinero: [{url:'/panel/pef.html',label:'💰 PEF'},{url:'/panel/asf.html',label:'🔍 ASF'}],
+  seguridad: [{url:'/panel/emergencia.html',label:'🚨 Emergencias'}],
+  derechos: [{url:'/panel/generador.html',label:'📄 Generador de documentos'}],
+  medioambiente: [{url:'/panel/estado.html',label:'🌿 Estado / clima'}],
+  cultura: [{url:'/panel/directorio.html',label:'🏛️ Directorio'}],
+  participacion: [{url:'/panel/votar.html',label:'🗳️ Votar'},{url:'/panel/iniciativa-firmar.html',label:'✍️ Firmar iniciativa'},{url:'/panel/votosim.html',label:'🔁 Voto simbólico'}],
+  organizacion: [{url:'/panel/organizacion.html',label:'✊ Organización'}]
+};
+
+function getInitials(name) {
+  if (!name || !name.trim()) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function render() {
+  // Nombre
+  const nombre = localStorage.getItem('tequio_nombre') || '';
+  document.getElementById('nombre-input').value = nombre;
+  document.getElementById('avatar').textContent = getInitials(nombre);
+
+  // Estado
+  const estadoClave = localStorage.getItem('tequio_estado_clave');
+  const estadoNombre = localStorage.getItem('tequio_estado_nombre') || (estadoClave && ESTADOS[estadoClave]) || 'No configurado';
+  document.getElementById('estado-display').textContent = estadoNombre;
+
+  // Stats
+  document.getElementById('stat-docs').textContent = localStorage.getItem('tequio_docs_generados') || '0';
+  document.getElementById('stat-votos').textContent = localStorage.getItem('tequio_votos_emitidos') || '0';
+  document.getElementById('stat-args').textContent = localStorage.getItem('tequio_argumentos_count') || '0';
+  document.getElementById('stat-testigos').textContent = localStorage.getItem('tequio_testigos_count') || '0';
+
+  // Intereses
+  let intereses = [];
+  try { intereses = JSON.parse(localStorage.getItem('tequio_intereses') || '[]'); } catch(e) {}
+  const intDisp = document.getElementById('intereses-display');
+  if (intereses.length === 0) {
+    intDisp.innerHTML = '<div class="empty-state">Aún no has configurado tus intereses. Recarga Tequio para hacer el onboarding.</div>';
+  } else {
+    intDisp.innerHTML = intereses.map(id => {
+      const i = INTERES_LABELS[id];
+      return i ? '<span class="pill">' + i.emoji + ' ' + i.titulo + '</span>' : '';
+    }).join('');
+  }
+
+  // Quick links basados en intereses
+  const qlContainer = document.getElementById('quick-links');
+  const links = [];
+  intereses.forEach(id => {
+    (QUICK_LINKS[id] || []).forEach(l => links.push(l));
+  });
+  const seen = new Set();
+  const uniqueLinks = links.filter(l => seen.has(l.url) ? false : (seen.add(l.url), true));
+  if (uniqueLinks.length === 0) {
+    qlContainer.innerHTML = '<div class="empty-state">Configura tus intereses para ver accesos rápidos.</div>';
+  } else {
+    qlContainer.innerHTML = uniqueLinks.map(l => '<a class="quick-link" href="' + l.url + '">' + l.label + '</a>').join('');
+  }
+
+  // Representante
+  const cp = localStorage.getItem('tequio_cp') || '';
+  document.getElementById('cp-input').value = cp;
+  const repInfo = document.getElementById('rep-info');
+  if (!cp && !estadoClave) {
+    repInfo.innerHTML = '<div class="empty-state">Configura tu código postal o estado para ver a tu representante.</div>';
+  } else {
+    let html = '';
+    if (estadoClave) {
+      html += '<div class="card"><div class="label">DIRECTORIO 32 ESTADOS</div><div style="margin-top:8px;">Tu estado: <strong>' + estadoNombre + '</strong></div><a class="quick-link" style="margin-top:10px;" href="/panel/directorio.html?estado=' + estadoClave + '">🏛️ Ver autoridades de ' + estadoNombre + '</a></div>';
+    }
+    if (cp) {
+      html += '<div class="card"><div class="label">TU CP</div><div style="margin-top:8px;font-weight:700;">' + cp + '</div><div style="font-size:12px;color:#9ca3af;margin-top:6px;">Próximamente: detección automática de distrito federal y representantes.</div></div>';
+    }
+    repInfo.innerHTML = html;
+  }
+
+  // Casos
+  let casos = [];
+  try { casos = JSON.parse(localStorage.getItem('tequio_casos_seguidos') || '[]'); } catch(e) {}
+  const casosList = document.getElementById('casos-list');
+  if (!casos.length) {
+    casosList.innerHTML = '<div class="empty-state">Empieza siguiendo un caso desde el Panel Municipal.</div>';
+  } else {
+    casosList.innerHTML = casos.map(c => {
+      const titulo = typeof c === 'string' ? c : (c.titulo || c.id || 'Caso');
+      return '<div class="card"><strong>' + titulo + '</strong></div>';
+    }).join('');
+  }
+}
+
+// Save nombre on input
+document.getElementById('nombre-input').addEventListener('input', function(e) {
+  localStorage.setItem('tequio_nombre', e.target.value);
+  document.getElementById('avatar').textContent = getInitials(e.target.value);
+});
+
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function cambiarEstado() {
+  const clave = prompt('Ingresa el código del estado (01-32):');
+  if (!clave) return;
+  const c = clave.padStart(2, '0');
+  if (!ESTADOS[c]) {
+    alert('Código de estado inválido.');
+    return;
+  }
+  localStorage.setItem('tequio_estado_clave', c);
+  localStorage.setItem('tequio_estado_nombre', ESTADOS[c]);
+  render();
+}
+
+function guardarCP() {
+  const cp = document.getElementById('cp-input').value.trim();
+  if (!/^\d{5}$/.test(cp)) {
+    alert('El CP debe tener 5 dígitos.');
+    return;
+  }
+  localStorage.setItem('tequio_cp', cp);
+  render();
+  alert('CP guardado.');
+}
+
+function descargarDatos() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('tequio_')) data[k] = localStorage.getItem(k);
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tequio-perfil-' + Date.now() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarDatos(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      for (const k in data) {
+        if (k.startsWith('tequio_')) localStorage.setItem(k, data[k]);
+      }
+      alert('Datos restaurados. Recarga la página.');
+      render();
+    } catch (err) {
+      alert('Error: archivo inválido');
+    }
+  };
+  r.readAsText(file);
+}
+
+function borrarDatos() {
+  if (!confirm('¿Borrar TODOS tus datos de Tequio en este dispositivo? Esta acción no se puede deshacer.')) return;
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('tequio_')) keys.push(k);
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+  alert('Datos eliminados.');
+  location.reload();
+}
+
+window.showTab = showTab;
+window.cambiarEstado = cambiarEstado;
+window.guardarCP = guardarCP;
+window.descargarDatos = descargarDatos;
+window.importarDatos = importarDatos;
+window.borrarDatos = borrarDatos;
+
+render();
+</script>
+</body>
+</html>
+ 
