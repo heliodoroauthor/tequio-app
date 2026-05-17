@@ -2104,6 +2104,9 @@
       <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
         <span class="icon">🤝</span> Pide Ayuda Legal
       </div>
+      <div class="nav-item" onclick="cargarPanel('organizacion')">
+        <span class="icon">✊</span> Organización Ciudadana
+      </div>
       <div class="nav-item" onclick="cargarPanel('servicios')">
         <span class="icon">🆘</span> Servicios Públicos
       </div>
@@ -13850,6 +13853,7 @@ function cargarPanel(slug) {
   const PANELS = {
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
+    'organizacion': '/panel/organizacion.html?embedded=1',
     'generador': '/panel/generador.html?embedded=1',
     'pef': '/panel/pef.html?embedded=1',
     'asf': '/panel/asf.html?embedded=1',
