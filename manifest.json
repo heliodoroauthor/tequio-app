@@ -1,0 +1,43 @@
+{
+  "name": "Tequio — Plataforma Cívica Digital",
+  "short_name": "Tequio",
+  "description": "Datos cívicos verificados de México: leyes, dinero público, presupuesto, contratos, derechos, servicios.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f1a",
+  "theme_color": "#fbbf24",
+  "orientation": "portrait-primary",
+  "categories": ["education", "government", "social"],
+  "lang": "es-MX",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "https://tequio.app/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Modo Emergencia",
+      "short_name": "Emergencia",
+      "description": "Asistente de voz para emergencias",
+      "url": "/panel/emergencia.html",
+      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+    },
+    {
+      "name": "Sin Internet",
+      "short_name": "Offline",
+      "description": "Contenido crítico sin conexión",
+      "url": "/panel/offline.html",
+      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+    },
+    {
+      "name": "Servicios Públicos",
+      "short_name": "Servicios",
+      "description": "Teléfonos de servicios federales y estatales",
+      "url": "/panel/servicios.html",
+      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+    }
+  ]
+}
