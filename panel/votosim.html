@@ -1,1 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Electoral - Tequio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg-2: #0d1424;
+    --card: #131a2e;
+    --card-2: #1a2240;
+    --border: rgba(251,191,36,0.15);
+    --border-2: rgba(255,255,255,0.08);
+    --text: #e7ecf3;
+    --muted: #93a0b8;
+    --gold: #fbbf24;
+    --gold-2: #f59e0b;
+    --indigo: #6366f1;
+    --purple: #8b5cf6;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+  a { color: inherit; }
+  .container { max-width: 760px; margin: 0 auto; padding: 16px; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--muted); text-decoration: none; font-size: 14px;
+    padding: 8px 0; margin-bottom: 8px;
+  }
+  .back-link:hover { color: var(--gold); }
 
+  /* VIEW A: INTRO */
+  .hero {
+    background: linear-gradient(160deg, #06090f, #0d1b3e, #1a0d3e);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 10%, rgba(139,92,246,0.18), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99,102,241,0.18), transparent 50%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(251,191,36,0.12);
+    color: var(--gold);
+    border: 1px solid rgba(251,191,36,0.3);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .hero h1 {
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 12px 0;
+    line-height: 1.15;
+    background: linear-gradient(90deg, #fff, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+  }
+  .hero p.lead {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 24px;
+    position: relative;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0 26px;
+    position: relative;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+    padding: 14px 8px;
+  }
+  .stat-num {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+  .btn-cta {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    padding: 16px 28px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.35);
+    transition: transform .15s ease, box-shadow .15s ease;
+    position: relative;
+  }
+  .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(99,102,241,0.45); }
+  .disclaimer {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  /* VIEW B: QUIZ */
+  .quiz-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+  }
+  .progress-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .progress-bar {
+    width: 100%; height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #fbbf24);
+    border-radius: 999px;
+    transition: width .35s ease;
+  }
+  .q-tema {
+    display: inline-block;
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .q-icon {
+    font-size: 38px;
+    margin-bottom: 8px;
+  }
+  .q-titulo {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin: 0 0 18px;
+    color: #fff;
+  }
+  .options {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .opt {
+    background: var(--card-2);
+    border: 1.5px solid var(--border-2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all .15s ease;
+    font-family: inherit;
+  }
+  .opt:hover {
+    border-color: var(--gold);
+    background: rgba(251,191,36,0.06);
+    transform: translateX(2px);
+  }
+  .opt-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    background: rgba(251,191,36,0.15);
+    color: var(--gold);
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 12px;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .btn-skip {
+    margin-top: 14px;
+    background: transparent;
+    border: 1px solid var(--border-2);
+    color: var(--muted);
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    width: 100%;
+  }
+  .btn-skip:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+
+  /* VIEW C: RESULT */
+  .result-hero {
+    background: linear-gradient(160deg, #1a0d3e, #0d1b3e, #06090f);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .result-hero h2 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #fff, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .result-hero p { color: var(--muted); margin: 0; font-size: 14px; }
+  .boleta {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .boleta-title {
+    font-size: 12px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 14px; text-align: center;
+  }
+  .partido-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-2);
+    border: 1.5px solid var(--border-2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .partido-card.top {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(99,102,241,0.04));
+    box-shadow: 0 0 0 1px rgba(251,191,36,0.2);
+  }
+  .partido-top-badge {
+    position: absolute;
+    top: -10px; right: 10px;
+    background: var(--gold);
+    color: #1a1407;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+  .partido-emoji { font-size: 28px; line-height: 1; }
+  .partido-info { min-width: 0; }
+  .partido-nombre { font-weight: 800; font-size: 16px; color: #fff; }
+  .partido-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .partido-bar-wrap {
+    margin-top: 8px;
+    width: 100%; height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 999px; overflow: hidden;
+  }
+  .partido-bar { height: 100%; border-radius: 999px; transition: width .8s ease; }
+  .partido-pct {
+    font-size: 22px; font-weight: 900; color: #fff;
+    min-width: 56px; text-align: right;
+  }
+  .partido-pct .small { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  .analysis {
+    background: var(--card);
+    border: 1px solid var(--border-2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .analysis b { color: var(--text); }
+  .actions {
+    display: grid; grid-template-columns: 1fr; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .btn-action {
+    background: var(--card-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 13px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-action.primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none; color: #fff;
+  }
+  .btn-action:hover { transform: translateY(-1px); }
+
+  .hidden { display: none !important; }
+
+  @media (min-width: 540px) {
+    .hero h1 { font-size: 36px; }
+    .actions { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link" id="backLink">&larr; Volver al inicio</a>
+
+  <!-- VIEW A: INTRO -->
+  <section id="view-intro" class="view">
+    <div class="hero">
+      <span class="badge">SIMULACION EDUCATIVA - NO OFICIAL</span>
+      <h1>&iquest;Con qui&eacute;n votar&iacute;as en 2027?</h1>
+      <p class="lead">Responde 10 preguntas sobre temas clave y descubre qu&eacute; partido se alinea m&aacute;s con tus ideas.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num">2027</div><div class="stat-lbl">Pr&oacute;xima elec.</div></div>
+        <div class="stat-card"><div class="stat-num">10</div><div class="stat-lbl">Preguntas</div></div>
+        <div class="stat-card"><div class="stat-num">6</div><div class="stat-lbl">Partidos</div></div>
+      </div>
+      <button class="btn-cta" onclick="vsStart()">&#x1F5F3;&#xFE0F; Comenzar el quiz</button>
+      <p class="disclaimer">Simulaci&oacute;n educativa basada en posiciones p&uacute;blicas de los partidos. No predice resultados electorales.</p>
+    </div>
+  </section>
+
+  <!-- VIEW B: QUIZ -->
+  <section id="view-quiz" class="view hidden">
+    <div class="quiz-wrap">
+      <div class="progress-row">
+        <span id="progressText">Pregunta 1 de 10</span>
+        <span id="progressPct">10%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+      <span class="q-tema" id="qTema">Tema</span>
+      <div class="q-icon" id="qIcon">&#x1F4AC;</div>
+      <h2 class="q-titulo" id="qTitulo">Pregunta...</h2>
+      <div class="options" id="qOptions"></div>
+      <button class="btn-skip" onclick="vsSkip()">Saltar pregunta &rarr;</button>
+    </div>
+  </section>
+
+  <!-- VIEW C: RESULT -->
+  <section id="view-result" class="view hidden">
+    <div class="result-hero">
+      <h2>Tus resultados</h2>
+      <p>As&iacute; se alinea tu perfil con los partidos pol&iacute;ticos</p>
+    </div>
+    <div class="boleta">
+      <div class="boleta-title">Boleta Visual - % de coincidencia</div>
+      <div id="boletaList"></div>
+    </div>
+    <div class="analysis" id="analysisBox"></div>
+    <div class="actions">
+      <button class="btn-action primary" onclick="vsShare()">&#x1F4CB; Compartir</button>
+      <button class="btn-action" onclick="vsRestart()">&#x1F504; Repetir quiz</button>
+      <button class="btn-action" onclick="vsVerPerfil()">&#x1F3DB;&#xFE0F; Ver perfil</button>
+    </div>
+    <p class="disclaimer" style="text-align:center">Esta simulaci&oacute;n es educativa y se basa en posiciones p&uacute;blicas. No constituye recomendaci&oacute;n electoral ni predicci&oacute;n de resultados.</p>
+  </section>
+</div>
+
+<script>
+  // EMBEDDED HANDLING
+  (function() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('embedded') === '1') {
+      const bl = document.getElementById('backLink');
+      if (bl) bl.style.display = 'none';
+      document.body.style.padding = '0';
+    }
+    const view = params.get('view');
+    if (view === 'quiz') setTimeout(vsStart, 50);
+  })();
+
+  // DATA
+  const PREGUNTAS = [
+    {
+      id: 'q1', icono: '\u{1F4B0}', tema: 'Economía',
+      titulo: '¿Cómo crees que debería manejarse la economía mexicana?',
+      opciones: [
+        { texto: 'Más participación del Estado, empresas estratégicas en manos del gobierno (PEMEX, CFE, AIFA)', scores: { MORENA: 3, PT: 3, PVEM: 1, PRI: 0, PAN: -2, MC: -1 } },
+        { texto: 'Libre mercado: privatizaciones, menos regulación, atracción de inversión extranjera', scores: { MORENA: -2, PT: -2, PRI: 1, PAN: 3, MC: 2, PVEM: 0 } },
+        { texto: 'Mixto: Estado fuerte en estratégicos pero abriendo otros sectores a privados', scores: { MORENA: 0, PT: -1, PRI: 2, PAN: 1, MC: 3, PVEM: 1 } },
+        { texto: 'No tengo opinión clara / depende del sector', scores: {} }
+      ]
+    },
+    {
+      id: 'q2', icono: '\u{1F6A8}', tema: 'Seguridad',
+      titulo: '¿Qué estrategia de seguridad debe seguir el gobierno?',
+      opciones: [
+        { texto: 'Mantener Guardia Nacional + militares en las calles, ampliar facultades', scores: { MORENA: 3, PT: 2, PRI: 1, PVEM: 2, PAN: -1, MC: -1 } },
+        { texto: 'Regresar al modelo de policías civiles federales (Policía Federal), retirar al ejército', scores: { MORENA: -2, PT: 0, PAN: 2, MC: 3, PRI: 0, PVEM: -1 } },
+        { texto: 'Endurecer leyes: cadena perpetua, prisión preventiva más amplia, militarización absoluta', scores: { MORENA: 1, PT: 0, PRI: 2, PAN: 2, PVEM: 1, MC: -1 } },
+        { texto: 'Enfoque social: atender causas (pobreza, drogas, educación) antes que mano dura', scores: { MORENA: 2, PT: 3, MC: 2, PAN: -1, PRI: 0, PVEM: 1 } }
+      ]
+    },
+    {
+      id: 'q3', icono: '\u{1F474}', tema: 'Programas sociales',
+      titulo: '¿Qué debe pasar con los programas sociales (Pensión Adulto Mayor, Sembrando Vida, etc.)?',
+      opciones: [
+        { texto: 'Mantenerlos y expandirlos. Son derechos constitucionales conquistados', scores: { MORENA: 3, PT: 3, PVEM: 2, MC: 1, PRI: 0, PAN: -1 } },
+        { texto: 'Mantener pero auditarlos, condicionarlos a resultados verificables', scores: { MORENA: 0, PT: -1, MC: 2, PRI: 2, PAN: 2, PVEM: 1 } },
+        { texto: 'Reducirlos o eliminarlos. Generan dependencia y son electorales', scores: { MORENA: -3, PT: -2, MC: 0, PAN: 2, PRI: 0, PVEM: -2 } },
+        { texto: 'Reemplazarlos con renta básica universal o empleo garantizado', scores: { MORENA: 1, PT: 2, MC: 1, PAN: 0, PRI: 0, PVEM: 1 } }
+      ]
+    },
+    {
+      id: 'q4', icono: '⚖️', tema: 'Justicia y poder judicial',
+      titulo: '¿Cómo deben elegirse los jueces y ministros?',
+      opciones: [
+        { texto: 'Por voto popular directo (reforma judicial 2024 actual)', scores: { MORENA: 3, PT: 2, PVEM: 1, PRI: -1, PAN: -2, MC: -1 } },
+        { texto: 'Por mérito, concursos públicos abiertos, sin política', scores: { MORENA: -1, PT: -1, MC: 3, PAN: 2, PRI: 1, PVEM: 0 } },
+        { texto: 'Por designación del ejecutivo con ratificación del Senado (modelo anterior)', scores: { MORENA: -2, PT: -2, PAN: 1, PRI: 2, MC: 0, PVEM: 0 } },
+        { texto: 'No sé / es un tema técnico complejo', scores: {} }
+      ]
+    },
+    {
+      id: 'q5', icono: '\u{1F33F}', tema: 'Medio ambiente',
+      titulo: '¿Cómo enfrentar la crisis climática y energética?',
+      opciones: [
+        { texto: 'Soberanía energética: fortalecer PEMEX y CFE incluso si usan combustibles fósiles', scores: { MORENA: 3, PT: 2, PVEM: -1, PRI: 1, PAN: -1, MC: 0 } },
+        { texto: 'Transición rápida a renovables (solar, eólica), aunque sea con inversión extranjera', scores: { MORENA: -1, PT: 0, PVEM: 3, MC: 2, PAN: 2, PRI: 0 } },
+        { texto: 'Nuclear y gas como puentes hacia renovables', scores: { MORENA: 0, PT: -1, PVEM: 1, PAN: 2, PRI: 2, MC: 1 } },
+        { texto: 'Reducir consumo: impuestos verdes, transporte público masivo, ciudades caminables', scores: { MORENA: 1, PT: 2, PVEM: 3, MC: 3, PAN: 0, PRI: 0 } }
+      ]
+    },
+    {
+      id: 'q6', icono: '\u{1F3E5}', tema: 'Salud',
+      titulo: '¿Cómo debe ser el sistema de salud público?',
+      opciones: [
+        { texto: 'Sistema único universal gratuito tipo IMSS-Bienestar para todos', scores: { MORENA: 3, PT: 3, PVEM: 1, MC: 1, PAN: -1, PRI: 0 } },
+        { texto: 'Mixto: público + privado coexistiendo, con apoyo a quien no puede pagar', scores: { MORENA: 0, PT: -1, PRI: 2, PAN: 3, MC: 2, PVEM: 1 } },
+        { texto: 'Privatización completa con seguro médico subsidiado a los más pobres', scores: { MORENA: -3, PT: -3, PAN: 2, PRI: 1, MC: 0, PVEM: -2 } },
+        { texto: 'Foco en prevención y medicina tradicional/comunitaria, no medicalización', scores: { MORENA: 1, PT: 2, MC: 2, PVEM: 3, PAN: -1, PRI: 0 } }
+      ]
+    },
+    {
+      id: 'q7', icono: '\u{1F308}', tema: 'Derechos sociales',
+      titulo: '¿Cuál es tu postura sobre derechos LGBTQ+ y matrimonio igualitario?',
+      opciones: [
+        { texto: 'Apoyo total: matrimonio igualitario, adopción, identidad de género legal', scores: { MORENA: 3, MC: 3, PT: 2, PVEM: 2, PAN: -2, PRI: 0 } },
+        { texto: 'Apoyo civil pero no llamarle "matrimonio" / preocupaciones religiosas', scores: { MORENA: -1, MC: 0, PAN: 3, PRI: 2, PVEM: 0, PT: 0 } },
+        { texto: 'Cada estado decide / no es prioridad nacional', scores: { MORENA: 0, MC: 1, PRI: 1, PAN: 1, PVEM: 1, PT: 0 } },
+        { texto: 'No tengo opinión clara', scores: {} }
+      ]
+    },
+    {
+      id: 'q8', icono: '\u{1F69C}', tema: 'Campo y soberanía alimentaria',
+      titulo: '¿Qué debe pasar con el campo mexicano y los alimentos?',
+      opciones: [
+        { texto: 'Apoyo directo a pequeños productores con subsidios (Producción para el Bienestar)', scores: { MORENA: 3, PT: 3, PVEM: 1, MC: 1, PAN: -1, PRI: 0 } },
+        { texto: 'Modernizar con tecnología, agroindustria, exportación', scores: { MORENA: 0, PT: -1, MC: 2, PAN: 3, PRI: 2, PVEM: 0 } },
+        { texto: 'Prohibir transgénicos y glifosato, agroecología y orgánicos', scores: { MORENA: 1, PT: 2, PVEM: 3, MC: 1, PAN: -1, PRI: -1 } },
+        { texto: 'Mantener TMEC y libre importación de alimentos para abaratar', scores: { MORENA: -2, PT: -2, PRI: 1, PAN: 2, MC: 1, PVEM: -1 } }
+      ]
+    },
+    {
+      id: 'q9', icono: '\u{1F4DA}', tema: 'Educación',
+      titulo: '¿Cómo debe ser la educación en México?',
+      opciones: [
+        { texto: 'Pública y gratuita en todos los niveles, con textos gratuitos (Nueva Escuela Mexicana)', scores: { MORENA: 3, PT: 3, PVEM: 1, MC: 0, PAN: -1, PRI: 1 } },
+        { texto: 'Pública + privadas reguladas, vouchers para elegir escuela', scores: { MORENA: -1, PT: -2, MC: 2, PAN: 3, PRI: 2, PVEM: 0 } },
+        { texto: 'Evaluación docente estricta, mérito, despedir maestros que no rindan', scores: { MORENA: -2, PT: -2, PAN: 2, PRI: 2, MC: 1, PVEM: -1 } },
+        { texto: 'Educación intercultural, lenguas indígenas, currículo descolonizado', scores: { MORENA: 2, PT: 3, PVEM: 1, MC: 1, PAN: -1, PRI: 0 } }
+      ]
+    },
+    {
+      id: 'q10', icono: '✊', tema: 'Democracia',
+      titulo: '¿Cómo fortalecer la democracia mexicana?',
+      opciones: [
+        { texto: 'Mayoría legítima de las urnas debe poder gobernar sin trabas (reformas amplias)', scores: { MORENA: 3, PT: 3, PVEM: 1, PRI: -1, PAN: -2, MC: -1 } },
+        { texto: 'Contrapesos fuertes: INE autónomo, SCJN independiente, oposición plural', scores: { MORENA: -2, PT: -2, MC: 3, PAN: 3, PRI: 2, PVEM: 0 } },
+        { texto: 'Democracia participativa: consultas, revocación, presupuesto participativo', scores: { MORENA: 2, PT: 2, MC: 2, PVEM: 1, PAN: 0, PRI: 0 } },
+        { texto: 'Sistema parlamentario o reducir reelección de legisladores', scores: { MORENA: 0, PT: 0, MC: 2, PAN: 1, PRI: 1, PVEM: 0 } }
+      ]
+    }
+  ];
+
+  const PARTIDOS = {
+    MORENA: { nombre: 'MORENA', color: '#b91c1c', emoji: '\u{1F7E5}', desc: 'Movimiento Regeneración Nacional', max: 30 },
+    PAN:    { nombre: 'PAN',    color: '#1e40af', emoji: '\u{1F7E6}', desc: 'Partido Acción Nacional', max: 25 },
+    PRI:    { nombre: 'PRI',    color: '#16a34a', emoji: '\u{1F7E9}', desc: 'Partido Revolucionario Institucional', max: 19 },
+    MC:     { nombre: 'MC',     color: '#f97316', emoji: '\u{1F7E7}', desc: 'Movimiento Ciudadano', max: 22 },
+    PT:     { nombre: 'PT',     color: '#facc15', emoji: '\u{1F7E8}', desc: 'Partido del Trabajo', max: 23 },
+    PVEM:   { nombre: 'PVEM',   color: '#15803d', emoji: '\u{1F7E9}', desc: 'Partido Verde Ecologista de México', max: 18 }
+  };
+
+  // STATE
+  const state = {
+    qIdx: 0,
+    scores: { MORENA: 0, PAN: 0, PRI: 0, MC: 0, PT: 0, PVEM: 0 },
+    historial: []
+  };
+
+  // VIEW SWITCHER
+  function setView(name) {
+    document.getElementById('view-intro').classList.toggle('hidden', name !== 'intro');
+    document.getElementById('view-quiz').classList.toggle('hidden', name !== 'quiz');
+    document.getElementById('view-result').classList.toggle('hidden', name !== 'result');
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
+  }
+
+  // QUIZ
+  function vsStart() {
+    state.qIdx = 0;
+    state.scores = { MORENA: 0, PAN: 0, PRI: 0, MC: 0, PT: 0, PVEM: 0 };
+    state.historial = [];
+    setView('quiz');
+    vsRenderQuestion();
+  }
+
+  function vsRenderQuestion() {
+    const q = PREGUNTAS[state.qIdx];
+    if (!q) { vsShowResult(); return; }
+    const pct = Math.round(((state.qIdx + 1) / PREGUNTAS.length) * 100);
+    document.getElementById('progressText').textContent = 'Pregunta ' + (state.qIdx + 1) + ' de ' + PREGUNTAS.length;
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('qTema').textContent = q.tema;
+    document.getElementById('qIcon').textContent = q.icono;
+    document.getElementById('qTitulo').textContent = q.titulo;
+    const cont = document.getElementById('qOptions');
+    cont.innerHTML = '';
+    q.opciones.forEach((op, idx) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      const letter = String.fromCharCode(65 + idx);
+      b.innerHTML = '<span class="opt-letter">' + letter + '</span>' + escapeHtml(op.texto);
+      b.onclick = () => vsAnswer(idx);
+      cont.appendChild(b);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function vsAnswer(opcionIdx) {
+    const q = PREGUNTAS[state.qIdx];
+    const op = q.opciones[opcionIdx];
+    const scores = op.scores || {};
+    for (const partido of Object.keys(scores)) {
+      state.scores[partido] = (state.scores[partido] || 0) + scores[partido];
+    }
+    state.historial.push({ qIdx: state.qIdx, opcionIdx: opcionIdx, tema: q.tema, scores: scores });
+    state.qIdx++;
+    if (state.qIdx >= PREGUNTAS.length) vsShowResult();
+    else vsRenderQuestion();
+  }
+
+  function vsSkip() {
+    state.historial.push({ qIdx: state.qIdx, opcionIdx: -1, tema: PREGUNTAS[state.qIdx].tema, scores: {} });
+    state.qIdx++;
+    if (state.qIdx >= PREGUNTAS.length) vsShowResult();
+    else vsRenderQuestion();
+  }
+
+  // RESULT
+  function vsShowResult() {
+    const results = Object.keys(state.scores).map(k => {
+      const max = PARTIDOS[k].max;
+      const min = -max;
+      const v = state.scores[k] || 0;
+      const pct = Math.max(0, Math.min(100, Math.round(((v - min) / (max - min)) * 100)));
+      return { partido: k, pct: pct, score: v, info: PARTIDOS[k] };
+    }).sort((a, b) => b.pct - a.pct);
+
+    const list = document.getElementById('boletaList');
+    list.innerHTML = '';
+    results.forEach((r, idx) => {
+      const card = document.createElement('div');
+      card.className = 'partido-card' + (idx === 0 ? ' top' : '');
+      const badge = idx === 0 ? '<div class="partido-top-badge">TU PARTIDO MAS AFIN</div>' : '';
+      card.innerHTML =
+        badge +
+        '<div class="partido-emoji">' + r.info.emoji + '</div>' +
+        '<div class="partido-info">' +
+          '<div class="partido-nombre">' + r.info.nombre + '</div>' +
+          '<div class="partido-desc">' + r.info.desc + '</div>' +
+          '<div class="partido-bar-wrap"><div class="partido-bar" style="width:' + r.pct + '%;background:' + r.info.color + '"></div></div>' +
+        '</div>' +
+        '<div class="partido-pct">' + r.pct + '<span class="small">%</span></div>';
+      list.appendChild(card);
+    });
+
+    // Analysis
+    const top = results[0];
+    const coincide = [];
+    const dife = [];
+    state.historial.forEach(h => {
+      const s = (h.scores || {})[top.partido];
+      if (s === undefined) return;
+      if (s >= 2) coincide.push(h.tema);
+      if (s <= -1) dife.push(h.tema);
+    });
+    const uniq = arr => Array.from(new Set(arr)).slice(0, 3);
+    const cTxt = uniq(coincide).join(', ') || 'varios temas';
+    const dTxt = uniq(dife).join(', ') || 'pocas diferencias';
+    document.getElementById('analysisBox').innerHTML =
+      '<b>Coincides más con ' + top.info.nombre + ' en:</b> ' + cTxt + '. ' +
+      '<b>Diferencias más fuertes:</b> ' + dTxt + '.';
+
+    window._vsTop = top;
+    window._vsResults = results;
+    setView('result');
+  }
+
+  function vsRestart() { vsStart(); }
+  function vsVerPerfil() {
+    const top = window._vsTop;
+    if (!top) return;
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'tequio:verPartido', partido: top.partido }, '*');
+    } else {
+      alert('Perfil del partido ' + top.info.nombre + ' (próximamente)');
+    }
+  }
+  function vsShare() {
+    const top = window._vsTop;
+    if (!top) return;
+    const text = 'Mi partido más afín según Quiz Tequio: ' + top.info.nombre + ' (' + top.pct + '% match). Haz tu quiz en https://tequio.app/panel/votosim.html';
+    if (navigator.share) {
+      navigator.share({ title: 'Quiz Electoral Tequio', text: text }).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => alert('Resultado copiado al portapapeles!'));
+    } else {
+      prompt('Copia tu resultado:', text);
+    }
+  }
+</script>
+</body>
+</html>
