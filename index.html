@@ -26379,10 +26379,11 @@ window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
 <!-- ════════ SOS FAB ════════ -->
 <div id="sos-fab">
   <div id="sos-menu">
-    <div class="sos-menu-header">🆘 Ayuda de emergencia</div>
-    <div class="sos-menu-item" onclick="sosGo('emergencia')"><span class="sos-icon">🚨</span><div><div>Modo Emergencia 24/7</div><div class="sos-desc">Líneas de crisis y ayuda inmediata</div></div></div>
-    <div class="sos-menu-item" onclick="sosGo('derechos')"><span class="sos-icon">⚖️</span><div><div>Mis Derechos</div><div class="sos-desc">Conoce tus derechos ciudadanos</div></div></div>
-    <div class="sos-menu-item" onclick="sosGo('offline')"><span class="sos-icon">📵</span><div><div>Sin Internet</div><div class="sos-desc">Próximamente: versión offline</div></div></div>
+    <div class="sos-menu-header">🆘 Ayuda rápida</div>
+    <div class="sos-menu-item" onclick="sosGo('emergencia')"><span class="sos-icon">🚨</span><div><div>Modo Emergencia 24/7</div><div class="sos-desc">Lee tus derechos en voz alta + 911</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('servicios')"><span class="sos-icon">🆘</span><div><div>Servicios Públicos</div><div class="sos-desc">Teléfonos verificados (CFE, IMSS, fiscalías)</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('generador')"><span class="sos-icon">⚖️</span><div><div>Genera denuncia legal</div><div class="sos-desc">Plantillas oficiales (CNDH, INAI, Profeco, OIC)</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('offline')"><span class="sos-icon">📵</span><div><div>Sin Internet</div><div class="sos-desc">Contenido cacheado offline</div></div></div>
   </div>
   <button id="sos-btn" onclick="toggleSosMenu()" aria-label="SOS - Ayuda de emergencia">SOS</button>
 </div>
@@ -26431,11 +26432,15 @@ function toggleSosMenu() {
 }
 function sosGo(slug) {
   document.getElementById('sos-menu').classList.remove('open');
-  if (slug === 'offline') {
-    alert('Próximamente: versión offline para emergencias sin Internet.');
-    return;
-  }
-  if (window.cargarPanel) cargarPanel(slug === 'derechos' ? 'emergencia' : slug);
+  // Map de SOS slugs a paneles reales (ya no hay fallback a 'emergencia')
+  const SOS_MAP = {
+    'emergencia': 'emergencia',
+    'servicios': 'servicios',
+    'generador': 'generador',
+    'offline': 'offline'
+  };
+  const target = SOS_MAP[slug] || slug;
+  if (window.cargarPanel) cargarPanel(target);
 }
 document.addEventListener('click', function(e){
   if (!e.target.closest('#sos-fab')) {
