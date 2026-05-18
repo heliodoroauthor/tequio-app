@@ -5210,13 +5210,13 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           <div class="grid-2 mb-16" style="gap:12px">
             <div class="stat-card" style="border-color:var(--red)">
               <div class="stat-label">DEUDA INTERNA</div>
-              <div class="stat-value" style="color:var(--red2);font-size:22px">$9.84T</div>
-              <div class="stat-change down">71.8% del total · CETES, Bonos M</div>
+              <div class="stat-value" data-cifra="deuda-interna" style="color:var(--red2);font-size:22px">$13.11 bn</div>
+              <div class="stat-change down" data-cifra="deuda-interna-pct">72.0% del total · CETES, Bonos M</div>
             </div>
             <div class="stat-card" style="border-color:var(--yellow)">
               <div class="stat-label">DEUDA EXTERNA</div>
-              <div class="stat-value" style="color:var(--yellow2);font-size:22px">$3.86T</div>
-              <div class="stat-change down">28.2% del total · USD, EUR, JPY</div>
+              <div class="stat-value" data-cifra="deuda-externa" style="color:var(--yellow2);font-size:22px">$5.09 bn</div>
+              <div class="stat-change down" data-cifra="deuda-externa-pct">28.0% del total · USD, EUR, JPY</div>
             </div>
           </div>
 
@@ -27002,6 +27002,53 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
     }
   } catch(e){}
 })();
+</script>
+<script>
+// Unifica cifras de Deuda+PEF+Iniciativas a endpoints API (una sola fuente de verdad)
+async function cargarDinerosCifras(){
+  try {
+    const [deudaR, pefR, iniR] = await Promise.all([
+      fetch('/api/data?vista=deuda', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/data?vista=pef_resumen&anio=2026', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/data?vista=iniciativas', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+    // Deuda (interna/externa/total/pib)
+    if (deudaR && deudaR.ultimo) {
+      const u = deudaR.ultimo;
+      const total = u.shrfsp_total_mxn;
+      const interna = u.deuda_interna_mxn;
+      const externa = u.deuda_externa_mxn;
+      const pib = u.shrfsp_porcentaje_pib;
+      const fmt = (v) => '$' + (v/1e12).toFixed(2) + ' bn';
+      const pctOf = (v) => total ? ((v/total)*100).toFixed(1) : null;
+      document.querySelectorAll('[data-cifra="deuda-monto"]').forEach(el => { if (typeof total === 'number') el.textContent = fmt(total); });
+      document.querySelectorAll('[data-cifra="deuda-pib"]').forEach(el => { if (typeof pib === 'number') el.textContent = pib.toFixed(1) + '% PIB · SHCP'; });
+      document.querySelectorAll('[data-cifra="deuda-interna"]').forEach(el => { if (typeof interna === 'number') el.textContent = fmt(interna); });
+      document.querySelectorAll('[data-cifra="deuda-externa"]').forEach(el => { if (typeof externa === 'number') el.textContent = fmt(externa); });
+      document.querySelectorAll('[data-cifra="deuda-interna-pct"]').forEach(el => { const p = pctOf(interna); if (p) el.textContent = p + '% del total · CETES, Bonos M'; });
+      document.querySelectorAll('[data-cifra="deuda-externa-pct"]').forEach(el => { const p = pctOf(externa); if (p) el.textContent = p + '% del total · USD, EUR, JPY'; });
+    }
+    // PEF total
+    if (pefR && typeof pefR.total === 'number') {
+      const v = '$' + (pefR.total/1e12).toFixed(2) + ' bn';
+      document.querySelectorAll('[data-cifra="pef-total"]').forEach(el => { el.textContent = v; });
+    }
+    // Iniciativas count + firmas reales
+    if (iniR && Array.isArray(iniR.items)) {
+      const count = iniR.items.length;
+      let totalFirmas = 0;
+      iniR.items.forEach(it => {
+        if (it.tipo === 'iniciativa_ciudadana' && typeof it.firmas === 'number') totalFirmas += it.firmas;
+      });
+      document.querySelectorAll('[data-cifra="iniciativas-count"]').forEach(el => { el.textContent = String(count); });
+      document.querySelectorAll('[data-cifra="iniciativas-firmas"]').forEach(el => { el.textContent = totalFirmas.toLocaleString('es-MX'); });
+    }
+  } catch(e) {
+    console.warn('cargarDinerosCifras error:', e);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(cargarDinerosCifras, 800));
+setTimeout(cargarDinerosCifras, 2500);
 </script>
 </body>
 </html>
