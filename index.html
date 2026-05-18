@@ -12157,32 +12157,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
 
         <script>
-        const _munNoticias = [
-          { id:'n1', cat:'obras',     catLabel:'🏗️ OBRAS',     catColor:'#2dd4bf',    catBg:'rgba(13,148,136,0.18)',   catBorder:'rgba(13,148,136,0.3)',
-            tiempo:'Hace 2 horas', titulo:'Inicia rehabilitación de Av. Revolución con inversión de $45M',
-            cuerpo:'El Ayuntamiento arrancó los trabajos de repavimentación del tramo Av. Revolución entre López Mateos y Mariano Otero. La obra beneficiará a 120,000 vecinos del sector poniente de la ciudad.\n\nEl contrato fue adjudicado a la empresa Constructora Jalisco S.A. por $45 millones de pesos con un plazo de ejecución de 8 meses. Los trabajos incluyen banquetas, alumbrado LED y ciclovía.\n\nLos vecinos podrán dar seguimiento a la obra en el portal transparencia.guadalajara.gob.mx.',
-            fuente:'Mural · Guadalajara' },
-          { id:'n2', cat:'seguridad', catLabel:'🔒 SEGURIDAD', catColor:'var(--red2)', catBg:'rgba(239,68,68,0.12)',     catBorder:'rgba(239,68,68,0.3)',
-            tiempo:'Hace 5 horas', titulo:'Cabildo aprueba 200 nuevas cámaras de videovigilancia',
-            cuerpo:'Por 18 votos a favor y 4 en contra, el cabildo aprobó la ampliación del sistema C4 con 200 cámaras adicionales en colonias de alta incidencia delictiva.\n\nLa inversión es de $32 millones financiados con recursos del Fondo de Aportaciones para la Seguridad Pública (FASP). Las cámaras incluyen reconocimiento de placas y análisis de comportamiento por inteligencia artificial.\n\nLas colonias beneficiadas son Oblatos, Polanco, Rancho Nuevo y Tateposco.',
-            fuente:'Informador · Guadalajara' },
-          { id:'n3', cat:'finanzas',  catLabel:'💰 FINANZAS',  catColor:'var(--yellow2)', catBg:'rgba(245,158,11,0.12)', catBorder:'rgba(245,158,11,0.3)',
-            tiempo:'Hace 8 horas', titulo:'Tesorería reporta déficit de $180M en recaudación predial',
-            cuerpo:'La recaudación del impuesto predial cayó 12% respecto al primer trimestre de 2024, según el informe presentado ante el Cabildo por la tesorera municipal.\n\nEl déficit se atribuye a la falta de actualización de valores catastrales y al aumento de propietarios en mora. El municipio estima que hay 48,000 predios con adeudos superiores a dos años.\n\nLa tesorería anunció un programa de regularización con descuentos del 50% en recargos para quienes paguen antes del 30 de junio.',
-            fuente:'El Financiero · Guadalajara' },
-          { id:'n4', cat:'ambiente',  catLabel:'🌳 AMBIENTE',  catColor:'var(--green2)', catBg:'rgba(34,197,94,0.12)',   catBorder:'rgba(34,197,94,0.3)',
-            tiempo:'Hace 1 día', titulo:'GDL planta 3,200 árboles en el primer trimestre de 2025',
-            cuerpo:'El Ayuntamiento reporta avance del 32% en su meta de 10,000 árboles. Los trabajos se concentran en las colonias Zapotlán, Tetlán y Oblatos.\n\nLas especies plantadas son nativas de la región: huizache, palo dulce, tepame y pirúl. Cada árbol tiene código QR para que los vecinos reporten su estado.\n\nEl programa incluye capacitación a 300 brigadas vecinales para cuidado y riego durante los primeros 6 meses.',
-            fuente:'Notisistema · Guadalajara' },
-          { id:'n5', cat:'educacion', catLabel:'🏫 EDUCACIÓN', catColor:'var(--accent2)', catBg:'rgba(99,179,237,0.12)', catBorder:'rgba(99,179,237,0.3)',
-            tiempo:'Hace 2 días', titulo:'Municipio abrirá 5 nuevas guarderías en zonas marginadas',
-            cuerpo:'El DIF municipal firmó convenio con la federación para construir 5 guarderías en colonias de alta marginación. Inversión total de $28 millones.\n\nLas guarderías se ubicarán en Las Juntas, El Retiro, Miravalle, San Andrés y Ferrocarril. Cada una tendrá capacidad para 60 niños de 45 días a 6 años.\n\nEl proyecto se financia con recursos del programa federal Bienestar para la Niñez y se espera que los inmuebles estén listos en diciembre de 2025.',
-            fuente:'UDG TV · Guadalajara' },
-          { id:'n6', cat:'obras',     catLabel:'🏗️ OBRAS',     catColor:'#2dd4bf',    catBg:'rgba(13,148,136,0.18)',   catBorder:'rgba(13,148,136,0.3)',
-            tiempo:'Hace 3 días', titulo:'Retrasos en obra del Tren Ligero afectan comercios del Centro',
-            cuerpo:'Comerciantes de la Av. Juárez exigen compensación por pérdidas económicas derivadas de los 14 meses de obra del Tren Ligero línea 3 ampliación.\n\nLa Cámara de Comercio de Guadalajara estima que 340 negocios han perdido entre 30% y 70% de sus ventas. El colectivo "Juárez Vive" presentó queja ante la PROFECO y solicita audiencia con el gobernador.\n\nEl Sistema de Tren Eléctrico Urbano indicó que la obra concluirá en octubre de 2025, con 4 meses de retraso respecto al calendario original.',
-            fuente:'El Occidental · Guadalajara' },
-        ];
+        const _munNoticias = [];
         let _munNoticiaActual = null;
 
         function abrirMunNoticia(id) {
