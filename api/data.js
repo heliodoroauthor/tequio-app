@@ -2115,8 +2115,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (vista === 'aprobacion_scoreboard',
-      'promesas_listar','promesas_votar','promesa_detalle','desastres_listar') {
+    if (vista === 'aprobacion_scoreboard') {
       const votos = (await sb('aprobacion_actores?select=actor_slug,voto&limit=100000')) || [];
       const actores = (await sb('actores_poder?activo=eq.true&select=slug,nombre,cargo_actual,entidad,partido,tipo&limit=2000')) || [];
       const idx = {};
@@ -2263,7 +2262,8 @@ export default async function handler(req, res) {
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista','directorio_estado',
       'chat','chat_publicar','chat_votar','chat_reportar',
-      'aprobacion_actores','aprobacion_leyes','aprobacion_votar_actor','aprobacion_votar_ley','aprobacion_scoreboard'
+      'aprobacion_actores','aprobacion_leyes','aprobacion_votar_actor','aprobacion_votar_ley','aprobacion_scoreboard',
+      'promesas_listar','promesas_votar','promesa_detalle','desastres_listar'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
