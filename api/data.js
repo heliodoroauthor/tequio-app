@@ -1882,6 +1882,48 @@ export default async function handler(req, res) {
       return res.status(200).json({ items, ultimo, total });
     }
 
+    // Mi Rep vs Yo - votaciones divisivas + diputados estado + sus votos
+    if (vista === 'mi_rep_datos') {
+      const claveEnt = (req.query.clave_entidad || '').trim().padStart(2, '0');
+      const limit = Math.min(parseInt(req.query.limit || '20', 10), 50);
+
+      const votaciones = await sb(`votaciones_diputados?total_no=gt.50&order=fecha.desc.nullslast&limit=${limit}&select=votacion_id,fecha,asunto,tipo,total_si,total_no,total_abst,total_ausente,resultado,url_oficial`);
+
+      let dips = [];
+      if (claveEnt && claveEnt !== '00') {
+        const NOMBRES = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de Mexico","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de Mexico","16":"Michoacan","17":"Morelos","18":"Nayarit","19":"Nuevo Leon","20":"Oaxaca","21":"Puebla","22":"Queretaro","23":"Quintana Roo","24":"San Luis Potosi","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatan","32":"Zacatecas"};
+        const nombreEstado = NOMBRES[claveEnt];
+        if (nombreEstado) {
+          const variantes = [nombreEstado];
+          if (claveEnt === '09') variantes.push('Ciudad de M\u00e9xico');
+          if (claveEnt === '15') variantes.push('M\u00e9xico', 'Mexico', 'Estado de M\u00e9xico');
+          if (claveEnt === '19') variantes.push('Nuevo Le\u00f3n');
+          if (claveEnt === '16') variantes.push('Michoac\u00e1n');
+          if (claveEnt === '22') variantes.push('Quer\u00e9taro');
+          if (claveEnt === '24') variantes.push('San Luis Potos\u00ed');
+          if (claveEnt === '31') variantes.push('Yucat\u00e1n');
+          const filter = variantes.map(v => `entidad.ilike.*${encodeURIComponent(v)}*`).join(',');
+          dips = await sb(`politicos_diputados?or=(${filter})&select=dipt_id,nombre,partido,partido_codigo,entidad,distrito,principio_eleccion,foto_url&limit=100`).catch(() => []);
+        }
+      }
+
+      let votosInd = [];
+      if (dips.length && votaciones.length) {
+        const dipIds = dips.map(d => d.dipt_id).filter(Boolean);
+        const votIds = votaciones.map(v => v.votacion_id);
+        if (dipIds.length && votIds.length) {
+          votosInd = await sb(`votos_individuales?dipt_id=in.(${dipIds.join(',')})&votacion_id=in.(${votIds.join(',')})&select=*&limit=10000`).catch(() => []);
+        }
+      }
+
+      return res.status(200).json({
+        votaciones,
+        diputados: dips,
+        votos_individuales: votosInd,
+        clave_entidad: claveEnt || null
+      });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
