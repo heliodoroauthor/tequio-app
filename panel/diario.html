@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diario Civico · Tequio</title>
+<title>Diario Cívico · Tequio</title>
 <style>
   :root { --bg:#0b0f1a; --text:#e5e7eb; --muted:#9ca3af; --accent:#fbbf24; --border:rgba(255,255,255,0.1); }
   * { box-sizing: border-box; }
@@ -78,16 +78,16 @@ async function cargar() {
   const intereses = JSON.parse(localStorage.getItem('tequio_intereses') || '[]');
   const nombreEstado = ESTADOS[estado] || 'México';
   if (!estado) document.getElementById('config-banner').style.display = 'block';
-  
+
   const hora = new Date().getHours();
   let saludo = 'Buenos días';
   if (hora >= 12 && hora < 19) saludo = 'Buenas tardes';
   else if (hora >= 19 || hora < 5) saludo = 'Buenas noches';
-  
+
   document.getElementById('saludo').textContent = `${saludo}, ciudadano de ${nombreEstado}`;
   document.getElementById('fecha').textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   document.getElementById('subtitle').textContent = `Resumen para ${nombreEstado}`;
-  
+
   try {
     const r = await fetch(`/api/data?vista=diario&estado=${estado}`);
     if (!r.ok) throw new Error('API error');
@@ -101,7 +101,7 @@ async function cargar() {
 function render(data, intereses, nombreEstado) {
   const cont = document.getElementById('contenido');
   let html = '';
-  
+
   // Noticias siempre
   html += '<div class="section"><h2>📰 NOTICIAS DE HOY</h2>';
   if (data.noticias && data.noticias.length) {
@@ -113,7 +113,7 @@ function render(data, intereses, nombreEstado) {
     `).join('');
   } else html += '<div class="empty">Sin noticias hoy.</div>';
   html += '</div>';
-  
+
   // Legislativo
   if (intereses.length === 0 || intereses.includes('legislativo') || intereses.includes('participacion')) {
     html += '<div class="section"><h2>🏛️ LEGISLATIVO</h2>';
@@ -127,7 +127,7 @@ function render(data, intereses, nombreEstado) {
     } else html += '<div class="empty">Sin iniciativas activas.</div>';
     html += '</div>';
   }
-  
+
   // Dinero
   if (intereses.length === 0 || intereses.includes('dinero')) {
     if (data.banxico && data.banxico.length) {
@@ -139,7 +139,7 @@ function render(data, intereses, nombreEstado) {
       html += '</div></div>';
     }
   }
-  
+
   // En tu estado
   if (data.estado_usuario && data.municipios_estado && data.municipios_estado.length) {
     html += `<div class="section"><h2>📍 EN ${nombreEstado.toUpperCase()}</h2>`;
@@ -152,7 +152,7 @@ function render(data, intereses, nombreEstado) {
     `).join('');
     html += '</div>';
   }
-  
+
   // Ambiente
   if (intereses.includes('medioambiente') && data.presas && data.presas.length) {
     html += '<div class="section"><h2>🌿 PRESAS Y AGUA</h2>';
@@ -164,7 +164,7 @@ function render(data, intereses, nombreEstado) {
     `).join('');
     html += '</div>';
   }
-  
+
   // Derechos
   if (intereses.length === 0 || intereses.includes('derechos') || intereses.includes('participacion')) {
     const derechos = [
@@ -181,7 +181,7 @@ function render(data, intereses, nombreEstado) {
       <a href="${d.link}" class="btn">${d.accion} →</a>
     </div>`;
   }
-  
+
   cont.innerHTML = html;
 }
 
