@@ -2093,12 +2093,12 @@ export default async function handler(req, res) {
         ? { actor_slug: target, actor_tipo: tipo, voto, device_hash: device, ip_hash: ipHash, clave_entidad: entidad || null }
         : { ley_id: target, ley_titulo: titulo, voto, device_hash: device, ip_hash: ipHash, clave_entidad: entidad || null };
       try {
-        const url = process.env.SUPABASE_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict;
+        const url = SUPABASE_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict;
         const r = await fetch(url, {
           method: 'POST',
           headers: {
-            apikey: process.env.SERVICE_KEY,
-            Authorization: 'Bearer ' + process.env.SERVICE_KEY,
+            apikey: SERVICE_KEY,
+            Authorization: 'Bearer ' + SERVICE_KEY,
             'Content-Type': 'application/json',
             Prefer: 'resolution=merge-duplicates,return=representation'
           },
