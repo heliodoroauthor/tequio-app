@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Nacional — Tequio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+<style>
+  :root {
+    --bg:#0b0f1a; --panel:#131826; --panel2:#1a2030; --border:#2a334a;
+    --text:#e6e9f2; --muted:#8b94a7; --gold:#fbbf24;
+    --green:#34d399; --red:#f87171; --accent:#60a5fa;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; }
+  header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0 0 4px; font-size: 20px; color: var(--gold); }
+  .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 70px); }
+  .sidebar { background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+  #map { width: 100%; height: 100%; background: #1a1a1a; }
+  .filter { margin-bottom: 12px; }
+  .filter label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .filter select { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
+  .btn-sos { width: 100%; padding: 12px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
+  .btn-sos:hover { background: #d62b2b; }
+  .stats { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .stats strong { color: var(--gold); }
+  .resultados { font-size: 12px; }
+  .resultado-item { padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .resultado-item:hover { background: var(--panel2); }
+  .res-nombre { font-weight: 600; }
+  .res-cat { color: var(--muted); font-size: 11px; }
+  .res-dist { color: var(--green); font-size: 11px; }
+  .leaflet-popup-content-wrapper { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .leaflet-popup-tip { background: var(--panel); }
+  .leaflet-popup-content a { color: var(--accent); }
+  .pin-pop { font-size: 13px; }
+  .pin-pop b { color: var(--gold); }
+  .pin-pop .src { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .sidebar { max-height: 280px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🗺️ Atlas Nacional</h1>
+  <p class="subtitle">9,580+ servicios públicos georreferenciados. Fuente: Atlas Digital Tamaulipas (oficial).</p>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <button class="btn-sos" id="btn-cerca">📍 Cerca de mí (GPS)</button>
+    <div class="filter">
+      <label>Estado</label>
+      <select id="f-entidad">
+        <option value="TAMPS" selected>Tamaulipas</option>
+      </select>
+    </div>
+    <div class="filter">
+      <label>Categoría</label>
+      <select id="f-categoria"><option value="">Todas</option></select>
+    </div>
+    <div class="filter">
+      <label>Subcategoría</label>
+      <select id="f-subcat"><option value="">Todas</option></select>
+    </div>
+    <div class="stats" id="stats">Cargando…</div>
+    <div class="resultados" id="resultados"></div>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const API = '/api/data';
+const map = L.map('map', { preferCanvas: true }).setView([24.0, -99.0], 7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
+let markersLayer = L.layerGroup().addTo(map);
+let allCategorias = [];
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function loadCategorias(){
+  const ent = document.getElementById('f-entidad').value;
+  const r = await fetch(API + '?vista=atlas_categorias&entidad=' + encodeURIComponent(ent));
+  const j = await r.json();
+  allCategorias = j.categorias || [];
+  const sel = document.getElementById('f-categoria');
+  sel.innerHTML = '<option value="">Todas</option>' + allCategorias.map(c => '<option value="' + escapeHtml(c.categoria_slug) + '">' + escapeHtml(c.categoria) + ' (' + c.total + ')</option>').join('');
+  updateSubcat();
+}
+
+function updateSubcat(){
+  const catSlug = document.getElementById('f-categoria').value;
+  const cat = allCategorias.find(c => c.categoria_slug === catSlug);
+  const sel = document.getElementById('f-subcat');
+  if (!cat){ sel.innerHTML = '<option value="">Todas</option>'; return; }
+  sel.innerHTML = '<option value="">Todas</option>' + cat.subcategorias.map(s => '<option value="' + escapeHtml(s.subcategoria_slug) + '">' + escapeHtml(s.subcategoria) + ' (' + s.total + ')</option>').join('');
+}
+
+async function loadPuntos(){
+  const ent = document.getElementById('f-entidad').value;
+  const cat = document.getElementById('f-categoria').value;
+  const sub = document.getElementById('f-subcat').value;
+  if (!cat && !sub){
+    document.getElementById('stats').innerHTML = '<strong>9,580</strong> puntos en Tamaulipas. Filtra por categoría para visualizar.';
+    document.getElementById('resultados').innerHTML = '';
+    markersLayer.clearLayers();
+    return;
+  }
+  const params = new URLSearchParams({ vista: 'atlas_puntos', entidad: ent, limit: '3000' });
+  if (cat) params.set('categoria', cat);
+  if (sub) params.set('subcategoria', sub);
+  document.getElementById('stats').textContent = 'Cargando…';
+  const r = await fetch(API + '?' + params);
+  const j = await r.json();
+  const pts = j.puntos || [];
+  markersLayer.clearLayers();
+  for (const p of pts){
+    const color = p.color || '#fbbf24';
+    const marker = L.circleMarker([p.lat, p.lng], { radius: 5, fillColor: color, color: '#fff', weight: 1, fillOpacity: 0.85 });
+    marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
+    markersLayer.addLayer(marker);
+  }
+  document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos mostrados';
+  if (pts.length){
+    const bounds = L.latLngBounds(pts.map(p => [p.lat, p.lng]));
+    map.fitBounds(bounds.pad(0.1));
+  }
+  const res = document.getElementById('resultados');
+  res.innerHTML = pts.slice(0, 50).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div></div>').join('');
+  res.querySelectorAll('.resultado-item').forEach(el => {
+    el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
+  });
+}
+
+async function cercaDeMi(){
+  if (!navigator.geolocation){ alert('Tu navegador no soporta geolocalización'); return; }
+  document.getElementById('btn-cerca').textContent = '📍 Buscando ubicación…';
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    const cat = document.getElementById('f-categoria').value;
+    const sub = document.getElementById('f-subcat').value;
+    const params = new URLSearchParams({ vista: 'atlas_cerca_de_mi', lat: lat, lng: lng, radio_km: '10' });
+    if (cat) params.set('categoria', cat);
+    if (sub) params.set('subcategoria', sub);
+    const r = await fetch(API + '?' + params);
+    const j = await r.json();
+    const pts = j.puntos || [];
+    markersLayer.clearLayers();
+    L.circleMarker([lat, lng], { radius: 10, fillColor: '#60a5fa', color: '#fff', weight: 2, fillOpacity: 0.9 }).bindPopup('Tú estás aquí').addTo(markersLayer);
+    for (const p of pts){
+      const marker = L.circleMarker([p.lat, p.lng], { radius: 6, fillColor: p.color || '#fbbf24', color: '#fff', weight: 1, fillOpacity: 0.85 });
+      marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + '<br>📏 ' + p.distancia_km.toFixed(2) + ' km<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
+      markersLayer.addLayer(marker);
+    }
+    map.setView([lat, lng], 13);
+    document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos en 10 km';
+    document.getElementById('resultados').innerHTML = pts.slice(0, 30).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div><div class="res-dist">' + p.distancia_km.toFixed(2) + ' km</div></div>').join('');
+    document.getElementById('resultados').querySelectorAll('.resultado-item').forEach(el => {
+      el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
+    });
+    document.getElementById('btn-cerca').textContent = '📍 Cerca de mí (GPS)';
+  }, err => {
+    alert('No se pudo obtener tu ubicación: ' + err.message);
+    document.getElementById('btn-cerca').textContent = '📍 Cerca de mí (GPS)';
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+document.getElementById('f-entidad').addEventListener('change', () => { loadCategorias(); loadPuntos(); });
+document.getElementById('f-categoria').addEventListener('change', () => { updateSubcat(); loadPuntos(); });
+document.getElementById('f-subcat').addEventListener('change', loadPuntos);
+document.getElementById('btn-cerca').addEventListener('click', cercaDeMi);
+
+loadCategorias().then(loadPuntos);
+</script>
+</body>
+</html>
