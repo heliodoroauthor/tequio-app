@@ -2253,6 +2253,80 @@ export default async function handler(req, res) {
       return res.status(200).json({ promesa: p });
     }
 
+    // ==================== ATLAS NACIONAL ====================
+    if (vista === 'atlas_categorias') {
+      const entidad = (req.query.entidad || '').toString();
+      let q = '?select=*';
+      if (entidad) q += '&entidad=eq.' + encodeURIComponent(entidad);
+      q += '&order=categoria.asc,subcategoria.asc&limit=2000';
+      const cats = (await sb('puntos_categorias' + q)) || [];
+      const grouped = {};
+      for (const c of cats) {
+        if (!grouped[c.categoria]) grouped[c.categoria] = { categoria: c.categoria, categoria_slug: c.categoria_slug, color: c.color, total: 0, subcategorias: [] };
+        grouped[c.categoria].subcategorias.push({ subcategoria: c.subcategoria, subcategoria_slug: c.subcategoria_slug, total: c.total });
+        grouped[c.categoria].total += c.total;
+      }
+      return res.status(200).json({ categorias: Object.values(grouped), total: cats.length });
+    }
+
+    if (vista === 'atlas_puntos') {
+      const entidad = (req.query.entidad || '').toString();
+      const categoria = (req.query.categoria || '').toString();
+      const subcategoria = (req.query.subcategoria || '').toString();
+      const bbox = (req.query.bbox || '').toString();
+      const limit = Math.min(parseInt(req.query.limit || '500'), 5000);
+      let q = '?activo=eq.true&select=slug,nombre,categoria,subcategoria,categoria_slug,subcategoria_slug,lat,lng,entidad,municipio,color,icon,fuente_origen,fuente_url';
+      if (entidad) q += '&entidad=eq.' + encodeURIComponent(entidad);
+      if (categoria) q += '&categoria_slug=eq.' + encodeURIComponent(categoria);
+      if (subcategoria) q += '&subcategoria_slug=eq.' + encodeURIComponent(subcategoria);
+      if (bbox) {
+        const parts = bbox.split(',').map(Number);
+        if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+          q += '&lat=gte.' + parts[0] + '&lat=lte.' + parts[2] + '&lng=gte.' + parts[1] + '&lng=lte.' + parts[3];
+        }
+      }
+      q += '&limit=' + limit;
+      const puntos = (await sb('puntos_servicio' + q)) || [];
+      return res.status(200).json({ puntos, total: puntos.length });
+    }
+
+    if (vista === 'atlas_cerca_de_mi') {
+      const lat = parseFloat(req.query.lat);
+      const lng = parseFloat(req.query.lng);
+      const radio = parseFloat(req.query.radio_km || '5');
+      const categoria = (req.query.categoria || '').toString();
+      const subcategoria = (req.query.subcategoria || '').toString();
+      if (isNaN(lat) || isNaN(lng)) return res.status(400).json({ error: 'lat/lng requeridos' });
+      const dlat = radio / 111;
+      const dlng = radio / (111 * Math.cos(lat * Math.PI / 180));
+      let q = '?activo=eq.true&select=*' +
+        '&lat=gte.' + (lat - dlat) + '&lat=lte.' + (lat + dlat) +
+        '&lng=gte.' + (lng - dlng) + '&lng=lte.' + (lng + dlng);
+      if (categoria) q += '&categoria_slug=eq.' + encodeURIComponent(categoria);
+      if (subcategoria) q += '&subcategoria_slug=eq.' + encodeURIComponent(subcategoria);
+      q += '&limit=2000';
+      const puntos = (await sb('puntos_servicio' + q)) || [];
+      function hav(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const toRad = x => x * Math.PI / 180;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      }
+      const enriched = puntos.map(p => ({ ...p, distancia_km: hav(lat, lng, p.lat, p.lng) })).filter(p => p.distancia_km <= radio);
+      enriched.sort((a,b) => a.distancia_km - b.distancia_km);
+      return res.status(200).json({ puntos: enriched.slice(0, 100), total: enriched.length, radio_km: radio });
+    }
+
+    if (vista === 'atlas_punto_detalle') {
+      const slug = (req.query.slug || '').toString();
+      if (!slug) return res.status(400).json({ error: 'slug requerido' });
+      const arr = (await sb('puntos_servicio?slug=eq.' + encodeURIComponent(slug) + '&select=*')) || [];
+      if (!arr.length) return res.status(404).json({ error: 'No encontrado' });
+      return res.status(200).json({ punto: arr[0] });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
@@ -2263,7 +2337,8 @@ export default async function handler(req, res) {
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista','directorio_estado',
       'chat','chat_publicar','chat_votar','chat_reportar',
       'aprobacion_actores','aprobacion_leyes','aprobacion_votar_actor','aprobacion_votar_ley','aprobacion_scoreboard',
-      'promesas_listar','promesas_votar','promesa_detalle','desastres_listar'
+      'promesas_listar','promesas_votar','promesa_detalle','desastres_listar',
+      'atlas_categorias','atlas_puntos','atlas_cerca_de_mi','atlas_punto_detalle'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
