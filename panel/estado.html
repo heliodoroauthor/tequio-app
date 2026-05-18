@@ -98,12 +98,12 @@
 <script>
 const ESTADOS = {
   "01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche",
-  "05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de Mexico",
+  "05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México",
   "10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco",
-  "15":"Estado de Mexico","16":"Michoacan","17":"Morelos","18":"Nayarit","19":"Nuevo Leon",
-  "20":"Oaxaca","21":"Puebla","22":"Queretaro","23":"Quintana Roo","24":"San Luis Potosi",
+  "15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León",
+  "20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí",
   "25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala",
-  "30":"Veracruz","31":"Yucatan","32":"Zacatecas"
+  "30":"Veracruz","31":"Yucatán","32":"Zacatecas"
 };
 function fmt(n) {
   n = Number(n || 0);
@@ -288,6 +288,37 @@ async function loadPanel(clave) {
   } else {
     renderLanding();
   }
+})();
+</script>
+
+<script>
+/* P0.3 — Sort estados 01 → 32 numéricamente */
+(function() {
+  function sortEstadosOnce() {
+    const selectors = ['.estado-item', '.estado-card', '[data-cve-ent]', '[data-estado]'];
+    for (const sel of selectors) {
+      const container = document.querySelector('.estados-grid, .estados-list, #estados');
+      if (!container) continue;
+      const items = Array.from(container.querySelectorAll(sel));
+      if (items.length < 2) continue;
+      items.sort(function(a, b) {
+        const ca = (a.dataset.cveEnt || a.dataset.estado || a.textContent.match(/\d+/) || [''])[0];
+        const cb = (b.dataset.cveEnt || b.dataset.estado || b.textContent.match(/\d+/) || [''])[0];
+        return parseInt(ca) - parseInt(cb);
+      });
+      items.forEach(function(it) { container.appendChild(it); });
+      break;
+    }
+  }
+  // Observe DOM and sort after each render
+  let timer = null;
+  const obs = new MutationObserver(function() {
+    clearTimeout(timer);
+    timer = setTimeout(sortEstadosOnce, 200);
+  });
+  if (document.body) obs.observe(document.body, { childList: true, subtree: true });
+  setTimeout(sortEstadosOnce, 1000);
+  setTimeout(sortEstadosOnce, 3000);
 })();
 </script>
 </body>
