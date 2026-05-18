@@ -4457,13 +4457,13 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         invitacion_tres:      { txt: 'Invitación a tres',    color: '#f59e0b', icon: '🟡' },
         adjudicacion_directa: { txt: 'Adjudicación directa', color: '#ef4444', icon: '🔴' },
       };
-      function cmpRenderContratos(contratos) {
+      function cmpRenderContratos(contratos, append) {
         const cont = document.getElementById('cmp-lista');
-        if (!contratos.length) {
+        if (!contratos.length && !append) {
           cont.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:40px;text-align:center;color:var(--text2)">Sin contratos que coincidan. Prueba otra búsqueda.</div>';
           return;
         }
-        cont.innerHTML = contratos.map(c => {
+        const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
           return `<div style="background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start">
             <div style="min-width:0">
@@ -4486,27 +4486,50 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
           </div>`;
         }).join('');
+        if (append) { cont.insertAdjacentHTML('beforeend', html); } else { cont.innerHTML = html; }
       }
-      async function cmpBuscar() {
+      window.__cmpState = window.__cmpState || { offset: 0, total: 0, monto: 0 };
+      const CMP_PAGE_SIZE = 50;
+      async function cmpBuscar(append) {
         const q = document.getElementById('cmp-search').value.trim();
         const tipoProc = document.getElementById('cmp-tipoproc').value;
         const orden = document.getElementById('cmp-orden').value;
+        if (!append) { window.__cmpState.offset = 0; }
         const params = new URLSearchParams();
         if (q) params.set('q', q);
         if (tipoProc) params.set('tipo_proc', tipoProc);
         params.set('orden', orden);
-        params.set('limit', '50');
+        params.set('limit', String(CMP_PAGE_SIZE));
+        params.set('offset', String(window.__cmpState.offset));
         const cont = document.getElementById('cmp-lista');
-        cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Buscando…</div>';
+        if (!append) {
+          cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2)">Buscando…</div>';
+        }
         try {
           const r = await fetch('/api/data?vista=contratos&' + params.toString());
           const j = await r.json();
           const total = j.total_resultados || 0;
           const monto = cmpFmtMonto(j.monto_total);
-          document.getElementById('cmp-results-info').innerHTML = `<strong>${total.toLocaleString('es-MX')}</strong> contratos · <strong>${monto}</strong> MXN total adjudicado` + (total > 50 ? ' · mostrando los 50 más relevantes' : '');
-          cmpRenderContratos(j.contratos || []);
+          if (!append) { window.__cmpState.total = total; window.__cmpState.monto = monto; }
+          const mostrados = Math.min(window.__cmpState.offset + (j.contratos||[]).length, total);
+          document.getElementById('cmp-results-info').innerHTML = `<strong>${total.toLocaleString('es-MX')}</strong> contratos · <strong>${window.__cmpState.monto}</strong> MXN total adjudicado · mostrando ${mostrados.toLocaleString('es-MX')} de ${total.toLocaleString('es-MX')}`;
+          cmpRenderContratos(j.contratos || [], append);
+          window.__cmpState.offset += (j.contratos||[]).length;
+          // Botón "Cargar más"
+          let masBtn = document.getElementById('cmp-cargar-mas');
+          if (masBtn) masBtn.remove();
+          if (window.__cmpState.offset < total) {
+            const restantes = total - window.__cmpState.offset;
+            const btn = document.createElement('button');
+            btn.id = 'cmp-cargar-mas';
+            btn.type = 'button';
+            btn.onclick = () => cmpBuscar(true);
+            btn.style.cssText = 'display:block;margin:18px auto 6px;padding:12px 22px;background:var(--accent,#0066cc);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px';
+            btn.textContent = `Cargar más (${Math.min(CMP_PAGE_SIZE,restantes)} de ${restantes.toLocaleString('es-MX')} restantes) →`;
+            cont.appendChild(btn);
+          }
         } catch (e) {
-          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al buscar.</div>';
+          if (!append) cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al buscar.</div>';
         }
       }
       async function cmpCargarStats() {
