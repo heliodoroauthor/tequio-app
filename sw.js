@@ -1,5 +1,5 @@
 // Tequio Service Worker — Cache crítico para uso sin internet
-const CACHE_NAME = 'tequio-v1';
+const CACHE_NAME = 'tequio-v2';
 const CRITICAL = [
   '/',
   '/panel/offline.html',
