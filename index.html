@@ -2224,6 +2224,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('comparador')">
         <span class="icon">⚖️</span> Comparador Electoral
       </div>
+      <div class="nav-item" onclick="cargarPanel('aprobacion')">
+        <span class="icon">🗳️</span> Aprobacion del Pueblo
+      </div>
       <div class="nav-item" onclick="cargarPanel('simulador')">
         <span class="icon">🔬</span> Simulador Impacto
       </div>
@@ -13761,6 +13764,7 @@ function showPage(id) {
     redes: 'Redes de Influencia',
     ia: 'Asistente Legal IA',
     comparador: 'Comparar Propuestas',
+    'aprobacion': '/panel/aprobacion.html?embedded=1',
     simulador: 'Simulador de Impacto',
     votosim:   '🗳️ Simulador de Voto 2027',
     iniciativas: 'Iniciativas Ciudadanas',
