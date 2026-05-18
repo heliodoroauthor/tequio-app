@@ -40,6 +40,25 @@ export default async function handler(req, res) {
     return r.json();
   }
 
+  async function sbCount(path) {
+    // Devuelve el total exacto de filas que matchean (vía Content-Range).
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        method: 'HEAD',
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': `Bearer ${ANON_KEY}`,
+          'Prefer': 'count=exact',
+          'Range-Unit': 'items',
+          'Range': '0-0',
+        },
+      });
+      const cr = r.headers.get('content-range') || '';
+      const m = cr.match(/\/(\d+)$/);
+      return m ? parseInt(m[1], 10) : null;
+    } catch { return null; }
+  }
+
   async function sbWrite(path, body) {
     const key = SERVICE_KEY || ANON_KEY;
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -623,6 +642,9 @@ export default async function handler(req, res) {
         statsQuery += '&limit=10000';
       }
       const statsRows = await sb(statsQuery);
+      // Total exacto (PostgREST count=exact), independiente del cap del statsRows
+      const countPath = `contratos_publicos?select=ocid${conditions.length ? '&' + conditions.join('&') : ''}`;
+      const totalExacto = await sbCount(countPath);
       const monto_total = statsRows.reduce((s, r) => s + (parseFloat(r.monto_mxn) || 0), 0);
       const por_tipo = {};
       const por_dependencia = {};
@@ -633,7 +655,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         contratos: rows,
-        total_resultados: statsRows.length,
+        total_resultados: (totalExacto != null ? totalExacto : statsRows.length),
         offset,
         limit,
         monto_total,
