@@ -222,7 +222,7 @@
 
   <!-- Panel: Crear -->
   <section id="panel-crear" class="panel active">
-    <div id="telemetry" class="telemetry">Tiempo en pagina: 0s &middot; Necesitas 30s para publicar</div>
+    <div id="telemetry" class="telemetry">Verificando seguridad&hellip; (faltan 30s para publicar)</div>
     <div id="form-msg"></div>
     <form id="form-reporte" class="card" autocomplete="off">
       <input type="text" name="website" class="honeypot" tabindex="-1" aria-hidden="true">
@@ -400,11 +400,11 @@
     const ms = Date.now() - T0;
     const s = Math.floor(ms/1000);
     if (s >= 30) {
-      telEl.textContent = 'Tiempo en pagina: ' + s + 's (listo para publicar)';
+      telEl.textContent = 'Verificacion humana completa ' + String.fromCharCode(0x2713);
       telEl.classList.add('ready');
       formReady = true;
     } else {
-      telEl.textContent = 'Tiempo en pagina: ' + s + 's &middot; faltan ' + (30 - s) + 's para publicar';
+      telEl.textContent = 'Verificando seguridad... (faltan ' + (30 - s) + 's)';
       telEl.innerHTML = telEl.textContent.replace('&middot;','&middot;');
     }
     updateSubmit();
