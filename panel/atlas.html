@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas Nacional — Tequio</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
 <style>
   :root {
     --bg:#0b0f1a; --panel:#131826; --panel2:#1a2030; --border:#2a334a;
@@ -21,7 +23,8 @@
   #map { width: 100%; height: 100%; background: #1a1a1a; }
   .filter { margin-bottom: 12px; }
   .filter label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .filter select { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
+  .filter select, .filter input { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
+  .filter input::placeholder { color: var(--muted); }
   .btn-sos { width: 100%; padding: 12px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
   .btn-sos:hover { background: #d62b2b; }
   .stats { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
@@ -38,6 +41,11 @@
   .pin-pop { font-size: 13px; }
   .pin-pop b { color: var(--gold); }
   .pin-pop .src { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  /* Dark theme for clusters */
+  .marker-cluster-small div { background-color: rgba(251,191,36,0.7); color: #000; }
+  .marker-cluster-medium div { background-color: rgba(251,146,60,0.8); color: #000; }
+  .marker-cluster-large div { background-color: rgba(239,68,68,0.85); color: #fff; }
+  .marker-cluster { background: transparent; }
   @media (max-width: 768px) {
     .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .sidebar { max-height: 280px; }
@@ -52,6 +60,10 @@
 <div class="layout">
   <aside class="sidebar">
     <button class="btn-sos" id="btn-cerca">📍 Cerca de mí (GPS)</button>
+    <div class="filter">
+      <label>🔍 Buscar por nombre</label>
+      <input type="text" id="f-buscar" placeholder="Hospital General, Escuela Juárez..."/>
+    </div>
     <div class="filter">
       <label>Estado</label>
       <select id="f-entidad">
@@ -77,14 +89,26 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <script>
 const API = '/api/data';
 const map = L.map('map', { preferCanvas: true }).setView([22.0, -101.0], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
-let markersLayer = L.layerGroup().addTo(map);
+// Cluster group instead of plain layer
+let markersLayer = L.markerClusterGroup({
+  chunkedLoading: true,
+  maxClusterRadius: 60,
+  spiderfyOnMaxZoom: true,
+  showCoverageOnHover: false
+}).addTo(map);
 let allCategorias = [];
+let allPuntosLoaded = []; // last batch loaded, for client-side search
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function debounce(fn, ms){
+  let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); };
+}
 
 async function loadCategorias(){
   const ent = document.getElementById('f-entidad').value;
@@ -104,41 +128,60 @@ function updateSubcat(){
   sel.innerHTML = '<option value="">Todas</option>' + cat.subcategorias.map(s => '<option value="' + escapeHtml(s.subcategoria_slug) + '">' + escapeHtml(s.subcategoria) + ' (' + s.total + ')</option>').join('');
 }
 
+function renderPuntos(pts, fitBounds=true){
+  markersLayer.clearLayers();
+  const filtered = applySearch(pts);
+  const markers = [];
+  for (const p of filtered){
+    const color = p.color || '#fbbf24';
+    const marker = L.circleMarker([p.lat, p.lng], { radius: 6, fillColor: color, color: '#fff', weight: 1, fillOpacity: 0.85 });
+    marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + (p.municipio ? '<br>📍 ' + escapeHtml(p.municipio) : '') + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
+    markers.push(marker);
+  }
+  markersLayer.addLayers(markers);
+  document.getElementById('stats').innerHTML = '<strong>' + filtered.length + '</strong> puntos' + (filtered.length !== pts.length ? ' (de ' + pts.length + ')' : '');
+  if (fitBounds && filtered.length){
+    const bounds = L.latLngBounds(filtered.map(p => [p.lat, p.lng]));
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.1));
+  }
+  const res = document.getElementById('resultados');
+  res.innerHTML = filtered.slice(0, 80).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + (p.municipio ? ' · ' + escapeHtml(p.municipio) : '') + (p.distancia_km !== undefined ? ' · <span style="color:var(--green)">'+p.distancia_km.toFixed(2)+' km</span>' : '') + '</div></div>').join('');
+  res.querySelectorAll('.resultado-item').forEach(el => {
+    el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
+  });
+}
+
+function applySearch(pts){
+  const q = (document.getElementById('f-buscar').value || '').trim().toLowerCase();
+  if (!q) return pts;
+  return pts.filter(p =>
+    (p.nombre||'').toLowerCase().includes(q) ||
+    (p.subcategoria||'').toLowerCase().includes(q) ||
+    (p.municipio||'').toLowerCase().includes(q)
+  );
+}
+
 async function loadPuntos(){
   const ent = document.getElementById('f-entidad').value;
   const cat = document.getElementById('f-categoria').value;
   const sub = document.getElementById('f-subcat').value;
-  if (!cat && !sub){
-    document.getElementById('stats').innerHTML = '<strong>42,868</strong> puntos en 4 estados. Filtra por categoría.';
+  const q = (document.getElementById('f-buscar').value || '').trim();
+  if (!cat && !sub && !q){
+    document.getElementById('stats').innerHTML = '<strong>42,868</strong> puntos. Filtra por categoría o busca por nombre.';
     document.getElementById('resultados').innerHTML = '';
     markersLayer.clearLayers();
+    allPuntosLoaded = [];
     return;
   }
-  const params = new URLSearchParams({ vista: 'atlas_puntos', limit: '3000' });
+  const params = new URLSearchParams({ vista: 'atlas_puntos', limit: '5000' });
   if (ent) params.set('entidad', ent);
   if (cat) params.set('categoria', cat);
   if (sub) params.set('subcategoria', sub);
   document.getElementById('stats').textContent = 'Cargando…';
   const r = await fetch(API + '?' + params);
   const j = await r.json();
-  const pts = j.puntos || [];
-  markersLayer.clearLayers();
-  for (const p of pts){
-    const color = p.color || '#fbbf24';
-    const marker = L.circleMarker([p.lat, p.lng], { radius: 5, fillColor: color, color: '#fff', weight: 1, fillOpacity: 0.85 });
-    marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + (p.municipio ? '<br>📍 ' + escapeHtml(p.municipio) : '') + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
-    markersLayer.addLayer(marker);
-  }
-  document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos mostrados';
-  if (pts.length){
-    const bounds = L.latLngBounds(pts.map(p => [p.lat, p.lng]));
-    map.fitBounds(bounds.pad(0.1));
-  }
-  const res = document.getElementById('resultados');
-  res.innerHTML = pts.slice(0, 50).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + (p.municipio ? ' · ' + escapeHtml(p.municipio) : '') + '</div></div>').join('');
-  res.querySelectorAll('.resultado-item').forEach(el => {
-    el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
-  });
+  allPuntosLoaded = j.puntos || [];
+  renderPuntos(allPuntosLoaded);
 }
 
 async function cercaDeMi(){
@@ -155,18 +198,10 @@ async function cercaDeMi(){
     const j = await r.json();
     const pts = j.puntos || [];
     markersLayer.clearLayers();
-    L.circleMarker([lat, lng], { radius: 10, fillColor: '#60a5fa', color: '#fff', weight: 2, fillOpacity: 0.9 }).bindPopup('Tú estás aquí').addTo(markersLayer);
-    for (const p of pts){
-      const marker = L.circleMarker([p.lat, p.lng], { radius: 6, fillColor: p.color || '#fbbf24', color: '#fff', weight: 1, fillOpacity: 0.85 });
-      marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + '<br>📏 ' + p.distancia_km.toFixed(2) + ' km<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
-      markersLayer.addLayer(marker);
-    }
+    L.circleMarker([lat, lng], { radius: 10, fillColor: '#60a5fa', color: '#fff', weight: 2, fillOpacity: 0.9 }).bindPopup('Tú estás aquí').addTo(map);
+    allPuntosLoaded = pts;
+    renderPuntos(pts, false);
     map.setView([lat, lng], 13);
-    document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos en 10 km';
-    document.getElementById('resultados').innerHTML = pts.slice(0, 30).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div><div class="res-dist">' + p.distancia_km.toFixed(2) + ' km</div></div>').join('');
-    document.getElementById('resultados').querySelectorAll('.resultado-item').forEach(el => {
-      el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
-    });
     document.getElementById('btn-cerca').textContent = '📍 Cerca de mí (GPS)';
   }, err => {
     alert('No se pudo obtener tu ubicación: ' + err.message);
@@ -178,6 +213,14 @@ document.getElementById('f-entidad').addEventListener('change', () => { loadCate
 document.getElementById('f-categoria').addEventListener('change', () => { updateSubcat(); loadPuntos(); });
 document.getElementById('f-subcat').addEventListener('change', loadPuntos);
 document.getElementById('btn-cerca').addEventListener('click', cercaDeMi);
+// Search: if we have loaded data, filter client-side; else trigger new load
+document.getElementById('f-buscar').addEventListener('input', debounce(() => {
+  if (allPuntosLoaded.length > 0) {
+    renderPuntos(allPuntosLoaded, false);
+  } else {
+    loadPuntos();
+  }
+}, 300));
 
 loadCategorias().then(loadPuntos);
 </script>
