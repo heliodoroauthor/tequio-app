@@ -2115,7 +2115,8 @@ export default async function handler(req, res) {
       }
     }
 
-    if (vista === 'aprobacion_scoreboard') {
+    if (vista === 'aprobacion_scoreboard',
+      'promesas_listar','promesas_votar','promesa_detalle','desastres_listar') {
       const votos = (await sb('aprobacion_actores?select=actor_slug,voto&limit=100000')) || [];
       const actores = (await sb('actores_poder?activo=eq.true&select=slug,nombre,cargo_actual,entidad,partido,tipo&limit=2000')) || [];
       const idx = {};
@@ -2137,6 +2138,120 @@ export default async function handler(req, res) {
       const top = [...filtered].sort((a,b) => b.pct_aprobacion - a.pct_aprobacion).slice(0, 20);
       const bottom = [...filtered].sort((a,b) => a.pct_aprobacion - b.pct_aprobacion).slice(0, 20);
       return res.status(200).json({ top_aprobados: top, top_desaprobados: bottom, total_actores: rows.length, min_votos: minVotos });
+    }
+
+    // ==================== PROMESOMETRO ====================
+    if (vista === 'promesas_listar') {
+      const actor = (req.query.actor_slug || '').toString();
+      const tipo = (req.query.tipo || '').toString();
+      const categoria = (req.query.categoria || '').toString();
+      const estado = (req.query.estado || '').toString();
+      const desastre = (req.query.desastre || '').toString();
+      const ambito = (req.query.ambito || '').toString();
+      const entidad = (req.query.entidad || '').toString();
+      const device = (req.query.device || '').toString();
+      let q = '?destacada=eq.true&select=*';
+      if (actor) q += '&actor_slug=eq.' + encodeURIComponent(actor);
+      if (tipo) q += '&tipo_promesa=eq.' + encodeURIComponent(tipo);
+      if (categoria) q += '&categoria=eq.' + encodeURIComponent(categoria);
+      if (estado) q += '&estado_actual=eq.' + encodeURIComponent(estado);
+      if (desastre) q += '&desastre_slug=eq.' + encodeURIComponent(desastre);
+      if (ambito) q += '&ambito=eq.' + encodeURIComponent(ambito);
+      if (entidad) q += '&entidad=eq.' + encodeURIComponent(entidad);
+      q += '&order=fecha_promesa.desc&limit=500';
+      const promesas = (await sb('promesas' + q)) || [];
+      // Get actor names for display
+      const slugs = [...new Set(promesas.map(p => p.actor_slug))];
+      let actores = [];
+      if (slugs.length) {
+        const filter = '?slug=in.(' + slugs.map(s => encodeURIComponent(s)).join(',') + ')&select=slug,nombre,cargo_actual,partido,entidad,tipo';
+        actores = (await sb('actores_poder' + filter)) || [];
+      }
+      const aidx = {};
+      for (const a of actores) aidx[a.slug] = a;
+      // Vote aggregates
+      const votos = (await sb('promesas_votos?select=promesa_slug,evaluacion&limit=100000')) || [];
+      const counts = {};
+      for (const v of votos) {
+        if (!counts[v.promesa_slug]) counts[v.promesa_slug] = { cumplida:0, parcial:0, incumplida:0, no_se:0, total:0 };
+        counts[v.promesa_slug][v.evaluacion] = (counts[v.promesa_slug][v.evaluacion]||0) + 1;
+        counts[v.promesa_slug].total++;
+      }
+      const miVoto = {};
+      if (device) {
+        const mis = (await sb('promesas_votos?device_hash=eq.' + encodeURIComponent(device) + '&select=promesa_slug,evaluacion&limit=10000')) || [];
+        for (const v of mis) miVoto[v.promesa_slug] = v.evaluacion;
+      }
+      const out = promesas.map(p => ({
+        ...p,
+        actor: aidx[p.actor_slug] || { slug: p.actor_slug, nombre: p.actor_slug },
+        counts: counts[p.slug] || { cumplida:0, parcial:0, incumplida:0, no_se:0, total:0 },
+        mi_voto: miVoto[p.slug] || null
+      }));
+      return res.status(200).json({ promesas: out, total: out.length });
+    }
+
+    if (vista === 'desastres_listar') {
+      const desastres = (await sb('desastres?destacado=eq.true&order=fecha_inicio.desc&limit=100')) || [];
+      // Count promesas per desastre
+      const promesas = (await sb('promesas?desastre_slug=not.is.null&select=desastre_slug,estado_actual&limit=5000')) || [];
+      const counts = {};
+      for (const p of promesas) {
+        if (!counts[p.desastre_slug]) counts[p.desastre_slug] = { total:0, cumplida:0, parcial:0, en_curso:0, incumplida:0 };
+        counts[p.desastre_slug].total++;
+        if (counts[p.desastre_slug][p.estado_actual] !== undefined) counts[p.desastre_slug][p.estado_actual]++;
+      }
+      const out = desastres.map(d => ({ ...d, promesas_stats: counts[d.slug] || { total:0 } }));
+      return res.status(200).json({ desastres: out, total: out.length });
+    }
+
+    if (vista === 'promesas_votar') {
+      const slug = (req.query.slug || '').toString();
+      const evaluacion = (req.query.evaluacion || '').toString();
+      const device = (req.query.device || '').toString();
+      const entidad = (req.query.entidad || '').toString();
+      if (!slug || !evaluacion || !device) return res.status(400).json({ error:'Faltan parametros: slug/evaluacion/device' });
+      if (!['cumplida','parcial','incumplida','no_se'].includes(evaluacion)) return res.status(400).json({ error:'evaluacion invalida' });
+      if (device.length < 8 || device.length > 128) return res.status(400).json({ error:'device invalido' });
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const ipHash = nodeCrypto.createHash('sha256').update(ip + '|tequio').digest('hex').substring(0,16);
+      const body = { promesa_slug: slug, evaluacion, device_hash: device, ip_hash: ipHash, clave_entidad: entidad || null };
+      try {
+        const key = SERVICE_KEY || ANON_KEY;
+        const url = SUPABASE_URL + '/rest/v1/promesas_votos?on_conflict=promesa_slug,device_hash';
+        const r = await fetch(url, {
+          method:'POST',
+          headers: {
+            apikey: key,
+            Authorization: 'Bearer ' + key,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) {
+          const t = await r.text();
+          return res.status(500).json({ error:'Error voto', detail: t.substring(0,200) });
+        }
+        return res.status(200).json({ ok:true });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    if (vista === 'promesa_detalle') {
+      const slug = (req.query.slug || '').toString();
+      if (!slug) return res.status(400).json({ error: 'slug requerido' });
+      const arr = (await sb('promesas?slug=eq.' + encodeURIComponent(slug) + '&select=*')) || [];
+      if (!arr.length) return res.status(404).json({ error: 'No encontrada' });
+      const p = arr[0];
+      const actorArr = (await sb('actores_poder?slug=eq.' + encodeURIComponent(p.actor_slug) + '&select=slug,nombre,cargo_actual,partido,entidad,tipo,fuente_url')) || [];
+      p.actor = actorArr[0] || null;
+      const votos = (await sb('promesas_votos?promesa_slug=eq.' + encodeURIComponent(slug) + '&select=evaluacion&limit=50000')) || [];
+      const c = { cumplida:0, parcial:0, incumplida:0, no_se:0, total:0 };
+      for (const v of votos) { c[v.evaluacion]++; c.total++; }
+      p.counts = c;
+      return res.status(200).json({ promesa: p });
     }
 
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
