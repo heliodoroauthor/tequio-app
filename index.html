@@ -26877,6 +26877,86 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
   setTimeout(initBusquedaGlobal, 1500);
   setTimeout(initBusquedaGlobal, 4000);
 })();
+
+// Bug 3 fix: reemplazar loading eterno de "Tu Representante" con CTA real
+(function() {
+  function fixTuRepresentante() {
+    const card = document.getElementById('dash-diputado-card');
+    if (!card) return false;
+    if (card.dataset.tuRepFixed === '1') return true;
+    // Check if it has data already loaded (presence of partido name, voting info, etc)
+    const txt = (card.textContent || '').toLowerCase();
+    const isLoading = txt.includes('cargando') || txt.trim().length < 60;
+    if (!isLoading) { card.dataset.tuRepFixed = '1'; return true; }
+    const estadoClave = (function(){
+      try { return localStorage.getItem('tequio_estado_clave') || localStorage.getItem('estado_clave') || localStorage.getItem('user_estado'); }
+      catch(e){ return null; }
+    })();
+    if (!estadoClave) {
+      // No onboarding: show CTA
+      const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
+      const cta = '<div style="text-align:center;padding:0.8rem 0.5rem;">' +
+        '<div style="font-size:1.8rem;margin-bottom:0.4rem;">' + String.fromCodePoint(0x1F3DB) + '</div>' +
+        '<div style="color:#9ca3af;font-size:0.85rem;line-height:1.4;margin-bottom:0.7rem;">Configura tu estado para ver a tu diputado.</div>' +
+        '<button onclick="(window.cargarPanel && cargarPanel(\'perfil\'))||(window.cargarPagina && cargarPagina(\'perfil\'))||(window.irPerfil && irPerfil())" style="background:#fbbf24;color:#111;border:none;padding:0.5rem 1rem;border-radius:0.4rem;font-weight:700;cursor:pointer;font-size:0.85rem;">Configurar ' + String.fromCharCode(8594) + '</button>' +
+        '</div>';
+      if (placeholder) {
+        placeholder.innerHTML = cta;
+      } else {
+        // Find the inner div that holds "Cargando..." and replace
+        const divs = card.querySelectorAll('div');
+        for (const d of divs) {
+          if ((d.textContent || '').includes('Cargando')) {
+            d.innerHTML = cta;
+            break;
+          }
+        }
+      }
+      card.dataset.tuRepFixed = '1';
+      return true;
+    } else {
+      // Has estado: try fetching directorio_estado, replace loading
+      fetch('/api/data?vista=directorio_estado&clave=' + encodeURIComponent(estadoClave))
+        .then(r => r.json())
+        .then(data => {
+          const dip = (data && (data.diputados_federales || data.diputados || []))[0];
+          const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
+          const html = dip
+            ? '<div style="font-weight:700;color:#fbbf24;">' + (dip.nombre || '') + '</div><div style="color:#9ca3af;font-size:0.8rem;margin-top:0.2rem;">' + (dip.partido || '') + ' \u00b7 ' + (dip.entidad || '') + '</div>'
+            : '<div style="color:#9ca3af;font-size:0.85rem;">No se encontr' + String.fromCharCode(243) + ' representante para tu estado.</div>';
+          if (placeholder) placeholder.innerHTML = html;
+          else {
+            const divs = card.querySelectorAll('div');
+            for (const d of divs) {
+              if ((d.textContent || '').includes('Cargando')) { d.innerHTML = html; break; }
+            }
+          }
+          card.dataset.tuRepFixed = '1';
+        })
+        .catch(() => {
+          const divs = card.querySelectorAll('div');
+          for (const d of divs) {
+            if ((d.textContent || '').includes('Cargando')) {
+              d.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;">Error al cargar.</div>';
+              break;
+            }
+          }
+          card.dataset.tuRepFixed = '1';
+        });
+      return true;
+    }
+  }
+  window.renderTuRepresentanteCard = fixTuRepresentante;
+  // Trigger after dashboard mount
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(fixTuRepresentante, 2500));
+  } else {
+    setTimeout(fixTuRepresentante, 2500);
+  }
+  // Retries because existing code may also be trying to populate
+  setTimeout(fixTuRepresentante, 5000);
+  setTimeout(fixTuRepresentante, 9000);
+})();
 </script>
 </body>
 </html>
