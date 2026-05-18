@@ -26994,7 +26994,7 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
     const pib = u.shrfsp_porcentaje_pib;
     if (typeof monto === 'number') {
       const elMonto = document.querySelector('[data-deuda-monto]');
-      if (elMonto) elMonto.textContent = ' + (monto/1e12).toFixed(2) + ' bn';
+      if (elMonto) elMonto.textContent = '$' + (monto/1e12).toFixed(2) + ' bn';
     }
     if (typeof pib === 'number') {
       const elPib = document.querySelector('[data-deuda-pib]');
