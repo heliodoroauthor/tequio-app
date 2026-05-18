@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DENUE Scraper — Tequio Admin</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b0f1a; color: #e6e9f2; font-family: 'Inter', sans-serif; line-height: 1.5; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { color: #fbbf24; }
+  .row { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; color: #8b94a7; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; padding: 10px; background: #131826; border: 1px solid #2a334a; color: #e6e9f2; border-radius: 6px; font-family: inherit; font-size: 14px; }
+  button { padding: 12px 24px; background: #fbbf24; color: #000; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; margin-right: 8px; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.danger { background: #ef4444; color: #fff; }
+  .log { background: #0a0e16; border: 1px solid #2a334a; border-radius: 6px; padding: 12px; height: 280px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
+  .progress { background: #131826; border: 1px solid #2a334a; border-radius: 6px; padding: 12px; margin: 10px 0; }
+  .progress .bar { height: 8px; background: #2a334a; border-radius: 4px; overflow: hidden; margin: 6px 0; }
+  .progress .bar-fill { height: 100%; background: #34d399; transition: width 0.3s; }
+  .small { font-size: 12px; color: #8b94a7; }
+</style>
+</head>
+<body>
+<h1>🔧 DENUE Scraper · Tequio Admin</h1>
+<p class="small">Scrapea DENUE INEGI por todos los estados × categorías SCIAN prioritarias. Cero invención: datos oficiales.</p>
+
+<div class="row">
+  <label>Token DENUE (INEGI)</label>
+  <input type="text" id="token" placeholder="cb584720-a5da-4edd-85aa-d6175bc86f6a"/>
+</div>
+
+<div class="row">
+  <label>Estados (separados por comas, 01-32). Default: todos.</label>
+  <input type="text" id="estados" value="01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32"/>
+</div>
+
+<div class="row">
+  <label>Categorías SCIAN (priority)</label>
+  <textarea id="categorias" rows="8">622,Hospitales,Salud,#ef4444
+6211,Consultorios médicos,Salud,#f87171
+611,Escuelas,Educación,#3b82f6
+621,Servicios médicos ambulatorios,Salud,#fb923c
+6242,Bienestar y asistencia social,Bienestar Social,#facc15
+9311,Gobierno municipal,Gobierno,#8b5cf6
+9312,Gobierno estatal,Gobierno,#a855f7
+5121,Bibliotecas,Cultura,#22c55e
+7121,Museos,Cultura,#10b981
+8131,Asociaciones religiosas,Cultura,#ec4899</textarea>
+</div>
+
+<div class="row">
+  <button id="start">▶️ Iniciar scrape</button>
+  <button id="stop" class="danger" disabled>⏹ Detener</button>
+  <button id="upload" disabled>📤 Subir a Supabase</button>
+  <button id="download" disabled>📥 Descargar JSON</button>
+</div>
+
+<div class="progress">
+  <div><strong id="status">Listo</strong></div>
+  <div class="bar"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+  <div class="small"><span id="progress-text">0 / 0</span> · <span id="points-text">0 puntos</span> · <span id="errors-text">0 errores</span></div>
+</div>
+
+<div class="log" id="log"></div>
+
+<script>
+const API = '/api/data';
+const SB_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oc3VpaHdqZ3R6eGZsZXNibnh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3ODc3MDAsImV4cCI6MjA5MzM2MzcwMH0.CpF2wYWgLSlPMG78_dtLPzIY4t08m_mwhu92ryxovxY';
+
+const STATES = {
+  '01':'AGS','02':'BC','03':'BCS','04':'CAM','05':'COAH','06':'COL','07':'CHIS','08':'CHIH',
+  '09':'CDMX','10':'DGO','11':'GTO','12':'GRO','13':'HGO','14':'JAL','15':'EDOMEX','16':'MICH',
+  '17':'MOR','18':'NAY','19':'NL','20':'OAX','21':'PUE','22':'QRO','23':'QROO','24':'SLP',
+  '25':'SIN','26':'SON','27':'TAB','28':'TAMPS','29':'TLAX','30':'VER','31':'YUC','32':'ZAC'
+};
+
+let scraping = false;
+let allPoints = [];
+let stats = { ok: 0, err: 0, totalCalls: 0 };
+
+function log(msg) {
+  const el = document.getElementById('log');
+  const t = new Date().toLocaleTimeString();
+  el.textContent += '[' + t + '] ' + msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function slugify(s) { return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+
+async function denueCall(path, token) {
+  const r = await fetch(API + '?vista=denue_proxy&path=' + encodeURIComponent(path) + '&token=' + encodeURIComponent(token));
+  return await r.json();
+}
+async function scrape() {
+  const token = document.getElementById('token').value.trim();
+  if (!token) { alert('Token requerido'); return; }
+  const estados = document.getElementById('estados').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const linesIn = document.getElementById('categorias').value.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  const cats = linesIn.map(l => {
+    const parts = l.split(',').map(x=>x.trim());
+    return { scian: parts[0], sub: parts[1], cat: parts[2], color: parts[3] || '#fbbf24' };
+  });
+  document.getElementById('start').disabled = true;
+  document.getElementById('stop').disabled = false;
+  scraping = true; allPoints = []; stats = { ok:0, err:0, totalCalls:0 };
+  const totalSteps = estados.length * cats.length;
+  let step = 0;
+  log('▶️ Iniciando scrape: ' + estados.length + ' estados × ' + cats.length + ' cats = ' + totalSteps + ' queries');
+  for (const ent of estados) {
+    if (!scraping) break;
+    for (const c of cats) {
+      if (!scraping) break;
+      step++;
+      document.getElementById('progress-text').textContent = step + ' / ' + totalSteps;
+      document.getElementById('bar').style.width = (step/totalSteps*100) + '%';
+      document.getElementById('status').textContent = 'Scrapeando ' + STATES[ent] + ' / ' + c.sub;
+      let start = 1; const PAGE = 1000; let pageCount = 0;
+      while (scraping && pageCount < 20) {
+        const end = start + PAGE - 1;
+        const path = 'BuscarAreaActEstr/00/' + c.scian + '/' + ent + '/0/0/0/0/0/0/0/' + start + '/' + end + '/0/1';
+        let result = null;
+        try {
+          const resp = await denueCall(path, token);
+          stats.totalCalls++;
+          if (resp.ok && Array.isArray(resp.data)) result = resp.data;
+          else if (!resp.ok) { stats.err++; log('❌ ' + STATES[ent] + '/' + c.scian + ' p' + (pageCount+1) + ': ' + (resp.status || 'fail')); }
+        } catch(e) { stats.err++; log('💥 ' + STATES[ent] + '/' + c.scian + ': ' + e.message); }
+        if (!result || result.length === 0) break;
+        for (const r of result) {
+          const nombre = r[2] || '';
+          const lng = parseFloat(r[17]); const lat = parseFloat(r[18]);
+          if (isNaN(lat) || isNaN(lng)) continue;
+          if (lat < 14 || lat > 33 || lng < -118 || lng > -86) continue;
+          const clee = r[0] || ''; const id_est = r[1] || '';
+          allPoints.push({
+            slug: 'denue-' + (clee || id_est || Math.random().toString(36).slice(2)).replace(/[^a-zA-Z0-9]/g,'').substring(0, 40),
+            nombre: String(nombre).substring(0, 200),
+            categoria: c.cat, subcategoria: c.sub,
+            categoria_slug: slugify(c.cat), subcategoria_slug: slugify(c.sub),
+            lat, lng, entidad: STATES[ent],
+            municipio: r[12] || null,
+            direccion: [r[6], r[7], r[8], r[10]].filter(Boolean).join(' ') || null,
+            telefono: r[13] || null,
+            color: c.color, fuente_origen: 'denue_inegi',
+            fuente_url: 'https://www.inegi.org.mx/app/mapa/denue/',
+            external_id: String(clee || id_est)
+          });
+        }
+        stats.ok++;
+        document.getElementById('points-text').textContent = allPoints.length + ' puntos';
+        document.getElementById('errors-text').textContent = stats.err + ' errores';
+        if (result.length < PAGE) break;
+        start = end + 1; pageCount++;
+        await new Promise(r=>setTimeout(r,200));
+      }
+      log('✓ ' + STATES[ent] + ' · ' + c.sub + ': ' + allPoints.length + ' acum.');
+    }
+  }
+  document.getElementById('status').textContent = scraping ? '✅ Completado' : '⏹ Detenido';
+  document.getElementById('start').disabled = false;
+  document.getElementById('stop').disabled = true;
+  document.getElementById('upload').disabled = allPoints.length === 0;
+  document.getElementById('download').disabled = allPoints.length === 0;
+  log('✅ Total: ' + allPoints.length + ' puntos · ' + stats.ok + ' calls OK · ' + stats.err + ' errores');
+}
+async function upload() {
+  if (allPoints.length === 0) return;
+  document.getElementById('upload').disabled = true;
+  const seen = new Set();
+  const dedup = allPoints.filter(p => !seen.has(p.slug) && seen.add(p.slug));
+  log('🔄 Dedup: ' + dedup.length + ' (de ' + allPoints.length + ')');
+  const catMap = {};
+  for (const p of dedup) {
+    const k = p.entidad + '|' + p.subcategoria_slug;
+    if (!catMap[k]) catMap[k] = { entidad: p.entidad, categoria: p.categoria, subcategoria: p.subcategoria, categoria_slug: p.categoria_slug, subcategoria_slug: p.subcategoria_slug, color: p.color, total: 0, fuente_origen: 'denue_inegi', fuente_url: 'https://www.inegi.org.mx/app/mapa/denue/' };
+    catMap[k].total++;
+  }
+  const cats = Object.values(catMap);
+  log('📤 Subiendo ' + cats.length + ' categorías...');
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/puntos_categorias?on_conflict=entidad,subcategoria_slug', {
+      method: 'POST',
+      headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(cats)
+    });
+    log(r.ok ? '✓ Categorías OK' : '❌ Categorías: ' + (await r.text()).substring(0,100));
+  } catch(e) { log('💥 cats: ' + e.message); }
+  log('📤 Subiendo ' + dedup.length + ' puntos...');
+  let done = 0, errs = 0;
+  for (let i = 0; i < dedup.length; i += 500) {
+    const chunk = dedup.slice(i, i + 500);
+    try {
+      const r = await fetch(SB_URL + '/rest/v1/puntos_servicio?on_conflict=slug', {
+        method: 'POST',
+        headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify(chunk)
+      });
+      if (r.ok) done += chunk.length;
+      else errs++;
+    } catch(e) { errs++; }
+    log('  batch ' + i + ': ' + done + ' subidos, ' + errs + ' errs');
+    await new Promise(r=>setTimeout(r, 50));
+  }
+  log('✅ Upload completado: ' + done + ' puntos LIVE · ' + errs + ' errs');
+  alert('✅ ' + done + ' puntos en Atlas. Recuerda quitar las policies temporales!');
+}
+
+function download() {
+  const blob = new Blob([JSON.stringify(allPoints, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'denue_scrape_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('start').addEventListener('click', scrape);
+document.getElementById('stop').addEventListener('click', () => { scraping = false; });
+document.getElementById('upload').addEventListener('click', upload);
+document.getElementById('download').addEventListener('click', download);
+
+log('Listo. Antes de iniciar:');
+log('  1. Aplica policy temporal en Supabase');
+log('  2. Pega token DENUE arriba');
+log('  3. Click Iniciar');
+</script>
+</body>
+</html>
