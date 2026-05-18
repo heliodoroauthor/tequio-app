@@ -1924,6 +1924,96 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── Notificaciones — agregador de eventos recientes ──
+    if (vista === 'notificaciones') {
+      const claveEnt = (req.query.estado || '').trim();
+      const sinceStr = (req.query.since || '').trim();
+      const since = sinceStr ? new Date(sinceStr) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const [votaciones, iniciativas, leyesRec, banxico, noticias, asfRec] = await Promise.all([
+        sb('votaciones_diputados?total_no=gt.20&order=fecha.desc.nullslast&limit=3&select=votacion_id,fecha,asunto').catch(() => []),
+        sb('iniciativas?estatus=eq.abierta&order=fecha_inicio.desc&limit=2&select=id,titulo,tipo,fecha_inicio').catch(() => []),
+        sb('leyes?order=fecha_publicacion.desc.nullslast&limit=2&select=id,titulo,tipo,fecha_publicacion').catch(() => []),
+        sb('econ_banxico?order=fecha.desc&limit=1&select=fecha,serie,titulo,valor').catch(() => []),
+        sb('noticias_civicas?order=fecha_publicacion.desc&limit=3&select=titulo,fuente,fecha_publicacion,url').catch(() => []),
+        sb('asf_auditorias?order=fecha_entrega.desc&limit=1&select=cuenta_publica,entrega,fecha_entrega,num_auditorias').catch(() => [])
+      ]);
+
+      const items = [];
+
+      votaciones.forEach(v => items.push({
+        tipo: 'votacion',
+        icono: '🗳️',
+        titulo: 'Votación divisiva en Diputados',
+        desc: (v.asunto || '').slice(0, 130),
+        fecha: v.fecha,
+        link: '/panel/mi-rep-vs-yo.html?embedded=1',
+        slug: 'mi-rep'
+      }));
+
+      iniciativas.forEach(i => items.push({
+        tipo: 'iniciativa',
+        icono: i.tipo === 'voto_congreso' ? '🗳️' : '✍️',
+        titulo: i.tipo === 'voto_congreso' ? 'Vota antes que el Congreso' : 'Firma iniciativa ciudadana',
+        desc: i.titulo,
+        fecha: i.fecha_inicio,
+        link: i.tipo === 'voto_congreso' ? '/panel/votar.html?embedded=1' : '/panel/iniciativa-firmar.html?embedded=1',
+        slug: i.tipo === 'voto_congreso' ? 'votar' : 'iniciativa-firmar'
+      }));
+
+      leyesRec.forEach(l => l.fecha_publicacion && items.push({
+        tipo: 'ley',
+        icono: '📜',
+        titulo: 'Nueva ley publicada',
+        desc: l.titulo,
+        fecha: l.fecha_publicacion,
+        link: null,
+        slug: null
+      }));
+
+      if (banxico[0] && banxico[0].fecha) {
+        const b = banxico[0];
+        items.push({
+          tipo: 'banxico',
+          icono: '💰',
+          titulo: `${b.titulo || b.serie || 'Indicador económico'} actualizado`,
+          desc: `Valor: ${b.valor != null ? Number(b.valor).toLocaleString('es-MX', { maximumFractionDigits: 4 }) : '—'}`,
+          fecha: b.fecha,
+          link: null,
+          slug: null
+        });
+      }
+
+      noticias.forEach(n => items.push({
+        tipo: 'noticia',
+        icono: '📰',
+        titulo: 'Noticia cívica',
+        desc: n.titulo,
+        fecha: n.fecha_publicacion,
+        link: n.url || null,
+        slug: null,
+        external: !!n.url
+      }));
+
+      if (asfRec[0]) {
+        const a = asfRec[0];
+        items.push({
+          tipo: 'asf',
+          icono: '🔍',
+          titulo: `ASF — ${a.entrega} Cuenta Pública ${a.cuenta_publica}`,
+          desc: `${a.num_auditorias} auditorías documentadas`,
+          fecha: a.fecha_entrega,
+          link: '/panel/asf.html?embedded=1',
+          slug: 'asf'
+        });
+      }
+
+      const sorted = items.filter(i => i.fecha).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 12);
+      const unread = sorted.filter(i => new Date(i.fecha) > since).length;
+
+      return res.status(200).json({ items: sorted, total: sorted.length, unread });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
