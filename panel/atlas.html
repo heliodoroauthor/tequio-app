@@ -47,7 +47,7 @@
 <body>
 <header>
   <h1>🗺️ Atlas Nacional</h1>
-  <p class="subtitle">27,846+ servicios públicos georreferenciados. Tamaulipas + Jalisco (datos oficiales).</p>
+  <p class="subtitle">42,868+ servicios públicos georreferenciados. 4 estados con datos oficiales.</p>
 </header>
 <div class="layout">
   <aside class="sidebar">
@@ -56,8 +56,10 @@
       <label>Estado</label>
       <select id="f-entidad">
         <option value="">Todos los estados</option>
-        <option value="TAMPS">Tamaulipas</option>
-        <option value="JAL" selected>Jalisco</option>
+        <option value="JAL" selected>Jalisco (18,266)</option>
+        <option value="GTO">Guanajuato (12,596)</option>
+        <option value="TAMPS">Tamaulipas (9,580)</option>
+        <option value="PUE">Puebla (2,426)</option>
       </select>
     </div>
     <div class="filter">
@@ -107,7 +109,7 @@ async function loadPuntos(){
   const cat = document.getElementById('f-categoria').value;
   const sub = document.getElementById('f-subcat').value;
   if (!cat && !sub){
-    document.getElementById('stats').innerHTML = '<strong>27,846</strong> puntos en 2 estados. Filtra por categoría para visualizar.';
+    document.getElementById('stats').innerHTML = '<strong>42,868</strong> puntos en 4 estados. Filtra por categoría.';
     document.getElementById('resultados').innerHTML = '';
     markersLayer.clearLayers();
     return;
@@ -124,7 +126,7 @@ async function loadPuntos(){
   for (const p of pts){
     const color = p.color || '#fbbf24';
     const marker = L.circleMarker([p.lat, p.lng], { radius: 5, fillColor: color, color: '#fff', weight: 1, fillOpacity: 0.85 });
-    marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
+    marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + (p.municipio ? '<br>📍 ' + escapeHtml(p.municipio) : '') + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
     markersLayer.addLayer(marker);
   }
   document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos mostrados';
@@ -133,7 +135,7 @@ async function loadPuntos(){
     map.fitBounds(bounds.pad(0.1));
   }
   const res = document.getElementById('resultados');
-  res.innerHTML = pts.slice(0, 50).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div></div>').join('');
+  res.innerHTML = pts.slice(0, 50).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + (p.municipio ? ' · ' + escapeHtml(p.municipio) : '') + '</div></div>').join('');
   res.querySelectorAll('.resultado-item').forEach(el => {
     el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
   });
