@@ -47,7 +47,7 @@
 <body>
 <header>
   <h1>🗺️ Atlas Nacional</h1>
-  <p class="subtitle">9,580+ servicios públicos georreferenciados. Fuente: Atlas Digital Tamaulipas (oficial).</p>
+  <p class="subtitle">27,846+ servicios públicos georreferenciados. Tamaulipas + Jalisco (datos oficiales).</p>
 </header>
 <div class="layout">
   <aside class="sidebar">
@@ -55,7 +55,9 @@
     <div class="filter">
       <label>Estado</label>
       <select id="f-entidad">
-        <option value="TAMPS" selected>Tamaulipas</option>
+        <option value="">Todos los estados</option>
+        <option value="TAMPS">Tamaulipas</option>
+        <option value="JAL" selected>Jalisco</option>
       </select>
     </div>
     <div class="filter">
@@ -75,7 +77,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 const API = '/api/data';
-const map = L.map('map', { preferCanvas: true }).setView([24.0, -99.0], 7);
+const map = L.map('map', { preferCanvas: true }).setView([22.0, -101.0], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 let markersLayer = L.layerGroup().addTo(map);
 let allCategorias = [];
@@ -84,7 +86,7 @@ function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&am
 
 async function loadCategorias(){
   const ent = document.getElementById('f-entidad').value;
-  const r = await fetch(API + '?vista=atlas_categorias&entidad=' + encodeURIComponent(ent));
+  const r = await fetch(API + '?vista=atlas_categorias' + (ent ? '&entidad=' + encodeURIComponent(ent) : ''));
   const j = await r.json();
   allCategorias = j.categorias || [];
   const sel = document.getElementById('f-categoria');
@@ -105,12 +107,13 @@ async function loadPuntos(){
   const cat = document.getElementById('f-categoria').value;
   const sub = document.getElementById('f-subcat').value;
   if (!cat && !sub){
-    document.getElementById('stats').innerHTML = '<strong>9,580</strong> puntos en Tamaulipas. Filtra por categoría para visualizar.';
+    document.getElementById('stats').innerHTML = '<strong>27,846</strong> puntos en 2 estados. Filtra por categoría para visualizar.';
     document.getElementById('resultados').innerHTML = '';
     markersLayer.clearLayers();
     return;
   }
-  const params = new URLSearchParams({ vista: 'atlas_puntos', entidad: ent, limit: '3000' });
+  const params = new URLSearchParams({ vista: 'atlas_puntos', limit: '3000' });
+  if (ent) params.set('entidad', ent);
   if (cat) params.set('categoria', cat);
   if (sub) params.set('subcategoria', sub);
   document.getElementById('stats').textContent = 'Cargando…';
