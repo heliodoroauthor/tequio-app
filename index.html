@@ -13477,7 +13477,7 @@ function cargarPanel(slug) {
     'perfil': '/panel/perfil.html?embedded=1'
   };
   const url = PANELS[slug];
-  if (!url) return;
+  if (!url) return; document.querySelectorAll('[id^="page-iframe-"]').forEach(function(el){ if (el.id !== 'page-iframe-' + slug) el.remove(); });
   const pageId = 'page-iframe-' + slug;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   let host = document.getElementById(pageId);
