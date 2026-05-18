@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mi Rep vs Yo | Tequio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg-card: rgba(255,255,255,0.03);
+    --border: #374151;
+    --text: #f3f4f6;
+    --text-dim: #9ca3af;
+    --gold: #fbbf24;
+    --green: #10b981;
+    --red: #dc2626;
+    --gray: #6b7280;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  body { padding: 1rem 0.9rem 4rem; max-width: 760px; margin: 0 auto; line-height: 1.55; }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back-link { display: inline-block; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem; }
+  .header h1 { font-size: 1.7rem; font-weight: 800; color: var(--gold); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+  .header .subtitle { color: var(--text-dim); font-size: 0.92rem; margin-bottom: 1.4rem; }
+  .config-banner { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; padding: 1rem 1.1rem; border-radius: 0.6rem; margin-bottom: 1.2rem; }
+  .config-banner a { color: var(--gold); font-weight: 700; }
+  .hero { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(168,85,247,0.06)); border: 1px solid rgba(251,191,36,0.2); border-radius: 0.85rem; padding: 1.1rem 1.2rem; margin-bottom: 1.3rem; }
+  .hero h2 { color: var(--gold); font-size: 1.1rem; margin-bottom: 0.3rem; font-weight: 700; }
+  .hero p { color: var(--text-dim); font-size: 0.88rem; }
+  .loading { color: var(--text-dim); text-align: center; padding: 2rem; font-size: 0.9rem; }
+  .disclaimer { background: rgba(255,255,255,0.02); border-left: 3px solid var(--gray); padding: 0.9rem 1rem; margin-top: 2rem; color: var(--text-dim); font-size: 0.78rem; border-radius: 0.3rem; line-height: 1.6; }
+  button { font-family: inherit; }
+  .embedded .back-link { display: none !important; }
+</style>
+</head>
+<body>
+<a href="/" class="back-link" id="back-link">&larr; Tequio</a>
+<div class="header">
+  <h1>Mi Rep vs Yo</h1>
+  <div class="subtitle">Compara tu voto con como votaron tus diputados federales. Accountability ciudadana real.</div>
+</div>
+<div id="config-banner" class="config-banner" style="display:none;">
+  Configura tu estado para ver a tus diputados. <a href="/panel/perfil.html" target="_top">Configurar &rarr;</a>
+</div>
+<div id="hero-state" style="display:none;"></div>
+<div id="loading" class="loading">Cargando votaciones...</div>
+<div id="votaciones-feed"></div>
+<div id="resumen" style="display:none;"></div>
+<div class="disclaimer">
+  Tus votos se guardan SOLO en tu dispositivo (localStorage). Nada se envia a servidores. Los votos de los diputados son datos oficiales de la Camara de Diputados.
+</div>
+<script>
+
+const NOMBRES_ESTADO = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de Mexico","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de Mexico","16":"Michoacan","17":"Morelos","18":"Nayarit","19":"Nuevo Leon","20":"Oaxaca","21":"Puebla","22":"Queretaro","23":"Quintana Roo","24":"San Luis Potosi","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatan","32":"Zacatecas"};
+const VOTO_LABELS = { 'a_favor': 'A favor', 'en_contra': 'En contra', 'abstencion': 'Abstencion' };
+const VOTO_EMOJI = { 'a_favor': '\u2705', 'en_contra': '\u274C', 'abstencion': '\u2696\uFE0F' };
+const DIP_VOTO_TO_USER = { 'si': 'a_favor', 'no': 'en_contra', 'abst': 'abstencion' };
+
+let datos = null;
+
+(function () {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('embedded') === '1') {
+      document.body.classList.add('embedded');
+    }
+  } catch (e) {}
+})();
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function getVotoUser(votacionId) {
+  return localStorage.getItem('tequio_voto_' + votacionId);
+}
+
+function setVotoUser(votacionId, voto) {
+  if (voto === null || voto === undefined) {
+    localStorage.removeItem('tequio_voto_' + votacionId);
+  } else {
+    localStorage.setItem('tequio_voto_' + votacionId, voto);
+  }
+  renderVotaciones();
+  renderResumen();
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
+}
+
+function getVotoDip(votacionId, dipId) {
+  if (!datos || !datos.votos_individuales) return null;
+  return datos.votos_individuales.find(v => v.votacion_id === votacionId && v.dipt_id === dipId);
+}
+
+function calcularCoincidencia(votacionId, votoUser) {
+  let coinciden = 0;
+  let total = 0;
+  for (const dip of datos.diputados) {
+    const vDip = getVotoDip(votacionId, dip.dipt_id);
+    if (!vDip || vDip.voto === 'ausente') continue;
+    total++;
+    if (DIP_VOTO_TO_USER[vDip.voto] === votoUser) coinciden++;
+  }
+  return { coinciden, total, pct: total > 0 ? Math.round((coinciden / total) * 100) : 0 };
+}
+
+function fmtFecha(f) {
+  try {
+    return new Date(f).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch (e) { return f || ''; }
+}
+
+async function init() {
+  const clave = localStorage.getItem('tequio_estado_clave') || '';
+  const banner = document.getElementById('config-banner');
+  const loading = document.getElementById('loading');
+  const heroState = document.getElementById('hero-state');
+
+  if (!clave) {
+    banner.style.display = 'block';
+    loading.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'none';
+  loading.style.display = 'block';
+  loading.textContent = 'Cargando votaciones y diputados...';
+
+  try {
+    const r = await fetch('/api/data?vista=mi_rep_datos&clave_entidad=' + encodeURIComponent(clave) + '&limit=20');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    datos = await r.json();
+  } catch (e) {
+    loading.innerHTML = '<span style="color:#ef4444;">Error cargando datos: ' + escapeHtml(e.message) + '</span>';
+    return;
+  }
+
+  loading.style.display = 'none';
+  const nombreEstado = NOMBRES_ESTADO[clave] || 'tu estado';
+  const nDips = (datos.diputados || []).length;
+  heroState.style.display = 'block';
+  heroState.innerHTML = '<div class="hero"><h2>Tus diputados federales de ' + escapeHtml(nombreEstado) + '</h2><p>' + nDips + ' diputado' + (nDips === 1 ? '' : 's') + ' encontrado' + (nDips === 1 ? '' : 's') + '. ' + (datos.votaciones || []).length + ' votaciones divisivas recientes.</p></div>';
+
+  renderVotaciones();
+  renderResumen();
+}
+
+function renderVotaciones() {
+  const container = document.getElementById('votaciones-feed');
+  if (!datos || !datos.votaciones || !datos.votaciones.length) {
+    container.innerHTML = '<div class="loading">No hay votaciones divisivas disponibles.</div>';
+    return;
+  }
+  container.innerHTML = datos.votaciones.map(v => {
+    const votoUser = getVotoUser(v.votacion_id);
+    return votoUser ? renderVotacionVotada(v, votoUser) : renderVotacionPendiente(v);
+  }).join('');
+}
+
+function renderVotacionPendiente(v) {
+  const asunto = String(v.asunto || '');
+  const truncated = asunto.length > 280 ? asunto.substring(0, 280) + '...' : asunto;
+  return '<div class="votacion-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:0.75rem;padding:1.2rem;margin-bottom:1rem;">'
+    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.4rem;">' + escapeHtml(fmtFecha(v.fecha)) + '</div>'
+    + '<div style="color:var(--text);line-height:1.5;margin-bottom:1rem;font-size:0.95rem;">' + escapeHtml(truncated) + '</div>'
+    + '<div style="color:var(--text-dim);font-size:0.82rem;margin-bottom:1rem;">Resultado oficial: ' + (v.total_si || 0) + ' si \u00B7 ' + (v.total_no || 0) + ' no \u00B7 ' + (v.total_abst || 0) + ' abst</div>'
+    + '<div style="color:var(--gold);font-size:0.85rem;font-weight:600;margin-bottom:0.7rem;">\u00BFTu como habrias votado?</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">'
+    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'a_favor\')" style="background:var(--green);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u2705 A favor</button>'
+    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'en_contra\')" style="background:var(--red);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u274C En contra</button>'
+    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'abstencion\')" style="background:var(--gray);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u2696\uFE0F Abst.</button>'
+    + '</div>'
+    + (v.url_oficial ? '<div style="margin-top:0.7rem;font-size:0.75rem;"><a href="' + escapeHtml(v.url_oficial) + '" target="_blank" rel="noopener" style="color:var(--text-dim);">Ver acta oficial \u2197</a></div>' : '')
+    + '</div>';
+}
+
+function renderVotacionVotada(v, votoUser) {
+  const { coinciden, total, pct } = calcularCoincidencia(v.votacion_id, votoUser);
+  const labelUser = (VOTO_EMOJI[votoUser] || '') + ' ' + (VOTO_LABELS[votoUser] || votoUser);
+  const asunto = String(v.asunto || '');
+  const truncated = asunto.length > 280 ? asunto.substring(0, 280) + '...' : asunto;
+
+  const dipsConVoto = (datos.diputados || []).map(d => {
+    const vDip = getVotoDip(v.votacion_id, d.dipt_id);
+    if (!vDip) return null;
+    const dipNorm = DIP_VOTO_TO_USER[vDip.voto];
+    const ausente = vDip.voto === 'ausente';
+    return { dip: d, vDip, coincide: dipNorm === votoUser, ausente };
+  }).filter(Boolean);
+
+  // Sort: coincidencia primero, luego no coincide, luego ausente
+  dipsConVoto.sort((a, b) => {
+    const sa = a.ausente ? 2 : (a.coincide ? 0 : 1);
+    const sb = b.ausente ? 2 : (b.coincide ? 0 : 1);
+    return sa - sb;
+  });
+
+  const dipsHtml = dipsConVoto.map(({ dip, vDip, coincide, ausente }) => {
+    let badge;
+    if (ausente) badge = '<span style="background:#374151;color:#9ca3af;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;white-space:nowrap;">\u2298 AUSENTE</span>';
+    else if (coincide) badge = '<span style="background:var(--green);color:white;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;white-space:nowrap;">\u2705 COINCIDE</span>';
+    else badge = '<span style="background:var(--red);color:white;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;white-space:nowrap;">\u274C NO</span>';
+
+    const foto = dip.foto_url
+      ? '<img src="' + escapeHtml(dip.foto_url) + '" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">'
+      : '<div style="width:34px;height:34px;border-radius:50%;background:#374151;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#9ca3af;">\u{1F464}</div>';
+
+    return '<div style="display:flex;gap:0.6rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+      + foto
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="color:#e5e7eb;font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(dip.nombre || '') + '</div>'
+      + '<div style="color:var(--text-dim);font-size:0.72rem;">' + escapeHtml(dip.partido_codigo || dip.partido || '') + ' \u00B7 ' + escapeHtml(dip.distrito || dip.principio_eleccion || '-') + '</div>'
+      + '</div>'
+      + badge
+      + '</div>';
+  }).join('');
+
+  const colorBarra = pct >= 60 ? 'var(--green)' : (pct >= 40 ? 'var(--gold)' : 'var(--red)');
+
+  return '<div class="votacion-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:0.75rem;padding:1.2rem;margin-bottom:1rem;">'
+    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.4rem;">' + escapeHtml(fmtFecha(v.fecha)) + '</div>'
+    + '<div style="color:var(--text);line-height:1.5;margin-bottom:0.8rem;font-size:0.95rem;">' + escapeHtml(truncated) + '</div>'
+    + '<div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:var(--purple);padding:0.6rem 0.8rem;border-radius:0.4rem;margin-bottom:0.8rem;font-size:0.85rem;font-weight:600;">Tu voto: ' + escapeHtml(labelUser) + '</div>'
+    + '<div style="background:rgba(255,255,255,0.04);padding:0.5rem 0.8rem;border-radius:0.4rem;margin-bottom:0.8rem;font-size:0.8rem;color:var(--text-dim);">Resultado oficial: ' + (v.total_si || 0) + ' si \u00B7 ' + (v.total_no || 0) + ' no \u00B7 ' + (v.total_abst || 0) + ' abst</div>'
+    + (total > 0 ? '<div style="color:' + colorBarra + ';font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">' + coinciden + '/' + total + ' diputados de tu estado coincidieron contigo (' + pct + '%)</div>' : '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">No hay votos registrados de tus diputados en esta votacion.</div>')
+    + (dipsHtml ? '<div style="max-height:360px;overflow-y:auto;margin-top:0.5rem;border-top:1px solid rgba(255,255,255,0.04);">' + dipsHtml + '</div>' : '')
+    + '<button onclick="setVotoUser(' + v.votacion_id + ',null)" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;border-radius:0.3rem;cursor:pointer;font-size:0.75rem;margin-top:0.8rem;">\u21BA Cambiar mi voto</button>'
+    + (v.url_oficial ? ' <a href="' + escapeHtml(v.url_oficial) + '" target="_blank" rel="noopener" style="color:var(--text-dim);font-size:0.75rem;margin-left:0.5rem;">Acta oficial \u2197</a>' : '')
+    + '</div>';
+}
+
+function renderResumen() {
+  const container = document.getElementById('resumen');
+  if (!datos || !datos.votaciones) { container.style.display = 'none'; return; }
+  const votadas = datos.votaciones.filter(v => getVotoUser(v.votacion_id));
+  if (votadas.length < 3) {
+    container.style.display = 'none';
+    return;
+  }
+  const clave = localStorage.getItem('tequio_estado_clave') || '';
+  const nombreEstado = NOMBRES_ESTADO[clave] || 'tu estado';
+
+  const dipScores = datos.diputados.map(d => {
+    let coinciden = 0;
+    let total = 0;
+    for (const v of votadas) {
+      const vDip = getVotoDip(v.votacion_id, d.dipt_id);
+      if (!vDip || vDip.voto === 'ausente') continue;
+      total++;
+      const votoUser = getVotoUser(v.votacion_id);
+      if (DIP_VOTO_TO_USER[vDip.voto] === votoUser) coinciden++;
+    }
+    return { dip: d, coinciden, total, pct: total ? Math.round((coinciden/total)*100) : 0 };
+  }).filter(x => x.total > 0).sort((a,b) => b.pct - a.pct);
+
+  if (!dipScores.length) { container.style.display = 'none'; return; }
+
+  const top3 = dipScores.slice(0, 3);
+  const bottom3 = dipScores.slice(-3).reverse();
+
+  const rowHtml = x => {
+    const foto = x.dip.foto_url
+      ? '<img src="' + escapeHtml(x.dip.foto_url) + '" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">'
+      : '<div style="width:32px;height:32px;border-radius:50%;background:#374151;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#9ca3af;">\u{1F464}</div>';
+    return '<div style="display:flex;gap:0.6rem;align-items:center;padding:0.45rem 0;">'
+      + foto
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="color:#e5e7eb;font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(x.dip.nombre || '') + '</div>'
+      + '<div style="color:var(--text-dim);font-size:0.72rem;">' + escapeHtml(x.dip.partido_codigo || x.dip.partido || '') + ' \u00B7 ' + x.coinciden + '/' + x.total + ' coincidencias</div>'
+      + '</div>'
+      + '<div style="color:var(--gold);font-weight:800;font-size:1.05rem;flex-shrink:0;">' + x.pct + '%</div>'
+      + '</div>';
+  };
+
+  container.style.display = 'block';
+  container.innerHTML = ''
+    + '<h3 style="color:var(--gold);margin:2rem 0 0.4rem 0;font-size:1.2rem;">Tu ranking de diputados</h3>'
+    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">Has votado en ' + votadas.length + ' temas. Estos son los diputados de ' + escapeHtml(nombreEstado) + ' que mas (y menos) coinciden contigo:</div>'
+    + '<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.3);border-radius:0.6rem;padding:0.9rem 1rem;margin-bottom:0.9rem;">'
+    + '<div style="color:var(--green);font-size:0.82rem;letter-spacing:0.08em;margin-bottom:0.5rem;font-weight:700;">\u{1F3C6} MAS COINCIDEN CONTIGO</div>'
+    + top3.map(rowHtml).join('')
+    + '</div>'
+    + '<div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.3);border-radius:0.6rem;padding:0.9rem 1rem;">'
+    + '<div style="color:#ef4444;font-size:0.82rem;letter-spacing:0.08em;margin-bottom:0.5rem;font-weight:700;">\u26A0\uFE0F MENOS COINCIDEN CONTIGO</div>'
+    + bottom3.map(rowHtml).join('')
+    + '</div>';
+}
+
+window.setVotoUser = setVotoUser;
+window.init = init;
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
