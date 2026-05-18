@@ -2460,8 +2460,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
           <div class="stat-card" onclick="showPage('dinero')" style="cursor:pointer">
             <div class="stat-label">DEUDA PÚBLICA <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('deuda_publica')">🔍</button></div>
-            <div class="stat-value" style="color:var(--red2)">$13.7T</div>
-            <div class="stat-change" style="color:var(--text3)">SHCP · Saldo neto</div>
+            <div class="stat-value" data-deuda-monto style="color:var(--red2)">$18.20 bn</div>
+            <div class="stat-change" data-deuda-pib style="color:var(--text3)">52.4% PIB · SHCP</div>
           </div>
           <div class="stat-card" onclick="showPage('ombligo')" style="cursor:pointer">
             <div class="stat-label">PATRIMONIO INAH <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('patrimonio_inah')">🔍</button></div>
@@ -12685,7 +12685,7 @@ let obIntereses = new Set();
 const fuentesDB = {
   leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'757 leyes en el catálogo de Tequio', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'Leyes federales vigentes (~280) + reglamentos + leyes core de los 32 estados. Scraping diario contra diputados.gob.mx y dof.gob.mx. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
   contratos_publicos: { titulo:'Contratos Públicos APF', dato:'9,775 contratos cargados', fuente:'ComprasMX / CompraNet (OCDS)', url:'https://comprasmx.buengobierno.gob.mx', fecha:'Actualización semanal vía workflow', metodologia:'Contratos publicados por la Administración Pública Federal en el estándar de datos abiertos OCDS. Incluye contratante, proveedor, monto, fecha, modalidad de contratación.', verificar:'comprasmx.buengobierno.gob.mx → Contrataciones' },
-  deuda_publica: { titulo:'Deuda Pública', dato:'$13.7 billones de pesos', fuente:'SHCP — Informe de Finanzas Públicas Q3 2024', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Publicado: 31 octubre 2024', metodologia:'Saldo de deuda del Sector Público Federal: interna ($9.84T) + externa ($3.86T) + PEMEX + CFE. Calculado conforme a la metodología del FMI.', verificar:'finanzaspublicas.hacienda.gob.mx → Deuda Pública → Informes Trimestrales' },
+  deuda_publica: { titulo:'Deuda Pública', dato:'$18.20 billones de pesos (52.4% PIB)', fuente:'SHCP — Informe de Finanzas Públicas Q3 2024', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Publicado: 31 octubre 2024', metodologia:'Saldo de deuda del Sector Público Federal: interna ($9.84T) + externa ($3.86T) + PEMEX + CFE. Calculado conforme a la metodología del FMI.', verificar:'finanzaspublicas.hacienda.gob.mx → Deuda Pública → Informes Trimestrales' },
   patrimonio_inah: { titulo:'Patrimonio Cultural · INAH', dato:'195 zonas arqueológicas + 165 museos', fuente:'INAH · Datos Abiertos', url:'https://datos.inah.gob.mx', fecha:'Catálogo INAH vigente', metodologia:'Catálogo oficial de zonas arqueológicas abiertas al público y museos administrados por el INAH. Datos abiertos del Instituto Nacional de Antropología e Historia.', verificar:'datos.inah.gob.mx → Zonas Arqueológicas · Museos' },
   deficit_2024: { titulo:'Déficit Fiscal 2024', dato:'5.9% del PIB', fuente:'SHCP — Criterios Generales de Política Económica 2025', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Octubre 2024', metodologia:'Requerimientos Financieros del Sector Público (RFSP) como % del PIB. El más alto desde 1988 según series históricas de Banxico.', verificar:'finanzaspublicas.hacienda.gob.mx → Comunicados → RFSP 2024' },
   tren_maya_irr: { titulo:'Irregularidades Tren Maya', dato:'$89,000 millones observados', fuente:'ASF — Auditoría 1771-GB, Cuenta Pública 2023', url:'https://www.asf.gob.mx', fecha:'2024', metodologia:'Auditoría de desempeño y financiera a tramos 5-7 del Tren Maya ejecutados por SEDENA. Incluye contratos sin licitación y diferencias no justificadas en costos.', verificar:'asf.gob.mx → Informes → Cuenta Pública 2023 → "Tren Maya"' },
@@ -15044,10 +15044,10 @@ const noticiasDB = [
     estado:'Nacional', fecha:'Hace 2 horas', fuente:'SCJN', impactoNivel:'critico', comentarios:6240, visto:89400 },
 
   { id:'n2', ambito:'nacional', tema:'economia', titulo:'Déficit fiscal de México llega al 5.9% del PIB — el más alto desde 1988',
-    resumen:'La SHCP reportó que el déficit presupuestario de 2024 superó todas las proyecciones, alcanzando el 5.9% del PIB. La deuda pública total supera los $13.7 billones de pesos.',
+    resumen:'La SHCP reportó que el déficit presupuestario de 2024 superó todas las proyecciones, alcanzando el 5.9% del PIB. La deuda pública total supera los $18.20 billones de pesos (52.4% PIB).',
     cuerpo:`El secretario de Hacienda confirmó que el déficit incluye los gastos de inversión de PEMEX, CFE y otras empresas productivas del Estado.\n\nLas calificadoras Moody's y S&P han expresado preocupación. Moody's revisó la perspectiva de México a "negativa" en octubre de 2024.\n\nLa nueva administración deberá implementar un ajuste fiscal significativo en 2025.`,
     impacto:'Un déficit alto significa que el gobierno gasta más de lo que cobra. Esto puede derivar en recortes a servicios públicos, alza de impuestos o inflación.',
-    datos:[{k:'Déficit 2024',v:'5.9% PIB'},{k:'Deuda total',v:'$13.7T'},{k:'vs 2023',v:'+2.1%'},{k:'Calificación',v:'Baa2'}],
+    datos:[{k:'Déficit 2024',v:'5.9% PIB'},{k:'Deuda total',v:'$18.2 bn'},{k:'vs 2023',v:'+2.1%'},{k:'Calificación',v:'Baa2'}],
     acciones:['📋 Consultar el presupuesto en transparenciapresupuestaria.gob.mx','🧠 Preguntar a la IA cómo el déficit afecta tu economía personal'],
     fuentes:'SHCP Informe Q3 2024 · Moody\'s Oct 2024 · Banxico',
     explicacion12:'Imagina que tu familia gana $10,000 al mes pero gasta $10,590. Cada mes deben $590 más. Si siguen así, pronto deben tanto que los bancos ya no les prestan. Eso le pasa a México: el gobierno gasta más de lo que cobra en impuestos. Para tapar ese hoyo, pide prestado. Pero la deuda crece y crece, y algún día hay que pagarla — con más impuestos o recortando escuelas y hospitales.',
@@ -26958,6 +26958,27 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
   setTimeout(fixTuRepresentante, 9000);
 })();
 </script>
+
+<script>
+(async function cargarDeudaHome(){
+  try {
+    const r = await fetch('/api/data?vista=deuda', {cache:'no-store'});
+    if (!r.ok) return;
+    const j = await r.json();
+    const u = j && j.ultimo;
+    if (!u) return;
+    const monto = u.shrfsp_total_mxn;
+    const pib = u.shrfsp_porcentaje_pib;
+    if (typeof monto === 'number') {
+      const elMonto = document.querySelector('[data-deuda-monto]');
+      if (elMonto) elMonto.textContent = ' + (monto/1e12).toFixed(2) + ' bn';
+    }
+    if (typeof pib === 'number') {
+      const elPib = document.querySelector('[data-deuda-pib]');
+      if (elPib) elPib.textContent = pib.toFixed(1) + '% PIB · SHCP';
+    }
+  } catch(e){}
+})();
+</script>
 </body>
 </html>
-
