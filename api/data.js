@@ -589,6 +589,7 @@ export default async function handler(req, res) {
       const montoMin = req.query.monto_min ? parseFloat(req.query.monto_min) : null;
       const montoMax = req.query.monto_max ? parseFloat(req.query.monto_max) : null;
       const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+      const offset = Math.max(parseInt(req.query.offset || '0', 10), 0);
       const orden = req.query.orden || 'monto'; // monto | fecha | dependencia
 
       let query = 'contratos_publicos?select=ocid,dependencia,unidad_compradora,proveedor_rfc,proveedor_nombre,titulo,monto_mxn,fecha_firma,tipo_procedimiento,tipo_contrato,entidad_federativa,fuente_url,flag_adjudicacion_directa_alta';
@@ -609,7 +610,7 @@ export default async function handler(req, res) {
         fecha: 'fecha_firma.desc.nullslast',
         dependencia: 'dependencia.asc',
       };
-      query += `&order=${orderMap[orden] || orderMap.monto}&limit=${limit}`;
+      query += `&order=${orderMap[orden] || orderMap.monto}&limit=${limit}&offset=${offset}`;
 
       const rows = await sb(query);
 
@@ -633,6 +634,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         contratos: rows,
         total_resultados: statsRows.length,
+        offset,
+        limit,
         monto_total,
         por_tipo,
         top_dependencias: Object.entries(por_dependencia).sort((a,b)=>b[1]-a[1]).slice(0,10),
@@ -1804,9 +1807,19 @@ export default async function handler(req, res) {
         sb('presas_cuencas?select=*&order=fecha.desc&limit=3').catch(() => [])
       ];
       const [noticias, votaciones, iniciativas, municipios_estado, banxico, presas] = await Promise.all(queries);
+      // Dedup defensivo: noticias con titulo duplicado (mismo encabezado DOF, etc.)
+      const noticiasUnicas = [];
+      const titulosVistos = new Set();
+      for (const n of (noticias || [])) {
+        const key = (n.titulo || '').toLowerCase().trim();
+        if (key && !titulosVistos.has(key)) {
+          titulosVistos.add(key);
+          noticiasUnicas.push(n);
+        }
+      }
       return res.status(200).json({
         fecha: today, estado_usuario: clave || null,
-        noticias, votaciones, iniciativas, municipios_estado, banxico, presas
+        noticias: noticiasUnicas, votaciones, iniciativas, municipios_estado, banxico, presas
       });
     }
 
