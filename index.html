@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#fbbf24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tequio — Plataforma Cívica Digital</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;60h0;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <!-- TEQUIO splash failsafe — debe ir antes de TODO parha garantizar que se ejecute incluso si scripts posteriores fallan por syntax errors -->
 <script>
@@ -13174,7 +13174,7 @@ async function abrirNotifPanel() {
   let panel = document.getElementById('notif-dropdown');
   if (!panel) {
     panel = document.createElement('div');
-    panel.id = 'notif-dropdown';
+    panel.id = 'notif-dropdown'; panel.addEventListener('click', function(e) { e.stopPropagation(); });
     panel.style.cssText = 'position:absolute;top:60px;right:12px;background:#0f172a;border:1px solid #334155;border-radius:0.75rem;width:380px;max-height:520px;overflow-y:auto;z-index:99998;box-shadow:0 12px 32px rgba(0,0,0,0.6);display:none;';
     document.body.appendChild(panel);
   }
