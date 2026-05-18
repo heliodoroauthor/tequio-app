@@ -13107,6 +13107,69 @@ const notificacionesDemoData = [
   { icon:'✊', titulo:'Iniciativa cerca de la meta', texto:'Agua Pública: No a la Privatización alcanzó el 85% — solo 21,570 firmas más.', tiempo:'Hace 5 horas', page:'iniciativas', urgente:false },
 ];
 
+const NOTIF_PREFS_DEFAULT = {
+  votacion: true,
+  iniciativa: true,
+  ley: true,
+  banxico: true,
+  noticia: true,
+  asf: true
+};
+
+const NOTIF_LABELS = {
+  votacion: { icon: '🗳️', label: 'Votaciones del Congreso', desc: 'Cuando hay votaciones divisivas en Diputados' },
+  iniciativa: { icon: '✍️', label: 'Iniciativas ciudadanas', desc: 'Nuevas votaciones e iniciativas activas en Tequio' },
+  ley: { icon: '📜', label: 'Nuevas leyes', desc: 'Leyes federales recién publicadas' },
+  banxico: { icon: '💰', label: 'Banxico', desc: 'Indicadores económicos actualizados' },
+  noticia: { icon: '📰', label: 'Noticias cívicas', desc: 'Últimas noticias del DOF y fuentes oficiales' },
+  asf: { icon: '🔍', label: 'Auditorías ASF', desc: 'Nuevos informes de la Auditoría Superior de la Federación' }
+};
+
+function getNotifPrefs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('tequio_notif_prefs') || '{}');
+    return Object.assign({}, NOTIF_PREFS_DEFAULT, saved);
+  } catch (e) {
+    return Object.assign({}, NOTIF_PREFS_DEFAULT);
+  }
+}
+
+function setNotifPref(tipo, val) {
+  const prefs = getNotifPrefs();
+  prefs[tipo] = !!val;
+  localStorage.setItem('tequio_notif_prefs', JSON.stringify(prefs));
+}
+
+function notifFiltrarItems(items) {
+  const prefs = getNotifPrefs();
+  return (items || []).filter(it => prefs[it && it.tipo] !== false);
+}
+
+function resetNotifPrefs() {
+  localStorage.setItem('tequio_notif_prefs', JSON.stringify(NOTIF_PREFS_DEFAULT));
+  if (typeof mostrarPrefsNotif === 'function') mostrarPrefsNotif();
+}
+
+function mostrarPrefsNotif() {
+  const panel = document.getElementById('notif-dropdown');
+  if (!panel) return;
+  const prefs = getNotifPrefs();
+  const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+  const rows = Object.keys(NOTIF_LABELS).map(tipo => {
+    const info = NOTIF_LABELS[tipo];
+    const isOn = prefs[tipo] !== false;
+    return `<label style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;background:transparent;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'"><div style="font-size:1.3rem;flex-shrink:0;">${info.icon}</div><div style="flex:1;min-width:0;"><div style="color:#f3f4f6;font-weight:600;font-size:0.85rem;">${esc(info.label)}</div><div style="color:#9ca3af;font-size:0.72rem;line-height:1.3;margin-top:0.1rem;">${esc(info.desc)}</div></div><div style="flex-shrink:0;"><input type="checkbox" ${isOn ? 'checked' : ''} onchange="setNotifPref('${tipo}', this.checked); window._notifPrefChanged=true;" style="width:18px;height:18px;cursor:pointer;accent-color:#fbbf24;"></div></label>`;
+  }).join('');
+  panel.innerHTML = `<div style="padding:0.7rem 1rem;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,0.05);"><span style="color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">⚙️ NOTIFICACIONES — PREFERENCIAS</span><button onclick="abrirNotifPanel()" style="background:transparent;border:none;color:#9ca3af;padding:0.2rem;cursor:pointer;font-family:inherit;font-size:1.1rem;">←</button></div><div style="padding:0.8rem 1rem;color:#9ca3af;font-size:0.78rem;line-height:1.4;border-bottom:1px solid rgba(255,255,255,0.05);">Activa solo las notificaciones que te interesan. Cambios se aplican inmediatamente y se guardan localmente en tu dispositivo.</div><div>${rows}</div><div style="padding:0.8rem 1rem;border-top:1px solid #334155;display:flex;gap:0.5rem;justify-content:space-between;"><button onclick="resetNotifPrefs()" style="background:transparent;color:#9ca3af;border:1px solid #334155;padding:0.4rem 0.8rem;border-radius:0.3rem;cursor:pointer;font-family:inherit;font-size:0.75rem;">Restablecer</button><button onclick="abrirNotifPanel()" style="background:#fbbf24;color:#111;border:none;padding:0.4rem 1rem;border-radius:0.3rem;cursor:pointer;font-weight:700;font-family:inherit;font-size:0.75rem;">Ver notificaciones</button></div>`;
+  panel.style.display = 'block';
+}
+
+window.mostrarPrefsNotif = mostrarPrefsNotif;
+window.resetNotifPrefs = resetNotifPrefs;
+window.setNotifPref = setNotifPref;
+window.getNotifPrefs = getNotifPrefs;
+window.notifFiltrarItems = notifFiltrarItems;
+
 async function abrirNotifPanel() {
   let panel = document.getElementById('notif-dropdown');
   if (!panel) {
@@ -13126,11 +13189,16 @@ async function abrirNotifPanel() {
   try {
     const r = await fetch(`/api/data?vista=notificaciones&estado=${encodeURIComponent(estado)}&since=${encodeURIComponent(since)}`);
     const data = await r.json();
-    if (!data.items || data.items.length === 0) {
-      panel.innerHTML = '<div style="padding:0.6rem 1rem;border-bottom:1px solid #334155;color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">🔔 NOTIFICACIONES</div><div style="padding:2rem 1rem;text-align:center;color:#9ca3af;font-size:0.85rem;">Sin novedades por ahora.</div>';
+    const rawItems = data.items || [];
+    const filtered = notifFiltrarItems(rawItems);
+    const headerHtml = `<div style="padding:0.7rem 1rem;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,0.05);"><span style="color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">🔔 NOTIFICACIONES</span><button onclick="mostrarPrefsNotif()" style="background:transparent;border:1px solid #334155;color:#9ca3af;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;cursor:pointer;font-family:inherit;">⚙️ Configurar</button></div>`;
+    if (rawItems.length === 0) {
+      panel.innerHTML = headerHtml + '<div style="padding:2rem 1rem;text-align:center;color:#9ca3af;font-size:0.85rem;">Sin novedades por ahora.</div>';
+    } else if (filtered.length === 0) {
+      panel.innerHTML = headerHtml + '<div style="padding:2rem 1rem;text-align:center;color:#9ca3af;font-size:0.85rem;line-height:1.5;">Has desactivado todas las categorías.<br><a href="#" onclick="event.preventDefault();mostrarPrefsNotif();" style="color:#fbbf24;text-decoration:none;font-weight:600;">Configurar →</a></div>';
     } else {
       const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
-      const itemsHtml = data.items.map(it => {
+      const itemsHtml = filtered.map(it => {
         const isInternal = it.link && it.link.startsWith('/panel/');
         const slug = it.slug;
         let onclick = '';
@@ -13141,7 +13209,7 @@ async function abrirNotifPanel() {
         if (it.link) return `<a href="${esc(it.link)}" ${linkAttr} onclick="${onclick}" style="display:block;padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#e5e7eb;text-decoration:none;">${inner}</a>`;
         return `<div style="padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#e5e7eb;cursor:default;">${inner}</div>`;
       }).join('');
-      panel.innerHTML = `<div style="padding:0.7rem 1rem;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,0.05);"><span style="color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">🔔 NOTIFICACIONES</span><span style="color:#9ca3af;font-size:0.7rem;">${data.total} recientes</span></div><div>${itemsHtml}</div>`;
+      panel.innerHTML = headerHtml + `<div>${itemsHtml}</div>`;
     }
     localStorage.setItem('tequio_notif_last_seen', new Date().toISOString());
     actualizarNotifBadge(0);
@@ -13184,7 +13252,9 @@ async function checkearNotifBadgeInicial() {
   try {
     const r = await fetch(`/api/data?vista=notificaciones&estado=${encodeURIComponent(estado)}&since=${encodeURIComponent(since)}`);
     const data = await r.json();
-    actualizarNotifBadge(data.unread || 0);
+    const filtered = notifFiltrarItems(data.items || []);
+    const filteredUnread = filtered.filter(i => new Date(i.fecha) > new Date(since)).length;
+    actualizarNotifBadge(filteredUnread);
   } catch (e) {}
 }
 
