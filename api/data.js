@@ -2327,6 +2327,28 @@ export default async function handler(req, res) {
       return res.status(200).json({ punto: arr[0] });
     }
 
+    // ==================== DENUE PROXY ====================
+    if (vista === 'denue_proxy') {
+      const path = (req.query.path || '').toString();
+      const token = (req.query.token || '').toString();
+      if (!path || !token) return res.status(400).json({ error: 'path y token requeridos' });
+      if (!/^[A-Za-z]+\/[0-9A-Za-z,\-\.\/]+$/.test(path)) return res.status(400).json({ error: 'path invalido' });
+      try {
+        const url = 'https://www.inegi.org.mx/app/api/denue/v1/consulta/' + path + '/' + token;
+        const r = await fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'Tequio/1.0' } });
+        const text = await r.text();
+        let j; try { j = JSON.parse(text); } catch(e) {}
+        return res.status(200).json({
+          ok: r.ok, status: r.status,
+          data: j || null,
+          raw: j ? null : text.substring(0, 500),
+          count: Array.isArray(j) ? j.length : null
+        });
+      } catch (e) {
+        return res.status(500).json({ error: 'fetch failed: ' + e.message });
+      }
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
@@ -2338,7 +2360,7 @@ export default async function handler(req, res) {
       'chat','chat_publicar','chat_votar','chat_reportar',
       'aprobacion_actores','aprobacion_leyes','aprobacion_votar_actor','aprobacion_votar_ley','aprobacion_scoreboard',
       'promesas_listar','promesas_votar','promesa_detalle','desastres_listar',
-      'atlas_categorias','atlas_puntos','atlas_cerca_de_mi','atlas_punto_detalle'
+      'atlas_categorias','atlas_puntos','atlas_cerca_de_mi','atlas_punto_detalle','denue_proxy'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
