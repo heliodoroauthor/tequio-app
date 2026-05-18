@@ -13107,26 +13107,99 @@ const notificacionesDemoData = [
   { icon:'✊', titulo:'Iniciativa cerca de la meta', texto:'Agua Pública: No a la Privatización alcanzó el 85% — solo 21,570 firmas más.', tiempo:'Hace 5 horas', page:'iniciativas', urgente:false },
 ];
 
-function abrirNotifPanel() {
-  const lista = document.getElementById('notif-lista');
-  if (lista) {
-    lista.innerHTML = notificacionesDemoData.map(n => `
-      <div onclick="showPage('${n.page}');cerrarNotifPanel()" style="display:flex;gap:12px;padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:10px;background:${n.urgente?'rgba(239,68,68,0.05)':'transparent'}">
-        <span style="font-size:24px;flex-shrink:0">${n.icon}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;margin-bottom:2px">${n.titulo}${n.urgente?' 🔴':''}</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.4">${n.texto}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:4px">${n.tiempo}</div>
-        </div>
-      </div>`).join('');
+async function abrirNotifPanel() {
+  let panel = document.getElementById('notif-dropdown');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'notif-dropdown';
+    panel.style.cssText = 'position:absolute;top:60px;right:12px;background:#0f172a;border:1px solid #334155;border-radius:0.75rem;width:380px;max-height:520px;overflow-y:auto;z-index:99998;box-shadow:0 12px 32px rgba(0,0,0,0.6);display:none;';
+    document.body.appendChild(panel);
   }
-  const btn = document.getElementById('notif-activar-btn');
-  if (btn && Notification.permission === 'granted') {
-    btn.textContent = '✅ Alertas push activas';
-    btn.style.background = 'var(--green)';
+  if (panel.style.display === 'block') {
+    panel.style.display = 'none';
+    return;
   }
-  document.getElementById('notif-panel').style.display = 'block';
+  panel.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#9ca3af;font-size:0.9rem;">Cargando...</div>';
+  panel.style.display = 'block';
+  const estado = localStorage.getItem('tequio_estado_clave') || '';
+  const since = localStorage.getItem('tequio_notif_last_seen') || new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  try {
+    const r = await fetch(`/api/data?vista=notificaciones&estado=${encodeURIComponent(estado)}&since=${encodeURIComponent(since)}`);
+    const data = await r.json();
+    if (!data.items || data.items.length === 0) {
+      panel.innerHTML = '<div style="padding:0.6rem 1rem;border-bottom:1px solid #334155;color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">🔔 NOTIFICACIONES</div><div style="padding:2rem 1rem;text-align:center;color:#9ca3af;font-size:0.85rem;">Sin novedades por ahora.</div>';
+    } else {
+      const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+      const itemsHtml = data.items.map(it => {
+        const isInternal = it.link && it.link.startsWith('/panel/');
+        const slug = it.slug;
+        let onclick = '';
+        if (isInternal && slug) onclick = `event.preventDefault();window.cargarPanel&&window.cargarPanel('${slug}');document.getElementById('notif-dropdown').style.display='none';`;
+        else if (it.link) onclick = "document.getElementById('notif-dropdown').style.display='none';";
+        const linkAttr = it.external ? 'target="_blank" rel="noopener"' : 'target="_top"';
+        const inner = `<div style="display:flex;gap:0.6rem;align-items:flex-start;"><div style="font-size:1.2rem;line-height:1.2;flex-shrink:0;">${it.icono}</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.85rem;color:#f3f4f6;margin-bottom:0.2rem;">${esc(it.titulo)}</div><div style="color:#9ca3af;font-size:0.78rem;line-height:1.4;">${esc((it.desc||'').slice(0,110))}${(it.desc||'').length>110?'...':''}</div><div style="color:#6b7280;font-size:0.7rem;margin-top:0.3rem;">${relativeTimeNotif(it.fecha)}</div></div></div>`;
+        if (it.link) return `<a href="${esc(it.link)}" ${linkAttr} onclick="${onclick}" style="display:block;padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#e5e7eb;text-decoration:none;">${inner}</a>`;
+        return `<div style="padding:0.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#e5e7eb;cursor:default;">${inner}</div>`;
+      }).join('');
+      panel.innerHTML = `<div style="padding:0.7rem 1rem;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;background:rgba(251,191,36,0.05);"><span style="color:#fbbf24;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;">🔔 NOTIFICACIONES</span><span style="color:#9ca3af;font-size:0.7rem;">${data.total} recientes</span></div><div>${itemsHtml}</div>`;
+    }
+    localStorage.setItem('tequio_notif_last_seen', new Date().toISOString());
+    actualizarNotifBadge(0);
+  } catch (e) {
+    panel.innerHTML = '<div style="padding:1.5rem;text-align:center;color:#ef4444;font-size:0.85rem;">Error cargando notificaciones</div>';
+  }
 }
+
+function relativeTimeNotif(ts) {
+  if (!ts) return '';
+  const diff = (Date.now() - new Date(ts).getTime()) / 1000;
+  if (diff < 60) return 'hace segundos';
+  if (diff < 3600) return 'hace ' + Math.floor(diff/60) + ' min';
+  if (diff < 86400) return 'hace ' + Math.floor(diff/3600) + 'h';
+  if (diff < 86400*7) return 'hace ' + Math.floor(diff/86400) + ' días';
+  return new Date(ts).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+}
+
+function actualizarNotifBadge(count) {
+  const btn = document.querySelector('.btn-icon[onclick*="abrirNotifPanel"]');
+  if (!btn) return;
+  let badge = btn.querySelector('.notif-badge');
+  if (count > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'notif-badge';
+      badge.style.cssText = 'position:absolute;top:-2px;right:-2px;background:#dc2626;color:white;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:999px;line-height:1.2;border:2px solid #0b0f1a;';
+      btn.style.position = 'relative';
+      btn.appendChild(badge);
+    }
+    badge.textContent = count > 9 ? '9+' : count;
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+async function checkearNotifBadgeInicial() {
+  const estado = localStorage.getItem('tequio_estado_clave') || '';
+  const since = localStorage.getItem('tequio_notif_last_seen') || new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  try {
+    const r = await fetch(`/api/data?vista=notificaciones&estado=${encodeURIComponent(estado)}&since=${encodeURIComponent(since)}`);
+    const data = await r.json();
+    actualizarNotifBadge(data.unread || 0);
+  } catch (e) {}
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('notif-dropdown');
+  if (!panel || panel.style.display !== 'block') return;
+  const btn = e.target.closest('.btn-icon[onclick*="abrirNotifPanel"]');
+  if (btn) return;
+  if (!panel.contains(e.target)) panel.style.display = 'none';
+});
+
+window.abrirNotifPanel = abrirNotifPanel;
+window.actualizarNotifBadge = actualizarNotifBadge;
+
+document.addEventListener('DOMContentLoaded', () => setTimeout(checkearNotifBadgeInicial, 1200));
 
 function cerrarNotifPanel(e) {
   if (e && e.target !== document.getElementById('notif-panel')) return;
