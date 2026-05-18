@@ -184,29 +184,29 @@ const ESTADOS_EMOJI = {
   "06":{nombre:"Colima",abbr:"COL",emoji:"&#127755;"},
   "07":{nombre:"Chiapas",abbr:"CHIS",emoji:"&#129436;"},
   "08":{nombre:"Chihuahua",abbr:"CHIH",emoji:"&#127964;&#65039;"},
-  "09":{nombre:"Ciudad de Mexico",abbr:"CDMX",emoji:"&#127961;&#65039;"},
+  "09":{nombre:"Ciudad de México",abbr:"CDMX",emoji:"&#127961;&#65039;"},
   "10":{nombre:"Durango",abbr:"DGO",emoji:"&#129410;"},
   "11":{nombre:"Guanajuato",abbr:"GTO",emoji:"&#9962;"},
   "12":{nombre:"Guerrero",abbr:"GRO",emoji:"&#127802;"},
   "13":{nombre:"Hidalgo",abbr:"HGO",emoji:"&#127984;"},
   "14":{nombre:"Jalisco",abbr:"JAL",emoji:"&#129749;"},
-  "15":{nombre:"Estado de Mexico",abbr:"EDOMEX",emoji:"&#127963;&#65039;"},
-  "16":{nombre:"Michoacan",abbr:"MICH",emoji:"&#129419;"},
+  "15":{nombre:"Estado de México",abbr:"EDOMEX",emoji:"&#127963;&#65039;"},
+  "16":{nombre:"Michoacán",abbr:"MICH",emoji:"&#129419;"},
   "17":{nombre:"Morelos",abbr:"MOR",emoji:"&#127800;"},
   "18":{nombre:"Nayarit",abbr:"NAY",emoji:"&#128011;"},
-  "19":{nombre:"Nuevo Leon",abbr:"NL",emoji:"&#9968;&#65039;"},
+  "19":{nombre:"Nuevo León",abbr:"NL",emoji:"&#9968;&#65039;"},
   "20":{nombre:"Oaxaca",abbr:"OAX",emoji:"&#129718;"},
   "21":{nombre:"Puebla",abbr:"PUE",emoji:"&#127755;"},
-  "22":{nombre:"Queretaro",abbr:"QRO",emoji:"&#127799;"},
+  "22":{nombre:"Querétaro",abbr:"QRO",emoji:"&#127799;"},
   "23":{nombre:"Quintana Roo",abbr:"QROO",emoji:"&#129897;"},
-  "24":{nombre:"San Luis Potosi",abbr:"SLP",emoji:"&#127797;"},
+  "24":{nombre:"San Luis Potosí",abbr:"SLP",emoji:"&#127797;"},
   "25":{nombre:"Sinaloa",abbr:"SIN",emoji:"&#129438;"},
   "26":{nombre:"Sonora",abbr:"SON",emoji:"&#127774;"},
   "27":{nombre:"Tabasco",abbr:"TAB",emoji:"&#127796;"},
   "28":{nombre:"Tamaulipas",abbr:"TAMS",emoji:"&#127806;"},
   "29":{nombre:"Tlaxcala",abbr:"TLAX",emoji:"&#127805;"},
   "30":{nombre:"Veracruz",abbr:"VER",emoji:"&#127754;"},
-  "31":{nombre:"Yucatan",abbr:"YUC",emoji:"&#129897;"},
+  "31":{nombre:"Yucatán",abbr:"YUC",emoji:"&#129897;"},
   "32":{nombre:"Zacatecas",abbr:"ZAC",emoji:"&#9935;&#65039;"}
 };
 
@@ -282,7 +282,7 @@ function renderLanding(federales){
   app.innerHTML = `
     <div class="section-title">Selecciona tu estado &mdash; Fiscalia General</div>
     <div class="estados-grid">${grid}</div>
-    <div class="section-title">Servicios federales &mdash; aplican en todo Mexico</div>
+    <div class="section-title">Servicios federales &mdash; aplican en todo México</div>
     ${renderFederalesAgrupados(federales)}
   `;
 }
@@ -301,7 +301,7 @@ function renderEstado(clave, federales, estatales){
     <div class="section-title">Servicios estatales</div>
     ${lista}
     <a class="back-btn" href="${preserveEmbedded('')}">&larr; Volver a 32 estados</a>
-    <div class="section-title">Servicios federales &mdash; aplican en todo Mexico</div>
+    <div class="section-title">Servicios federales &mdash; aplican en todo México</div>
     ${renderFederalesAgrupados(federales)}
   `;
 }
