@@ -110,23 +110,23 @@ const API = '/api/data';
 const map = L.map('map', { preferCanvas: true }).setView([22.0, -101.0], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 let markersLayer = L.layerGroup().addTo(map);
-let allCategorias = [];
+let allCategorías = [];
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-async function loadCategorias(){
+async function loadCategorías(){
   const ent = document.getElementById('f-entidad').value;
   const r = await fetch(API + '?vista=atlas_categorias' + (ent ? '&entidad=' + encodeURIComponent(ent) : ''));
   const j = await r.json();
-  allCategorias = j.categorias || [];
+  allCategorías = j.categorias || [];
   const sel = document.getElementById('f-categoria');
-  sel.innerHTML = '<option value="">Todas</option>' + allCategorias.map(c => '<option value="' + escapeHtml(c.categoria_slug) + '">' + escapeHtml(c.categoria) + ' (' + c.total + ')</option>').join('');
+  sel.innerHTML = '<option value="">Todas</option>' + allCategorías.map(c => '<option value="' + escapeHtml(c.categoria_slug) + '">' + escapeHtml(c.categoria) + ' (' + c.total + ')</option>').join('');
   updateSubcat();
 }
 
 function updateSubcat(){
   const catSlug = document.getElementById('f-categoria').value;
-  const cat = allCategorias.find(c => c.categoria_slug === catSlug);
+  const cat = allCategorías.find(c => c.categoria_slug === catSlug);
   const sel = document.getElementById('f-subcat');
   if (!cat){ sel.innerHTML = '<option value="">Todas</option>'; return; }
   sel.innerHTML = '<option value="">Todas</option>' + cat.subcategorias.map(s => '<option value="' + escapeHtml(s.subcategoria_slug) + '">' + escapeHtml(s.subcategoria) + ' (' + s.total + ')</option>').join('');
@@ -202,12 +202,12 @@ async function cercaDeMi(){
   }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
-document.getElementById('f-entidad').addEventListener('change', () => { loadCategorias(); loadPuntos(); });
+document.getElementById('f-entidad').addEventListener('change', () => { loadCategorías(); loadPuntos(); });
 document.getElementById('f-categoria').addEventListener('change', () => { updateSubcat(); loadPuntos(); });
 document.getElementById('f-subcat').addEventListener('change', loadPuntos);
 document.getElementById('btn-cerca').addEventListener('click', cercaDeMi);
 
-loadCategorias().then(loadPuntos);
+loadCategorías().then(loadPuntos);
 </script>
 </body>
 </html>
