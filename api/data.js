@@ -2022,6 +2022,7 @@ export default async function handler(req, res) {
       const device = (req.query.device || '').toString();
       let q = '?activo=eq.true&select=slug,nombre,tipo,cargo_actual,organizacion,entidad,partido,bio_corta,fuente_url';
       if (tipo) q += '&tipo=eq.' + encodeURIComponent(tipo);
+      else q += '&tipo=in.(politico,gobernador,ministro_scjn,consejero_ine,magistrado_tepjf,secretario_federal,lider_partido,diputado_presidencia,fiscal)';
       if (entidad) q += '&entidad=eq.' + encodeURIComponent(entidad);
       if (partido) q += '&partido=eq.' + encodeURIComponent(partido);
       q += '&order=nombre.asc&limit=500';
