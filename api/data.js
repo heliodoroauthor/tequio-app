@@ -2014,6 +2014,129 @@ export default async function handler(req, res) {
       return res.status(200).json({ items: sorted, total: sorted.length, unread });
     }
 
+    // ==================== APROBACION DEL PUEBLO ====================
+    if (vista === 'aprobacion_actores') {
+      const tipo = (req.query.tipo || '').toString();
+      const entidad = (req.query.entidad || '').toString();
+      const partido = (req.query.partido || '').toString();
+      const device = (req.query.device || '').toString();
+      let q = '?activo=eq.true&select=slug,nombre,tipo,cargo_actual,organizacion,entidad,partido,bio_corta,fuente_url';
+      if (tipo) q += '&tipo=eq.' + encodeURIComponent(tipo);
+      if (entidad) q += '&entidad=eq.' + encodeURIComponent(entidad);
+      if (partido) q += '&partido=eq.' + encodeURIComponent(partido);
+      q += '&order=nombre.asc&limit=500';
+      const actores = (await sb('actores_poder' + q)) || [];
+      const allVotos = (await sb('aprobacion_actores?select=actor_slug,voto&limit=100000')) || [];
+      const counts = {};
+      for (const v of allVotos) {
+        if (!counts[v.actor_slug]) counts[v.actor_slug] = { aprueba:0, desaprueba:0, neutral:0, total:0 };
+        counts[v.actor_slug][v.voto] = (counts[v.actor_slug][v.voto]||0) + 1;
+        counts[v.actor_slug].total++;
+      }
+      const miVoto = {};
+      if (device) {
+        const mis = (await sb('aprobacion_actores?device_hash=eq.' + encodeURIComponent(device) + '&select=actor_slug,voto&limit=5000')) || [];
+        for (const v of mis) miVoto[v.actor_slug] = v.voto;
+      }
+      const out = actores.map(a => ({
+        slug:a.slug, nombre:a.nombre, tipo:a.tipo, cargo_actual:a.cargo_actual, organizacion:a.organizacion, entidad:a.entidad, partido:a.partido, bio_corta:a.bio_corta, fuente_url:a.fuente_url,
+        counts: counts[a.slug] || { aprueba:0, desaprueba:0, neutral:0, total:0 },
+        mi_voto: miVoto[a.slug] || null
+      }));
+      return res.status(200).json({ actores: out, total: out.length });
+    }
+
+    if (vista === 'aprobacion_leyes') {
+      const device = (req.query.device || '').toString();
+      const cat = (req.query.categoria || '').toString();
+      let q = '?destacada=eq.true&select=*';
+      if (cat) q += '&categoria=eq.' + encodeURIComponent(cat);
+      q += '&order=orden.asc&limit=200';
+      const leyes = (await sb('leyes_destacadas' + q)) || [];
+      const votos = (await sb('aprobacion_leyes?select=ley_id,voto&limit=100000')) || [];
+      const counts = {};
+      for (const v of votos) {
+        if (!counts[v.ley_id]) counts[v.ley_id] = { aprueba:0, desaprueba:0, neutral:0, total:0 };
+        counts[v.ley_id][v.voto] = (counts[v.ley_id][v.voto]||0) + 1;
+        counts[v.ley_id].total++;
+      }
+      const miVoto = {};
+      if (device) {
+        const mis = (await sb('aprobacion_leyes?device_hash=eq.' + encodeURIComponent(device) + '&select=ley_id,voto&limit=5000')) || [];
+        for (const v of mis) miVoto[v.ley_id] = v.voto;
+      }
+      const out = leyes.map(l => ({
+        slug:l.slug, titulo_oficial:l.titulo_oficial, titulo_ciudadano:l.titulo_ciudadano, tipo:l.tipo, ambito:l.ambito, resumen_ciudadano:l.resumen_ciudadano, categoria:l.categoria, emoji:l.emoji, url_oficial:l.url_oficial,
+        counts: counts[l.slug] || { aprueba:0, desaprueba:0, neutral:0, total:0 },
+        mi_voto: miVoto[l.slug] || null
+      }));
+      return res.status(200).json({ leyes: out, total: out.length });
+    }
+
+    if (vista === 'aprobacion_votar_actor' || vista === 'aprobacion_votar_ley') {
+      const isActor = vista === 'aprobacion_votar_actor';
+      const target = isActor ? (req.query.slug || '').toString() : (req.query.ley_id || '').toString();
+      const tipo = (req.query.actor_tipo || 'politico').toString();
+      const titulo = (req.query.titulo || target).toString();
+      const voto = (req.query.voto || '').toString();
+      const device = (req.query.device || '').toString();
+      const entidad = (req.query.entidad || '').toString();
+      if (!target || !voto || !device) return res.status(400).json({ error: 'Faltan parametros: target/voto/device' });
+      if (!['aprueba','desaprueba','neutral'].includes(voto)) return res.status(400).json({ error: 'voto invalido' });
+      if (device.length < 8 || device.length > 128) return res.status(400).json({ error: 'device invalido' });
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const ipHash = nodeCrypto.createHash('sha256').update(ip + '|tequio').digest('hex').substring(0, 16);
+      const table = isActor ? 'aprobacion_actores' : 'aprobacion_leyes';
+      const onConflict = isActor ? 'actor_slug,device_hash' : 'ley_id,device_hash';
+      const body = isActor
+        ? { actor_slug: target, actor_tipo: tipo, voto, device_hash: device, ip_hash: ipHash, clave_entidad: entidad || null }
+        : { ley_id: target, ley_titulo: titulo, voto, device_hash: device, ip_hash: ipHash, clave_entidad: entidad || null };
+      try {
+        const url = process.env.SUPABASE_URL + '/rest/v1/' + table + '?on_conflict=' + onConflict;
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: {
+            apikey: process.env.SERVICE_KEY,
+            Authorization: 'Bearer ' + process.env.SERVICE_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) {
+          const t = await r.text();
+          return res.status(500).json({ error: 'Error voto', detail: t.substring(0,200) });
+        }
+        return res.status(200).json({ ok: true });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    if (vista === 'aprobacion_scoreboard') {
+      const votos = (await sb('aprobacion_actores?select=actor_slug,voto&limit=100000')) || [];
+      const actores = (await sb('actores_poder?activo=eq.true&select=slug,nombre,cargo_actual,entidad,partido,tipo&limit=2000')) || [];
+      const idx = {};
+      for (const a of actores) idx[a.slug] = a;
+      const agg = {};
+      for (const v of votos) {
+        if (!agg[v.actor_slug]) agg[v.actor_slug] = { aprueba:0, desaprueba:0, neutral:0, total:0 };
+        agg[v.actor_slug][v.voto] = (agg[v.actor_slug][v.voto]||0) + 1;
+        agg[v.actor_slug].total++;
+      }
+      const rows = [];
+      for (const slug of Object.keys(agg)) {
+        if (!idx[slug]) continue;
+        const c = agg[slug];
+        rows.push({ slug, nombre: idx[slug].nombre, cargo_actual: idx[slug].cargo_actual, entidad: idx[slug].entidad, partido: idx[slug].partido, tipo: idx[slug].tipo, counts: c, pct_aprobacion: c.total > 0 ? Math.round((c.aprueba / c.total) * 100) : 0, pct_desaprobacion: c.total > 0 ? Math.round((c.desaprueba / c.total) * 100) : 0 });
+      }
+      const minVotos = parseInt(req.query.min_votos || '5');
+      const filtered = rows.filter(r => r.counts.total >= minVotos);
+      const top = [...filtered].sort((a,b) => b.pct_aprobacion - a.pct_aprobacion).slice(0, 20);
+      const bottom = [...filtered].sort((a,b) => a.pct_aprobacion - b.pct_aprobacion).slice(0, 20);
+      return res.status(200).json({ top_aprobados: top, top_desaprobados: bottom, total_actores: rows.length, min_votos: minVotos });
+    }
+
     return res.status(400).json({ error: 'Vista desconocida', vistas_disponibles: [
       'dashboard','clima','alertas','sequia','presas','diputados','votaciones',
       'mi_representante','buscar_diputado','senadores','senador_detalle','senadores_busqueda',
@@ -2022,7 +2145,8 @@ export default async function handler(req, res) {
       'contratos','contrato_detalle','proveedores_top','proveedor_detalle','compranet_stats',
       'despachos','crear_lead',
       'banxico_historico','inegi_estado','inegi_comparador','leyes_lista','directorio_estado',
-      'chat','chat_publicar','chat_votar','chat_reportar'
+      'chat','chat_publicar','chat_votar','chat_reportar',
+      'aprobacion_actores','aprobacion_leyes','aprobacion_votar_actor','aprobacion_votar_ley','aprobacion_scoreboard'
     ]});
   } catch (e) {
     return res.status(500).json({ error: e.message });
