@@ -26819,6 +26819,64 @@ function loadAccesibilidadSettings() {
   } catch(e){}
 }
 document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
+
+// Bug 2 fix: busqueda global con autocomplete
+(function() {
+  function initBusquedaGlobal() {
+    const input = document.querySelector('input[placeholder*="Buscar leyes"]');
+    if (!input) return false;
+    if (input.dataset.bgInit === '1') return true;
+    input.dataset.bgInit = '1';
+    const dropdown = document.createElement('div');
+    dropdown.id = 'busqueda-dropdown';
+    dropdown.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:#1f2937;border:1px solid #374151;border-radius:8px;max-height:400px;overflow-y:auto;display:none;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-top:4px;';
+    input.parentElement.style.position = 'relative';
+    input.parentElement.appendChild(dropdown);
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    let timer = null;
+    input.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      if (timer) clearTimeout(timer);
+      if (q.length < 2) { dropdown.style.display = 'none'; return; }
+      timer = setTimeout(async () => {
+        try {
+          const r = await fetch('/api/data?vista=buscador_global&q=' + encodeURIComponent(q));
+          const data = await r.json();
+          if (!data.items || !data.items.length) {
+            dropdown.innerHTML = '<div style="padding:12px;color:#9ca3af;font-size:13px;">Sin resultados.</div>';
+          } else {
+            dropdown.innerHTML = data.items.map(it => '<a href="' + escapeHtml(it.link || '#') + '" style="display:block;padding:10px 14px;border-bottom:1px solid #374151;color:#e5e7eb;text-decoration:none;font-size:13px;" onmouseover="this.style.background=\'rgba(251,191,36,0.1)\';" onmouseout="this.style.background=\'transparent\';"><div style="display:flex;align-items:center;gap:8px;"><span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;">' + escapeHtml(it.tipo) + '</span><span style="font-weight:600;">' + escapeHtml(it.titulo) + '</span></div>' + (it.sub ? '<div style="color:#9ca3af;font-size:11px;margin-top:2px;margin-left:50px;">' + escapeHtml(it.sub) + '</div>' : '') + '</a>').join('');
+          }
+          dropdown.style.display = 'block';
+        } catch (err) {}
+      }, 250);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const first = dropdown.querySelector('a');
+        if (first && dropdown.style.display !== 'none') { e.preventDefault(); first.click(); }
+      }
+      if (e.key === 'Escape') dropdown.style.display = 'none';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.parentElement.contains(e.target)) dropdown.style.display = 'none';
+    });
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initBusquedaGlobal, 200));
+  } else {
+    setTimeout(initBusquedaGlobal, 200);
+  }
+  setTimeout(initBusquedaGlobal, 1500);
+  setTimeout(initBusquedaGlobal, 4000);
+})();
 </script>
 </body>
 </html>
