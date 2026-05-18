@@ -15,7 +15,7 @@
   .intro{background:#13131a;border:1px solid #2a2a2a;border-radius:12px;padding:18px;margin-bottom:20px}
   .intro h2{color:#a78bfa;font-size:16px;margin-bottom:6px}
   .intro p{font-size:13px;color:#9ca3af}
-  .telemetria{display:flex;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#0f1419;border:1px solid #1f2937;border-radius:10px;margin-bottom:20px;font-size:12px;color:#94a3b8}
+  .telemetria{display:none !important;display:flex;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#0f1419;border:1px solid #1f2937;border-radius:10px;margin-bottom:20px;font-size:12px;color:#94a3b8}
   .telemetria span.ok{color:#10b981}
   .telemetria span.warn{color:#f59e0b}
   .card{background:#13131a;border:1px solid #2a2a2a;border-radius:14px;padding:20px;margin-bottom:18px;transition:.2s}
@@ -59,12 +59,54 @@
     <p>Las iniciativas ciudadanas necesitan apoyo masivo para entrar al proceso legislativo. Firma de forma anonima las que apoyas.</p>
   </div>
 
-  <div class="telemetria">
+  <div class="telemetria" aria-hidden="true">
     <span id="tel-tiempo">Tiempo en pagina: <strong>0s</strong></span>
     <span id="tel-scroll" class="warn">Scroll: pendiente</span>
     <span id="tel-pointer" class="warn">Interaccion: pendiente</span>
     <span id="tel-device">Device hash: calculando...</span>
   </div>
+  <div id="verif-status-bar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0f1419;border:1px solid #1f2937;border-radius:8px;margin-bottom:20px;font-size:12px;color:#94a3b8">
+    <span id="verif-status-icon" aria-hidden="true">⏳</span>
+    <span id="verif-status-text">Verificando seguridad...</span>
+  </div>
+  <script>
+  (function verifStatusObserver(){
+    function update(){
+      var t = document.getElementById('tel-tiempo');
+      var s = document.getElementById('tel-scroll');
+      var p = document.getElementById('tel-pointer');
+      var d = document.getElementById('tel-device');
+      var bar = document.getElementById('verif-status-bar');
+      var icon = document.getElementById('verif-status-icon');
+      var txt = document.getElementById('verif-status-text');
+      if (!bar) return;
+      var scrollOk = s && !/pendiente/i.test(s.textContent);
+      var pointerOk = p && !/pendiente/i.test(p.textContent);
+      var deviceOk = d && !/calculando/i.test(d.textContent);
+      var tiempoOk = false;
+      if (t) {
+        var m = t.textContent.match(/(\d+)\s*s/);
+        if (m && parseInt(m[1],10) >= 30) tiempoOk = true;
+      }
+      if (scrollOk && pointerOk && deviceOk && tiempoOk) {
+        icon.textContent = '✅';
+        txt.textContent = 'Verificación humana completa';
+        bar.style.borderColor = '#10b981';
+        bar.style.color = '#10b981';
+      } else {
+        icon.textContent = '⏳';
+        txt.textContent = 'Verificando seguridad...';
+      }
+    }
+    var obs = new MutationObserver(update);
+    ['tel-tiempo','tel-scroll','tel-pointer','tel-device'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) obs.observe(el, {childList:true, characterData:true, subtree:true});
+    });
+    setInterval(update, 1000);
+    update();
+  })();
+  </script>
 
   <div id="ine-zone" style="margin-bottom:1.2rem;">
     <button id="btn-ine" type="button" style="background:#1f2937;color:#e5e7eb;border:1px solid #374151;padding:0.7rem 1rem;border-radius:0.5rem;cursor:pointer;font-size:0.95rem;">
