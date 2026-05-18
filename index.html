@@ -2214,6 +2214,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('votar')">
         <span class="icon">🗳️</span> Vota antes del Congreso
       </div>
+      <div class="nav-item" onclick="cargarPanel('mi-rep')"><span class="icon">🏛️</span> Mi Rep vs Yo</div>
       <div class="nav-item" onclick="cargarPanel('iniciativa-firmar')">
         <span class="icon">✍️</span> Firma Iniciativas
       </div>
@@ -13444,6 +13445,7 @@ function switchTab(el) {
 // ─── Panel iframe loader & Próximamente placeholder ───
 function cargarPanel(slug) {
   const PANELS = {
+    'mi-rep': '/panel/mi-rep-vs-yo.html?embedded=1',
     'chat': '/panel/chat.html?embedded=1',
     'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
