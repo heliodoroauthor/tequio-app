@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promesómetro — Tequio</title>
+<style>
+  :root {
+    --bg: #0b0f1a; --panel: #131826; --panel2: #1a2030; --border: #2a334a;
+    --text: #e6e9f2; --muted: #8b94a7; --gold: #fbbf24;
+    --green: #34d399; --red: #f87171; --gray: #9ca3af; --accent: #60a5fa;
+    --orange: #fb923c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  h1 { margin: 0 0 4px; font-size: 22px; color: var(--gold); }
+  .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 16px; background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .filters { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .filter-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .filter-group select { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
+  .stats-bar { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .stats-bar strong { color: var(--gold); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; border-left: 4px solid var(--gray); }
+  .card.estado-cumplida { border-left-color: var(--green); }
+  .card.estado-parcial { border-left-color: var(--orange); }
+  .card.estado-incumplida, .card.estado-rota { border-left-color: var(--red); }
+  .card.estado-en_curso { border-left-color: var(--accent); }
+  .card.estado-olvidada { border-left-color: var(--muted); }
+  .actor-line { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .actor-name { font-weight: 600; font-size: 14px; }
+  .actor-cargo { color: var(--muted); font-size: 11px; }
+  .promesa-texto { font-size: 14px; line-height: 1.5; margin: 10px 0; font-style: italic; padding-left: 12px; border-left: 2px solid var(--gold); }
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: var(--panel2); color: var(--muted); border: 1px solid var(--border); }
+  .pill.estado.cumplida { background: rgba(52,211,153,0.15); color: var(--green); border-color: rgba(52,211,153,0.3); }
+  .pill.estado.parcial { background: rgba(251,146,60,0.15); color: var(--orange); border-color: rgba(251,146,60,0.3); }
+  .pill.estado.incumplida, .pill.estado.rota { background: rgba(248,113,113,0.15); color: var(--red); border-color: rgba(248,113,113,0.3); }
+  .pill.estado.en_curso { background: rgba(96,165,250,0.15); color: var(--accent); border-color: rgba(96,165,250,0.3); }
+  .pill.tipo { background: rgba(251,191,36,0.15); color: var(--gold); border-color: rgba(251,191,36,0.3); }
+  .resumen { color: var(--muted); font-size: 12px; margin: 6px 0; }
+  .fechas { font-size: 11px; color: var(--muted); margin: 6px 0; }
+  .bar-wrap { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; display: flex; margin: 10px 0 4px; }
+  .bar-green { background: var(--green); height: 100%; }
+  .bar-orange { background: var(--orange); height: 100%; }
+  .bar-red { background: var(--red); height: 100%; }
+  .bar-gray { background: var(--gray); height: 100%; }
+  .counts-line { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .vote-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+  .vote-btn { padding: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.15s; }
+  .vote-btn:hover { background: var(--panel2); }
+  .vote-btn.active.cumplida { background: var(--green); color: #000; border-color: var(--green); }
+  .vote-btn.active.parcial { background: var(--orange); color: #000; border-color: var(--orange); }
+  .vote-btn.active.incumplida { background: var(--red); color: #fff; border-color: var(--red); }
+  .vote-btn.active.no_se { background: var(--gray); color: #000; border-color: var(--gray); }
+  .vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .source { font-size: 11px; color: var(--muted); margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .source a { color: var(--accent); text-decoration: none; }
+  .source a:hover { text-decoration: underline; }
+  .empty { padding: 40px; text-align: center; color: var(--muted); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+  .disclaimer { font-size: 11px; color: var(--muted); padding: 10px; background: rgba(96,165,250,0.06); border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 16px; }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .toast.err { background: var(--red); color: #fff; }
+  .desastre-card { display: flex; gap: 14px; align-items: flex-start; }
+  .desastre-emoji { font-size: 36px; }
+  .desastre-info h3 { margin: 0 0 4px; font-size: 17px; }
+  .desastre-info .when { color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📊 Promesómetro</h1>
+    <p class="subtitle">Cada promesa de campaña, toma de protesta y crisis — con su fuente oficial. Vota si se cumplió.</p>
+  </header>
+
+  <div class="disclaimer">
+    🎯 <strong>Cero invención.</strong> Cada promesa viene de fuente oficial pública (DOF, gob.mx, plataforma INE, video oficial). Tu evaluación ciudadana se suma al consenso. 1 voto por dispositivo por promesa.
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="promesas">📋 Promesas</button>
+    <button class="tab" data-tab="desastres">🌀 Crisis y Desastres</button>
+  </div>
+
+  <div id="panel-promesas">
+    <div class="filters">
+      <div class="filter-group">
+        <label>Tipo</label>
+        <select id="f-tipo">
+          <option value="">Todos</option>
+          <option value="campana">Campaña</option>
+          <option value="toma_protesta">Toma de protesta</option>
+          <option value="conferencia_oficial">Conferencia oficial</option>
+          <option value="desastre">Desastre / Crisis</option>
+          <option value="declaracion_publica">Declaración pública</option>
+          <option value="plataforma_ine">Plataforma INE</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Categoría</label>
+        <select id="f-categoria">
+          <option value="">Todas</option>
+          <option value="economia">Economía</option>
+          <option value="seguridad">Seguridad</option>
+          <option value="salud">Salud</option>
+          <option value="infraestructura">Infraestructura</option>
+          <option value="educacion">Educación</option>
+          <option value="justicia">Justicia</option>
+          <option value="derechos">Derechos</option>
+          <option value="vivienda">Vivienda</option>
+          <option value="energia">Energía</option>
+          <option value="medio_ambiente">Medio Ambiente</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Estado actual</label>
+        <select id="f-estado">
+          <option value="">Todos</option>
+          <option value="cumplida">Cumplida</option>
+          <option value="parcial">Parcial</option>
+          <option value="en_curso">En curso</option>
+          <option value="incumplida">Incumplida</option>
+          <option value="olvidada">Olvidada</option>
+          <option value="rota">Rota</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ámbito</label>
+        <select id="f-ambito">
+          <option value="">Todos</option>
+          <option value="federal">Federal</option>
+          <option value="estatal">Estatal</option>
+          <option value="municipal">Municipal</option>
+        </select>
+      </div>
+    </div>
+    <div class="stats-bar" id="stats-promesas">Cargando…</div>
+    <div class="cards" id="cards-promesas"><div class="loading">Cargando promesas…</div></div>
+  </div>
+
+  <div id="panel-desastres" style="display:none;">
+    <div class="stats-bar" id="stats-desastres">Cargando…</div>
+    <div class="cards" id="cards-desastres"><div class="loading">Cargando crisis y desastres…</div></div>
+  </div>
+</div>
+
+<script>
+const API = '/api/data';
+
+function getDevice(){
+  let d = localStorage.getItem('tequio_device_hash');
+  if (!d) {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    d = Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
+    localStorage.setItem('tequio_device_hash', d);
+  }
+  return d;
+}
+const DEVICE = getDevice();
+const ENTIDAD = (localStorage.getItem('tequio_estado')||'').trim();
+
+function toast(msg, err){
+  const t = document.createElement('div');
+  t.className = 'toast' + (err?' err':'');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fmtDate(d){
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+  } catch(e){ return d; }
+}
+
+function pct(n,t){ return t>0?Math.round((n/t)*100):0; }
+
+function renderBar(c){
+  const total = c.total || 0;
+  if (total === 0) return '<div class="bar-wrap"><div style="background:var(--panel2);width:100%"></div></div><div class="counts-line"><span>Sin evaluaciones aún</span></div>';
+  const cu = pct(c.cumplida,total), pa = pct(c.parcial,total), inc = pct(c.incumplida,total), ns = pct(c.no_se,total);
+  return '<div class="bar-wrap">' +
+    '<div class="bar-green" style="width:'+cu+'%"></div>' +
+    '<div class="bar-orange" style="width:'+pa+'%"></div>' +
+    '<div class="bar-red" style="width:'+inc+'%"></div>' +
+    '<div class="bar-gray" style="width:'+ns+'%"></div>' +
+  '</div>' +
+  '<div class="counts-line">' +
+    '<span>✓'+cu+'%</span>' +
+    '<span>~'+pa+'%</span>' +
+    '<span>✗'+inc+'%</span>' +
+    '<span>?'+ns+'%</span>' +
+    '<span>· '+total+' votos</span>' +
+  '</div>';
+}
+function cardPromesaHtml(p){
+  const c = p.counts;
+  const mi = p.mi_voto;
+  const actor = p.actor || {};
+  const html =
+    '<div class="card estado-'+escapeHtml(p.estado_actual)+'" data-slug="'+escapeHtml(p.slug)+'">' +
+      '<div class="actor-line">' +
+        '<div><div class="actor-name">'+escapeHtml(actor.nombre||p.actor_slug)+'</div>' +
+        '<div class="actor-cargo">'+escapeHtml(actor.cargo_actual||'')+'</div></div>' +
+      '</div>' +
+      '<div class="meta">' +
+        '<span class="pill tipo">'+escapeHtml(p.tipo_promesa.replace(/_/g,' '))+'</span>' +
+        '<span class="pill">'+escapeHtml(p.categoria)+'</span>' +
+        '<span class="pill estado '+escapeHtml(p.estado_actual)+'">'+escapeHtml(p.estado_actual.replace(/_/g,' '))+'</span>' +
+        (p.entidad && p.entidad!=='FEDERAL' ? '<span class="pill">'+escapeHtml(p.entidad)+'</span>' : '') +
+      '</div>' +
+      '<div class="promesa-texto">"'+escapeHtml(p.texto_promesa)+'"</div>' +
+      (p.resumen ? '<div class="resumen">'+escapeHtml(p.resumen)+'</div>' : '') +
+      '<div class="fechas">📅 Prometida: '+fmtDate(p.fecha_promesa) +
+      (p.fecha_limite ? ' · Límite: '+fmtDate(p.fecha_limite) : '') +
+      (p.evento_contexto ? '<br>📍 '+escapeHtml(p.evento_contexto) : '') + '</div>' +
+      renderBar(c) +
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">¿Tú qué dices?</div>' +
+      '<div class="vote-row">' +
+        '<button class="vote-btn cumplida '+(mi==='cumplida'?'active':'')+'" data-eval="cumplida">✓ Cumplida</button>' +
+        '<button class="vote-btn parcial '+(mi==='parcial'?'active':'')+'" data-eval="parcial">~ Parcial</button>' +
+        '<button class="vote-btn incumplida '+(mi==='incumplida'?'active':'')+'" data-eval="incumplida">✗ Incumplida</button>' +
+        '<button class="vote-btn no_se '+(mi==='no_se'?'active':'')+'" data-eval="no_se">? No sé</button>' +
+      '</div>' +
+      '<div class="source">' +
+        '📎 <a href="'+escapeHtml(p.fuente_url)+'" target="_top" rel="noopener">Fuente oficial</a>' +
+        (p.evidencia_actual_url ? ' · 🔍 <a href="'+escapeHtml(p.evidencia_actual_url)+'" target="_top" rel="noopener">Evidencia actual</a>' : '') +
+      '</div>' +
+    '</div>';
+  return html;
+}
+
+function cardDesastreHtml(d){
+  const s = d.promesas_stats || {total:0};
+  return '<div class="card">' +
+    '<div class="desastre-card">' +
+      '<div class="desastre-emoji">'+escapeHtml(d.emoji||'⚠️')+'</div>' +
+      '<div class="desastre-info">' +
+        '<h3>'+escapeHtml(d.nombre)+'</h3>' +
+        '<div class="when">'+fmtDate(d.fecha_inicio)+' · '+escapeHtml(d.entidad||'')+'</div>' +
+        '<div class="resumen" style="margin-top:8px;">'+escapeHtml(d.resumen||'')+'</div>' +
+        '<div class="meta" style="margin-top:8px;">' +
+          '<span class="pill tipo">'+escapeHtml(d.tipo)+'</span>' +
+          '<span class="pill">'+s.total+' promesas</span>' +
+          (s.cumplida ? '<span class="pill estado cumplida">'+s.cumplida+' cumplidas</span>' : '') +
+          (s.parcial ? '<span class="pill estado parcial">'+s.parcial+' parciales</span>' : '') +
+          (s.en_curso ? '<span class="pill estado en_curso">'+s.en_curso+' en curso</span>' : '') +
+          (s.incumplida ? '<span class="pill estado incumplida">'+s.incumplida+' incumplidas</span>' : '') +
+        '</div>' +
+        (d.fuente_url ? '<div class="source" style="margin-top:8px;">📎 <a href="'+escapeHtml(d.fuente_url)+'" target="_top" rel="noopener">Declaratoria oficial</a></div>' : '') +
+        '<div style="margin-top:10px;"><button class="vote-btn" style="width:100%;padding:8px;" data-desastre="'+escapeHtml(d.slug)+'">Ver promesas de esta crisis →</button></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+async function loadPromesas(extra){
+  const t = document.getElementById('f-tipo').value;
+  const c = document.getElementById('f-categoria').value;
+  const e = document.getElementById('f-estado').value;
+  const a = document.getElementById('f-ambito').value;
+  const params = new URLSearchParams({ vista:'promesas_listar', device: DEVICE });
+  if (t) params.set('tipo', t);
+  if (c) params.set('categoria', c);
+  if (e) params.set('estado', e);
+  if (a) params.set('ambito', a);
+  if (extra && extra.desastre) params.set('desastre', extra.desastre);
+  const cont = document.getElementById('cards-promesas');
+  const stats = document.getElementById('stats-promesas');
+  cont.innerHTML = '<div class="loading">Cargando…</div>';
+  try {
+    const r = await fetch(API+'?'+params.toString());
+    const j = await r.json();
+    const arr = j.promesas || [];
+    if (!arr.length){ cont.innerHTML='<div class="empty">No hay promesas con esos filtros.</div>'; stats.textContent='0 resultados'; return; }
+    const tv = arr.reduce((s,p)=>s+(p.counts?p.counts.total:0),0);
+    const cumplidas = arr.filter(p=>p.estado_actual==='cumplida').length;
+    const incumplidas = arr.filter(p=>p.estado_actual==='incumplida' || p.estado_actual==='rota').length;
+    stats.innerHTML = '<span><strong>'+arr.length+'</strong> promesas</span>' +
+      (cumplidas ? '<span><strong class="" style="color:var(--green)">'+cumplidas+'</strong> cumplidas</span>' : '') +
+      (incumplidas ? '<span><strong style="color:var(--red)">'+incumplidas+'</strong> incumplidas/rotas</span>' : '') +
+      '<span><strong>'+tv+'</strong> votos ciudadanos</span>';
+    cont.innerHTML = arr.map(cardPromesaHtml).join('');
+    attachVoteHandlers(cont);
+  } catch(err){
+    cont.innerHTML='<div class="empty">Error de carga.</div>';
+  }
+}
+
+async function loadDesastres(){
+  const cont = document.getElementById('cards-desastres');
+  const stats = document.getElementById('stats-desastres');
+  cont.innerHTML='<div class="loading">Cargando…</div>';
+  try {
+    const r = await fetch(API+'?vista=desastres_listar');
+    const j = await r.json();
+    const arr = j.desastres || [];
+    if (!arr.length){ cont.innerHTML='<div class="empty">Sin crisis catalogadas.</div>'; stats.textContent='0'; return; }
+    const totalProm = arr.reduce((s,d)=>s+(d.promesas_stats?d.promesas_stats.total:0),0);
+    stats.innerHTML = '<span><strong>'+arr.length+'</strong> crisis</span><span><strong>'+totalProm+'</strong> promesas relacionadas</span>';
+    cont.innerHTML = arr.map(cardDesastreHtml).join('');
+    // attach desastre filter handlers
+    cont.querySelectorAll('[data-desastre]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        // switch to promesas tab with desastre filter
+        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        document.querySelector('.tab[data-tab="promesas"]').classList.add('active');
+        document.getElementById('panel-promesas').style.display='';
+        document.getElementById('panel-desastres').style.display='none';
+        loadPromesas({desastre: b.dataset.desastre});
+      });
+    });
+  } catch(err){
+    cont.innerHTML='<div class="empty">Error de carga.</div>';
+  }
+}
+
+function attachVoteHandlers(container){
+  container.querySelectorAll('.vote-btn[data-eval]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const card = btn.closest('.card');
+      const slug = card.dataset.slug;
+      const evaluacion = btn.dataset.eval;
+      const allBtns = card.querySelectorAll('.vote-btn[data-eval]');
+      allBtns.forEach(b=>b.disabled=true);
+      const params = new URLSearchParams({vista:'promesas_votar', slug, evaluacion, device:DEVICE, entidad:ENTIDAD});
+      try {
+        const r = await fetch(API+'?'+params.toString());
+        const j = await r.json();
+        if (!r.ok || j.error){ toast(j.error||'Error al votar', true); allBtns.forEach(b=>b.disabled=false); return; }
+        toast('✓ Evaluación registrada');
+        allBtns.forEach(b=>{ b.classList.remove('active'); b.disabled=false; });
+        btn.classList.add('active');
+        setTimeout(()=>loadPromesas(), 600);
+      } catch(e){
+        toast('Error de red', true);
+        allBtns.forEach(b=>b.disabled=false);
+      }
+    });
+  });
+}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const tab = t.dataset.tab;
+    document.getElementById('panel-promesas').style.display = tab==='promesas'?'':'none';
+    document.getElementById('panel-desastres').style.display = tab==='desastres'?'':'none';
+    if (tab==='desastres') loadDesastres();
+  });
+});
+
+['f-tipo','f-categoria','f-estado','f-ambito'].forEach(id=>document.getElementById(id).addEventListener('change', ()=>loadPromesas()));
+
+loadPromesas();
+</script>
+</body>
+</html>
