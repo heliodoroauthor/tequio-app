@@ -15105,7 +15105,7 @@ function filtrarNoticias() {
     const matchEstado = noticiasEstadoActivo === 'todos' || n.estado === noticiasEstadoActivo;
     const matchTema   = noticiasTemActivo === 'todos' || n.tema === noticiasTemActivo;
     const matchQ      = !q || n.titulo.toLowerCase().includes(q) || n.resumen.toLowerCase().includes(q) || n.estado.toLowerCase().includes(q);
-    return matchTab && matchEstado && matchTema && matchQ && (!window.noticiasFuenteActiva || window.noticiasFuenteActiva === 'todas' || n.fuente === window.noticiasFuenteActiva);
+    return matchTab && matchEstado && matchTema && matchQ && (!window.noticiasFuenteActiva || window.noticiasFuenteActiva === 'todas' || (n.fuente && (n.fuente === window.noticiasFuenteActiva || n.fuente.endsWith(' ' + window.noticiasFuenteActiva))));
   });
 
   // Sort
