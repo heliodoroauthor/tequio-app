@@ -1821,7 +1821,7 @@ export default async function handler(req, res) {
       const queries = [
         sb('noticias_civicas?select=*&order=fecha_publicacion.desc&limit=10').catch(() => []),
         sb('votaciones_pendientes?select=*&order=fecha.desc&limit=5').catch(() => []),
-        sb('iniciativas?estatus=eq.abierta&select=*&order=fecha_inicio.desc&limit=5').catch(() => []),
+        sb('iniciativas?estado=eq.abierta&select=*&order=fecha_inicio.desc&limit=5').catch(() => []),
         clave && clave !== '00' 
           ? sb(`municipios?clave_entidad=eq.${clave}&select=clave_inegi,nombre,poblacion_total&order=poblacion_total.desc.nullslast&limit=5`).catch(() => [])
           : Promise.resolve([]),
@@ -1932,7 +1932,7 @@ export default async function handler(req, res) {
 
       const [votaciones, iniciativas, leyesRec, banxico, noticias, asfRec] = await Promise.all([
         sb('votaciones_diputados?total_no=gt.20&order=fecha.desc.nullslast&limit=3&select=votacion_id,fecha,asunto').catch(() => []),
-        sb('iniciativas?estatus=eq.abierta&order=fecha_inicio.desc&limit=2&select=id,titulo,tipo,fecha_inicio').catch(() => []),
+        sb('iniciativas?estado=eq.abierta&order=fecha_inicio.desc&limit=2&select=id,titulo,tipo,fecha_inicio').catch(() => []),
         sb('leyes?order=fecha_publicacion.desc.nullslast&limit=2&select=id,titulo,tipo,fecha_publicacion').catch(() => []),
         sb('econ_banxico?order=fecha.desc&limit=1&select=fecha,serie,titulo,valor').catch(() => []),
         sb('noticias_civicas?order=fecha_publicacion.desc&limit=3&select=titulo,fuente,fecha_publicacion,url').catch(() => []),
