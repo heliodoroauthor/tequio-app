@@ -26527,38 +26527,71 @@ setTimeout(cargarDinerosCifras, 2500);
 })();
 </script>
 <!-- /P2.1 -->
-
 <!-- DASH-LOAD-FIX -->
 <script>
 (function() {
-  function patchCargando() {
-    // 1) Trigger cargarNoticiasDesdeAPI si existe y noticiasDB está vacío
+  function dispararNoticias() {
     if (typeof cargarNoticiasDesdeAPI === 'function' &&
         typeof noticiasDB !== 'undefined' && noticiasDB.length === 0) {
-      Promise.resolve(cargarNoticiasDesdeAPI()).catch(function(){});
+      Promise.resolve(cargarNoticiasDesdeAPI()).then(function(){
+        if (typeof actualizarDashboard === 'function') actualizarDashboard();
+      }).catch(function(){});
     }
-    // 2) Después de un timeout razonable, si todavía dice 'Cargando', mostrar fallback
-    setTimeout(function() {
+  }
+
+  function patchCargando() {
+    var n = document.getElementById('dash-noticia-titulo');
+    if (n && /^\s*Cargando/i.test(n.textContent || '')) {
+      // Si ya tenemos noticiasDB, intentar mostrar la primera nacional como destacada
+      if (typeof noticiasDB !== 'undefined' && noticiasDB.length > 0) {
+        var nat = noticiasDB.find(function(x){ return x.ambito === 'nacional' && x.titulo; }) || noticiasDB[0];
+        if (nat) {
+          n.textContent = nat.titulo;
+          var res = document.getElementById('dash-noticia-resumen');
+          if (res && nat.resumen) res.textContent = nat.resumen.substring(0, 200);
+          var meta = document.getElementById('dash-noticia-meta');
+          if (meta && nat.fuente) meta.textContent = '📰 ' + nat.fuente;
+          // Hacer toda la card clickeable
+          var parent = document.getElementById('dash-noticia-estado');
+          if (parent && nat.url_oficial) {
+            parent.style.cursor = 'pointer';
+            parent.onclick = function(){ window.open(nat.url_oficial, '_blank', 'noopener'); };
+          }
+        }
+      } else {
+        n.textContent = 'No hay noticia destacada todavía';
+        var meta2 = document.getElementById('dash-noticia-meta');
+        if (meta2) meta2.textContent = 'Revisa Noticias Cívicas para todas las noticias';
+      }
+    }
+    var d = document.getElementById('dash-diputado-nombre');
+    if (d && /^\s*Cargando/i.test(d.textContent || '')) {
+      d.textContent = 'Sin información disponible';
+      var info = document.getElementById('dash-diputado-info');
+      if (info && /^\s*$/.test(info.textContent || '')) {
+        info.textContent = 'Configura tu estado en Mi Perfil';
+      }
+    }
+  }
+
+  var triggered = false;
+  function init() {
+    if (!triggered) { dispararNoticias(); triggered = true; }
+    // Re-checar cada 2 segundos hasta 30s
+    var attempts = 0;
+    var timer = setInterval(function() {
+      patchCargando();
+      attempts++;
       var n = document.getElementById('dash-noticia-titulo');
-      if (n && /Cargando/i.test(n.textContent || '')) {
-        n.textContent = 'No hay noticia destacada para tu estado todavía.';
-        var meta = document.getElementById('dash-noticia-meta');
-        if (meta) meta.textContent = 'Revisa Noticias Cívicas para ver todas las noticias nacionales.';
-        var res = document.getElementById('dash-noticia-resumen');
-        if (res) res.textContent = '';
-      }
       var d = document.getElementById('dash-diputado-nombre');
-      if (d && /Cargando/i.test(d.textContent || '')) {
-        d.textContent = 'Sin información disponible';
-        var info = document.getElementById('dash-diputado-info');
-        if (info) info.textContent = 'Selecciona tu estado en Mi Perfil para ver tu representante';
-      }
-    }, 4000);
+      var done = (!n || !/Cargando/i.test(n.textContent || '')) && (!d || !/Cargando/i.test(d.textContent || ''));
+      if (done || attempts >= 15) clearInterval(timer);
+    }, 2000);
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(patchCargando, 500); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 1000); });
   } else {
-    setTimeout(patchCargando, 500);
+    setTimeout(init, 1000);
   }
 })();
 </script>
