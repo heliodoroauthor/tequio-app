@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/cron/dof",      "schedule": "0 9 * * *" },
+    { "path": "/api/cron/fgr",      "schedule": "5 9 * * *" },
+    { "path": "/api/cron/cofepris", "schedule": "30 9 * * 1" }
+  ]
+}
