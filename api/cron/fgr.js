@@ -16,8 +16,15 @@ export default async function handler(req, res) {
 
   try {
     const html = await fetch(FGR_URL, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Tequio/1.0 cron)' }
-    }).then(r => r.text());
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
 
     // Buscar items: ámbito + fecha + Comunicado FGR NUM + título
     const items = [];
