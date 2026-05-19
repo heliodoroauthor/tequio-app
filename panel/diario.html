@@ -107,7 +107,7 @@ function render(data, intereses, nombreEstado) {
   if (data.noticias && data.noticias.length) {
     html += data.noticias.slice(0, 5).map(n => `
       <div class="item">
-        <div class="item-title">${escapeHtml(n.titulo || n.title || '')}</div>
+        <div class="item-label" style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${escapeHtml(n.titulo || '')}</div><div class="item-title">${escapeHtml((n.resumen || n.titulo || '').split('.')[0].substring(0, 200))}</div>
         <div class="item-meta">${escapeHtml(n.fuente || '')} ${n.url ? ` · <a href="${escapeHtml(n.url)}" target="_blank" rel="noopener">Leer ↗</a>` : ''}</div>
       </div>
     `).join('');
@@ -134,7 +134,7 @@ function render(data, intereses, nombreEstado) {
       html += '<div class="section"><h2>💰 DINERO PÚBLICO HOY</h2><div class="stat-grid">';
       data.banxico.slice(0, 3).forEach(b => {
         const val = b.valor != null ? Number(b.valor).toLocaleString('es-MX', { maximumFractionDigits: 4 }) : '—';
-        html += `<div class="stat"><div class="stat-num">${val}</div><div class="stat-label">${escapeHtml(b.titulo || b.serie || 'Indicador')}</div></div>`;
+        html += `<div class="stat"><div class="stat-num">${val}</div><div class="stat-label">${escapeHtml(b.nombre || b.titulo || 'Indicador') + (b.unidad ? ' · ' + escapeHtml(b.unidad) : '')}</div></div>`;
       });
       html += '</div></div>';
     }
