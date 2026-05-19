@@ -304,12 +304,22 @@
       document.getElementById('bigStats').innerHTML = '<div class="error">Sin datos</div>';
       return;
     }
-    const entes = consolidado.num_entes_fiscalizados;
+    // P1.4 + P1.5: agregar values across entregas (Consolidado tiene nulls)
+    const sumField = (field) => cp2024.reduce((s, r) => s + (r[field] || 0), 0);
+    const tipos = {
+      'Gasto federalizado': sumField('num_gasto_federalizado'),
+      'Cumplimiento financiero': sumField('num_cumplimiento_financiero'),
+      'Desempeño': sumField('num_desempeno'),
+      'Inversiones físicas': sumField('num_inversiones_fisicas'),
+      'Otros': sumField('num_otros'),
+    };
+    const topTipo = Object.entries(tipos).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+    const entregasReales = cp2024.filter(r => !/consolidado/i.test(r.entrega));
     const html = [
-      stat('Auditorías totales', fmtInt.format(consolidado.num_auditorias || 0), 'Cuenta Publica 2024'),
+      stat('Auditorías totales', fmtInt.format(consolidado.num_auditorias || 0), 'Cuenta Pública 2024'),
       stat('Observaciones', fmtMdp(consolidado.monto_observaciones_mxn) || '-', 'Monto fiscalizable observado'),
-      stat('Cumplimiento financiero', fmtInt.format(consolidado.num_cumplimiento_financiero || 0), 'Tipo mas frecuente'),
-      stat('Entes fiscalizados', entes != null ? fmtInt.format(entes) : 'N/D', 'Dependencias revisadas')
+      stat(topTipo[0], fmtInt.format(topTipo[1]), 'Tipo más frecuente'),
+      stat('Entregas', fmtInt.format(entregasReales.length), 'Cortes recibidos en 2024')
     ].join('');
     document.getElementById('bigStats').innerHTML = html;
   }
