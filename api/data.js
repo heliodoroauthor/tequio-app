@@ -761,7 +761,7 @@ export default async function handler(req, res) {
       const fuente = (req.query.fuente || '').trim();
       const tema = (req.query.tema || '').trim();
       const ambito = (req.query.ambito || '').trim();
-      let path = 'noticias_civicas?select=id,titulo,resumen,url_oficial,fuente,fuente_url,ambito,tema,fecha_publicacion&order=fecha_publicacion.desc.nullslast&limit=200';
+      let path = 'noticias_civicas?select=id,titulo,resumen,url_oficial,fuente,fuente_url,ambito,tema,fecha_publicacion&order=fecha_publicacion.desc.nullslast&limit=1000';
       if (fuente) path += `&fuente=eq.${encodeURIComponent(fuente)}`;
       if (tema) path += `&tema=eq.${encodeURIComponent(tema)}`;
       if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
