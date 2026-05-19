@@ -15834,61 +15834,7 @@ function exportarDocumentoAccion() {
       <div class="disclaimer">⚖️ <strong>AVISO LEGAL:</strong> Este documento fue generado por inteligencia artificial con fines exclusivamente orientativos. No constituye asesoría jurídica. Revise con un abogado o Defensoría Pública (800 200 3030) antes de presentarlo.</div>
       <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
       <div class="footer">Generado por Tequio — Plataforma Cívica Digital · ${new Date().toLocaleDateString('es-MX')} · Solo con fines informativos</div>
-      
-<!-- P2.1: Sidebar colapsable -->
-<style>
-  .nav-label {
-    cursor: pointer; user-select: none;
-    display: flex; align-items: center; justify-content: space-between;
-    transition: color 0.15s; padding: 6px 0;
-  }
-  .nav-label:hover { color: var(--gold, #fbbf24); }
-  .nav-label::after {
-    content: '▾'; font-size: 10px; margin-left: 8px;
-    transition: transform 0.2s ease; color: var(--muted, #8b94a7);
-  }
-  .nav-section.collapsed .nav-label::after { transform: rotate(-90deg); }
-  .nav-section .nav-item {
-    max-height: 60px; overflow: hidden;
-    transition: max-height 0.25s ease, opacity 0.15s, padding 0.2s, margin 0.2s;
-  }
-  .nav-section.collapsed .nav-item {
-    max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin: 0;
-  }
-</style>
-<script>
-/* Collapse/expand nav-sections, persist in localStorage. Init: only first section open. */
-(function() {
-  function initCollapsibleSidebar() {
-    const sections = document.querySelectorAll('.nav-section');
-    if (!sections.length) return;
-    let state = {};
-    try { state = JSON.parse(localStorage.getItem('tequio_sidebar') || '{}'); } catch(e) {}
-    sections.forEach(function(sec, i) {
-      const label = sec.querySelector('.nav-label');
-      if (!label) return;
-      const key = 'sec_' + i;
-      // Default: first section (Monitoreo) open, rest closed
-      const defaultCollapsed = i > 0;
-      const collapsed = state[key] !== undefined ? state[key] : defaultCollapsed;
-      if (collapsed) sec.classList.add('collapsed');
-      label.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sec.classList.toggle('collapsed');
-        state[key] = sec.classList.contains('collapsed');
-        try { localStorage.setItem('tequio_sidebar', JSON.stringify(state)); } catch(e) {}
-      });
-    });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCollapsibleSidebar);
-  } else {
-    initCollapsibleSidebar();
-  }
-})();
-</script>
-<!-- /P2.1 -->
-</body></html>`);
+      </body></html>`);
     win.document.close();
     setTimeout(() => win.print(), 400);
   });
@@ -26527,5 +26473,59 @@ async function cargarDinerosCifras(){
 document.addEventListener('DOMContentLoaded', () => setTimeout(cargarDinerosCifras, 800));
 setTimeout(cargarDinerosCifras, 2500);
 </script>
+
+<!-- P2.1: Sidebar colapsable -->
+<style>
+  .nav-label {
+    cursor: pointer; user-select: none;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: color 0.15s; padding: 6px 0;
+  }
+  .nav-label:hover { color: var(--gold, #fbbf24); }
+  .nav-label::after {
+    content: '▾'; font-size: 10px; margin-left: 8px;
+    transition: transform 0.2s ease; color: var(--muted, #8b94a7);
+  }
+  .nav-section.collapsed .nav-label::after { transform: rotate(-90deg); }
+  .nav-section .nav-item {
+    max-height: 60px; overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.15s, padding 0.2s, margin 0.2s;
+  }
+  .nav-section.collapsed .nav-item {
+    max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin: 0;
+  }
+</style>
+<script>
+/* Collapse/expand nav-sections, persist in localStorage. Init: only first section open. */
+(function() {
+  function initCollapsibleSidebar() {
+    const sections = document.querySelectorAll('.nav-section');
+    if (!sections.length) return;
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem('tequio_sidebar') || '{}'); } catch(e) {}
+    sections.forEach(function(sec, i) {
+      const label = sec.querySelector('.nav-label');
+      if (!label) return;
+      const key = 'sec_' + i;
+      // Default: first section (Monitoreo) open, rest closed
+      const defaultCollapsed = i > 0;
+      const collapsed = state[key] !== undefined ? state[key] : defaultCollapsed;
+      if (collapsed) sec.classList.add('collapsed');
+      label.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sec.classList.toggle('collapsed');
+        state[key] = sec.classList.contains('collapsed');
+        try { localStorage.setItem('tequio_sidebar', JSON.stringify(state)); } catch(e) {}
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCollapsibleSidebar);
+  } else {
+    initCollapsibleSidebar();
+  }
+})();
+</script>
+<!-- /P2.1 -->
 </body>
 </html>
