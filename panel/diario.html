@@ -107,8 +107,8 @@ function render(data, intereses, nombreEstado) {
   if (data.noticias && data.noticias.length) {
     html += data.noticias.slice(0, 5).map(n => `
       <div class="item">
-        <div class="item-label" style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${escapeHtml(n.titulo || '')}</div><div class="item-title">${escapeHtml(n.resumen || n.titulo || '')}</div>
-        <div class="item-meta">${escapeHtml(n.fuente || '')} ${(n.url_oficial || n.fuente_url) ? ` · <a href="${escapeHtml(n.url_oficial || n.fuente_url)}" target="_blank" rel="noopener">Ver fuente ↗</a>` : ''}</div>
+        <div class="item-label" style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${escapeHtml(decodeEntities(n.titulo || ''))}</div><div class="item-title">${escapeHtml(decodeEntities(n.resumen || n.titulo || ''))}</div>
+        <div class="item-meta">${escapeHtml(decodeEntities(n.fuente || ''))} ${(n.url_oficial || n.fuente_url) ? ` · <a href="${escapeHtml(n.url_oficial || n.fuente_url)}" target="_blank" rel="noopener">Ver fuente ↗</a>` : ''}</div>
       </div>
     `).join('');
   } else html += '<div class="empty">Sin noticias hoy.</div>';
@@ -185,6 +185,19 @@ function render(data, intereses, nombreEstado) {
   cont.innerHTML = html;
 }
 
+function decodeEntities(s){
+  return String(s||'')
+    .replace(/&aacute;/g,'á').replace(/&Aacute;/g,'Á')
+    .replace(/&eacute;/g,'é').replace(/&Eacute;/g,'É')
+    .replace(/&iacute;/g,'í').replace(/&Iacute;/g,'Í')
+    .replace(/&oacute;/g,'ó').replace(/&Oacute;/g,'Ó')
+    .replace(/&uacute;/g,'ú').replace(/&Uacute;/g,'Ú')
+    .replace(/&ntilde;/g,'ñ').replace(/&Ntilde;/g,'Ñ')
+    .replace(/&hellip;/g,'…').replace(/&nbsp;/g,' ')
+    .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&apos;/g,"'")
+    .replace(/&laquo;/g,'«').replace(/&raquo;/g,'»')
+    .replace(/&amp;/g,'&');
+}
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 }
