@@ -15140,19 +15140,8 @@ function filtrarNoticias() {
 }
 
 function abrirNoticia(id) {
-  const n = noticiasDB.find(x => x.id === id || String(x.id) === String(id));
-  if (!n) {
-    // Fallback: abrir el link de la noticia en una nueva pestaña si tenemos el url
-    const card = event && event.currentTarget ? event.currentTarget : null;
-    const fallbackUrl = card ? card.dataset.urlOficial : null;
-    if (fallbackUrl) { window.open(fallbackUrl, '_blank', 'noopener'); }
-    return;
-  }
-  // Si tiene url_oficial, abrir directo en nueva pestaña (sin modal frágil)
-  if (n.url_oficial || n.fuente_url) {
-    window.open(n.url_oficial || n.fuente_url, '_blank', 'noopener');
-    return;
-  }
+  const n = noticiasDB.find(x => x.id === id);
+  if (!n) return;
   noticiaActual = n;
 
   const ambitoLabel = { nacional:'Nacional', estatal:'Estatal', municipal:'Municipal', alerta:'🚨 ALERTA' };
