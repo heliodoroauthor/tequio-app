@@ -21405,64 +21405,7 @@ const INIC_CAT_INFO = {
   transparencia:{ emoji:'🔍', label:'Transparencia',color:'#06b6d4' },
 };
 
-const INIC_INICIALES = [
-  { id:'agua-priv', cat:'agua', titulo:'🌊 Agua Pública: No a la Privatización',
-    desc:'Exigimos que el agua potable sea declarada formalmente como bien de uso común bajo administración estatal. Rechazamos la concesión de sistemas hidráulicos a empresas privadas y demandamos tarifas accesibles con cobertura universal, especialmente en zonas de alta marginación. Fundamentado en el Art. 4° constitucional y el Art. 27 sobre bienes de la nación.',
-    firmas:128430, estado:'tendencia', fecha:'Hace 2 días', autor:'Coalición Nacional por el Agua',
-    firmantes:[
-      {nombre:'María G. · CDMX', motivo:'El agua es vida, no negocio'},
-      {nombre:'Carlos R. · Monterrey', motivo:'En mi colonia ya la privatizaron y subió 300%'},
-      {nombre:'Ana P. · Oaxaca', motivo:'Comunidades indígenas sin agua potable desde 2019'},
-    ]
-  },
-  { id:'internet-escuelas', cat:'educacion', titulo:'🏫 Internet Gratuito en Todas las Escuelas Públicas',
-    desc:'Solicitamos al Congreso aprobar una ley que garantice conectividad de banda ancha mínima de 100 Mbps en todas las escuelas públicas de México, sin costo para planteles ni familias. La pandemia demostró que sin internet no hay educación real. Más de 15 millones de niños carecen de conectividad. Es el derecho a la educación del siglo XXI.',
-    firmas:94210, estado:'proceso', fecha:'Hace 5 días', autor:'Red de Maestros Digitales MX',
-    firmantes:[
-      {nombre:'Profa. Laura M. · Chiapas', motivo:'Mis alumnos hacen tareas en el cibercafé del pueblo'},
-      {nombre:'Roberto S. · Guerrero', motivo:'Escuela sin internet en pleno 2025'},
-    ]
-  },
-  { id:'clinicas-24', cat:'salud', titulo:'⚕️ Clínicas Comunitarias 24/7 en Zonas de Alta Marginación',
-    desc:'Pedimos la apertura y equipamiento de al menos 500 clínicas comunitarias con servicio permanente las 24 horas en municipios con índice de marginación alto o muy alto. Hoy, el 68% de las comunidades rurales no tiene acceso a atención médica nocturna. Un parto complicado a las 3am puede significar la muerte si no hay clínica abierta.',
-    firmas:61800, estado:'activa', fecha:'Hace 1 semana', autor:'Médicos Sin Fronteras MX',
-    firmantes:[
-      {nombre:'Dr. Arturo V. · Veracruz', motivo:'He perdido pacientes por falta de atención nocturna'},
-      {nombre:'Josefina H. · Puebla', motivo:'Mi madre murió porque no había guardia en la noche'},
-    ]
-  },
-  { id:'transporte-estudiantes', cat:'transporte', titulo:'🚌 Transporte Público Gratuito para Estudiantes',
-    desc:'Iniciativa para que el transporte público sea gratuito para estudiantes de nivel básico, medio superior y superior en ciudades con más de 100,000 habitantes. El gasto en transporte representa hasta el 15% del ingreso familiar en hogares de bajos ingresos, y es una de las principales causas de deserción escolar. Chile y Colombia ya lo implementan.',
-    firmas:32100, estado:'nueva', fecha:'Hace 3 días', autor:'Frente Estudiantil Nacional',
-    firmantes:[
-      {nombre:'Diego F. · Tijuana', motivo:'Me gasto $800 al mes en camión para ir a la universidad'},
-    ]
-  },
-  { id:'jornada-40', cat:'laboral', titulo:'⏰ Reforma Laboral: Jornada Máxima de 40 Horas',
-    desc:'Exigimos la modificación del Art. 123 constitucional para reducir la jornada laboral máxima de 48 a 40 horas semanales sin reducción de salario, con pago doble desde la hora 41. México tiene una de las jornadas laborales más largas del mundo (OCDE 2024: 2,226 horas/año vs promedio 1,752). Más tiempo libre significa más consumo, salud y vida familiar.',
-    firmas:87500, estado:'proceso', fecha:'Hace 4 días', autor:'Confederación Sindical Independiente',
-    firmantes:[
-      {nombre:'Patricia L. · CDMX', motivo:'Salgo a las 8am y llego a las 10pm. No veo a mis hijos'},
-      {nombre:'Enrique M. · Guadalajara', motivo:'En Alemania trabajan 35h. ¿Por qué en México 48?'},
-      {nombre:'Sofía R. · Monterrey', motivo:'La productividad no sube con más horas, sino con mejor calidad de vida'},
-    ]
-  },
-  { id:'transparencia-algoritmos', cat:'transparencia', titulo:'🔍 Ley de Transparencia Algorítmica del Gobierno',
-    desc:'Exigimos que todos los sistemas de inteligencia artificial utilizados por el gobierno mexicano (en seguridad, justicia, asistencia social, crédito) sean auditables públicamente. Los ciudadanos tienen derecho a saber cuándo una decisión que les afecta fue tomada por un algoritmo y a impugnarla. España, la UE y Canadá ya tienen marcos similares.',
-    firmas:18900, estado:'nueva', fecha:'Hace 6 días', autor:'Alianza por los Derechos Digitales',
-    firmantes:[
-      {nombre:'Ing. Carmen S. · CDMX', motivo:'El IMSS ya usa IA para decidir quién recibe cirugías'},
-    ]
-  },
-  { id:'agua-lluvia', cat:'ambiente', titulo:'🌧️ Recolección de Agua de Lluvia Obligatoria en Obras Nuevas',
-    desc:'Propuesta de ley para que toda construcción nueva de más de 100m² en México incluya obligatoriamente sistemas de captación y reutilización de agua pluvial. La CDMX recibe 700mm de lluvia anual pero el 90% va al drenaje. Esta medida reduciría la presión sobre acuíferos en un estimado del 20% en zonas urbanas en 10 años.',
-    firmas:41200, estado:'activa', fecha:'Hace 2 semanas', autor:'Greenpeace México',
-    firmantes:[
-      {nombre:'Arquitecta Valeria G.', motivo:'En mi proyecto lo pusimos y ahorramos 40% de agua'},
-      {nombre:'Luis A. · Querétaro', motivo:'La presa de mi ciudad está al 12% de capacidad'},
-    ]
-  },
-];
+const INIC_INICIALES = []; // mock data eliminado — sistema de firmas ciudadanas en construcción
 
 let inicData = JSON.parse(localStorage.getItem('tequio_iniciativas') || 'null') || JSON.parse(JSON.stringify(INIC_INICIALES));
 let inicFirmas = JSON.parse(localStorage.getItem('tequio_inic_firmas') || '{}');
@@ -26740,5 +26683,45 @@ window.abrirFuenteNoticia = function(id) {
 };
 </script>
 <!-- /ABRIR-FUENTE-NOTICIA -->
+
+<!-- HIDE-INIC-MOCK -->
+<script>
+(function() {
+  // 1) Esconder el card "Iniciativas Ciudadanas / Las más votadas" del dashboard
+  // 2) Esconder botones "Ver iniciativas ciudadanas" del menú flotante / dropdowns
+  // Sistema de firmas ciudadanas: tabla `firmas_iniciativas` está vacía en Supabase.
+  // Hasta que exista un sistema real, no mostrar widgets fake.
+  function hideInicMock() {
+    // Card del dashboard
+    document.querySelectorAll('.card-title').forEach(function(t) {
+      var txt = (t.textContent || '').trim();
+      if (txt === 'Iniciativas Ciudadanas') {
+        var sub = t.nextElementSibling;
+        var subTxt = sub ? (sub.textContent || '').trim() : '';
+        if (subTxt === 'Las más votadas') {
+          var card = t.closest ? t.closest('.card') : null;
+          if (card) card.style.display = 'none';
+        }
+      }
+    });
+
+    // Botones flotantes con texto que contiene "iniciativas ciudadanas"
+    document.querySelectorAll('button').forEach(function(btn) {
+      var text = (btn.textContent || '').trim().toLowerCase();
+      if (text.indexOf('iniciativas ciudadanas') !== -1) {
+        btn.style.display = 'none';
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideInicMock);
+  } else {
+    hideInicMock();
+  }
+  setTimeout(hideInicMock, 500);
+  setTimeout(hideInicMock, 2000);
+})();
+</script>
+<!-- /HIDE-INIC-MOCK -->
 </body>
 </html>
