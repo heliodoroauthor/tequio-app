@@ -107,8 +107,8 @@ function render(data, intereses, nombreEstado) {
   if (data.noticias && data.noticias.length) {
     html += data.noticias.slice(0, 5).map(n => `
       <div class="item">
-        <div class="item-label" style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${escapeHtml(n.titulo || '')}</div><div class="item-title">${escapeHtml((n.resumen || n.titulo || '').split('.')[0].substring(0, 200))}</div>
-        <div class="item-meta">${escapeHtml(n.fuente || '')} ${n.url ? ` · <a href="${escapeHtml(n.url)}" target="_blank" rel="noopener">Leer ↗</a>` : ''}</div>
+        <div class="item-label" style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${escapeHtml(n.titulo || '')}</div><div class="item-title">${escapeHtml(n.resumen || n.titulo || '')}</div>
+        <div class="item-meta">${escapeHtml(n.fuente || '')} ${(n.url_oficial || n.fuente_url) ? ` · <a href="${escapeHtml(n.url_oficial || n.fuente_url)}" target="_blank" rel="noopener">Ver fuente ↗</a>` : ''}</div>
       </div>
     `).join('');
   } else html += '<div class="empty">Sin noticias hoy.</div>';
