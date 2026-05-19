@@ -26527,5 +26527,41 @@ setTimeout(cargarDinerosCifras, 2500);
 })();
 </script>
 <!-- /P2.1 -->
+
+<!-- DASH-LOAD-FIX -->
+<script>
+(function() {
+  function patchCargando() {
+    // 1) Trigger cargarNoticiasDesdeAPI si existe y noticiasDB está vacío
+    if (typeof cargarNoticiasDesdeAPI === 'function' &&
+        typeof noticiasDB !== 'undefined' && noticiasDB.length === 0) {
+      Promise.resolve(cargarNoticiasDesdeAPI()).catch(function(){});
+    }
+    // 2) Después de un timeout razonable, si todavía dice 'Cargando', mostrar fallback
+    setTimeout(function() {
+      var n = document.getElementById('dash-noticia-titulo');
+      if (n && /Cargando/i.test(n.textContent || '')) {
+        n.textContent = 'No hay noticia destacada para tu estado todavía.';
+        var meta = document.getElementById('dash-noticia-meta');
+        if (meta) meta.textContent = 'Revisa Noticias Cívicas para ver todas las noticias nacionales.';
+        var res = document.getElementById('dash-noticia-resumen');
+        if (res) res.textContent = '';
+      }
+      var d = document.getElementById('dash-diputado-nombre');
+      if (d && /Cargando/i.test(d.textContent || '')) {
+        d.textContent = 'Sin información disponible';
+        var info = document.getElementById('dash-diputado-info');
+        if (info) info.textContent = 'Selecciona tu estado en Mi Perfil para ver tu representante';
+      }
+    }, 4000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(patchCargando, 500); });
+  } else {
+    setTimeout(patchCargando, 500);
+  }
+})();
+</script>
+<!-- /DASH-LOAD-FIX -->
 </body>
 </html>
