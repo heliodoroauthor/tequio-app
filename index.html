@@ -15120,7 +15120,7 @@ function filtrarNoticias() {
   const ambitoLabel  = { nacional: 'Nacional', estatal: 'Estatal', municipal: 'Municipal', alerta: 'Alerta' };
 
   document.getElementById('noticias-lista').innerHTML = lista.map(n => `
-    <div class="noticia-card ${n.ambito}" onclick="abrirNoticia('${n.id}')">
+    <div class="noticia-card ${n.ambito}" onclick="abrirFuenteNoticia('${n.id}')">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <span class="noticia-tag ${n.ambito}">${ambitoLabel[n.ambito]}</span>
         ${n.urgente ? '<span style="background:rgba(239,68,68,0.15);color:var(--red2);border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-size:10px;font-weight:700;padding:2px 7px">🔴 URGENTE</span>' : ''}
@@ -26717,5 +26717,28 @@ setTimeout(cargarDinerosCifras, 2500);
 })();
 </script>
 <!-- /FUENTE-CHIPS-FIX -->
+
+<!-- ABRIR-FUENTE-NOTICIA -->
+<script>
+window.abrirFuenteNoticia = function(id) {
+  if (typeof noticiasDB === 'undefined') return;
+  var n = noticiasDB.find(function(x) { return String(x.id) === String(id); });
+  if (!n) return;
+  // Si tiene url_oficial válida y no es la fuente_url genérica, abrir directo
+  if (n.url_oficial && /^https?:\/\//i.test(n.url_oficial) &&
+      n.url_oficial !== n.fuente_url) {
+    window.open(n.url_oficial, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  // Fallback: si solo tiene fuente_url (página general), abrirla también
+  if (n.fuente_url && /^https?:\/\//i.test(n.fuente_url)) {
+    window.open(n.fuente_url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  // Último fallback: modal interno
+  if (typeof abrirNoticia === 'function') abrirNoticia(id);
+};
+</script>
+<!-- /ABRIR-FUENTE-NOTICIA -->
 </body>
 </html>
