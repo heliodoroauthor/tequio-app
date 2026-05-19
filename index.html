@@ -26279,20 +26279,7 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
     input.parentElement.style.position = 'relative';
     input.parentElement.appendChild(dropdown);
 
-    function decodeEntities(s){
-  return String(s||'')
-    .replace(/&aacute;/g,'á').replace(/&Aacute;/g,'Á')
-    .replace(/&eacute;/g,'é').replace(/&Eacute;/g,'É')
-    .replace(/&iacute;/g,'í').replace(/&Iacute;/g,'Í')
-    .replace(/&oacute;/g,'ó').replace(/&Oacute;/g,'Ó')
-    .replace(/&uacute;/g,'ú').replace(/&Uacute;/g,'Ú')
-    .replace(/&ntilde;/g,'ñ').replace(/&Ntilde;/g,'Ñ')
-    .replace(/&hellip;/g,'…').replace(/&nbsp;/g,' ')
-    .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&apos;/g,"'")
-    .replace(/&laquo;/g,'«').replace(/&raquo;/g,'»')
-    .replace(/&amp;/g,'&');
-}
-function escapeHtml(s) {
+    function escapeHtml(s) {
       return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     }
 
