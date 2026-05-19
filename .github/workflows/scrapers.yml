@@ -1,0 +1,45 @@
+name: Tequio Scrapers
+
+on:
+  schedule:
+    # All times UTC. Mexico is UTC-6, so 09 UTC = 03 AM MX
+    - cron: '0 9 * * *'    # DOF + FGR diario
+    - cron: '30 9 * * 1'   # COFEPRIS lunes
+  workflow_dispatch:       # permite trigger manual desde la UI
+
+jobs:
+  dof:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r scripts/requirements.txt
+      - env:
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: python scripts/dof_scraper.py
+
+  fgr:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 9 * * *' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r scripts/requirements.txt
+      - env:
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: python scripts/fgr_scraper.py
+
+  cofepris:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '30 9 * * 1' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r scripts/requirements.txt
+      - env:
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: python scripts/cofepris_scraper.py
