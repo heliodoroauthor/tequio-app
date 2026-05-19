@@ -4,6 +4,8 @@ Env vars requeridas: SUPABASE_SERVICE_ROLE
 """
 import os, re, sys, json, requests
 import xml.etree.ElementTree as ET
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://mhsuihwjgtzxflesbnxv.supabase.co")
 SERVICE_ROLE = os.environ.get("SUPABASE_SERVICE_ROLE")
@@ -24,7 +26,7 @@ def parse_fecha_from_url(url):
 
 def main():
     print(f"Fetching {DOF_RSS}")
-    r = requests.get(DOF_RSS, headers=HEADERS, timeout=30)
+    r = requests.get(DOF_RSS, headers=HEADERS, timeout=30, verify=False)
     print(f"  HTTP {r.status_code}, {len(r.content):,} bytes")
     if r.status_code != 200:
         print(f"  ERROR: HTTP {r.status_code}"); sys.exit(1)
