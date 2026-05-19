@@ -26610,5 +26610,112 @@ setTimeout(cargarDinerosCifras, 2500);
 })();
 </script>
 <!-- /DASH-LOAD-FIX -->
+
+<!-- FUENTE-CHIPS-FIX -->
+<script>
+(function() {
+  var FUENTES = [
+    { key: 'todas',       label: 'Todas',           emoji: '🌐', count: 676 },
+    { key: 'INAI',        label: 'INAI',            emoji: '📂', count: 503 },
+    { key: 'DOF',         label: 'DOF',             emoji: '📜', count: 68 },
+    { key: 'FGR',         label: 'FGR',             emoji: '⚖️', count: 40 },
+    { key: 'Presidencia', label: 'Presidencia',     emoji: '🏛️', count: 24 },
+    { key: 'SEGOB',       label: 'SEGOB',           emoji: '🛡️', count: 20 },
+    { key: 'SCJN',        label: 'SCJN',            emoji: '⚖️', count: 12 },
+    { key: 'COFEPRIS',    label: 'COFEPRIS',        emoji: '🏥', count: 5 },
+    { key: 'SABG',        label: 'SABG',            emoji: '🏛️', count: 4 }
+  ];
+
+  window.noticiasFuenteActiva = 'todas';
+
+  window.selectFuenteNoticias = function(el, fuente) {
+    document.querySelectorAll('#noticias-fuentes-chips .estado-chip').forEach(function(c) {
+      c.classList.remove('active');
+    });
+    el.classList.add('active');
+    window.noticiasFuenteActiva = fuente;
+    if (typeof filtrarNoticias === 'function') filtrarNoticias();
+  };
+
+  function buildChip(f) {
+    var active = f.key === window.noticiasFuenteActiva ? ' active' : '';
+    return '<div class="estado-chip' + active +
+           '" onclick="selectFuenteNoticias(this, \'' + f.key + '\')"' +
+           ' style="cursor:pointer">' +
+           f.emoji + ' ' + f.label +
+           ' <span style="opacity:0.55;font-size:0.85em">(' + f.count + ')</span>' +
+           '</div>';
+  }
+
+  function inyectarChips() {
+    var temasChips = document.getElementById('noticias-temas-chips');
+    if (!temasChips) return false;
+    if (document.getElementById('noticias-fuentes-chips')) return true; // ya inyectado
+    var wrap = document.createElement('div');
+    wrap.style.marginTop = '14px';
+    wrap.innerHTML =
+      '<div style="color:#9ca3af;font-size:12px;letter-spacing:1px;font-weight:700;margin-bottom:6px;">FUENTE</div>' +
+      '<div id="noticias-fuentes-chips" style="display:flex;flex-wrap:wrap;gap:8px;">' +
+      FUENTES.map(buildChip).join('') +
+      '</div>';
+    temasChips.parentNode.insertBefore(wrap, temasChips.nextSibling);
+    return true;
+  }
+
+  // Monkey-patch filtrarNoticias para considerar fuente
+  function aplicarParcheFiltrado() {
+    if (typeof window.filtrarNoticias !== 'function') return false;
+    if (window._filtrarNoticiasOrig) return true; // ya parcheado
+    window._filtrarNoticiasOrig = window.filtrarNoticias;
+    window.filtrarNoticias = function() {
+      var fuenteAct = window.noticiasFuenteActiva;
+      if (!fuenteAct || fuenteAct === 'todas') {
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      }
+      // Filtrar noticiasDB temporalmente
+      var dbOrig = window.noticiasDB;
+      if (!Array.isArray(dbOrig)) {
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      }
+      try {
+        window.noticiasDB = dbOrig.filter(function(n) { return n && n.fuente === fuenteAct; });
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      } finally {
+        window.noticiasDB = dbOrig;
+      }
+    };
+    return true;
+  }
+
+  function init() {
+    aplicarParcheFiltrado();
+    inyectarChips();
+  }
+
+  // Retry: la sección de noticias puede renderizar después
+  var tries = 0;
+  var iv = setInterval(function() {
+    init();
+    tries++;
+    var done = document.getElementById('noticias-fuentes-chips') && window._filtrarNoticiasOrig;
+    if (done || tries >= 30) clearInterval(iv);
+  }, 500);
+
+  // Re-inyectar si el usuario navega entre secciones
+  document.addEventListener('click', function(e) {
+    // Si el click cambia de sección, re-intentar inyección 500ms después
+    setTimeout(function() {
+      if (!document.getElementById('noticias-fuentes-chips')) inyectarChips();
+    }, 500);
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<!-- /FUENTE-CHIPS-FIX -->
 </body>
 </html>
