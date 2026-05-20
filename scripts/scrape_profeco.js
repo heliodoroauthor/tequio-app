@@ -1,4 +1,4 @@
-// scripts/scrape_profeco.js  (v8 — header keys + quote handling fixed)
+// scripts/scrape_profeco.js  (v9 — dedup batch + resilient upsert)
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
@@ -32,26 +32,13 @@ async function logRun(p) {
   catch (e) { console.warn('no log:', e.message); }
 }
 
-// El CSV usa nombres en lowercase con underscores: producto,presentacion,marca,categoria,catalogo,precio,fecha_registro,cadena_comercial,giro,nombre_comercial,direccion,estado,municipio,latitud,longitud
-// Mi normH() los pasa a UPPERCASE pero conserva underscores.
 function normH(h) { return String(h||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toUpperCase().trim(); }
 
 const HM = {
-  PRODUCTO:          'producto',
-  PRESENTACION:      'presentacion',
-  MARCA:             'marca',
-  CATEGORIA:         'categoria',
-  CATALOGO:          'catalogo',
-  PRECIO:            'precio',
-  FECHA_REGISTRO:    'fecha_registro',  // ← underscore
-  CADENA_COMERCIAL:  'cadena_comercial', // ← underscore
-  GIRO:              'giro',
-  NOMBRE_COMERCIAL:  'nombre_comercial', // ← underscore
-  DIRECCION:         'direccion',
-  ESTADO:            'estado',
-  MUNICIPIO:         'municipio',
-  LATITUD:           'latitud',
-  LONGITUD:          'longitud',
+  PRODUCTO:'producto', PRESENTACION:'presentacion', MARCA:'marca', CATEGORIA:'categoria', CATALOGO:'catalogo',
+  PRECIO:'precio', FECHA_REGISTRO:'fecha_registro', CADENA_COMERCIAL:'cadena_comercial', GIRO:'giro',
+  NOMBRE_COMERCIAL:'nombre_comercial', DIRECCION:'direccion', ESTADO:'estado', MUNICIPIO:'municipio',
+  LATITUD:'latitud', LONGITUD:'longitud',
 };
 
 function parseF(r) { if (!r) return null; const s=String(r).trim(); const m1=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m1)return `${m1[1]}-${m1[2]}-${m1[3]}`; const m2=s.match(/^(\d{4})\/(\d{2})\/(\d{2})/); if(m2)return `${m2[1]}-${m2[2]}-${m2[3]}`; const m3=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if(m3)return `${m3[3]}-${m3[2]}-${m3[1]}`; return null; }
@@ -68,6 +55,16 @@ function normalizeRow(raw) {
   return r.producto ? r : null;
 }
 
+// Dedup dentro del batch usando key compuesta del UNIQUE constraint
+function dedupBatch(rows) {
+  const m = new Map();
+  for (const r of rows) {
+    const k = [r.producto||'', r.marca||'', r.presentacion||'', r.nombre_comercial||'', r.fecha_registro||''].join('|');
+    m.set(k, r); // last-write-wins
+  }
+  return [...m.values()];
+}
+
 async function descubrirURL(anio) {
   const html = await (await fetch(CATALOGO_URL, { headers: { 'User-Agent': UA } })).text();
   const rx = /<a\b[^>]*\bhref\s*=\s*["']([^"']*file\.php\?t=[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
@@ -80,16 +77,14 @@ async function descubrirURL(anio) {
 
 async function descomprimirRAR(buf) {
   const extractor = await createExtractorFromData({ data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
-  const list = extractor.getFileList();
-  const headers = [...list.fileHeaders];
+  const headers = [...extractor.getFileList().fileHeaders];
   console.log(`[profeco] RAR ${headers.length} archivos:`);
-  headers.forEach(f => console.log(`  - ${f.name} (${f.unpSize} bytes)`));
-  const extracted = extractor.extract();
-  const files = [...extracted.files];
+  headers.forEach(f => console.log(`  - ${f.name} (${f.unpSize})`));
+  const files = [...extractor.extract().files];
   let largest = null, largestSize = 0;
   for (const f of files) { if (f.fileHeader.unpSize > largestSize) { largest = f; largestSize = f.fileHeader.unpSize; } }
   if (!largest) throw new Error('RAR vacío');
-  console.log(`[profeco] usando ${largest.fileHeader.name} (${largestSize} bytes)`);
+  console.log(`[profeco] usando ${largest.fileHeader.name} (${largestSize})`);
   return Buffer.from(largest.extraction);
 }
 
@@ -97,19 +92,17 @@ async function descargarYParsear(url, onBatch) {
   const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': '*/*' }, redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   let buf = Buffer.from(await res.arrayBuffer());
-  console.log(`[profeco] descargado: ${buf.length} bytes · magic: ${buf.slice(0,8).toString('hex')}`);
+  console.log(`[profeco] descargado: ${buf.length} bytes · magic ${buf.slice(0,8).toString('hex')}`);
 
   if (buf[0]===0x52 && buf[1]===0x61 && buf[2]===0x72 && buf[3]===0x21) {
-    console.log('[profeco] formato RAR, descomprimiendo...');
+    console.log('[profeco] RAR, descomprimiendo...');
     buf = await descomprimirRAR(buf);
     console.log(`[profeco] descomprimido: ${buf.length} bytes`);
   } else if (buf[0]===0x1f && buf[1]===0x8b) { buf = zlib.gunzipSync(buf); }
   if (buf[0]===0xef && buf[1]===0xbb && buf[2]===0xbf) buf = buf.slice(3);
 
   const head = buf.slice(0,4096).toString('utf8');
-  const nl = head.indexOf('\n');
-  const firstLine = head.slice(0, nl >= 0 ? nl : 500);
-  console.log(`[profeco] primera línea: ${firstLine.slice(0,300)}`);
+  const firstLine = head.slice(0, head.indexOf('\n') >= 0 ? head.indexOf('\n') : 500);
   const counts = { ',':(firstLine.match(/,/g)||[]).length, ';':(firstLine.match(/;/g)||[]).length, '|':(firstLine.match(/\|/g)||[]).length, '\t':(firstLine.match(/\t/g)||[]).length };
   const delimiter = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
   console.log(`[profeco] delim: ${JSON.stringify(delimiter)}`);
@@ -117,30 +110,41 @@ async function descargarYParsear(url, onBatch) {
   const stream = Readable.from(buf);
   const parser = stream.pipe(parse({
     columns: h => { console.log('[profeco] HEADER:', JSON.stringify(h)); return h.map(normH); },
-    delimiter,
-    skip_empty_lines: true,
-    relax_column_count: true,
-    bom: true,
-    trim: true,
-    // quote HABILITADO (default es '"'). PROFECO usa comillas para escapar comas en presentaciones.
-    relax_quotes: true,            // tolerante a quotes desbalanceados
-    skip_records_with_error: true, // filas malas se saltan
+    delimiter, skip_empty_lines: true, relax_column_count: true, bom: true, trim: true,
+    relax_quotes: true, skip_records_with_error: true,
   }));
 
-  let batch = [], total = 0, skipped = 0, firstLogged = false;
+  let batch = [], total = 0, skipped = 0, failedBatches = 0, deduped = 0, firstLogged = false;
   parser.on('skip', e => { skipped++; if (skipped<=3) console.warn(`[profeco] skip: ${(e?.message||'').slice(0,120)}`); });
-  parser.on('error', e => console.error('[profeco] PARSER ERR:', e.message));
+
+  async function flushBatch(b) {
+    if (b.length === 0) return;
+    const before = b.length;
+    const cleanBatch = dedupBatch(b);
+    deduped += (before - cleanBatch.length);
+    try {
+      await onBatch(cleanBatch);
+      total += cleanBatch.length;
+    } catch (e) {
+      failedBatches++;
+      console.warn(`[profeco] batch fail (${failedBatches}): ${e.message.slice(0,200)}`);
+    }
+  }
 
   for await (const raw of parser) {
     if (!firstLogged) { console.log('[profeco] PRIMER RECORD:', JSON.stringify(raw).slice(0,400)); firstLogged = true; }
     const n = normalizeRow(raw);
     if (!n) continue;
     batch.push(n);
-    if (batch.length >= BATCH_SIZE) { await onBatch(batch); total += batch.length; batch = []; if (total % 50000 === 0) console.log(`[profeco] ${total} filas…`); }
+    if (batch.length >= BATCH_SIZE) {
+      await flushBatch(batch);
+      batch = [];
+      if (total % 50000 === 0 && total > 0) console.log(`[profeco] ${total} filas insertadas…`);
+    }
   }
-  if (batch.length) { await onBatch(batch); total += batch.length; }
-  console.log(`[profeco] resumen · ok=${total} · skipped=${skipped}`);
-  return { total, skipped };
+  if (batch.length) await flushBatch(batch);
+  console.log(`[profeco] resumen · insertadas=${total} · parse_skipped=${skipped} · dedup=${deduped} · batches_fallidas=${failedBatches}`);
+  return { total, skipped, deduped, failedBatches };
 }
 
 const started_at = new Date().toISOString();
@@ -152,14 +156,23 @@ const started_at = new Date().toISOString();
     if (!url) url = await descubrirURL(ANIO_FALLBACK);
     if (!url) throw new Error('No URL');
     sourceUrl = url;
-    const { total, skipped } = await descargarYParsear(url, async batch => {
+    const result = await descargarYParsear(url, async batch => {
       await sbInsert('profeco_precios', batch, { onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro', merge: true });
       inserted += batch.length;
     });
-    await logRun({ status: skipped > 0 ? 'partial' : 'ok', rows_inserted: inserted, rows_skipped: skipped, http_status: 200, fuente_url: sourceUrl, notes: `año ${ANIO_OBJETIVO} skip=${skipped}`, started_at });
+    const isPartial = result.skipped > 0 || result.failedBatches > 0 || result.deduped > 0;
+    await logRun({
+      status: isPartial ? 'partial' : 'ok',
+      rows_inserted: inserted,
+      rows_skipped: result.skipped + result.deduped,
+      http_status: 200,
+      fuente_url: sourceUrl,
+      notes: `año ${ANIO_OBJETIVO} insert=${inserted} skip=${result.skipped} dedup=${result.deduped} fail=${result.failedBatches}`,
+      started_at,
+    });
     process.exit(0);
   } catch (e) {
-    console.error('[profeco] ERROR:', e.message);
+    console.error('[profeco] FATAL:', e.message);
     await logRun({ status: 'fail', rows_inserted: inserted, fuente_url: sourceUrl, error_msg: String(e.message||e).slice(0,500), started_at });
     process.exit(1);
   }
