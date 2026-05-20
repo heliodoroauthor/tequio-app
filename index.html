@@ -2389,6 +2389,156 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           <div style="font-size:22px;font-weight:800;margin-bottom:2px" id="dash-bienvenida">Buenos días 👋</div>
           <div style="font-size:13px;color:var(--text3)" id="dash-fecha"></div>
         </div>
+        <!-- ════════ TEQUIO · Mi Tequio (personalizado por estado) ════════ -->
+        <div id="mi-tequio-section" style="display:none;margin-bottom:20px">
+          <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:10px">📍 MI TEQUIO · <span id="mi-tequio-estado" style="color:var(--accent2)">—</span></div>
+          <div id="mi-tequio-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px"></div>
+          <div id="mi-tequio-empty" style="display:none;font-size:11px;color:var(--text3);margin-top:6px">Cargando indicadores locales…</div>
+        </div>
+        <script>
+        (function () {
+          var SUPABASE_URL      = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+          var SUPABASE_ANON_KEY = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+
+          function $(id) { return document.getElementById(id); }
+
+          function fmtNum(n) {
+            if (n == null) return '—';
+            return Number(n).toLocaleString('es-MX');
+          }
+
+          function pct(p) {
+            if (p == null) return '—';
+            var n = Number(p);
+            if (isNaN(n)) return String(p);
+            return n.toFixed(1) + '%';
+          }
+
+          function renderMiTequio(estado, data) {
+            var cards = [];
+
+            // 1. DIPUTADOS
+            var dip = data.diputados || {};
+            var dipLista = dip.lista || [];
+            if ((dip.total || 0) > 0) {
+              var primero = dipLista[0] || {};
+              cards.push(
+                '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s" onclick="if(typeof showPage===\'function\') showPage(\'politicos\')">' +
+                  '<div style="font-size:22px;margin-bottom:4px">🏛️</div>' +
+                  '<div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Tus diputados</div>' +
+                  '<div style="font-size:18px;font-weight:800;color:var(--text)">' + dip.total + ' federales</div>' +
+                  (primero.nombre ? '<div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4">' + (primero.nombre.length > 30 ? primero.nombre.slice(0,30)+'…' : primero.nombre) + ' (' + (primero.partido || '?') + ')</div>' : '') +
+                '</div>'
+              );
+            }
+
+            // 2. PRESAS
+            var presas = data.presas || {};
+            var presaCritica = presas.critica;
+            var presaTop = (presas.top || [])[0];
+            if (presaCritica) {
+              cards.push(
+                '<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.35);border-radius:12px;padding:14px;cursor:pointer" onclick="if(typeof showPage===\'function\') showPage(\'presas\')">' +
+                  '<div style="font-size:22px;margin-bottom:4px">⚠️</div>' +
+                  '<div style="font-size:10px;color:var(--red2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Presa crítica</div>' +
+                  '<div style="font-size:18px;font-weight:800;color:var(--text)">' + pct(presaCritica.pct_almacenamiento) + '</div>' +
+                  '<div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4">' + (presaCritica.presa || '') + '</div>' +
+                '</div>'
+              );
+            } else if (presaTop) {
+              cards.push(
+                '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer" onclick="if(typeof showPage===\'function\') showPage(\'presas\')">' +
+                  '<div style="font-size:22px;margin-bottom:4px">💧</div>' +
+                  '<div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Presas en ' + estado + '</div>' +
+                  '<div style="font-size:18px;font-weight:800;color:var(--text)">' + (presas.total || 0) + '</div>' +
+                  '<div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4">Mayor: ' + (presaTop.presa || '') + '</div>' +
+                '</div>'
+              );
+            }
+
+            // 3. DELITOS
+            var delitos = data.delitos || {};
+            var topDelito = (delitos.top_tipos || [])[0];
+            if ((delitos.total_anio || 0) > 0 && topDelito) {
+              cards.push(
+                '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer" onclick="if(typeof cargarPanel===\'function\') cargarPanel(\'estado\'); else if(typeof showPage===\'function\') showPage(\'tu-estado\')">' +
+                  '<div style="font-size:22px;margin-bottom:4px">🛡️</div>' +
+                  '<div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Delitos ' + topDelito.anio + '</div>' +
+                  '<div style="font-size:18px;font-weight:800;color:var(--text)">' + fmtNum(delitos.total_anio) + '</div>' +
+                  '<div style="font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4">+frec: ' + topDelito.tipo + '</div>' +
+                '</div>'
+              );
+            }
+
+            // 4. ALERTAS METEO ACTIVAS
+            var alertas = data.alertas_meteo || {};
+            if ((alertas.activas || 0) > 0) {
+              var alerta = (alertas.lista || [])[0];
+              var emoji = ({rojo:'🚨', naranja:'⚠️', amarillo:'🟡'}[(alerta.nivel||'').toLowerCase()] || '🌧️');
+              cards.push(
+                '<div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.35);border-radius:12px;padding:14px;cursor:pointer" onclick="if(typeof showPage===\'function\') showPage(\'alertas\')">' +
+                  '<div style="font-size:22px;margin-bottom:4px">' + emoji + '</div>' +
+                  '<div style="font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Alerta SMN activa</div>' +
+                  '<div style="font-size:13px;font-weight:800;color:var(--text);line-height:1.3">' + (alerta.nombre ? (alerta.nombre.length > 60 ? alerta.nombre.slice(0,60)+'…' : alerta.nombre) : 'Alerta vigente') + '</div>' +
+                  '<div style="font-size:10px;color:var(--text2);margin-top:6px">Nivel: ' + (alerta.nivel || '?') + '</div>' +
+                '</div>'
+              );
+            }
+
+            return cards.join('');
+          }
+
+          window.cargarMiTequio = function () {
+            var estado;
+            try { estado = localStorage.getItem('tequio_estado_nombre'); } catch (e) {}
+            if (!estado || estado.length < 3) return;
+
+            var section = $('mi-tequio-section');
+            var grid    = $('mi-tequio-grid');
+            var loading = $('mi-tequio-empty');
+            if (!section || !grid) return;
+
+            $('mi-tequio-estado').textContent = estado;
+            section.style.display = 'block';
+            loading.style.display = 'block';
+            loading.textContent = 'Cargando indicadores locales…';
+
+            fetch(SUPABASE_URL + '/rest/v1/rpc/panel_personalizado', {
+              method: 'POST',
+              headers: {
+                'apikey':       SUPABASE_ANON_KEY,
+                'Authorization':'Bearer ' + SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ p_estado: estado })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (!data || data.error) {
+                loading.textContent = 'No pudimos cargar indicadores locales.';
+                return;
+              }
+              var html = renderMiTequio(estado, data);
+              if (!html) {
+                loading.textContent = 'Aún no hay indicadores disponibles para tu estado.';
+                return;
+              }
+              grid.innerHTML = html;
+              loading.style.display = 'none';
+            })
+            .catch(function (err) {
+              console.warn('[mi-tequio]', err);
+              loading.textContent = 'Error de conexión.';
+            });
+          };
+
+          // Auto-cargar al estar listo el DOM, con delay para no bloquear el render inicial
+          function autoLoad() { setTimeout(window.cargarMiTequio, 800); }
+          if (document.readyState === 'complete') autoLoad();
+          else window.addEventListener('load', autoLoad);
+        })();
+        </script>
+        <!-- ════════ /Mi Tequio ════════ -->
         <!-- ACCIONES RÁPIDAS — arriba para máxima accionabilidad -->
         <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:0.5px;margin-bottom:10px">⚡ ACCIONES RÁPIDAS</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
