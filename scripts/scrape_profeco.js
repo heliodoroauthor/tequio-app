@@ -1,16 +1,13 @@
-// scripts/scrape_profeco.js  (v2: sin @supabase/supabase-js)
+// scripts/scrape_profeco.js  (v3)
 //
 // TEQUIO · Scraper PROFECO Quien es Quien en los Precios
 //
-// Fuente:  https://datos.profeco.gob.mx/datos_abiertos/qqp.php
-// Frecuencia: semanal
-//
-// Cambios v2:
-//   - Removido @supabase/supabase-js (Node 20 sin WebSocket nativo no lo soporta)
-//   - Usa fetch directo a PostgREST: POST + on_conflict + Prefer: resolution=merge-duplicates
-//
-// Env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GITHUB_RUN_ID
-// Deps:     csv-parse
+// Cambios v3:
+//   - status válidos en scraper_logs: 'ok' | 'fail' | 'partial' (NO 'running')
+//   - Solo se crea UN row en scraper_logs al final (no al inicio)
+//   - descubrirURL ahora extrae TODOS los anchors file.php?t=… y elige por año
+//     en el texto. Mucho más tolerante a variaciones del HTML.
+//   - Log de diagnóstico si no encuentra link (primeros 10 anchors)
 
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
@@ -26,13 +23,16 @@ const ANIO_FALLBACK = ANIO_OBJETIVO - 1;
 const CATALOGO_URL = 'https://datos.profeco.gob.mx/datos_abiertos/qqp.php';
 const BATCH_SIZE   = 500;
 
+// User-Agent más realista (algunos sitios bloquean UAs evidentemente bot)
+const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 TequioBot/1.0';
+
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('Faltan env vars SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
 // ─────────────────────────────────────────────────────────────
-// Helpers REST a Supabase (PostgREST)
+// Helpers REST a Supabase
 // ─────────────────────────────────────────────────────────────
 
 const BASE = SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1';
@@ -45,16 +45,9 @@ const AUTH_HEADERS = {
 async function sbInsert(table, rows, opts = {}) {
   const url = new URL(`${BASE}/${table}`);
   if (opts.onConflict) url.searchParams.set('on_conflict', opts.onConflict);
-
   const headers = { ...AUTH_HEADERS };
-  // resolution=merge-duplicates => upsert; return=minimal => no devuelve body para ahorrar bandwidth
   headers['Prefer'] = (opts.merge ? 'resolution=merge-duplicates,' : '') + 'return=minimal';
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(rows),
-  });
+  const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(rows) });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
@@ -62,61 +55,23 @@ async function sbInsert(table, rows, opts = {}) {
   return res;
 }
 
-async function sbUpdate(table, filter, payload) {
-  const url = new URL(`${BASE}/${table}`);
-  for (const [k, v] of Object.entries(filter)) url.searchParams.set(k, v);
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: { ...AUTH_HEADERS, 'Prefer': 'return=minimal' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
-  }
-  return res;
-}
-
-// ─────────────────────────────────────────────────────────────
-// Logging en scraper_logs (via REST)
-// ─────────────────────────────────────────────────────────────
-
-async function logStart(fuenteUrl) {
-  const url = new URL(`${BASE}/scraper_logs`);
-  url.searchParams.set('select', 'id');
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { ...AUTH_HEADERS, 'Prefer': 'return=representation' },
-    body: JSON.stringify([{
+// Log final único — status válidos: 'ok' | 'fail' | 'partial'
+async function logRun(payload) {
+  try {
+    await sbInsert('scraper_logs', [{
       scraper_slug:    SCRAPER_SLUG,
       workflow_run_id: RUN_ID,
-      status:          'running',
-      fuente_url:      fuenteUrl,
-      started_at:      new Date().toISOString(),
-    }]),
-  });
-  if (!res.ok) {
-    console.warn('[profeco] no se pudo log_start:', res.status, await res.text());
-    return null;
-  }
-  const data = await res.json();
-  return data[0]?.id ?? null;
-}
-
-async function logFinish(logId, payload) {
-  if (!logId) return;
-  try {
-    await sbUpdate('scraper_logs', { id: `eq.${logId}` }, {
+      started_at:      payload.started_at,
+      finished_at:     new Date().toISOString(),
       ...payload,
-      finished_at: new Date().toISOString(),
-    });
+    }]);
   } catch (e) {
-    console.warn('[profeco] no se pudo log_finish:', e.message);
+    console.warn('[profeco] no se pudo log final:', e.message);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Helpers de parsing
+// Helpers de parsing CSV
 // ─────────────────────────────────────────────────────────────
 
 function normHeader(h) {
@@ -182,20 +137,42 @@ function normalizeRow(rawRow) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Descubrir URL del archivo del año actual
+// Descubrir URL del archivo del año actual (flexible)
 // ─────────────────────────────────────────────────────────────
 
 async function descubrirURL(anio) {
-  const html = await fetch(CATALOGO_URL, {
-    headers: { 'User-Agent': 'TequioApp/1.0 (+tequio.app)' },
-  }).then(r => r.text());
-  const regex = new RegExp(
-    `href="([^"]+file\\.php\\?t=[^"]+)"[^>]*>[^<]*Quien es Quien en los Precios\\s*${anio}`,
-    'i'
-  );
-  const m = html.match(regex);
-  if (!m) return null;
-  return m[1].startsWith('http') ? m[1] : new URL(m[1], CATALOGO_URL).href;
+  const res = await fetch(CATALOGO_URL, {
+    headers: { 'User-Agent': UA, 'Accept': 'text/html,*/*' },
+  });
+  const html = await res.text();
+  console.log(`[profeco] catálogo HTML: ${html.length} bytes, status ${res.status}`);
+
+  // Extraer TODOS los <a href="...file.php?t=...">TEXT</a>
+  const linkRegex = /<a\b[^>]*\bhref\s*=\s*["']([^"']*file\.php\?t=[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  const allLinks = [...html.matchAll(linkRegex)].map(m => ({
+    href: m[1],
+    text: m[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+  }));
+  console.log(`[profeco] anchors file.php?t= encontrados: ${allLinks.length}`);
+
+  if (allLinks.length === 0) {
+    console.log('[profeco] DEBUG · primeros 800 chars del HTML:\n', html.slice(0, 800));
+    return null;
+  }
+
+  // Buscar el que tenga el año en su texto (Quien es Quien en los Precios <ANIO>)
+  const yearStr = String(anio);
+  const found = allLinks.find(l => l.text.includes(yearStr));
+  if (!found) {
+    console.log(`[profeco] no se encontró link con texto que incluya "${yearStr}". Anchors disponibles:`);
+    allLinks.slice(0, 10).forEach((l, i) => {
+      console.log(`  [${i}] text="${l.text.slice(0, 80)}" · href=${l.href.slice(0, 60)}`);
+    });
+    return null;
+  }
+
+  console.log(`[profeco] match · text="${found.text}" · href=${found.href}`);
+  return found.href.startsWith('http') ? found.href : new URL(found.href, CATALOGO_URL).href;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -205,7 +182,7 @@ async function descubrirURL(anio) {
 async function descargarYParsear(url, onBatch) {
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'TequioApp/1.0 (scraper-profeco; +tequio.app)',
+      'User-Agent': UA,
       'Accept': 'text/csv,application/csv,application/octet-stream,*/*',
     },
     redirect: 'follow',
@@ -261,9 +238,11 @@ async function descargarYParsear(url, onBatch) {
 // MAIN
 // ─────────────────────────────────────────────────────────────
 
+const started_at = new Date().toISOString();
 (async () => {
   console.log('[profeco] inicio · run', RUN_ID);
-  const logId = await logStart(CATALOGO_URL);
+  let inserted = 0;
+  let sourceUrl = CATALOGO_URL;
 
   try {
     let url = await descubrirURL(ANIO_OBJETIVO);
@@ -272,10 +251,9 @@ async function descargarYParsear(url, onBatch) {
       url = await descubrirURL(ANIO_FALLBACK);
     }
     if (!url) throw new Error('No se encontró URL del archivo PROFECO en el catálogo.');
-
+    sourceUrl = url;
     console.log('[profeco] URL del dataset:', url);
 
-    let inserted = 0;
     const total = await descargarYParsear(url, async (batch) => {
       await sbInsert('profeco_precios', batch, {
         onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro',
@@ -286,22 +264,25 @@ async function descargarYParsear(url, onBatch) {
 
     console.log(`[profeco] OK · ${total} filas procesadas`);
 
-    await logFinish(logId, {
-      status:        'success',
+    await logRun({
+      status:        'ok',
       rows_inserted: inserted,
       rows_updated:  0,
       rows_skipped:  0,
       http_status:   200,
-      fuente_url:    url,
+      fuente_url:    sourceUrl,
       notes:         `PROFECO QQP año ${ANIO_OBJETIVO}`,
+      started_at,
     });
     process.exit(0);
-
   } catch (err) {
     console.error('[profeco] ERROR:', err.message);
-    await logFinish(logId, {
-      status:    'error',
-      error_msg: String(err.message || err).slice(0, 500),
+    await logRun({
+      status:        'fail',
+      rows_inserted: inserted,
+      fuente_url:    sourceUrl,
+      error_msg:     String(err.message || err).slice(0, 500),
+      started_at,
     });
     process.exit(1);
   }
