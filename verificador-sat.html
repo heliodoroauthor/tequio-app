@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificador SAT — Tequio | ¿Esta empresa es facturera?</title>
+<meta name="description" content="Verifica si una empresa o RFC está en la lista negra del SAT (factureras EFOS y deudores fiscales). Datos públicos del Artículo 69 y 69-B del CFF.">
+<meta name="theme-color" content="#fbbf24">
+
+<!-- OpenGraph para WhatsApp / X / Facebook / Threads -->
+<meta property="og:title" content="Verificador SAT — ¿Esta empresa es facturera?">
+<meta property="og:description" content="Antes de contratar, verifica si una empresa está en la lista EFOS del SAT. Datos oficiales públicos. Gratis. Sin registro.">
+<meta property="og:image" content="https://tequio.app/icon-512.png">
+<meta property="og:url" content="https://tequio.app/verificador-sat.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tequio · Plataforma Cívica">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verificador SAT — Tequio">
+<meta name="twitter:description" content="¿Esta empresa es facturera? Verifica antes de contratar.">
+<meta name="twitter:image" content="https://tequio.app/icon-512.png">
+
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800&family=DM+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:      #0a0f1a;
+    --bg2:     #0e1525;
+    --surface: #1a243d;
+    --surface2:#1e2a42;
+    --border:  #2a3a5c;
+    --border2: #3a4f75;
+    --accent:  #fbbf24;
+    --accent2: #f59e0b;
+    --text:    #e8edf5;
+    --text2:   #94a3b8;
+    --text3:   #64748b;
+    --rojo:    #ef4444;
+    --rojo2:   #dc2626;
+    --naranja: #f97316;
+    --amarillo:#eab308;
+    --verde:   #22c55e;
+    --verde2:  #16a34a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: 'DM Mono', monospace; }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 18px 80px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .brand-stack { flex: 1; }
+  .brand-stack h1 {
+    font-size: 14px; font-weight: 700; color: var(--text); margin: 0;
+    letter-spacing: 0.5px;
+  }
+  .brand-stack .sub {
+    font-size: 11px; color: var(--text3); font-weight: 500;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .back-link {
+    font-size: 12px; color: var(--text2);
+    padding: 6px 12px; border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .back-link:hover { color: var(--text); border-color: var(--border2); text-decoration: none; }
+
+  /* HERO */
+  .hero { margin-bottom: 28px; text-align: center; padding: 18px 8px; }
+  .hero h2 {
+    font-size: 26px; font-weight: 800; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--text2); font-size: 14px; max-width: 540px; margin: 0 auto; }
+
+  /* SEARCH BOX */
+  .searchbox {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 22px;
+  }
+  .searchbox label {
+    display: block; font-size: 11px; color: var(--text2);
+    letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .searchrow { display: flex; gap: 8px; }
+  .searchrow input {
+    flex: 1;
+    background: var(--bg2); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    font-size: 16px; font-family: inherit;
+    outline: none;
+  }
+  .searchrow input:focus { border-color: var(--accent); }
+  .searchrow button {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827; border: none;
+    padding: 0 22px; border-radius: 12px;
+    font-weight: 800; font-size: 14px;
+    cursor: pointer; font-family: inherit;
+    transition: filter .12s;
+  }
+  .searchrow button:hover:not(:disabled) { filter: brightness(1.08); }
+  .searchrow button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .hint { margin-top: 10px; font-size: 11px; color: var(--text3); }
+  .hint code {
+    background: var(--bg2); padding: 2px 6px;
+    border-radius: 4px; font-size: 11px;
+    border: 1px solid var(--border);
+  }
+
+  /* RESULTS */
+  .verdict {
+    border-radius: 16px; padding: 20px 22px;
+    margin-bottom: 18px;
+    border: 1.5px solid;
+  }
+  .verdict.rojo           { background: rgba(239,68,68,0.08);  border-color: var(--rojo); }
+  .verdict.naranja        { background: rgba(249,115,22,0.08); border-color: var(--naranja); }
+  .verdict.amarillo       { background: rgba(234,179,8,0.08);  border-color: var(--amarillo); }
+  .verdict.verde,
+  .verdict.verde-amarillo { background: rgba(34,197,94,0.08);  border-color: var(--verde); }
+  .verdict-row1 {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+    background: rgba(255,255,255,0.06);
+  }
+  .badge.rojo           { background: var(--rojo);     color: white; }
+  .badge.naranja        { background: var(--naranja);  color: white; }
+  .badge.amarillo       { background: var(--amarillo); color: #111827; }
+  .badge.verde,
+  .badge.verde-amarillo { background: var(--verde);    color: white; }
+  .verdict h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+  .verdict p  { color: var(--text); font-size: 14px; line-height: 1.6; }
+  .verdict .razon { color: var(--text2); margin-top: 4px; }
+  .totals { font-size: 12px; color: var(--text3); margin-top: 10px; }
+
+  /* DETAIL */
+  .detail-section { margin-bottom: 22px; }
+  .detail-section h4 {
+    font-size: 13px; font-weight: 800; color: var(--text2);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .match {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .match.def      { border-left-color: var(--rojo); }
+  .match.pres     { border-left-color: var(--naranja); }
+  .match.firmes,
+  .match.nolocal  { border-left-color: var(--amarillo); }
+  .match.fav,
+  .match.des,
+  .match.canc     { border-left-color: var(--verde); }
+  .match .rfc {
+    font-family: 'DM Mono', monospace; font-weight: 700;
+    color: var(--accent2); font-size: 14px;
+  }
+  .match .nombre { font-weight: 700; margin-top: 4px; }
+  .match .meta {
+    font-size: 11px; color: var(--text3); margin-top: 6px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .match .meta span { background: var(--bg2); padding: 2px 8px; border-radius: 6px; }
+  .match a { font-size: 11px; }
+
+  /* SHARE */
+  .share {
+    background: var(--surface2);
+    border: 1px dashed var(--border2);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 22px;
+    text-align: center;
+  }
+  .share p { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+  .share-row {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .share-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 14px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    text-decoration: none; cursor: pointer; border: none;
+    transition: filter .12s;
+  }
+  .share-btn:hover { filter: brightness(1.1); text-decoration: none; }
+  .share-btn.wa { background: #25D366; color: white; }
+  .share-btn.tw { background: #1DA1F2; color: white; }
+  .share-btn.tg { background: #0088cc; color: white; }
+  .share-btn.copy { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    font-size: 11px; color: var(--text3); line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+
+  /* LOADING + EMPTY */
+  .loading, .empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--text3); font-size: 13px;
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px; border-radius: 12px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 480px) {
+    .searchrow { flex-direction: column; }
+    .searchrow button { padding: 14px; }
+    .hero h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ─── HEADER ─── -->
+  <div class="header">
+    <div class="logo">🔍</div>
+    <div class="brand-stack">
+      <h1>Verificador SAT</h1>
+      <div class="sub">Tequio · Plataforma Cívica</div>
+    </div>
+    <a href="/" class="back-link">← Tequio</a>
+  </div>
+
+  <!-- ─── HERO ─── -->
+  <div class="hero">
+    <h2>¿Esta empresa es facturera?</h2>
+    <p>Verifica si un RFC o empresa está en las listas públicas del SAT (Artículos 69 y 69-B): factureras EFOS y deudores fiscales. Antes de contratar, antes de aceptar facturas.</p>
+  </div>
+
+  <!-- ─── SEARCH ─── -->
+  <div class="searchbox">
+    <label for="q">RFC o nombre de empresa</label>
+    <div class="searchrow">
+      <input id="q" type="text" autocomplete="off" autocapitalize="characters"
+             placeholder="Ej: BIMB820207HK4 o BIMBO" maxlength="200">
+      <button id="go" type="button">Verificar</button>
+    </div>
+    <div class="hint">
+      Tip: si conoces el RFC exacto, mejor. Acepta también nombre o razón social.
+      Ejemplos: <code>XAXX010101000</code> o <code>Constructora Sol</code>
+    </div>
+  </div>
+
+  <!-- ─── RESULTS ─── -->
+  <div id="results"></div>
+
+  <!-- ─── DISCLAIMER ─── -->
+  <div class="disclaimer">
+    <strong style="color:var(--text2)">Aviso legal:</strong>
+    Esta herramienta consulta los listados públicos del SAT bajo los Artículos 69 y 69-B del Código Fiscal de la Federación (CFF), publicados en el Diario Oficial de la Federación. <strong>Tequio no genera ni modifica esta información</strong>: solo facilita su búsqueda. La fuente autoritativa siempre es el SAT — verifica el estatus vigente en <a href="https://www.sat.gob.mx" target="_blank" rel="noopener">sat.gob.mx</a> antes de tomar decisiones legales o fiscales. No usamos esta herramienta para difamar empresas: la inclusión en las listas refleja un proceso administrativo del SAT, no una sentencia penal definitiva en todos los casos.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const SUPABASE_URL       = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  const SUPABASE_ANON_KEY  = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  const RPC_URL            = SUPABASE_URL + '/rest/v1/rpc/verificar_facturera';
+  const SHARE_URL          = 'https://tequio.app/verificador-sat.html';
+
+  const $q        = document.getElementById('q');
+  const $go       = document.getElementById('go');
+  const $results  = document.getElementById('results');
+  const $toast    = document.getElementById('toast');
+
+  function showToast(msg) {
+    $toast.textContent = msg;
+    $toast.classList.add('show');
+    setTimeout(() => $toast.classList.remove('show'), 1800);
+  }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  function fmtMonto(n) {
+    if (n == null) return '';
+    const num = Number(n);
+    if (isNaN(num)) return '';
+    return '$' + num.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' MXN';
+  }
+
+  function classFromSituacion(s) {
+    if (!s) return '';
+    const x = String(s).toLowerCase();
+    if (x === 'definitivo')          return 'def';
+    if (x === 'presunto')            return 'pres';
+    if (x === 'sentencia favorable') return 'fav';
+    if (x === 'desvirtuado')         return 'des';
+    return '';
+  }
+  function classFromSupuesto(s) {
+    if (!s) return '';
+    const x = String(s).toLowerCase();
+    if (x === 'firmes')          return 'firmes';
+    if (x === 'no_localizados')  return 'nolocal';
+    if (x === 'cancelados')      return 'canc';
+    return '';
+  }
+
+  function renderMatch69b(m) {
+    const cls   = classFromSituacion(m.situacion);
+    const sit   = m.situacion || 'Sin clasificar';
+    const rfc   = escapeHtml(m.rfc);
+    const nom   = escapeHtml(m.nombre || '(sin nombre)');
+    const meta  = [];
+    if (m.fecha_publicacion_sat) meta.push('SAT: ' + escapeHtml(m.fecha_publicacion_sat));
+    if (m.fecha_dof)             meta.push('DOF: ' + escapeHtml(m.fecha_dof));
+    const link  = m.fuente_url ? '<a href="' + escapeHtml(m.fuente_url) + '" target="_blank" rel="noopener">Fuente oficial ↗</a>' : '';
+    return ''
+      + '<div class="match ' + cls + '">'
+      +   '<div class="rfc">' + rfc + ' · ' + escapeHtml(sit) + '</div>'
+      +   '<div class="nombre">' + nom + '</div>'
+      +   (meta.length ? '<div class="meta">' + meta.map(x => '<span>' + x + '</span>').join('') + '</div>' : '')
+      +   (link ? '<div style="margin-top:6px">' + link + '</div>' : '')
+      + '</div>';
+  }
+
+  function renderMatch69(m) {
+    const cls   = classFromSupuesto(m.supuesto);
+    const sup   = m.supuesto || 'Sin clasificar';
+    const rfc   = escapeHtml(m.rfc);
+    const nom   = escapeHtml(m.nombre || '(sin nombre)');
+    const meta  = [];
+    if (m.entidad_federativa) meta.push(escapeHtml(m.entidad_federativa));
+    if (m.ejercicio)          meta.push('Ejercicio ' + escapeHtml(m.ejercicio));
+    if (m.monto != null)      meta.push(fmtMonto(m.monto));
+    const link  = m.fuente_url ? '<a href="' + escapeHtml(m.fuente_url) + '" target="_blank" rel="noopener">Fuente oficial ↗</a>' : '';
+    return ''
+      + '<div class="match ' + cls + '">'
+      +   '<div class="rfc">' + rfc + ' · ' + escapeHtml(sup) + '</div>'
+      +   '<div class="nombre">' + nom + '</div>'
+      +   (meta.length ? '<div class="meta">' + meta.map(x => '<span>' + x + '</span>').join('') + '</div>' : '')
+      +   (link ? '<div style="margin-top:6px">' + link + '</div>' : '')
+      + '</div>';
+  }
+
+  function renderShareButtons(query, severidad) {
+    const text = '¿Conoces a "' + query + '"? Acabo de verificar en el SAT y el resultado es: ' + severidad + '. Tú también puedes verificar empresas en:';
+    const url = SHARE_URL;
+    const waHref = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
+    const twHref = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
+    const tgHref = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
+    return ''
+      + '<div class="share">'
+      +   '<p>📢 Comparte para que más gente verifique antes de contratar</p>'
+      +   '<div class="share-row">'
+      +     '<a class="share-btn wa" href="' + waHref + '" target="_blank" rel="noopener">💬 WhatsApp</a>'
+      +     '<a class="share-btn tw" href="' + twHref + '" target="_blank" rel="noopener">𝕏 Twitter</a>'
+      +     '<a class="share-btn tg" href="' + tgHref + '" target="_blank" rel="noopener">✈️ Telegram</a>'
+      +     '<button class="share-btn copy" onclick="navigator.clipboard.writeText(\'' + url.replace(/'/g, "\\'") + '\').then(()=>window.__toast(\'Link copiado\'))">📋 Copiar link</button>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  // Permitir toast desde el botón inline de copiar
+  window.__toast = showToast;
+
+  async function buscar() {
+    const q = ($q.value || '').trim();
+    if (q.length < 3) {
+      showToast('Escribe al menos 3 caracteres.');
+      $q.focus();
+      return;
+    }
+
+    $go.disabled = true;
+    $results.innerHTML = '<div class="loading"><div class="spinner"></div>Consultando listas SAT…</div>';
+
+    try {
+      const res = await fetch(RPC_URL, {
+        method: 'POST',
+        headers: {
+          'apikey':       SUPABASE_ANON_KEY,
+          'Authorization':'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ p_query: q })
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error('Error ' + res.status + ': ' + text.slice(0, 200));
+      }
+      const data = await res.json();
+      renderResult(data);
+    } catch (err) {
+      console.error(err);
+      $results.innerHTML = '<div class="loading">⚠️ Error consultando: ' + escapeHtml(err.message || String(err)) + '</div>';
+    } finally {
+      $go.disabled = false;
+    }
+  }
+
+  function renderResult(data) {
+    if (!data || data.error) {
+      $results.innerHTML = '<div class="loading">' + escapeHtml((data && data.mensaje) || 'Sin resultados.') + '</div>';
+      return;
+    }
+
+    const v        = data.veredicto || {};
+    const color    = v.color || 'verde';
+    const sev      = v.severidad || 'SIN_COINCIDENCIAS';
+    const reco     = v.recomendacion || '';
+    const razon    = v.razon || '';
+    const tipo     = data.tipo_busqueda || 'nombre';
+    const q        = data.query || '';
+    const total_b  = parseInt(data.total_69b || 0, 10);
+    const total_a  = parseInt(data.total_69 || 0, 10);
+
+    let html = '';
+
+    html += '<div class="verdict ' + escapeHtml(color) + '">';
+    html += '  <div class="verdict-row1">';
+    html += '    <span class="badge ' + escapeHtml(color) + '">' + escapeHtml(sev) + '</span>';
+    html += '    <span style="font-size:11px;color:var(--text3)">Búsqueda por ' + (tipo === 'rfc' ? 'RFC' : 'nombre') + ': "' + escapeHtml(q) + '"</span>';
+    html += '  </div>';
+    html += '  <h3>' + escapeHtml(reco) + '</h3>';
+    html += '  <p class="razon">' + escapeHtml(razon) + '</p>';
+    if (total_b > 0 || total_a > 0) {
+      html += '  <div class="totals">Coincidencias: ' + total_b + ' en Art. 69-B (factureras) · ' + total_a + ' en Art. 69 (deudores).</div>';
+    }
+    html += '</div>';
+
+    if (total_b > 0) {
+      html += '<div class="detail-section">';
+      html += '  <h4>📋 Coincidencias Art. 69-B (factureras EFOS)</h4>';
+      html += (data.matches_69b || []).map(renderMatch69b).join('');
+      html += '</div>';
+    }
+    if (total_a > 0) {
+      html += '<div class="detail-section">';
+      html += '  <h4>📋 Coincidencias Art. 69 (deudores fiscales)</h4>';
+      html += (data.matches_69 || []).map(renderMatch69).join('');
+      html += '</div>';
+    }
+
+    html += renderShareButtons(q, sev);
+
+    $results.innerHTML = html;
+    $results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  $go.addEventListener('click', buscar);
+  $q.addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
+
+  // Permitir prellenar vía ?q=... para que sea linkeable
+  const params = new URLSearchParams(location.search);
+  const initial = params.get('q');
+  if (initial) {
+    $q.value = initial;
+    buscar();
+  }
+})();
+</script>
+
+</body>
+</html>
