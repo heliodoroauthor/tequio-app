@@ -14217,6 +14217,7 @@ function filtrarNoticias() {
         <span>🕐 ${n.fecha}</span>
         <span>💬 ${n.comentarios.toLocaleString()}</span>
         <span>👁 ${n.visto.toLocaleString()}</span>
+        <button onclick="event.stopPropagation();tequioShareNoticia('${n.id}')" title="Compartir" style="background:rgba(34,197,94,0.10);border:1px solid rgba(34,197,94,0.30);color:#4ade80;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:inherit;margin-left:auto">📤 Compartir</button>
       </div>
     </div>
   `).join('');
@@ -15456,6 +15457,10 @@ function leyesFiltrar() {
           style="flex:1;min-width:110px;padding:7px 10px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;color:#4ade80;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center">
           📄 Ver fuente oficial
         </a>
+        <button onclick="event.stopPropagation();tequioShareLey('${l.id}')"
+          style="flex:1;min-width:110px;padding:7px 10px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:8px;color:#c084fc;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+          📤 Compartir
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -24867,6 +24872,136 @@ window.addEventListener('message', function(e) {
   }
 });
 </script>
+
+<!-- ════════ TEQUIO · Compartir global (Web Share API + modal fallback) ════════ -->
+<style>
+  #tequio-share-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 99000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #tequio-share-overlay.active { display: flex; }
+  #tequio-share-modal {
+    background: var(--surface, #1a243d);
+    border: 1px solid var(--border, #2a3a5c);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    width: 100%; max-width: 420px;
+    color: var(--text, #e8edf5);
+    font-family: var(--font-body, system-ui, sans-serif);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  #tequio-share-modal h3 { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
+  #tequio-share-modal .ts-sub {
+    font-size: 12px; color: var(--text2, #94a3b8); margin-bottom: 16px;
+    line-height: 1.4; max-height: 60px; overflow: hidden;
+    text-overflow: ellipsis; display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+  #tequio-share-modal .ts-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+  }
+  #tequio-share-modal .ts-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    text-decoration: none; cursor: pointer; border: none; color: #fff;
+    transition: filter .12s;
+  }
+  #tequio-share-modal .ts-btn:hover { filter: brightness(1.1); }
+  #tequio-share-modal .ts-wa { background: #25D366; }
+  #tequio-share-modal .ts-tw { background: #1DA1F2; }
+  #tequio-share-modal .ts-tg { background: #0088cc; }
+  #tequio-share-modal .ts-copy {
+    background: var(--bg2, #0e1525);
+    border: 1px solid var(--border, #2a3a5c);
+    color: var(--text, #e8edf5);
+  }
+  #tequio-share-modal .ts-close {
+    width: 100%; background: none;
+    border: 1px solid var(--border, #2a3a5c);
+    color: var(--text2, #94a3b8);
+    padding: 9px; border-radius: 10px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  #tequio-share-modal .ts-close:hover { color: var(--text, #e8edf5); }
+</style>
+<div id="tequio-share-overlay" onclick="if(event.target===this) tequioShareClose()">
+  <div id="tequio-share-modal" role="dialog" aria-label="Compartir">
+    <h3>📤 Compartir</h3>
+    <div class="ts-sub" id="ts-sub-text"></div>
+    <div class="ts-grid">
+      <a class="ts-btn ts-wa" id="ts-link-wa" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a class="ts-btn ts-tw" id="ts-link-tw" target="_blank" rel="noopener">𝕏 Twitter</a>
+      <a class="ts-btn ts-tg" id="ts-link-tg" target="_blank" rel="noopener">✈️ Telegram</a>
+      <button class="ts-btn ts-copy" id="ts-btn-copy" type="button">📋 Copiar</button>
+    </div>
+    <button class="ts-close" type="button" onclick="tequioShareClose()">Cerrar</button>
+  </div>
+</div>
+<script>
+(function () {
+  function ovl() { return document.getElementById('tequio-share-overlay'); }
+  window.tequioShareClose = function () {
+    var o = ovl(); if (o) o.classList.remove('active');
+  };
+  window.tequioShare = function (opts) {
+    opts = opts || {};
+    var titulo = (opts.titulo || 'Tequio').toString();
+    var texto  = (opts.texto  || '').toString();
+    var url    = (opts.url    || 'https://tequio.app/').toString();
+    var full   = (texto ? texto + '\n\n' : '') + url;
+    if (navigator.share) {
+      navigator.share({ title: titulo, text: texto, url: url }).catch(function () {});
+      return;
+    }
+    var encoded = encodeURIComponent(full);
+    var encodedShort = encodeURIComponent(titulo + ' ' + url);
+    document.getElementById('ts-sub-text').textContent = titulo;
+    document.getElementById('ts-link-wa').href = 'https://wa.me/?text=' + encoded;
+    document.getElementById('ts-link-tw').href = 'https://twitter.com/intent/tweet?text=' + encodedShort;
+    document.getElementById('ts-link-tg').href = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(titulo);
+    var copyBtn = document.getElementById('ts-btn-copy');
+    copyBtn.onclick = function () {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(full).then(function () {
+          var prev = copyBtn.textContent;
+          copyBtn.textContent = '✓ Copiado';
+          setTimeout(function () { copyBtn.textContent = prev; }, 1500);
+        });
+      }
+    };
+    ovl().classList.add('active');
+  };
+  window.tequioShareNoticia = function (id) {
+    if (typeof noticiasDB === 'undefined') return;
+    var n = noticiasDB.find(function (x) { return x.id === id; });
+    if (!n) return;
+    tequioShare({
+      titulo: '📰 ' + n.titulo,
+      texto:  (n.resumen || '') + (n.fuente ? '\n— ' + n.fuente : ''),
+      url:    n.url_oficial || ('https://tequio.app/?noticia=' + encodeURIComponent(n.id))
+    });
+  };
+  window.tequioShareLey = function (id) {
+    var src = (typeof leyesDB !== 'undefined') ? leyesDB : (window.LEYES || []);
+    var l = src.find ? src.find(function (x) { return x.id === id; }) : null;
+    if (!l) return;
+    tequioShare({
+      titulo: '⚖️ ' + l.titulo,
+      texto:  (l.desc || '') + (l.fuente ? '\n— ' + l.fuente : ''),
+      url:    l.url || 'https://tequio.app/'
+    });
+  };
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') tequioShareClose();
+  });
+})();
+</script>
+<!-- ════════ /Compartir global ════════ -->
 <!-- /TEQUIO-NAV-LISTENER -->
 </body>
 </html>
