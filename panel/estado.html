@@ -88,14 +88,30 @@
   }
 })();
 </script>
-
 <div class="wrap">
-  <a href="/" class="back">← Tequio</a>
+  <a href="/" class="back" id="tequio-back">← Tequio</a>
   <div id="content">
     <div class="loading"><div class="spin"></div><div style="margin-top:14px">Cargando panel estatal…</div></div>
   </div>
 </div>
 <script>
+/* === NAV HELPER — preserva ?embedded=1 en navegación interna === */
+function navTo(url) {
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    const sep = url.includes('?') ? '&' : '?';
+    url += sep + 'embedded=1';
+  }
+  location.href = url;
+}
+
+/* === BACK LINK INTELIGENTE — cuando está embebido, avisa al parent === */
+document.getElementById('tequio-back').addEventListener('click', function(e) {
+  if (window.parent !== window) {
+    e.preventDefault();
+    window.parent.postMessage({type:'tequio-nav', target:'dashboard'}, '*');
+  }
+});
+
 const ESTADOS = {
   "01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche",
   "05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México",
@@ -119,10 +135,9 @@ function fmtNum(n) {
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
 function renderLanding() {
   const tiles = Object.entries(ESTADOS).map(([clave, nombre]) =>
-    `<div class="estado-tile" onclick="location.href='?clave=${clave}'">
+    `<div class="estado-tile" onclick="navTo('?clave=${clave}')">
       <div class="t-clave">${clave}</div>
       <div class="t-name">${esc(nombre)}</div>
     </div>`
@@ -142,7 +157,6 @@ function renderLanding() {
     </div>
   `;
 }
-
 function renderPanel(data) {
   const c = document.getElementById('content');
   const nombre = data.nombre_estado || ESTADOS[data.clave] || '';
@@ -157,37 +171,29 @@ function renderPanel(data) {
   const partidos = data.presidentes_partido || [];
   const dips = data.diputados_federales || [];
   const sens = data.senadores || [];
-
   const bars = porAnio.map(r => {
     const h = Math.max(2, (r.total / maxVal) * 100);
     return `<div class="bar" style="height:${h}%"><span class="tip">${r.anio}: ${fmt(r.total)}</span></div>`;
   }).join('');
   const barLabels = porAnio.map(r => `<span>${String(r.anio).slice(2)}</span>`).join('');
-
   const fondosHtml = topFondos.length
     ? topFondos.slice(0, 8).map(f => `<div class="row-item"><span class="name">${esc(f.fondo)}</span><span class="val">${fmt(f.total)}</span></div>`).join('')
     : '<div class="empty">Sin datos de fondos.</div>';
-
   const ramosHtml = topRamos.length
     ? topRamos.map(r => `<div class="row-item"><span class="name">${esc(r.ramo)}</span><span class="val">${fmt(r.total)}</span></div>`).join('')
     : '<div class="empty">Sin datos de ramos.</div>';
-
   const partidosHtml = partidos.length
     ? `<div class="partido-grid">${partidos.slice(0, 8).map(p => `<div class="partido-chip"><div class="p-name">${esc(p.partido)}</div><div class="p-count">${p.num}</div></div>`).join('')}</div>`
     : '<div class="empty">Sin datos de presidentes municipales.</div>';
-
   const munisHtml = munis.length
-    ? `<div class="muni-grid">${munis.map(m => `<div class="muni-card" onclick="location.href='/panel/municipio.html?clave_inegi=${esc(m.clave_inegi)}'"><div class="m-name">${esc(m.nombre)}</div><div class="m-pob">${m.poblacion_total ? fmtNum(m.poblacion_total) + ' habs.' : 'Sin datos de población'}</div></div>`).join('')}</div>`
+    ? `<div class="muni-grid">${munis.map(m => `<div class="muni-card" onclick="navTo('/panel/municipio.html?clave_inegi=${esc(m.clave_inegi)}')"><div class="m-name">${esc(m.nombre)}</div><div class="m-pob">${m.poblacion_total ? fmtNum(m.poblacion_total) + ' habs.' : 'Sin datos de población'}</div></div>`).join('')}</div>`
     : '<div class="empty">Sin municipios disponibles.</div>';
-
   const dipsHtml = dips.length
     ? `<div class="rep-list">${dips.slice(0, 15).map(d => `<div class="rep-card"><span class="r-name">${esc(d.nombre)}<span class="partido-tag">${esc(d.partido_codigo || d.partido || '')}</span></span><span class="r-meta">${esc(d.distrito || '')}</span></div>`).join('')}</div>${dips.length > 15 ? `<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">+${dips.length - 15} más</div>` : ''}`
     : '<div class="empty">Sin diputados federales asociados.</div>';
-
   const sensHtml = sens.length
     ? `<div class="rep-list">${sens.map(s => `<div class="rep-card"><span class="r-name">${esc(s.nombre_completo || s.nombre || '')}<span class="partido-tag">${esc(s.partido || '')}</span></span><span class="r-meta">${esc(s.tipo_eleccion || s.principio || '')}</span></div>`).join('')}</div>`
     : '<div class="empty">Sin senadores asociados directamente en datos.</div>';
-
   c.innerHTML = `
     <div class="hero">
       <span class="clave-badge">${data.clave}</span>
@@ -195,7 +201,6 @@ function renderPanel(data) {
       <div class="total-historico">${fmt(total)}</div>
       <div class="sub">Transferencias federales acumuladas (2011-${ultimoAnio || '2026'}) · ${porAnio.length} años con datos</div>
     </div>
-
     <div class="grid-stats">
       <div class="stat-card">
         <div class="label">Total ${ultimoAnio || ''}</div>
@@ -218,49 +223,40 @@ function renderPanel(data) {
         <div class="sub">Del estado</div>
       </div>
     </div>
-
     <div class="section">
       <h2><span class="icon">📊</span> Transferencias federales por año</h2>
       <div class="bar-chart">${bars}</div>
       <div class="bar-labels">${barLabels}</div>
     </div>
-
     <div class="section">
       <h2><span class="icon">💰</span> Top fondos / programas</h2>
       <div class="row-list">${fondosHtml}</div>
     </div>
-
     <div class="section">
       <h2><span class="icon">🏛️</span> Top ramos (origen)</h2>
       <div class="row-list">${ramosHtml}</div>
     </div>
-
     <div class="section">
       <h2><span class="icon">🎨</span> Distribución partidista de alcaldías</h2>
       ${partidosHtml}
     </div>
-
     <div class="section">
       <h2><span class="icon">🏙️</span> Municipios principales</h2>
       ${munisHtml}
     </div>
-
     <div class="section">
       <h2><span class="icon">👥</span> Diputados federales del estado</h2>
       ${dipsHtml}
     </div>
-
     <div class="section">
       <h2><span class="icon">🎖️</span> Senadores</h2>
       ${sensHtml}
     </div>
-
     <div class="disclaimer">
       Fuentes: <strong>SHCP</strong> (Transferencias Federales a Entidades Federativas, ramos 23/28/33). <strong>INAFED</strong> (presidentes municipales). <strong>Cámara de Diputados / Senado de la República</strong> (representantes). <strong>INEGI</strong> (datos de población). Datos del periodo 2011-2026.
     </div>
   `;
 }
-
 async function loadPanel(clave) {
   try {
     const r = await fetch('/api/data?vista=estado_panel&clave=' + encodeURIComponent(clave));
@@ -274,12 +270,11 @@ async function loadPanel(clave) {
       <div class="hero">
         <h1>Error al cargar</h1>
         <div class="sub" style="color:var(--bad)">${esc(e.message)}</div>
-        <div style="margin-top:14px"><a href="/panel/estado.html">← Ver todos los estados</a></div>
+        <div style="margin-top:14px"><a href="#" onclick="navTo('/panel/estado.html');return false;">← Ver todos los estados</a></div>
       </div>
     `;
   }
 }
-
 (function init() {
   const params = new URLSearchParams(location.search);
   const clave = (params.get('clave') || '').padStart(2, '0');
@@ -290,7 +285,6 @@ async function loadPanel(clave) {
   }
 })();
 </script>
-
 <script>
 /* P0.3 — Sort estados 01 → 32 numéricamente */
 (function() {
@@ -310,7 +304,6 @@ async function loadPanel(clave) {
       break;
     }
   }
-  // Observe DOM and sort after each render
   let timer = null;
   const obs = new MutationObserver(function() {
     clearTimeout(timer);
