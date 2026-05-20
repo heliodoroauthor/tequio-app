@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador de Precios — Tequio | ¿Dónde está más barato?</title>
-<meta name="description" content="Compara precios de productos básicos en tiendas de México. Datos públicos PROFECO. Gratis. Sin registro.">
+<title>Precios PROFECO — Tequio</title>
+<meta name="description" content="Busca precios de productos en tiendas de México y compara canastas básicas. Datos PROFECO. Sin registro.">
 <meta name="theme-color" content="#fbbf24">
 
-<meta property="og:title" content="Buscador de Precios — Tequio">
-<meta property="og:description" content="Compara dónde está más barato lo que buscas. Datos PROFECO Quién es Quién en los Precios.">
+<meta property="og:title" content="Precios PROFECO — Tequio">
+<meta property="og:description" content="¿Dónde está más barato? Busca productos y compara canastas en cadenas de tu municipio.">
 <meta property="og:image" content="https://tequio.app/icon-512.png">
 <meta property="og:url" content="https://tequio.app/precios.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tequio · Plataforma Cívica">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Buscador de Precios — Tequio">
-<meta name="twitter:description" content="¿Dónde está más barato? Compara precios PROFECO.">
+<meta name="twitter:title" content="Precios PROFECO — Tequio">
+<meta name="twitter:description" content="Busca precios y compara canastas básicas.">
 <meta name="twitter:image" content="https://tequio.app/icon-512.png">
 
 <link rel="icon" href="/icon-192.png">
@@ -30,7 +30,7 @@
     --accent: #fbbf24; --accent2: #f59e0b;
     --text: #e8edf5; --text2: #94a3b8; --text3: #64748b;
     --green: #22c55e; --green2: #4ade80;
-    --rojo: #ef4444; --naranja: #f97316; --amarillo: #eab308;
+    --rojo: #ef4444; --naranja: #f97316;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -38,12 +38,16 @@
     background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
     color: var(--text); min-height: 100vh; line-height: 1.5;
   }
+  /* En modo embedded el shell de Tequio ya da fondo */
+  body.embedded { background: transparent; }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   code, .mono { font-family: 'DM Mono', monospace; }
   .wrap { max-width: 820px; margin: 0 auto; padding: 24px 18px 80px; }
+  body.embedded .wrap { padding-top: 12px; }
 
   .header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  body.embedded .header { display: none; } /* esconder header redundante */
   .logo { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 22px; }
   .brand-stack { flex: 1; }
   .brand-stack h1 { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
@@ -51,42 +55,83 @@
   .back-link { font-size: 12px; color: var(--text2); padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; }
   .back-link:hover { color: var(--text); border-color: var(--border2); text-decoration: none; }
 
-  .hero { margin-bottom: 24px; text-align: center; padding: 14px 8px; }
+  .hero { margin-bottom: 18px; text-align: center; padding: 8px 8px 6px; }
+  body.embedded .hero { padding-top: 0; margin-bottom: 14px; }
   .hero h2 {
-    font-size: 26px; font-weight: 800; margin-bottom: 8px;
+    font-size: 24px; font-weight: 800; margin-bottom: 6px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .hero p { color: var(--text2); font-size: 14px; max-width: 560px; margin: 0 auto; }
+  .hero p { color: var(--text2); font-size: 13px; max-width: 560px; margin: 0 auto; }
 
-  .searchbox {
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 18px;
+    background: var(--surface); padding: 6px; border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1; padding: 11px 14px; border-radius: 10px;
+    text-align: center; cursor: pointer; user-select: none;
+    font-size: 13px; font-weight: 700; color: var(--text2);
+    transition: all .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827;
+  }
+  .pane { display: none; }
+  .pane.active { display: block; }
+
+  /* ── Inputs comunes ── */
+  .box {
     background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
     padding: 18px; margin-bottom: 22px;
   }
-  .searchbox label { display: block; font-size: 11px; color: var(--text2); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+  .box label { display: block; font-size: 11px; color: var(--text2); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+  .box input, .box textarea {
+    width: 100%; background: var(--bg2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; font-size: 15px; font-family: inherit; outline: none;
+    line-height: 1.5;
+  }
+  .box textarea { min-height: 110px; resize: vertical; }
+  .box input:focus, .box textarea:focus { border-color: var(--accent); }
   .searchrow { display: flex; gap: 8px; margin-bottom: 12px; }
-  .searchrow input {
-    flex: 1; background: var(--bg2); color: var(--text); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 16px; font-size: 16px; font-family: inherit; outline: none;
-  }
-  .searchrow input:focus { border-color: var(--accent); }
-  .searchrow button {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #111827; border: none; padding: 0 22px; border-radius: 12px;
-    font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit;
-    transition: filter .12s;
-  }
-  .searchrow button:hover:not(:disabled) { filter: brightness(1.08); }
-  .searchrow button:disabled { opacity: 0.6; cursor: not-allowed; }
-  .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .searchrow input { flex: 1; }
+  .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
   .filters select {
     background: var(--bg2); color: var(--text); border: 1px solid var(--border);
     border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
   }
   .filters select:focus { border-color: var(--accent); }
-  .hint { margin-top: 10px; font-size: 11px; color: var(--text3); }
+  .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827; border: none; padding: 12px 22px; border-radius: 12px;
+    font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit;
+    transition: filter .12s;
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
+    padding: 10px 16px; border-radius: 10px; font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--border2); }
+  .hint { margin-top: 8px; font-size: 11px; color: var(--text3); }
 
+  .examples { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .example-chip {
+    background: var(--surface2); color: var(--text2); border: 1px solid var(--border);
+    padding: 5px 10px; border-radius: 999px; font-size: 11px; cursor: pointer;
+    transition: all .12s;
+  }
+  .example-chip:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── Stats ── */
   .stats {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
     gap: 8px; margin-bottom: 18px;
@@ -102,6 +147,7 @@
   .stat-card.avg { border-left: 3px solid var(--accent); }
   .stat-card.total { border-left: 3px solid var(--text2); }
 
+  /* ── Tabla resultados buscar ── */
   .results-table {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 14px; overflow: hidden; margin-bottom: 18px;
@@ -123,18 +169,74 @@
     color: var(--accent2);
   }
   .result-row .precio-fecha { font-size: 10px; color: var(--text3); }
-  .result-row .share-btn {
+  .result-row .share-row-btn {
     background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3);
     color: #25D366; border-radius: 8px; padding: 6px 8px; font-size: 14px;
-    cursor: pointer; font-family: inherit; transition: filter .12s;
+    cursor: pointer; font-family: inherit; transition: filter .12s; text-decoration: none;
+    text-align: center;
   }
-  .result-row .share-btn:hover { filter: brightness(1.2); }
+  .result-row .share-row-btn:hover { filter: brightness(1.2); text-decoration: none; }
   .badge-cheapest {
     display: inline-block; background: var(--green); color: white;
     padding: 1px 6px; border-radius: 6px; font-size: 9px; font-weight: 800;
     letter-spacing: 0.5px; margin-left: 6px; vertical-align: middle;
   }
 
+  /* ── Canasta: summary + chain cards ── */
+  .summary {
+    background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02));
+    border: 1px solid rgba(34,197,94,0.3); border-radius: 14px;
+    padding: 16px; margin-bottom: 18px; text-align: center;
+  }
+  .summary .winner-lbl { font-size: 10px; color: var(--green2); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .summary .winner-name { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .summary .winner-total { font-size: 28px; font-weight: 800; color: var(--green2); font-family: 'DM Mono', monospace; }
+  .summary .winner-meta { font-size: 12px; color: var(--text3); margin-top: 6px; }
+
+  .chain-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 10px; overflow: hidden;
+    transition: border-color .12s;
+  }
+  .chain-card.cheapest { border-color: var(--green); }
+  .chain-header {
+    display: grid; grid-template-columns: 28px 1fr auto;
+    gap: 10px; padding: 14px 16px; align-items: center;
+    cursor: pointer; user-select: none;
+  }
+  .chain-rank {
+    background: var(--surface2); border-radius: 8px; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: var(--text2);
+  }
+  .chain-card.cheapest .chain-rank { background: var(--green); color: white; }
+  .chain-info .name { font-weight: 700; font-size: 15px; }
+  .chain-info .meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .chain-total { text-align: right; }
+  .chain-total .total {
+    font-family: 'DM Mono', monospace; font-weight: 800; font-size: 18px;
+    color: var(--accent2);
+  }
+  .chain-card.cheapest .chain-total .total { color: var(--green2); }
+  .chain-total .items-cnt { font-size: 10px; color: var(--text3); }
+  .chain-items {
+    display: none; border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .chain-card.expanded .chain-items { display: block; }
+  .chain-item {
+    display: grid; grid-template-columns: 1fr auto;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .chain-item:last-child { border-bottom: none; }
+  .chain-item .name-col .prod { font-weight: 600; color: var(--text); }
+  .chain-item .name-col .pres { color: var(--text3); font-size: 11px; margin-top: 1px; }
+  .chain-item .price { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--accent2); }
+  .chain-item.missing { opacity: 0.5; }
+  .chain-item.missing .price { color: var(--text3); font-style: italic; }
+
+  /* ── Share section ── */
   .share-section {
     background: var(--surface2); border: 1px dashed var(--border2);
     border-radius: 14px; padding: 16px; margin-bottom: 22px; text-align: center;
@@ -178,11 +280,13 @@
 
   @media (max-width: 520px) {
     .searchrow { flex-direction: column; }
-    .searchrow button { padding: 14px; }
     .filters { grid-template-columns: 1fr; }
-    .hero h2 { font-size: 22px; }
+    .hero h2 { font-size: 20px; }
+    .summary .winner-name { font-size: 18px; }
+    .summary .winner-total { font-size: 24px; }
     .result-row { grid-template-columns: 1fr 80px 36px; }
     .result-row .precio { font-size: 14px; }
+    .tab { font-size: 12px; padding: 10px 8px; }
   }
 </style>
 </head>
@@ -190,42 +294,78 @@
 
 <div class="wrap">
   <div class="header">
-    <div class="logo">💰</div>
+    <div class="logo">🛒</div>
     <div class="brand-stack">
-      <h1>Buscador de Precios</h1>
+      <h1>Precios PROFECO</h1>
       <div class="sub">Tequio · Plataforma Cívica</div>
     </div>
     <a href="/" class="back-link">← Tequio</a>
   </div>
 
   <div class="hero">
-    <h2>¿Dónde está más barato?</h2>
-    <p>Compara precios reales de productos en tiendas de tu ciudad. Datos públicos de PROFECO actualizados semanalmente.</p>
+    <h2 id="hero-title">¿Dónde está más barato?</h2>
+    <p id="hero-sub">Datos públicos PROFECO actualizados semanalmente.</p>
   </div>
 
-  <div class="searchbox">
-    <label for="q">Producto a buscar</label>
-    <div class="searchrow">
-      <input id="q" type="text" autocomplete="off"
-             placeholder="Ej: tortilla, huevo, leche, gasolina" maxlength="120">
-      <button id="go" type="button">Buscar</button>
-    </div>
-    <div class="filters">
-      <select id="estado">
-        <option value="">— Todos los estados —</option>
-      </select>
-      <select id="municipio" disabled>
-        <option value="">— Todos los municipios —</option>
-      </select>
-    </div>
-    <div class="hint">Tip: usa palabras simples — "tortilla", "huevo", "papel higiénico"</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="buscar">🔍 Buscar precio</div>
+    <div class="tab" data-tab="canasta">🛍️ Comparar canasta</div>
   </div>
 
-  <div id="results"></div>
+  <!-- ═══ TAB BUSCAR ═══ -->
+  <div class="pane active" id="pane-buscar">
+    <div class="box">
+      <label for="q">Producto a buscar</label>
+      <div class="searchrow">
+        <input id="q" type="text" autocomplete="off"
+               placeholder="Ej: tortilla, huevo, leche, gasolina" maxlength="120">
+        <button id="go-buscar" class="btn-primary" type="button">Buscar</button>
+      </div>
+      <div class="filters">
+        <select id="estado-buscar">
+          <option value="">— Todos los estados —</option>
+        </select>
+        <select id="municipio-buscar" disabled>
+          <option value="">— Todos los municipios —</option>
+        </select>
+      </div>
+      <div class="hint">Tip: usa palabras simples — "tortilla", "huevo", "papel higiénico"</div>
+    </div>
+    <div id="results-buscar"></div>
+  </div>
+
+  <!-- ═══ TAB CANASTA ═══ -->
+  <div class="pane" id="pane-canasta">
+    <div class="box">
+      <label for="lista">Tu lista del super (uno por línea)</label>
+      <textarea id="lista" placeholder="tortilla&#10;huevo&#10;leche&#10;pan&#10;arroz&#10;frijol"></textarea>
+      <div class="examples">
+        <span class="example-chip" data-list="tortilla&#10;huevo&#10;leche&#10;frijol&#10;arroz">🍳 Despensa</span>
+        <span class="example-chip" data-list="huevo&#10;jamón&#10;queso&#10;pan&#10;leche">🥪 Desayuno</span>
+        <span class="example-chip" data-list="pollo&#10;arroz&#10;frijol&#10;jitomate&#10;cebolla&#10;chile">🍲 Comida</span>
+        <span class="example-chip" data-list="papel higiénico&#10;jabón&#10;detergente&#10;pasta dental&#10;shampoo">🧴 Aseo</span>
+      </div>
+      <div class="filters">
+        <select id="estado-canasta">
+          <option value="">— Todos los estados —</option>
+        </select>
+        <select id="municipio-canasta">
+          <option value="">— Todos los municipios —</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button id="go-canasta" class="btn-primary" type="button">Comparar precios</button>
+        <button id="clear-canasta" class="btn-secondary" type="button">Limpiar</button>
+      </div>
+      <div class="hint">Tip: usa palabras simples. Funciona mejor con productos básicos que PROFECO monitorea.</div>
+    </div>
+    <div id="results-canasta"></div>
+  </div>
 
   <div class="disclaimer">
     <strong style="color:var(--text2)">Aviso:</strong>
-    Datos públicos del programa <a href="https://qqp.profeco.gob.mx/" target="_blank" rel="noopener">PROFECO · Quien es Quien en los Precios</a>. Los precios reflejan la fecha de captura más reciente disponible. Pueden variar día a día. Verifica directamente con la tienda antes de viajar para una compra grande.
+    Datos públicos <a href="https://qqp.profeco.gob.mx/" target="_blank" rel="noopener">PROFECO · Quien es Quien en los Precios</a>. Los precios reflejan la fecha de captura más reciente. Pueden variar día a día. Una sucursal específica puede diferir del promedio reportado por cadena.
   </div>
 </div>
 
@@ -233,17 +373,16 @@
 
 <script>
 (function () {
+  // ── Detectar modo embedded ─────────────────────────────────
+  const params = new URLSearchParams(location.search);
+  if (params.get('embedded') === '1') document.body.classList.add('embedded');
+
+  // ── Config ────────────────────────────────────────────────
   const SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-  const RPC = SUPABASE_URL + '/rest/v1/rpc/buscar_precios';
+  const RPC_BUSCAR = SUPABASE_URL + '/rest/v1/rpc/buscar_precios';
+  const RPC_CANASTA = SUPABASE_URL + '/rest/v1/rpc/comparar_canasta';
   const SHARE_URL = 'https://tequio.app/precios.html';
-
-  const $q = document.getElementById('q');
-  const $go = document.getElementById('go');
-  const $estado = document.getElementById('estado');
-  const $municipio = document.getElementById('municipio');
-  const $results = document.getElementById('results');
-  const $toast = document.getElementById('toast');
 
   const ESTADOS_MX = [
     'Aguascalientes','Baja California','Baja California Sur','Campeche','Chiapas','Chihuahua',
@@ -252,34 +391,80 @@
     'Quintana Roo','San Luis Potosí','Sinaloa','Sonora','Tabasco','Tamaulipas','Tlaxcala',
     'Veracruz','Yucatán','Zacatecas'
   ];
-  ESTADOS_MX.forEach(e => {
-    const o = document.createElement('option'); o.value = e; o.textContent = e; $estado.appendChild(o);
-  });
 
-  // Prefill estado si está en localStorage
-  try {
-    const est = localStorage.getItem('tequio_estado_nombre');
-    if (est && ESTADOS_MX.includes(est)) $estado.value = est;
-  } catch (e) {}
+  // ── Refs comunes ──────────────────────────────────────────
+  const $toast = document.getElementById('toast');
+  const $heroTitle = document.getElementById('hero-title');
+  const $heroSub = document.getElementById('hero-sub');
 
   function showToast(msg) { $toast.textContent = msg; $toast.classList.add('show'); setTimeout(() => $toast.classList.remove('show'), 1800); }
   function esc(s) { if (s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-  function fmtPrice(n) { if (n==null) return '—'; return '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmt(n) { if (n==null) return '—'; return '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function fmtDate(s) { if (!s) return ''; return new Date(s).toLocaleDateString('es-MX', { day:'2-digit', month:'short' }); }
+  window.__t = showToast;
+
+  // ── Llenar selects de estados ─────────────────────────────
+  function fillEstados(el) {
+    ESTADOS_MX.forEach(e => {
+      const o = document.createElement('option'); o.value = e; o.textContent = e; el.appendChild(o);
+    });
+  }
+  const $estadoBuscar = document.getElementById('estado-buscar');
+  const $estadoCanasta = document.getElementById('estado-canasta');
+  fillEstados($estadoBuscar);
+  fillEstados($estadoCanasta);
+
+  // Prefill estado del perfil
+  try {
+    const est = localStorage.getItem('tequio_estado_nombre');
+    if (est && ESTADOS_MX.includes(est)) {
+      $estadoBuscar.value = est;
+      $estadoCanasta.value = est;
+    }
+  } catch (e) {}
+
+  // ── Tabs ──────────────────────────────────────────────────
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const slug = t.dataset.tab;
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + slug));
+      if (slug === 'buscar') {
+        $heroTitle.textContent = '¿Dónde está más barato?';
+        $heroSub.textContent = 'Busca un producto y ve los precios más bajos en tu estado.';
+      } else {
+        $heroTitle.textContent = '¿Qué tienda es más barata?';
+        $heroSub.textContent = 'Pega tu lista del super y compara cuánto costaría en cada cadena.';
+      }
+      // Refrescar URL sin reload (mantiene embedded si está)
+      try {
+        const u = new URL(location.href);
+        u.searchParams.set('tab', slug);
+        history.replaceState(null, '', u);
+      } catch (e) {}
+    });
+  });
+
+  // ── BUSCAR ────────────────────────────────────────────────
+  const $q = document.getElementById('q');
+  const $goBuscar = document.getElementById('go-buscar');
+  const $municipioBuscar = document.getElementById('municipio-buscar');
+  const $resultsBuscar = document.getElementById('results-buscar');
 
   async function buscar() {
     const q = ($q.value || '').trim();
     if (q.length < 2) { showToast('Escribe al menos 2 letras'); $q.focus(); return; }
 
-    $go.disabled = true;
-    $results.innerHTML = '<div class="loading"><div class="spinner"></div>Buscando precios…</div>';
+    $goBuscar.disabled = true;
+    $resultsBuscar.innerHTML = '<div class="loading"><div class="spinner"></div>Buscando precios…</div>';
 
     const params = { p_query: q, p_limit: 30 };
-    if ($estado.value) params.p_estado = $estado.value;
-    if ($municipio.value) params.p_municipio = $municipio.value;
+    if ($estadoBuscar.value) params.p_estado = $estadoBuscar.value;
+    if ($municipioBuscar.value) params.p_municipio = $municipioBuscar.value;
 
     try {
-      const res = await fetch(RPC, {
+      const res = await fetch(RPC_BUSCAR, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -288,20 +473,20 @@
         },
         body: JSON.stringify(params)
       });
-      if (!res.ok) throw new Error('Error ' + res.status + ': ' + (await res.text()).slice(0,200));
+      if (!res.ok) throw new Error('Error ' + res.status);
       const data = await res.json();
-      renderResults(data);
+      renderBuscar(data);
     } catch (err) {
       console.error(err);
-      $results.innerHTML = '<div class="loading">⚠️ ' + esc(err.message || 'Error') + '</div>';
+      $resultsBuscar.innerHTML = '<div class="loading">⚠️ ' + esc(err.message || 'Error') + '</div>';
     } finally {
-      $go.disabled = false;
+      $goBuscar.disabled = false;
     }
   }
 
-  function renderResults(data) {
+  function renderBuscar(data) {
     if (data.error) {
-      $results.innerHTML = '<div class="loading">' + esc(data.mensaje || 'Sin resultados') + '</div>';
+      $resultsBuscar.innerHTML = '<div class="loading">' + esc(data.mensaje || 'Sin resultados') + '</div>';
       return;
     }
     const matches = data.matches || [];
@@ -309,33 +494,25 @@
     const total = parseInt(stats.total || 0, 10);
 
     if (total === 0) {
-      $results.innerHTML = ''
-        + '<div class="loading">Sin resultados para "' + esc(data.query) + '"'
-        + (data.estado ? ' en ' + esc(data.estado) : '')
-        + '. Prueba con un término más simple o sin filtro de estado.</div>';
+      $resultsBuscar.innerHTML = '<div class="loading">Sin resultados para "' + esc(data.query) + '"'
+        + (data.estado ? ' en ' + esc(data.estado) : '') + '. Prueba con un término más simple.</div>';
       return;
     }
 
     let html = '';
-
-    // Stats
     html += '<div class="stats">';
     html += '<div class="stat-card total"><div class="lbl">Coincidencias</div><div class="val">' + total + '</div></div>';
-    html += '<div class="stat-card min"><div class="lbl">Más barato</div><div class="val">' + fmtPrice(stats.precio_min) + '</div></div>';
-    html += '<div class="stat-card avg"><div class="lbl">Promedio</div><div class="val">' + fmtPrice(stats.precio_promedio) + '</div></div>';
-    html += '<div class="stat-card max"><div class="lbl">Más caro</div><div class="val">' + fmtPrice(stats.precio_max) + '</div></div>';
+    html += '<div class="stat-card min"><div class="lbl">Más barato</div><div class="val">' + fmt(stats.precio_min) + '</div></div>';
+    html += '<div class="stat-card avg"><div class="lbl">Promedio</div><div class="val">' + fmt(stats.precio_promedio) + '</div></div>';
+    html += '<div class="stat-card max"><div class="lbl">Más caro</div><div class="val">' + fmt(stats.precio_max) + '</div></div>';
     html += '</div>';
 
-    // Tabla de resultados
     html += '<div class="results-table">';
     matches.forEach((m, idx) => {
       const cheapest = idx === 0;
-      const text = m.producto
-        + (m.marca && m.marca !== 'S/M' ? ' ' + m.marca : '')
-        + ' (' + m.presentacion + ')'
-        + ' está en ' + fmtPrice(m.precio)
-        + ' en ' + m.nombre_comercial
-        + ' (' + m.municipio + ', ' + m.estado + ')';
+      const text = m.producto + (m.marca && m.marca !== 'S/M' ? ' ' + m.marca : '')
+        + ' (' + m.presentacion + ')' + ' está en ' + fmt(m.precio)
+        + ' en ' + m.nombre_comercial + ' (' + m.municipio + ', ' + m.estado + ')';
       const shareText = '💰 ' + text + ' · vía Tequio';
       const shareUrl = SHARE_URL + '?q=' + encodeURIComponent(data.query) + (data.estado ? '&estado=' + encodeURIComponent(data.estado) : '');
       const waHref = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + shareUrl);
@@ -347,16 +524,15 @@
       html += '    <div class="tienda">📍 ' + esc(m.nombre_comercial || m.cadena_comercial || '?') + ' · ' + esc(m.municipio) + ', ' + esc(m.estado) + '</div>';
       html += '  </div>';
       html += '  <div class="price-col">';
-      html += '    <div class="precio">' + fmtPrice(m.precio) + '</div>';
+      html += '    <div class="precio">' + fmt(m.precio) + '</div>';
       html += '    <div class="precio-fecha">' + fmtDate(m.fecha_registro) + '</div>';
       html += '  </div>';
-      html += '  <a class="share-btn" href="' + waHref + '" target="_blank" rel="noopener" title="Compartir por WhatsApp">💬</a>';
+      html += '  <a class="share-row-btn" href="' + waHref + '" target="_blank" rel="noopener" title="Compartir por WhatsApp">💬</a>';
       html += '</div>';
     });
     html += '</div>';
 
-    // Share section
-    const allText = '🛒 Busqué "' + data.query + '" en Tequio · ' + total + ' resultados · más barato: ' + fmtPrice(stats.precio_min);
+    const allText = '🛒 Busqué "' + data.query + '" en Tequio · ' + total + ' resultados · más barato: ' + fmt(stats.precio_min);
     const allShareUrl = SHARE_URL + '?q=' + encodeURIComponent(data.query) + (data.estado ? '&estado=' + encodeURIComponent(data.estado) : '');
     const waAll = 'https://wa.me/?text=' + encodeURIComponent(allText + ' ' + allShareUrl);
     const twAll = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(allText) + '&url=' + encodeURIComponent(allShareUrl);
@@ -368,24 +544,193 @@
     html += '    <a class="share-btn-big wa" href="' + waAll + '" target="_blank" rel="noopener">💬 WhatsApp</a>';
     html += '    <a class="share-btn-big tw" href="' + twAll + '" target="_blank" rel="noopener">𝕏 Twitter</a>';
     html += '    <a class="share-btn-big tg" href="' + tgAll + '" target="_blank" rel="noopener">✈️ Telegram</a>';
-    html += '    <button class="share-btn-big copy" onclick="navigator.clipboard.writeText(\'' + allShareUrl.replace(/\'/g, "\\'") + '\').then(()=>window.__t(\'Link copiado\'))">📋 Copiar link</button>';
+    html += '    <button class="share-btn-big copy" onclick="navigator.clipboard.writeText(\'' + allShareUrl.replace(/\'/g, "\\'") + '\').then(()=>window.__t(\'Link copiado\'))">📋 Copiar</button>';
     html += '  </div>';
     html += '</div>';
 
-    $results.innerHTML = html;
-    $results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $resultsBuscar.innerHTML = html;
   }
 
-  window.__t = showToast;
-
-  $go.addEventListener('click', buscar);
+  $goBuscar.addEventListener('click', buscar);
   $q.addEventListener('keydown', e => { if (e.key === 'Enter') buscar(); });
 
-  // Auto-buscar si la URL trae ?q=
-  const params = new URLSearchParams(location.search);
+  // ── CANASTA ───────────────────────────────────────────────
+  const $lista = document.getElementById('lista');
+  const $goCanasta = document.getElementById('go-canasta');
+  const $clearCanasta = document.getElementById('clear-canasta');
+  const $municipioCanasta = document.getElementById('municipio-canasta');
+  const $resultsCanasta = document.getElementById('results-canasta');
+
+  // Restaurar última lista
+  try {
+    const saved = localStorage.getItem('tequio_canasta_last');
+    if (saved) $lista.value = saved;
+  } catch (e) {}
+
+  // Chips
+  document.querySelectorAll('.example-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $lista.value = chip.dataset.list;
+      $lista.focus();
+    });
+  });
+
+  $clearCanasta.addEventListener('click', () => {
+    $lista.value = '';
+    $resultsCanasta.innerHTML = '';
+    try { localStorage.removeItem('tequio_canasta_last'); } catch (e) {}
+    $lista.focus();
+  });
+
+  async function compararCanasta() {
+    const raw = ($lista.value || '').trim();
+    if (!raw) { showToast('Pega tu lista'); $lista.focus(); return; }
+    const items = raw.split(/[\n,;]/).map(s => s.trim()).filter(s => s.length >= 2);
+    if (items.length === 0) { showToast('Lista vacía'); return; }
+    if (items.length > 20) { showToast('Máximo 20 productos'); return; }
+
+    try { localStorage.setItem('tequio_canasta_last', raw); } catch (e) {}
+
+    $goCanasta.disabled = true;
+    $resultsCanasta.innerHTML = '<div class="loading"><div class="spinner"></div>Comparando ' + items.length + ' productos…</div>';
+
+    const params = { p_items: items };
+    if ($estadoCanasta.value) params.p_estado = $estadoCanasta.value;
+    if ($municipioCanasta.value) params.p_municipio = $municipioCanasta.value;
+
+    try {
+      const res = await fetch(RPC_CANASTA, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      });
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const data = await res.json();
+      renderCanasta(data, items);
+    } catch (err) {
+      console.error(err);
+      $resultsCanasta.innerHTML = '<div class="loading">⚠️ ' + esc(err.message || 'Error') + '</div>';
+    } finally {
+      $goCanasta.disabled = false;
+    }
+  }
+
+  function renderCanasta(data, originalItems) {
+    if (data.error) {
+      $resultsCanasta.innerHTML = '<div class="loading">' + esc(data.mensaje || 'Error') + '</div>';
+      return;
+    }
+    const cadenas = data.cadenas || [];
+    if (cadenas.length === 0) {
+      $resultsCanasta.innerHTML = '<div class="loading">Sin matches en cadenas para esa lista'
+        + (data.estado ? ' en ' + esc(data.estado) : '') + '. Prueba productos más básicos.</div>';
+      return;
+    }
+
+    const winner = cadenas[0];
+    const totalSolicitados = data.items_solicitados;
+
+    let html = '';
+    html += '<div class="summary">';
+    html += '  <div class="winner-lbl">🏆 Más barata</div>';
+    html += '  <div class="winner-name">' + esc(winner.cadena_comercial) + '</div>';
+    html += '  <div class="winner-total">' + fmt(winner.total) + '</div>';
+    html += '  <div class="winner-meta">' + winner.items_encontrados + ' de ' + totalSolicitados + ' productos';
+    if (data.estado) html += ' · ' + esc(data.estado);
+    html += '</div>';
+    html += '</div>';
+
+    cadenas.forEach((c, idx) => {
+      const isWinner = idx === 0;
+      const items = c.items || [];
+
+      html += '<div class="chain-card' + (isWinner ? ' cheapest' : '') + '" data-idx="' + idx + '">';
+      html += '  <div class="chain-header" onclick="window.__toggleChain(' + idx + ')">';
+      html += '    <div class="chain-rank">' + (idx + 1) + '</div>';
+      html += '    <div class="chain-info">';
+      html += '      <div class="name">' + esc(c.cadena_comercial) + '</div>';
+      html += '      <div class="meta">' + c.items_encontrados + ' de ' + totalSolicitados + ' productos · click para detalle</div>';
+      html += '    </div>';
+      html += '    <div class="chain-total">';
+      html += '      <div class="total">' + fmt(c.total) + '</div>';
+      html += '      <div class="items-cnt">' + (isWinner ? '🏆 más barato' : '+' + fmt(c.total - winner.total)) + '</div>';
+      html += '    </div>';
+      html += '  </div>';
+      html += '  <div class="chain-items">';
+      originalItems.forEach(orig => {
+        const norm = orig.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+        const item = items.find(i => i.item_query === norm);
+        if (item) {
+          html += '<div class="chain-item">';
+          html += '  <div class="name-col">';
+          html += '    <div class="prod">' + esc(item.producto) + (item.marca && item.marca !== 'S/M' ? ' · ' + esc(item.marca) : '') + '</div>';
+          html += '    <div class="pres">' + esc(item.presentacion) + '</div>';
+          html += '  </div>';
+          html += '  <div class="price">' + fmt(item.precio) + '</div>';
+          html += '</div>';
+        } else {
+          html += '<div class="chain-item missing">';
+          html += '  <div class="name-col">';
+          html += '    <div class="prod">' + esc(orig) + '</div>';
+          html += '    <div class="pres">no disponible aquí</div>';
+          html += '  </div>';
+          html += '  <div class="price">—</div>';
+          html += '</div>';
+        }
+      });
+      html += '  </div>';
+      html += '</div>';
+    });
+
+    // Share
+    const savings = cadenas.length > 1 ? (cadenas[cadenas.length-1].total - winner.total) : 0;
+    const shareText = '🛒 En ' + (data.estado || 'mi región') + ' la canasta más barata es ' + winner.cadena_comercial + ' por ' + fmt(winner.total)
+      + (savings > 0 ? ' (ahorras ' + fmt(savings) + ' vs la más cara)' : '') + ' · vía Tequio';
+    const waLink = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + SHARE_URL);
+    const twLink = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(SHARE_URL);
+    const tgLink = 'https://t.me/share/url?url=' + encodeURIComponent(SHARE_URL) + '&text=' + encodeURIComponent(shareText);
+
+    html += '<div class="share-section">';
+    html += '  <p>📢 Compártelo — quizá ahorras a alguien la quincena</p>';
+    html += '  <div class="share-row">';
+    html += '    <a class="share-btn-big wa" href="' + waLink + '" target="_blank" rel="noopener">💬 WhatsApp</a>';
+    html += '    <a class="share-btn-big tw" href="' + twLink + '" target="_blank" rel="noopener">𝕏 Twitter</a>';
+    html += '    <a class="share-btn-big tg" href="' + tgLink + '" target="_blank" rel="noopener">✈️ Telegram</a>';
+    html += '    <button class="share-btn-big copy" onclick="navigator.clipboard.writeText(\'' + SHARE_URL + '\').then(()=>window.__t(\'Link copiado\'))">📋 Link</button>';
+    html += '  </div>';
+    html += '</div>';
+
+    $resultsCanasta.innerHTML = html;
+    setTimeout(() => {
+      const first = document.querySelector('.chain-card[data-idx="0"]');
+      if (first) first.classList.add('expanded');
+    }, 100);
+  }
+
+  window.__toggleChain = function(idx) {
+    const c = document.querySelector('.chain-card[data-idx="' + idx + '"]');
+    if (c) c.classList.toggle('expanded');
+  };
+
+  $goCanasta.addEventListener('click', compararCanasta);
+  $lista.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) compararCanasta();
+  });
+
+  // ── Routing inicial por URL ───────────────────────────────
+  // ?tab=canasta abre la pestaña de canasta directamente
+  const initTab = params.get('tab');
+  if (initTab === 'canasta') {
+    document.querySelector('.tab[data-tab="canasta"]').click();
+  }
+  // ?q=... auto-busca
   const initQ = params.get('q');
   const initE = params.get('estado');
-  if (initE && ESTADOS_MX.includes(initE)) $estado.value = initE;
+  if (initE && ESTADOS_MX.includes(initE)) { $estadoBuscar.value = initE; $estadoCanasta.value = initE; }
   if (initQ) { $q.value = initQ; buscar(); }
 })();
 </script>
