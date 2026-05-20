@@ -2073,11 +2073,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('buscador-sat')">
         <span class="icon">🕵️</span> Buscador SAT
       </div>
-      <div class="nav-item" onclick="window.open('/precios.html','_blank')">
+      <div class="nav-item" onclick="cargarPanel('precios')">
         <span class="icon">🛒</span> Precios PROFECO
-      </div>
-      <div class="nav-item" onclick="window.open('/canasta.html','_blank')">
-        <span class="icon">🛍️</span> Canasta Básica
       </div>
     </div>
     <!-- ── MUNICIPIOS Y ESTADOS ── -->
@@ -12977,7 +12974,8 @@ function cargarPanel(slug) {
     'diario': '/panel/diario.html?embedded=1',
       'offline': '/panel/offline.html?embedded=1',
     'poder': '/panel/poder.html?embedded=1',
-    'perfil': '/panel/perfil.html?embedded=1'
+    'perfil': '/panel/perfil.html?embedded=1',
+    'precios': '/precios.html?embedded=1'
   };
   const url = PANELS[slug];
   if (!url) return; document.querySelectorAll('[id^="page-iframe-"]').forEach(function(el){ if (el.id !== 'page-iframe-' + slug) el.remove(); });
