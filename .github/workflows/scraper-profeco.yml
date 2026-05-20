@@ -1,7 +1,6 @@
 name: PROFECO Quien es Quien Weekly
 
 # Corre cada lunes a las 13:00 UTC (07:00 CDMX).
-# PROFECO publica actualizaciones semanales, esto las captura un dia despues.
 on:
   schedule:
     - cron: '0 13 * * 1'
@@ -22,7 +21,7 @@ jobs:
 
       - name: Install deps
         run: |
-          npm install --no-save @supabase/supabase-js@2 csv-parse
+          npm install --no-save csv-parse
 
       - name: Run PROFECO scraper
         env:
