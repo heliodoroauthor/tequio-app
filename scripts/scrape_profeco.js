@@ -1,25 +1,17 @@
-// scripts/scrape_profeco.js
+// scripts/scrape_profeco.js  (v2: sin @supabase/supabase-js)
 //
-// TEQUIO · Scraper PROFECO Quién es Quién en los Precios
+// TEQUIO · Scraper PROFECO Quien es Quien en los Precios
 //
 // Fuente:  https://datos.profeco.gob.mx/datos_abiertos/qqp.php
-// Frecuencia: semanal (la fuente se actualiza ~1 vez/semana)
+// Frecuencia: semanal
 //
-// Estrategia:
-//   1. Scrapear la página del catálogo de PROFECO para obtener el link más reciente
-//      al archivo del año actual. Esto evita hardcodear tokens que rotan.
-//   2. Descargar el archivo (CSV / TXT / ZIP — autodetectado).
-//   3. Parsearlo en streaming y upsertear en lotes a Supabase.
-//   4. Loggear inicio + fin en scraper_logs.
+// Cambios v2:
+//   - Removido @supabase/supabase-js (Node 20 sin WebSocket nativo no lo soporta)
+//   - Usa fetch directo a PostgREST: POST + on_conflict + Prefer: resolution=merge-duplicates
 //
-// Env vars requeridos:
-//   SUPABASE_URL
-//   SUPABASE_SERVICE_ROLE_KEY
-//   GITHUB_RUN_ID  (opcional, lo provee GitHub Actions)
-//
-// Dependencias: @supabase/supabase-js, csv-parse, node-fetch (opcional, Node 20 ya tiene fetch global)
+// Env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GITHUB_RUN_ID
+// Deps:     csv-parse
 
-import { createClient } from '@supabase/supabase-js';
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
@@ -29,8 +21,8 @@ const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RUN_ID       = process.env.GITHUB_RUN_ID || `local-${Date.now()}`;
 
 const SCRAPER_SLUG = 'profeco_qqp';
-const ANIO_OBJETIVO = new Date().getFullYear();          // 2026
-const ANIO_FALLBACK = ANIO_OBJETIVO - 1;                  // si el del año en curso falla, cae al anterior
+const ANIO_OBJETIVO = new Date().getFullYear();
+const ANIO_FALLBACK = ANIO_OBJETIVO - 1;
 const CATALOGO_URL = 'https://datos.profeco.gob.mx/datos_abiertos/qqp.php';
 const BATCH_SIZE   = 500;
 
@@ -39,17 +31,97 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
   process.exit(1);
 }
 
-const sb = createClient(SUPABASE_URL, SERVICE_KEY, {
-  auth: { persistSession: false },
-});
+// ─────────────────────────────────────────────────────────────
+// Helpers REST a Supabase (PostgREST)
+// ─────────────────────────────────────────────────────────────
+
+const BASE = SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1';
+const AUTH_HEADERS = {
+  'apikey':        SERVICE_KEY,
+  'Authorization': `Bearer ${SERVICE_KEY}`,
+  'Content-Type':  'application/json',
+};
+
+async function sbInsert(table, rows, opts = {}) {
+  const url = new URL(`${BASE}/${table}`);
+  if (opts.onConflict) url.searchParams.set('on_conflict', opts.onConflict);
+
+  const headers = { ...AUTH_HEADERS };
+  // resolution=merge-duplicates => upsert; return=minimal => no devuelve body para ahorrar bandwidth
+  headers['Prefer'] = (opts.merge ? 'resolution=merge-duplicates,' : '') + 'return=minimal';
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(rows),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
+  }
+  return res;
+}
+
+async function sbUpdate(table, filter, payload) {
+  const url = new URL(`${BASE}/${table}`);
+  for (const [k, v] of Object.entries(filter)) url.searchParams.set(k, v);
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { ...AUTH_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
+  }
+  return res;
+}
 
 // ─────────────────────────────────────────────────────────────
-// Helpers
+// Logging en scraper_logs (via REST)
+// ─────────────────────────────────────────────────────────────
+
+async function logStart(fuenteUrl) {
+  const url = new URL(`${BASE}/scraper_logs`);
+  url.searchParams.set('select', 'id');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { ...AUTH_HEADERS, 'Prefer': 'return=representation' },
+    body: JSON.stringify([{
+      scraper_slug:    SCRAPER_SLUG,
+      workflow_run_id: RUN_ID,
+      status:          'running',
+      fuente_url:      fuenteUrl,
+      started_at:      new Date().toISOString(),
+    }]),
+  });
+  if (!res.ok) {
+    console.warn('[profeco] no se pudo log_start:', res.status, await res.text());
+    return null;
+  }
+  const data = await res.json();
+  return data[0]?.id ?? null;
+}
+
+async function logFinish(logId, payload) {
+  if (!logId) return;
+  try {
+    await sbUpdate('scraper_logs', { id: `eq.${logId}` }, {
+      ...payload,
+      finished_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.warn('[profeco] no se pudo log_finish:', e.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Helpers de parsing
 // ─────────────────────────────────────────────────────────────
 
 function normHeader(h) {
   return String(h || '')
-    .normalize('NFD').replace(/\p{Diacritic}/gu, '') // sin acentos
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
     .toUpperCase().trim();
 }
 
@@ -74,7 +146,6 @@ const HEADER_MAP = {
 function parseFecha(raw) {
   if (!raw) return null;
   const s = String(raw).trim();
-  // Formatos comunes: "YYYY-MM-DD", "YYYY-MM-DD HH:MM:SS", "DD/MM/YYYY"
   const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m1) return `${m1[1]}-${m1[2]}-${m1[3]}`;
   const m2 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
@@ -106,36 +177,35 @@ function normalizeRow(rawRow) {
       row[dbCol] = cleanText(v);
     }
   }
-  // Validación mínima
   if (!row.producto) return null;
   return row;
 }
 
 // ─────────────────────────────────────────────────────────────
-// 1) Encontrar URL del archivo del año actual desde el catálogo
+// Descubrir URL del archivo del año actual
 // ─────────────────────────────────────────────────────────────
 
 async function descubrirURL(anio) {
-  const html = await fetch(CATALOGO_URL).then(r => r.text());
-  // Buscamos un href cuya etiqueta diga "Quien es Quien en los Precios <ANIO>"
+  const html = await fetch(CATALOGO_URL, {
+    headers: { 'User-Agent': 'TequioApp/1.0 (+tequio.app)' },
+  }).then(r => r.text());
   const regex = new RegExp(
     `href="([^"]+file\\.php\\?t=[^"]+)"[^>]*>[^<]*Quien es Quien en los Precios\\s*${anio}`,
     'i'
   );
   const m = html.match(regex);
   if (!m) return null;
-  let url = m[1].startsWith('http') ? m[1] : new URL(m[1], CATALOGO_URL).href;
-  return url;
+  return m[1].startsWith('http') ? m[1] : new URL(m[1], CATALOGO_URL).href;
 }
 
 // ─────────────────────────────────────────────────────────────
-// 2) Descargar + parsear stream CSV
+// Descargar + parsear stream CSV
 // ─────────────────────────────────────────────────────────────
 
 async function descargarYParsear(url, onBatch) {
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'TequioApp/1.0 (scraper-profeco; bot+tequio@gob.mx)',
+      'User-Agent': 'TequioApp/1.0 (scraper-profeco; +tequio.app)',
       'Accept': 'text/csv,application/csv,application/octet-stream,*/*',
     },
     redirect: 'follow',
@@ -143,22 +213,18 @@ async function descargarYParsear(url, onBatch) {
   if (!res.ok) throw new Error(`HTTP ${res.status} al descargar ${url}`);
 
   const buf = Buffer.from(await res.arrayBuffer());
-
-  // Autodetectar gzip
   let textBuf = buf;
   if (buf[0] === 0x1f && buf[1] === 0x8b) {
-    console.log('[profeco] archivo detectado como gzip, descomprimiendo...');
+    console.log('[profeco] archivo gzip, descomprimiendo...');
     textBuf = zlib.gunzipSync(buf);
   }
-  // Si es UTF-8 con BOM, removerlo
   if (textBuf[0] === 0xef && textBuf[1] === 0xbb && textBuf[2] === 0xbf) {
     textBuf = textBuf.slice(3);
   }
 
-  // Detectar delimitador (PROFECO usa coma o pipe a veces)
   const head = textBuf.slice(0, 4096).toString('utf8');
   const delimiter = head.includes('|') && !head.includes(',') ? '|' : ',';
-  console.log('[profeco] delimitador detectado:', JSON.stringify(delimiter), '· tamaño:', textBuf.length, 'bytes');
+  console.log('[profeco] delimitador:', JSON.stringify(delimiter), '· tamaño:', textBuf.length, 'bytes');
 
   const stream = Readable.from(textBuf);
   const parser = stream.pipe(parse({
@@ -192,50 +258,6 @@ async function descargarYParsear(url, onBatch) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3) Upsert por lotes
-// ─────────────────────────────────────────────────────────────
-
-async function upsertBatch(rows) {
-  const { error } = await sb
-    .from('profeco_precios')
-    .upsert(rows, {
-      onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro',
-      ignoreDuplicates: false,
-    });
-  if (error) {
-    console.error('[profeco] error upsert:', error.message);
-    throw error;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// 4) Logging en scraper_logs
-// ─────────────────────────────────────────────────────────────
-
-async function logStart(fuenteUrl) {
-  const { data, error } = await sb.from('scraper_logs').insert({
-    scraper_slug:    SCRAPER_SLUG,
-    workflow_run_id: RUN_ID,
-    status:          'running',
-    fuente_url:      fuenteUrl,
-    started_at:      new Date().toISOString(),
-  }).select('id').single();
-  if (error) console.warn('[profeco] no se pudo log_start:', error.message);
-  return data?.id;
-}
-
-async function logFinish(logId, payload) {
-  if (!logId) return;
-  const { error } = await sb.from('scraper_logs')
-    .update({
-      ...payload,
-      finished_at: new Date().toISOString(),
-    })
-    .eq('id', logId);
-  if (error) console.warn('[profeco] no se pudo log_finish:', error.message);
-}
-
-// ─────────────────────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────────────────────
 
@@ -244,7 +266,6 @@ async function logFinish(logId, payload) {
   const logId = await logStart(CATALOGO_URL);
 
   try {
-    // 1. Descubrir URL
     let url = await descubrirURL(ANIO_OBJETIVO);
     if (!url) {
       console.warn(`[profeco] no encontré link para ${ANIO_OBJETIVO}, intentando ${ANIO_FALLBACK}…`);
@@ -254,23 +275,25 @@ async function logFinish(logId, payload) {
 
     console.log('[profeco] URL del dataset:', url);
 
-    // 2. Descargar + parsear + upsertear
     let inserted = 0;
     const total = await descargarYParsear(url, async (batch) => {
-      await upsertBatch(batch);
+      await sbInsert('profeco_precios', batch, {
+        onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro',
+        merge: true,
+      });
       inserted += batch.length;
     });
 
     console.log(`[profeco] OK · ${total} filas procesadas`);
 
     await logFinish(logId, {
-      status:         'success',
-      rows_inserted:  inserted,
-      rows_updated:   0,
-      rows_skipped:   0,
-      http_status:    200,
-      fuente_url:     url,
-      notes:          `PROFECO QQP año ${ANIO_OBJETIVO}`,
+      status:        'success',
+      rows_inserted: inserted,
+      rows_updated:  0,
+      rows_skipped:  0,
+      http_status:   200,
+      fuente_url:    url,
+      notes:         `PROFECO QQP año ${ANIO_OBJETIVO}`,
     });
     process.exit(0);
 
