@@ -1,57 +1,202 @@
 // ============================================================
-// Tequio Service Worker · v1.0.0
-// Fase 3.A — Solo registro (sin caché agresivo todavía)
-// La caché completa viene en Fase 3.B
+// Tequio Service Worker · v2.0.0
+// Fase 3.B — Caché offline con estrategias híbridas
 // ============================================================
-const VERSION = 'tequio-v1.0.0';
-const PRECACHE = [
-  '/',
-  '/manifest.json',
+//
+//  • HTML (navegación):    network-first  → caché fallback
+//  • Imágenes/CSS/fuentes: cache-first    → red fallback
+//  • /api/data?vista=*:    stale-while-revalidate (10 min)
+//  • /api/ai-proxy:        network-only   (cada consulta es única)
+//  • CDNs (Leaflet, fonts): cache-first   (TTL largo)
+//
+// ============================================================
+const VERSION       = 'tequio-v2.0.0';
+const CACHE_SHELL   = `${VERSION}-shell`;
+const CACHE_ASSETS  = `${VERSION}-assets`;
+const CACHE_DATA    = `${VERSION}-data`;
+
+// Lo mínimo para que la app cargue offline desde la primera visita
+const PRECACHE_SHELL = ['/', '/manifest.json'];
+
+const PRECACHE_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
+  '/mask192.png',
+  '/mask512.png',
+  '/appletch.png',
+  '/fav32.png',
 ];
-// Install: pre-cachea solo lo esencial
+
+// ──────────────────────────────────────────────────────────
+// INSTALL — pre-cache best-effort
+// ──────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-  console.log('[Tequio SW] Installing', VERSION);
-  event.waitUntil(
-    caches.open(VERSION)
-      .then((cache) => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting())
-      .catch((err) => console.warn('[Tequio SW] Precache failed:', err))
-  );
+  console.log('[Tequio SW]', VERSION, 'installing');
+  event.waitUntil((async () => {
+    const shell  = await caches.open(CACHE_SHELL);
+    const assets = await caches.open(CACHE_ASSETS);
+    // allSettled: si falla un archivo, no rompemos el SW
+    await Promise.allSettled([
+      ...PRECACHE_SHELL.map(url =>
+        shell.add(url).catch(err => console.warn('[SW] precache shell falló:', url, err))
+      ),
+      ...PRECACHE_ASSETS.map(url =>
+        assets.add(url).catch(err => console.warn('[SW] precache asset falló:', url, err))
+      ),
+    ]);
+    await self.skipWaiting();
+  })());
 });
-// Activate: limpia versiones viejas
+
+// ──────────────────────────────────────────────────────────
+// ACTIVATE — limpieza de versiones viejas
+// ──────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
-  console.log('[Tequio SW] Activating', VERSION);
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== VERSION && k.startsWith('tequio-')).map((k) => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
-  );
+  console.log('[Tequio SW]', VERSION, 'activating');
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        .filter(k => k.startsWith('tequio-') && !k.startsWith(VERSION))
+        .map(k => {
+          console.log('[Tequio SW] eliminando caché vieja:', k);
+          return caches.delete(k);
+        })
+    );
+    await self.clients.claim();
+  })());
 });
-// Fetch: estrategia "network-first" con fallback a caché
-// En 3.A no cacheamos requests dinámicos — eso viene en 3.B
+
+// ──────────────────────────────────────────────────────────
+// FETCH — router de estrategias
+// ──────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  // Solo GET, solo same-origin, sin /api/
-  if (req.method !== 'GET') return;
+  if (req.method !== 'GET') return;                  // solo GET
   const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
-  if (url.pathname.startsWith('/api/')) return;
-  event.respondWith(
-    fetch(req)
-      .catch(() => caches.match(req).then((cached) => cached || caches.match('/')))
-  );
+
+  // 1. AI proxy → nunca cachear
+  if (url.pathname.startsWith('/api/ai-proxy')) {
+    return;  // browser lo maneja directo
+  }
+
+  // 2. /api/data → stale-while-revalidate
+  if (url.pathname.startsWith('/api/data')) {
+    event.respondWith(staleWhileRevalidate(req, CACHE_DATA));
+    return;
+  }
+
+  // 3. Same-origin
+  if (url.origin === location.origin) {
+    // 3a. Navegación HTML → network-first
+    const acceptsHtml = req.mode === 'navigate' ||
+                        (req.headers.get('accept') || '').includes('text/html');
+    if (acceptsHtml) {
+      event.respondWith(networkFirst(req, CACHE_SHELL));
+      return;
+    }
+    // 3b. Otros assets → cache-first
+    event.respondWith(cacheFirst(req, CACHE_ASSETS));
+    return;
+  }
+
+  // 4. CDNs conocidos → cache-first
+  const cdnHosts = [
+    'cdnjs.cloudflare.com',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'basemaps.cartocdn.com',
+    'unpkg.com',
+  ];
+  if (cdnHosts.some(h => url.host.endsWith(h))) {
+    event.respondWith(cacheFirst(req, CACHE_ASSETS));
+    return;
+  }
+
+  // 5. Resto → network-only (sin interceptar)
 });
-// Mensajería con la página (para 3.C — push subscribe)
+
+// ──────────────────────────────────────────────────────────
+// ESTRATEGIAS
+// ──────────────────────────────────────────────────────────
+
+// Cache-first: caché si existe, sino red
+async function cacheFirst(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+  try {
+    const fresh = await fetch(req);
+    if (fresh && (fresh.ok || fresh.type === 'opaque')) {
+      cache.put(req, fresh.clone()).catch(() => {});
+    }
+    return fresh;
+  } catch (err) {
+    return new Response('', { status: 503, statusText: 'Offline' });
+  }
+}
+
+// Network-first: red primero, caché si red falla
+async function networkFirst(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const fresh = await fetch(req);
+    if (fresh && fresh.ok) {
+      cache.put(req, fresh.clone()).catch(() => {});
+    }
+    return fresh;
+  } catch (err) {
+    const cached = await cache.match(req);
+    if (cached) return cached;
+    // Último recurso: la home cacheada
+    const home = await cache.match('/');
+    if (home) return home;
+    return new Response(
+      '<h1 style="font-family:sans-serif;padding:40px;text-align:center">📡 Tequio sin conexión</h1>' +
+      '<p style="text-align:center;color:#666">Esta sección no está cacheada. Vuelve a conectarte e intenta de nuevo.</p>',
+      { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    );
+  }
+}
+
+// Stale-while-revalidate: caché al instante, refresca en bg
+async function staleWhileRevalidate(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(req);
+  const networkPromise = fetch(req).then(fresh => {
+    if (fresh && fresh.ok) {
+      cache.put(req, fresh.clone()).catch(() => {});
+    }
+    return fresh;
+  }).catch(() => null);
+  if (cached) {
+    networkPromise;  // fire-and-forget
+    return cached;
+  }
+  const fresh = await networkPromise;
+  return fresh || new Response(
+    JSON.stringify({ error: 'offline', mensaje: 'Datos no disponibles sin conexión' }),
+    { status: 503, headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
+// ──────────────────────────────────────────────────────────
+// MESSAGING — comunicación con la página
+// ──────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+  if (event.data?.type === 'CLEAR_DATA_CACHE') {
+    caches.delete(CACHE_DATA).then(() => {
+      event.source?.postMessage({ type: 'CACHE_CLEARED' });
+    });
+  }
 });
-// Push handler — placeholder, se activa en Fase 3.D
+
+// ──────────────────────────────────────────────────────────
+// PUSH (placeholder · se activa en Fase 3.D)
+// ──────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   let data = {};
   try {
@@ -70,6 +215,7 @@ self.addEventListener('push', (event) => {
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
