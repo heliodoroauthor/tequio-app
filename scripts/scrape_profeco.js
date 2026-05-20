@@ -1,4 +1,4 @@
-// scripts/scrape_profeco.js  (v9 — dedup batch + resilient upsert)
+// scripts/scrape_profeco.js  (v10 — Windows-1252 → UTF-8)
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
@@ -55,12 +55,11 @@ function normalizeRow(raw) {
   return r.producto ? r : null;
 }
 
-// Dedup dentro del batch usando key compuesta del UNIQUE constraint
 function dedupBatch(rows) {
   const m = new Map();
   for (const r of rows) {
     const k = [r.producto||'', r.marca||'', r.presentacion||'', r.nombre_comercial||'', r.fecha_registro||''].join('|');
-    m.set(k, r); // last-write-wins
+    m.set(k, r);
   }
   return [...m.values()];
 }
@@ -78,8 +77,7 @@ async function descubrirURL(anio) {
 async function descomprimirRAR(buf) {
   const extractor = await createExtractorFromData({ data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
   const headers = [...extractor.getFileList().fileHeaders];
-  console.log(`[profeco] RAR ${headers.length} archivos:`);
-  headers.forEach(f => console.log(`  - ${f.name} (${f.unpSize})`));
+  console.log(`[profeco] RAR ${headers.length} archivos`);
   const files = [...extractor.extract().files];
   let largest = null, largestSize = 0;
   for (const f of files) { if (f.fileHeader.unpSize > largestSize) { largest = f; largestSize = f.fileHeader.unpSize; } }
@@ -92,14 +90,20 @@ async function descargarYParsear(url, onBatch) {
   const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': '*/*' }, redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   let buf = Buffer.from(await res.arrayBuffer());
-  console.log(`[profeco] descargado: ${buf.length} bytes · magic ${buf.slice(0,8).toString('hex')}`);
+  console.log(`[profeco] descargado: ${buf.length} bytes`);
 
   if (buf[0]===0x52 && buf[1]===0x61 && buf[2]===0x72 && buf[3]===0x21) {
     console.log('[profeco] RAR, descomprimiendo...');
     buf = await descomprimirRAR(buf);
-    console.log(`[profeco] descomprimido: ${buf.length} bytes`);
   } else if (buf[0]===0x1f && buf[1]===0x8b) { buf = zlib.gunzipSync(buf); }
   if (buf[0]===0xef && buf[1]===0xbb && buf[2]===0xbf) buf = buf.slice(3);
+
+  // ═══ FIX v10: PROFECO publica el CSV en Windows-1252 (Latin-1)
+  // Decodificamos como win1252 y re-encodeamos como UTF-8 para que acentos se vean bien
+  console.log('[profeco] re-encoding Windows-1252 → UTF-8...');
+  const decoded = new TextDecoder('windows-1252', { fatal: false }).decode(buf);
+  buf = Buffer.from(decoded, 'utf8');
+  console.log(`[profeco] post-encoding: ${buf.length} bytes`);
 
   const head = buf.slice(0,4096).toString('utf8');
   const firstLine = head.slice(0, head.indexOf('\n') >= 0 ? head.indexOf('\n') : 500);
@@ -122,13 +126,8 @@ async function descargarYParsear(url, onBatch) {
     const before = b.length;
     const cleanBatch = dedupBatch(b);
     deduped += (before - cleanBatch.length);
-    try {
-      await onBatch(cleanBatch);
-      total += cleanBatch.length;
-    } catch (e) {
-      failedBatches++;
-      console.warn(`[profeco] batch fail (${failedBatches}): ${e.message.slice(0,200)}`);
-    }
+    try { await onBatch(cleanBatch); total += cleanBatch.length; }
+    catch (e) { failedBatches++; console.warn(`[profeco] batch fail (${failedBatches}): ${e.message.slice(0,200)}`); }
   }
 
   for await (const raw of parser) {
@@ -137,13 +136,12 @@ async function descargarYParsear(url, onBatch) {
     if (!n) continue;
     batch.push(n);
     if (batch.length >= BATCH_SIZE) {
-      await flushBatch(batch);
-      batch = [];
-      if (total % 50000 === 0 && total > 0) console.log(`[profeco] ${total} filas insertadas…`);
+      await flushBatch(batch); batch = [];
+      if (total % 50000 === 0 && total > 0) console.log(`[profeco] ${total} filas…`);
     }
   }
   if (batch.length) await flushBatch(batch);
-  console.log(`[profeco] resumen · insertadas=${total} · parse_skipped=${skipped} · dedup=${deduped} · batches_fallidas=${failedBatches}`);
+  console.log(`[profeco] resumen · insert=${total} parse_skip=${skipped} dedup=${deduped} fail=${failedBatches}`);
   return { total, skipped, deduped, failedBatches };
 }
 
@@ -160,13 +158,10 @@ const started_at = new Date().toISOString();
       await sbInsert('profeco_precios', batch, { onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro', merge: true });
       inserted += batch.length;
     });
-    const isPartial = result.skipped > 0 || result.failedBatches > 0 || result.deduped > 0;
     await logRun({
-      status: isPartial ? 'partial' : 'ok',
-      rows_inserted: inserted,
-      rows_skipped: result.skipped + result.deduped,
-      http_status: 200,
-      fuente_url: sourceUrl,
+      status: (result.skipped>0||result.failedBatches>0||result.deduped>0) ? 'partial' : 'ok',
+      rows_inserted: inserted, rows_skipped: result.skipped + result.deduped,
+      http_status: 200, fuente_url: sourceUrl,
       notes: `año ${ANIO_OBJETIVO} insert=${inserted} skip=${result.skipped} dedup=${result.deduped} fail=${result.failedBatches}`,
       started_at,
     });
