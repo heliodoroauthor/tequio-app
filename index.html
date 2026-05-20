@@ -2222,6 +2222,164 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div style="font-size:18px" id="dash-leyes-count-arrow">→</div>
           </button>
         </div>
+        <!-- ═════ TEQUIO · Fase 3.C — Tarjeta "Activar alertas push" ═════ -->
+        <div id="tequio-push-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:20px;color:var(--text)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:18px">🔔</span>
+            <div style="font-size:15px;font-weight:700">Alertas Tequio</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">
+            Recibe avisos de decretos del DOF, alertas meteorológicas y noticias cívicas importantes en tu dispositivo.
+          </div>
+          <button id="tequio-push-btn" type="button" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;color:#111827;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:opacity .15s ease">Activar alertas</button>
+          <div id="tequio-push-status" style="margin-top:8px;font-size:11px;color:var(--text3);min-height:14px"></div>
+        </div>
+        <script>
+        (function () {
+          var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+          var SUPABASE_ANON_KEY = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+          var VAPID_PUBLIC_KEY = 'BH5HtYCFtUKv2msIpPjCpbp7cHerKXGeLxMTrOC3TUcUvLMDaBqJdnBiBc4eyZGmMMx3c0591h_ZhCFEzgPyoNk';
+
+          var btn = document.getElementById('tequio-push-btn');
+          var statusEl = document.getElementById('tequio-push-status');
+          if (!btn || !statusEl) return;
+
+          function setStatus(msg, kind) {
+            statusEl.textContent = msg || '';
+            statusEl.style.color = (kind === 'error') ? 'var(--red2)' : (kind === 'ok') ? 'var(--green2)' : 'var(--text3)';
+          }
+
+          function urlBase64ToUint8Array(base64String) {
+            var padding = '='.repeat((4 - base64String.length % 4) % 4);
+            var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            var rawData = atob(base64);
+            var outputArray = new Uint8Array(rawData.length);
+            for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+            return outputArray;
+          }
+
+          function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches
+              || window.navigator.standalone === true;
+          }
+
+          function pushSupported() {
+            return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+          }
+
+          function currentSubscription() {
+            return navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); });
+          }
+
+          function refreshButton() {
+            if (!pushSupported()) {
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+              btn.textContent = 'No soportado en este navegador';
+              setStatus('Tu navegador no permite notificaciones push.', 'error');
+              return Promise.resolve();
+            }
+            var isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isiOS && !isStandalone()) {
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+              btn.textContent = 'Instala Tequio primero';
+              setStatus('En iPhone: pulsa "Compartir" → "Añadir a pantalla de inicio" y vuelve desde el ícono.', '');
+              return Promise.resolve();
+            }
+            return currentSubscription().then(function (sub) {
+              if (sub && Notification.permission === 'granted') {
+                btn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
+                btn.style.color = '#fff';
+                btn.textContent = '✓ Alertas activadas (desactivar)';
+                setStatus('Recibirás avisos de decretos y alertas nuevas.', 'ok');
+              } else {
+                btn.style.background = 'linear-gradient(135deg,#fbbf24,#f59e0b)';
+                btn.style.color = '#111827';
+                btn.textContent = 'Activar alertas';
+                setStatus('', '');
+              }
+            });
+          }
+
+          function subscribe() {
+            setStatus('Pidiendo permiso…', '');
+            return Notification.requestPermission().then(function (permission) {
+              if (permission !== 'granted') {
+                setStatus('Permiso denegado. Actívalo desde Ajustes si cambias de opinión.', 'error');
+                return;
+              }
+              setStatus('Suscribiendo…', '');
+              return navigator.serviceWorker.ready.then(function (reg) {
+                return reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+              }).then(function (sub) {
+                return fetch(SUPABASE_URL + '/functions/v1/push-subscribe', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                  },
+                  body: JSON.stringify({
+                    subscription: sub.toJSON(),
+                    user_agent: navigator.userAgent,
+                    platform: navigator.platform || ''
+                  })
+                }).then(function (res) {
+                  if (!res.ok) {
+                    return res.text().catch(function () { return ''; }).then(function (text) {
+                      throw new Error('Servidor: ' + res.status + ' ' + text);
+                    });
+                  }
+                });
+              }).then(refreshButton);
+            });
+          }
+
+          function unsubscribe() {
+            setStatus('Desactivando…', '');
+            return currentSubscription().then(function (sub) {
+              if (!sub) return;
+              return fetch(SUPABASE_URL + '/functions/v1/push-unsubscribe', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': SUPABASE_ANON_KEY,
+                  'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ endpoint: sub.endpoint })
+              }).catch(function () {}).then(function () {
+                return sub.unsubscribe().catch(function () {});
+              });
+            }).then(refreshButton);
+          }
+
+          btn.addEventListener('click', function () {
+            btn.disabled = true;
+            currentSubscription().then(function (sub) {
+              if (sub && Notification.permission === 'granted') {
+                return unsubscribe();
+              }
+              return subscribe();
+            }).catch(function (err) {
+              console.error('[Tequio push]', err);
+              setStatus('Error: ' + (err && err.message ? err.message : 'desconocido'), 'error');
+            }).then(function () {
+              btn.disabled = false;
+            });
+          });
+
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(refreshButton).catch(function () { refreshButton(); });
+          } else {
+            refreshButton();
+          }
+        })();
+        </script>
+        <!-- ═════ /Tarjeta alertas push ═════ -->
         <!-- SALUDO PERSONAL -->
         <div id="dash-saludo" style="margin-bottom:20px">
           <div style="font-size:22px;font-weight:800;margin-bottom:2px" id="dash-bienvenida">Buenos días 👋</div>
