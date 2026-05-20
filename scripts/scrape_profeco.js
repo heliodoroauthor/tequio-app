@@ -1,9 +1,4 @@
-// scripts/scrape_profeco.js  (v7 — RAR support)
-//
-// TEQUIO · Scraper PROFECO Quien es Quien
-// PROFECO publica el dataset como archivo .rar (no CSV puro).
-// v7 detecta RAR magic y descomprime con node-unrar-js antes de parsear.
-
+// scripts/scrape_profeco.js  (v8 — header keys + quote handling fixed)
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
@@ -37,10 +32,29 @@ async function logRun(p) {
   catch (e) { console.warn('no log:', e.message); }
 }
 
+// El CSV usa nombres en lowercase con underscores: producto,presentacion,marca,categoria,catalogo,precio,fecha_registro,cadena_comercial,giro,nombre_comercial,direccion,estado,municipio,latitud,longitud
+// Mi normH() los pasa a UPPERCASE pero conserva underscores.
 function normH(h) { return String(h||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toUpperCase().trim(); }
-const HM = { PRODUCTO:'producto', PRESENTACION:'presentacion', MARCA:'marca', CATEGORIA:'categoria', CATALOGO:'catalogo', PRECIO:'precio', FECHAREGISTRO:'fecha_registro', CADENACOMERCIAL:'cadena_comercial', GIRO:'giro', NOMBRECOMERCIAL:'nombre_comercial', DIRECCION:'direccion', ESTADO:'estado', MUNICIPIO:'municipio', LATITUD:'latitud', LONGITUD:'longitud' };
 
-function parseF(r) { if (!r) return null; const s=String(r).trim(); const m1=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m1)return `${m1[1]}-${m1[2]}-${m1[3]}`; const m2=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if(m2)return `${m2[3]}-${m2[2]}-${m2[1]}`; return null; }
+const HM = {
+  PRODUCTO:          'producto',
+  PRESENTACION:      'presentacion',
+  MARCA:             'marca',
+  CATEGORIA:         'categoria',
+  CATALOGO:          'catalogo',
+  PRECIO:            'precio',
+  FECHA_REGISTRO:    'fecha_registro',  // ← underscore
+  CADENA_COMERCIAL:  'cadena_comercial', // ← underscore
+  GIRO:              'giro',
+  NOMBRE_COMERCIAL:  'nombre_comercial', // ← underscore
+  DIRECCION:         'direccion',
+  ESTADO:            'estado',
+  MUNICIPIO:         'municipio',
+  LATITUD:           'latitud',
+  LONGITUD:          'longitud',
+};
+
+function parseF(r) { if (!r) return null; const s=String(r).trim(); const m1=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m1)return `${m1[1]}-${m1[2]}-${m1[3]}`; const m2=s.match(/^(\d{4})\/(\d{2})\/(\d{2})/); if(m2)return `${m2[1]}-${m2[2]}-${m2[3]}`; const m3=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if(m3)return `${m3[3]}-${m3[2]}-${m3[1]}`; return null; }
 function parseN(r) { if (r==null||r==='') return null; const n=Number(String(r).replace(/,/g,'').trim()); return Number.isFinite(n)?n:null; }
 function cleanT(r, max=240) { if (r==null) return null; const s=String(r).trim(); return s.length===0?null:s.slice(0,max); }
 function normalizeRow(raw) {
@@ -65,23 +79,17 @@ async function descubrirURL(anio) {
 }
 
 async function descomprimirRAR(buf) {
-  // node-unrar-js extrae archivos del buffer RAR
   const extractor = await createExtractorFromData({ data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
   const list = extractor.getFileList();
-  const fileHeaders = [...list.fileHeaders];
-  console.log(`[profeco] RAR contiene ${fileHeaders.length} archivos:`);
-  fileHeaders.forEach(f => console.log(`  - ${f.name} (${f.unpSize} bytes)`));
-  // Extraer todos
+  const headers = [...list.fileHeaders];
+  console.log(`[profeco] RAR ${headers.length} archivos:`);
+  headers.forEach(f => console.log(`  - ${f.name} (${f.unpSize} bytes)`));
   const extracted = extractor.extract();
   const files = [...extracted.files];
-  // Encontrar el archivo más grande (probablemente el CSV)
   let largest = null, largestSize = 0;
-  for (const f of files) {
-    const size = f.fileHeader.unpSize;
-    if (size > largestSize) { largest = f; largestSize = size; }
-  }
-  if (!largest) throw new Error('RAR no contiene archivos');
-  console.log(`[profeco] usando archivo más grande: ${largest.fileHeader.name} (${largestSize} bytes)`);
+  for (const f of files) { if (f.fileHeader.unpSize > largestSize) { largest = f; largestSize = f.fileHeader.unpSize; } }
+  if (!largest) throw new Error('RAR vacío');
+  console.log(`[profeco] usando ${largest.fileHeader.name} (${largestSize} bytes)`);
   return Buffer.from(largest.extraction);
 }
 
@@ -89,34 +97,34 @@ async function descargarYParsear(url, onBatch) {
   const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': '*/*' }, redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   let buf = Buffer.from(await res.arrayBuffer());
-  console.log(`[profeco] descargado: ${buf.length} bytes`);
-  console.log(`[profeco] magic: ${buf.slice(0,8).toString('hex')}`);
+  console.log(`[profeco] descargado: ${buf.length} bytes · magic: ${buf.slice(0,8).toString('hex')}`);
 
-  // Detección + descompresión
   if (buf[0]===0x52 && buf[1]===0x61 && buf[2]===0x72 && buf[3]===0x21) {
-    console.log('[profeco] formato: RAR, descomprimiendo...');
+    console.log('[profeco] formato RAR, descomprimiendo...');
     buf = await descomprimirRAR(buf);
-    console.log(`[profeco] descomprimido a ${buf.length} bytes`);
-  } else if (buf[0]===0x1f && buf[1]===0x8b) {
-    console.log('[profeco] formato: GZIP'); buf = zlib.gunzipSync(buf);
-  } else if (buf[0]===0x50 && buf[1]===0x4b) {
-    throw new Error('Archivo es ZIP — no soportado (necesita unzip)');
-  }
+    console.log(`[profeco] descomprimido: ${buf.length} bytes`);
+  } else if (buf[0]===0x1f && buf[1]===0x8b) { buf = zlib.gunzipSync(buf); }
   if (buf[0]===0xef && buf[1]===0xbb && buf[2]===0xbf) buf = buf.slice(3);
 
   const head = buf.slice(0,4096).toString('utf8');
   const nl = head.indexOf('\n');
   const firstLine = head.slice(0, nl >= 0 ? nl : 500);
-  console.log(`[profeco] primera línea (${firstLine.length}): ${firstLine.slice(0,300)}`);
+  console.log(`[profeco] primera línea: ${firstLine.slice(0,300)}`);
   const counts = { ',':(firstLine.match(/,/g)||[]).length, ';':(firstLine.match(/;/g)||[]).length, '|':(firstLine.match(/\|/g)||[]).length, '\t':(firstLine.match(/\t/g)||[]).length };
-  console.log(`[profeco] delims:`, JSON.stringify(counts));
   const delimiter = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
   console.log(`[profeco] delim: ${JSON.stringify(delimiter)}`);
 
   const stream = Readable.from(buf);
   const parser = stream.pipe(parse({
     columns: h => { console.log('[profeco] HEADER:', JSON.stringify(h)); return h.map(normH); },
-    delimiter, skip_empty_lines: true, relax_column_count: true, bom: true, trim: true, quote: false, skip_records_with_error: true,
+    delimiter,
+    skip_empty_lines: true,
+    relax_column_count: true,
+    bom: true,
+    trim: true,
+    // quote HABILITADO (default es '"'). PROFECO usa comillas para escapar comas en presentaciones.
+    relax_quotes: true,            // tolerante a quotes desbalanceados
+    skip_records_with_error: true, // filas malas se saltan
   }));
 
   let batch = [], total = 0, skipped = 0, firstLogged = false;
@@ -128,7 +136,7 @@ async function descargarYParsear(url, onBatch) {
     const n = normalizeRow(raw);
     if (!n) continue;
     batch.push(n);
-    if (batch.length >= BATCH_SIZE) { await onBatch(batch); total += batch.length; batch = []; if (total % 10000 === 0) console.log(`[profeco] ${total} filas…`); }
+    if (batch.length >= BATCH_SIZE) { await onBatch(batch); total += batch.length; batch = []; if (total % 50000 === 0) console.log(`[profeco] ${total} filas…`); }
   }
   if (batch.length) { await onBatch(batch); total += batch.length; }
   console.log(`[profeco] resumen · ok=${total} · skipped=${skipped}`);
