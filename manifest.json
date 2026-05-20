@@ -1,43 +1,63 @@
 {
   "name": "Tequio — Plataforma Cívica Digital",
   "short_name": "Tequio",
-  "description": "Datos cívicos verificados de México: leyes, dinero público, presupuesto, contratos, derechos, servicios.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0b0f1a",
-  "theme_color": "#fbbf24",
-  "orientation": "portrait-primary",
-  "categories": ["education", "government", "social"],
-  "lang": "es-MX",
+  "description": "Datos cívicos verificables de México: leyes, contratos, deuda, presupuesto, derechos y emergencias.",
+  "start_url": "/?source=pwa",
   "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0f1a",
+  "theme_color": "#fbbf24",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "categories": ["news", "government", "education", "utilities"],
   "icons": [
     {
-      "src": "https://tequio.app/favicon.ico",
-      "sizes": "any",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mask192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/mask512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Modo Emergencia",
       "short_name": "Emergencia",
-      "description": "Asistente de voz para emergencias",
-      "url": "/panel/emergencia.html",
-      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+      "description": "Acceso rápido a derechos en situaciones urgentes",
+      "url": "/?source=pwa&shortcut=emergencia",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Sin Internet",
-      "short_name": "Offline",
-      "description": "Contenido crítico sin conexión",
-      "url": "/panel/offline.html",
-      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+      "name": "Diario Cívico",
+      "short_name": "Diario",
+      "description": "Resumen diario personalizado de México",
+      "url": "/?source=pwa&shortcut=diario",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Servicios Públicos",
-      "short_name": "Servicios",
-      "description": "Teléfonos de servicios federales y estatales",
-      "url": "/panel/servicios.html",
-      "icons": [{ "src": "https://tequio.app/favicon.ico", "sizes": "any" }]
+      "name": "Mi Estado",
+      "short_name": "Estado",
+      "description": "Panel de datos de tu estado",
+      "url": "/?source=pwa&shortcut=estado",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
