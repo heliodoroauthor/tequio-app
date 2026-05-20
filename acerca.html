@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tequio — Datos abiertos del Gobierno de México · Gratis, sin registro</title>
+<meta name="description" content="Plataforma cívica gratuita con precios PROFECO, gasolineras más baratas, verificador SAT, votaciones del Congreso y alertas en tu estado. Datos públicos en tu bolsillo.">
+<meta name="keywords" content="precios profeco mexico, gasolina barata cerca, verificador sat lista 69, datos abiertos gobierno mexico, plataforma civica, tequio">
+<meta name="theme-color" content="#fbbf24">
+<meta name="author" content="Tequio · Plataforma Cívica">
+<link rel="canonical" href="https://tequio.app/acerca.html">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Tequio — Datos abiertos del Gobierno de México">
+<meta property="og:description" content="Precios PROFECO, gasolineras más baratas, verificador SAT, votaciones del Congreso, alertas en tu estado. Gratis, sin registro.">
+<meta property="og:image" content="https://tequio.app/icon-512.png">
+<meta property="og:url" content="https://tequio.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tequio">
+<meta property="og:locale" content="es_MX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tequio — Datos abiertos del Gobierno de México">
+<meta name="twitter:description" content="Precios PROFECO, gasolina, SAT, Congreso. Gratis en tu cel.">
+<meta name="twitter:image" content="https://tequio.app/icon-512.png">
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Tequio",
+  "alternateName": "Tequio · Plataforma Cívica",
+  "url": "https://tequio.app",
+  "description": "Plataforma cívica gratuita con datos abiertos del Gobierno de México: precios PROFECO, gasolineras más baratas, verificador SAT, votaciones del Congreso y alertas en tu estado.",
+  "applicationCategory": "GovernmentApplication",
+  "operatingSystem": "Web, iOS, Android",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "MXN"
+  },
+  "inLanguage": "es-MX",
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "Ciudadanos mexicanos"
+  },
+  "featureList": [
+    "Buscador de precios PROFECO Quien es Quien",
+    "Comparador de canasta básica entre cadenas",
+    "Precios de gasolina por estación CRE",
+    "Verificador SAT Lista 69 / 69-B",
+    "Votaciones del Congreso de la Unión",
+    "Auditorías ASF de gasto público",
+    "Alertas meteorológicas geográficas",
+    "Mi Diputado vs Yo"
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Tequio",
+  "url": "https://tequio.app",
+  "logo": "https://tequio.app/icon-512.png",
+  "description": "Plataforma cívica mexicana que pone datos públicos del Gobierno al alcance de cualquier ciudadano.",
+  "sameAs": []
+}
+</script>
+
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;0,900&family=DM+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0f1a; --bg2: #0e1525; --surface: #1a243d; --surface2: #1e2a42;
+    --border: #2a3a5c; --border2: #3a4f75;
+    --accent: #fbbf24; --accent2: #f59e0b;
+    --text: #e8edf5; --text2: #94a3b8; --text3: #64748b;
+    --green: #22c55e; --green2: #4ade80;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text); min-height: 100vh; line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 0 18px; }
+
+  /* ── Header ── */
+  .nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0; border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-logo { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .nav-brand h1 { font-size: 18px; font-weight: 800; color: var(--text); }
+  .nav-brand .tag { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: -3px; }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827; padding: 10px 20px; border-radius: 999px;
+    font-weight: 800; font-size: 13px; text-decoration: none;
+    transition: filter .12s;
+  }
+  .nav-cta:hover { filter: brightness(1.08); text-decoration: none; }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center; padding: 40px 0 60px;
+  }
+  .hero h2 {
+    font-size: 48px; font-weight: 900; line-height: 1.1; margin-bottom: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .lede {
+    font-size: 18px; color: var(--text2); max-width: 640px; margin: 0 auto 28px;
+  }
+  .hero-cta {
+    display: inline-flex; gap: 10px; align-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827; padding: 16px 32px; border-radius: 14px;
+    font-weight: 800; font-size: 16px; text-decoration: none;
+    box-shadow: 0 4px 24px rgba(251,191,36,0.3);
+    transition: all .15s;
+  }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(251,191,36,0.5); text-decoration: none; }
+  .hero-pills {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin-top: 20px; font-size: 12px;
+  }
+  .pill {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 999px; color: var(--text2);
+  }
+  .pill strong { color: var(--green2); }
+
+  /* ── Install banner ── */
+  .install-banner {
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04));
+    border: 1px solid rgba(251,191,36,0.3); border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 36px;
+    display: none; align-items: center; gap: 16px;
+  }
+  .install-banner.show { display: flex; }
+  .install-banner .ib-icon { font-size: 32px; flex-shrink: 0; }
+  .install-banner .ib-text { flex: 1; }
+  .install-banner .ib-title { font-weight: 800; color: var(--text); margin-bottom: 2px; }
+  .install-banner .ib-sub { font-size: 12px; color: var(--text2); }
+  .install-banner button {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #111827; border: none; padding: 10px 18px; border-radius: 10px;
+    font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit;
+    flex-shrink: 0;
+  }
+  .install-banner button:hover { filter: brightness(1.08); }
+  .install-banner .ib-close {
+    background: transparent; color: var(--text3); border: none;
+    cursor: pointer; padding: 4px 8px; font-size: 18px;
+  }
+  @media (max-width: 520px) {
+    .install-banner { flex-wrap: wrap; }
+    .install-banner .ib-text { flex-basis: calc(100% - 56px); }
+  }
+
+  /* ── Features grid ── */
+  .features-section {
+    margin-bottom: 60px;
+  }
+  .section-title {
+    font-size: 28px; font-weight: 800; margin-bottom: 12px; text-align: center;
+  }
+  .section-sub {
+    color: var(--text2); text-align: center; margin-bottom: 36px;
+    max-width: 560px; margin-left: auto; margin-right: auto;
+  }
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    transition: all .15s; text-decoration: none; color: inherit; display: block;
+  }
+  .feature-card:hover {
+    border-color: var(--accent); transform: translateY(-2px);
+    text-decoration: none; box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  .feature-card .fc-icon { font-size: 32px; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+  .feature-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .feature-card .fc-cta { margin-top: 14px; color: var(--accent); font-size: 13px; font-weight: 700; }
+
+  /* ── Stats ── */
+  .stats-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; margin-bottom: 60px;
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+    gap: 24px; text-align: center;
+  }
+  .stat .num { font-size: 36px; font-weight: 900; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .stat .lbl { font-size: 11px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── FAQ ── */
+  .faq-section { margin-bottom: 60px; }
+  .faq-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px; margin-bottom: 10px;
+  }
+  .faq-item summary {
+    cursor: pointer; font-weight: 700; color: var(--text);
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-item summary::after { content: '+'; font-size: 22px; color: var(--accent); transition: transform .15s; }
+  .faq-item[open] summary::after { transform: rotate(45deg); }
+  .faq-item p { margin-top: 12px; color: var(--text2); font-size: 14px; line-height: 1.6; }
+
+  /* ── CTA final ── */
+  .final-cta {
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(34,197,94,0.04));
+    border: 1px solid rgba(251,191,36,0.3); border-radius: 20px;
+    padding: 48px 32px; text-align: center; margin-bottom: 40px;
+  }
+  .final-cta h3 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  .final-cta p { color: var(--text2); margin-bottom: 24px; max-width: 480px; margin-left: auto; margin-right: auto; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border); padding: 32px 0;
+    color: var(--text3); font-size: 12px; text-align: center; line-height: 1.8;
+  }
+  footer a { color: var(--text2); }
+
+  @media (max-width: 640px) {
+    .hero h2 { font-size: 34px; }
+    .hero .lede { font-size: 16px; }
+    .section-title { font-size: 22px; }
+    .stats-section { padding: 22px; }
+    .stat .num { font-size: 28px; }
+    .final-cta h3 { font-size: 22px; }
+    .final-cta { padding: 32px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Nav -->
+  <nav class="nav-bar">
+    <div class="nav-brand">
+      <div class="nav-logo">🇲🇽</div>
+      <div>
+        <h1>Tequio</h1>
+        <div class="tag">Plataforma Cívica</div>
+      </div>
+    </div>
+    <a href="/" class="nav-cta">Abrir App →</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h2>Datos públicos<br>en tu bolsillo</h2>
+    <p class="lede">Precios PROFECO, gasolineras más baratas, verificador SAT, votaciones del Congreso y alertas geo en tu estado. <strong>Gratis. Sin registro.</strong></p>
+    <a href="/" class="hero-cta">🚀 Abrir Tequio gratis</a>
+    <div class="hero-pills">
+      <span class="pill">✓ <strong>Sin login</strong></span>
+      <span class="pill">✓ <strong>100% gratis</strong></span>
+      <span class="pill">✓ <strong>Datos oficiales</strong></span>
+      <span class="pill">✓ <strong>Funciona offline</strong></span>
+    </div>
+  </section>
+
+  <!-- Install banner (PWA) -->
+  <div id="install-banner" class="install-banner">
+    <div class="ib-icon">📲</div>
+    <div class="ib-text">
+      <div class="ib-title">Instala Tequio en tu celular</div>
+      <div class="ib-sub">Acceso rápido, notificaciones, funciona sin internet</div>
+    </div>
+    <button id="install-btn" type="button">Instalar</button>
+    <button id="install-close" class="ib-close" type="button" aria-label="Cerrar">×</button>
+  </div>
+
+  <!-- Features -->
+  <section class="features-section">
+    <h2 class="section-title">Lo que puedes hacer</h2>
+    <p class="section-sub">Cada herramienta usa datos abiertos oficiales del Gobierno de México, actualizados automáticamente.</p>
+
+    <div class="features">
+      <a href="/precios.html" class="feature-card">
+        <div class="fc-icon">🛒</div>
+        <h3>Precios PROFECO</h3>
+        <p>Busca productos básicos y compara dónde están más baratos. Pega tu lista del super y descubre qué tienda te cuesta menos en tu municipio.</p>
+        <div class="fc-cta">Buscar precios →</div>
+      </a>
+
+      <a href="/gasolina.html" class="feature-card">
+        <div class="fc-icon">⛽</div>
+        <h3>Gasolineras Cercanas</h3>
+        <p>Las gasolineras más baratas a tu alrededor con datos CRE actualizados diariamente. Regular, premium, diésel. Ahorra hasta $3/L.</p>
+        <div class="fc-cta">Buscar cerca →</div>
+      </a>
+
+      <a href="/verificador-sat.html" class="feature-card">
+        <div class="fc-icon">🕵️</div>
+        <h3>Verificador SAT</h3>
+        <p>Consulta la Lista 69 y 69-B del SAT por RFC o nombre. Verifica si una empresa o persona aparece en listas de contribuyentes con operaciones simuladas.</p>
+        <div class="fc-cta">Verificar →</div>
+      </a>
+
+      <a href="/" class="feature-card">
+        <div class="fc-icon">🏛️</div>
+        <h3>Mi Diputado</h3>
+        <p>Conoce a tus representantes en el Congreso. Compara sus votos contra tus opiniones en votaciones reales del Pleno.</p>
+        <div class="fc-cta">Conocer reps →</div>
+      </a>
+
+      <a href="/" class="feature-card">
+        <div class="fc-icon">📊</div>
+        <h3>Dinero Público</h3>
+        <p>PEF, deuda pública, contratos del Gobierno, auditorías ASF. Sigue dónde se gasta cada peso de impuestos.</p>
+        <div class="fc-cta">Ver presupuesto →</div>
+      </a>
+
+      <a href="/" class="feature-card">
+        <div class="fc-icon">🚨</div>
+        <h3>Alertas Geo</h3>
+        <p>Notificaciones push de alertas meteorológicas, desastres y emergencias en TU estado. Filtradas por geografía, no spam.</p>
+        <div class="fc-cta">Activar alertas →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="num">618K+</div>
+        <div class="lbl">Observaciones de precios</div>
+      </div>
+      <div class="stat">
+        <div class="num">13K+</div>
+        <div class="lbl">Gasolineras</div>
+      </div>
+      <div class="stat">
+        <div class="num">32</div>
+        <div class="lbl">Estados de México</div>
+      </div>
+      <div class="stat">
+        <div class="num">$0</div>
+        <div class="lbl">Siempre gratis</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <h2 class="section-title">Preguntas frecuentes</h2>
+
+    <details class="faq-item">
+      <summary>¿De dónde sacan los datos?</summary>
+      <p>Todo viene de fuentes oficiales del Gobierno de México: PROFECO Quien es Quien en los Precios, CRE para gasolina, SAT para listas 69/69-B, Congreso de la Unión, ASF, Secretaría de Hacienda. No inventamos nada — solo lo hacemos fácil de consultar.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>¿Es realmente gratis? ¿Cuál es el negocio?</summary>
+      <p>Sí, 100% gratis y sin anuncios. Es un proyecto cívico, no comercial. Los datos públicos deberían ser fáciles de consultar y eso es lo único que hacemos.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>¿Necesito crear cuenta?</summary>
+      <p>No. Tequio funciona sin registro. Tu información (estado, productos favoritos) se guarda solo en tu propio dispositivo.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>¿Qué tan actualizados están los precios?</summary>
+      <p>Precios PROFECO: cada lunes a las 7am CDMX. Gasolineras: cada día a las 7am CDMX. Lista 69 SAT: cuando el SAT publica actualizaciones. Las fechas de captura se muestran junto a cada precio.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>¿Funciona sin internet?</summary>
+      <p>Sí, una vez que instalas Tequio como PWA en tu celular, puedes ver la información que ya consultaste aunque no tengas señal. Solo necesitas internet para refrescar datos nuevos.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>¿Cómo activo las alertas?</summary>
+      <p>Entra a la app, ve a tu perfil y activa "Recibir notificaciones". Te pediremos tu estado para filtrar solo lo relevante a ti (no spam de otros estados).</p>
+    </details>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <h3>Empieza a usar tus datos</h3>
+    <p>Más de 600 mil observaciones de precios y 13 mil gasolineras esperándote. Cero registros, cero anuncios.</p>
+    <a href="/" class="hero-cta">🚀 Abrir Tequio</a>
+  </section>
+
+  <footer>
+    Tequio · Plataforma Cívica · Hecho en México 🇲🇽<br>
+    Fuentes oficiales: <a href="https://qqp.profeco.gob.mx" target="_blank" rel="noopener">PROFECO</a> ·
+    <a href="https://www.cre.gob.mx/ConsultaPrecios/Index.html" target="_blank" rel="noopener">CRE</a> ·
+    <a href="https://www.sat.gob.mx" target="_blank" rel="noopener">SAT</a> ·
+    <a href="https://www.diputados.gob.mx" target="_blank" rel="noopener">Diputados</a> ·
+    <a href="https://www.asf.gob.mx" target="_blank" rel="noopener">ASF</a><br>
+    <a href="/">Abrir app</a> ·
+    <a href="/precios.html">Precios</a> ·
+    <a href="/gasolina.html">Gasolina</a> ·
+    <a href="/verificador-sat.html">SAT</a>
+  </footer>
+</div>
+
+<script>
+// PWA Install detection
+(function() {
+  const $banner = document.getElementById('install-banner');
+  const $btn = document.getElementById('install-btn');
+  const $close = document.getElementById('install-close');
+
+  // Skip si el usuario ya cerró el banner antes
+  try {
+    if (localStorage.getItem('tequio_install_dismissed') === '1') return;
+  } catch (e) {}
+
+  let deferredPrompt = null;
+
+  // Chrome/Android: capturar el prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    $banner.classList.add('show');
+  });
+
+  $btn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        $banner.classList.remove('show');
+      }
+      deferredPrompt = null;
+    } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // iOS Safari: mostrar instrucciones manuales
+      alert('En iOS Safari:\n1. Toca el ícono compartir (📤) abajo\n2. Selecciona "Agregar a Inicio"\n3. ¡Listo!');
+    } else {
+      alert('Tu navegador no soporta instalación PWA. Intenta con Chrome, Edge o Brave.');
+    }
+  });
+
+  $close.addEventListener('click', () => {
+    $banner.classList.remove('show');
+    try { localStorage.setItem('tequio_install_dismissed', '1'); } catch (e) {}
+  });
+
+  // iOS Safari: mostrar banner aunque no haya beforeinstallprompt
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+    setTimeout(() => $banner.classList.add('show'), 1500);
+  }
+})();
+</script>
+
+</body>
+</html>
