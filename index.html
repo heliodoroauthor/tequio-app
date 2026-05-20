@@ -2326,7 +2326,11 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
                   body: JSON.stringify({
                     subscription: sub.toJSON(),
                     user_agent: navigator.userAgent,
-                    platform: navigator.platform || ''
+                    platform: navigator.platform || '',
+                    estado: (function () {
+                      try { return localStorage.getItem('tequio_estado_nombre') || null; }
+                      catch (e) { return null; }
+                    })()
                   })
                 }).then(function (res) {
                   if (!res.ok) {
