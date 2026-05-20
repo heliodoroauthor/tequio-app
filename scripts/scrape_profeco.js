@@ -208,15 +208,15 @@ async function descargarYParsear(url, onBatch) {
     columns: header => header.map(normHeader),
     delimiter,
     skip_empty_lines: true,
-    relax_quotes: true,
     relax_column_count: true,
     bom: true,
     trim: true,
-    // Filas malformadas no abortan el run — se cuentan y se siguen
+    // PROFECO publica filas con comillas no balanceadas (ej: "MARCA "X" S.A.")
+    // que rompen cualquier tokenizer estricto. Deshabilitamos el manejo de
+    // comillas completamente — las comillas se tratan como caracteres literales.
+    // Trade-off aceptado: cualquier comilla en el texto queda literal.
+    quote: false,
     skip_records_with_error: true,
-    // Algunos CSV de PROFECO mezclan escape inconsistente; deshabilitamos el escape
-    // backslash para que el parser solo respete comillas dobles.
-    escape: '"',
   }));
 
   let batch = [];
