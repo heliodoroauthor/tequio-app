@@ -1,4 +1,4 @@
-// scripts/scrape_profeco.js  (v10 — Windows-1252 → UTF-8)
+// scripts/scrape_profeco.js  (v11 — mojibake fix in JS)
 import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import * as zlib from 'node:zlib';
@@ -41,9 +41,35 @@ const HM = {
   LATITUD:'latitud', LONGITUD:'longitud',
 };
 
+// ═══ FIX v11: PROFECO mojibake patterns (post-win1252→utf8)
+// Cada par 2-char es lo que sale después de TextDecoder('windows-1252') + Buffer.from(utf8)
+// Mapeo determinado empíricamente sobre la data observada:
+const MOJIBAKE = [
+  ['Ã¶', 'í'],  // Ã¶ → í
+  ['Ã©', 'ú'],  // Ã© → ú
+  ['Ã ', 'ó'],  // Ã+NBSP → ó
+  ['Ã¯', '\''],       // Ã¯ → ' (apostrophe)
+  ['Â¥', 'ñ'],  // Â¥ → ñ
+  ['Âµ', 'á'],  // Âµ → á
+  ['Â', 'é'],  // Â+DLE → é
+  ['Ã', 'Ö'],  // Ã+0096 → Ö
+  ['Ã', 'À'],  // Ã+NUL → À
+  ['Ã¸', 'ø'],  // Ã¸ → ø
+];
+
+function fixMojibake(s) {
+  if (!s) return s;
+  let out = s;
+  for (const [from, to] of MOJIBAKE) {
+    if (out.indexOf(from) >= 0) out = out.split(from).join(to);
+  }
+  return out;
+}
+
 function parseF(r) { if (!r) return null; const s=String(r).trim(); const m1=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m1)return `${m1[1]}-${m1[2]}-${m1[3]}`; const m2=s.match(/^(\d{4})\/(\d{2})\/(\d{2})/); if(m2)return `${m2[1]}-${m2[2]}-${m2[3]}`; const m3=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if(m3)return `${m3[3]}-${m3[2]}-${m3[1]}`; return null; }
 function parseN(r) { if (r==null||r==='') return null; const n=Number(String(r).replace(/,/g,'').trim()); return Number.isFinite(n)?n:null; }
-function cleanT(r, max=240) { if (r==null) return null; const s=String(r).trim(); return s.length===0?null:s.slice(0,max); }
+function cleanT(r, max=240) { if (r==null) return null; const s=fixMojibake(String(r).trim()); return s.length===0?null:s.slice(0,max); }
+
 function normalizeRow(raw) {
   const r = {};
   for (const [k,c] of Object.entries(HM)) {
@@ -98,8 +124,9 @@ async function descargarYParsear(url, onBatch) {
   } else if (buf[0]===0x1f && buf[1]===0x8b) { buf = zlib.gunzipSync(buf); }
   if (buf[0]===0xef && buf[1]===0xbb && buf[2]===0xbf) buf = buf.slice(3);
 
-  // ═══ FIX v10: PROFECO publica el CSV en Windows-1252 (Latin-1)
-  // Decodificamos como win1252 y re-encodeamos como UTF-8 para que acentos se vean bien
+  // ═══ Re-encoding Windows-1252 → UTF-8 (idéntico a v10)
+  // PROFECO publica en Win-1252; sin esto los acentos quedan como bytes [C3 B6] etc.
+  // El fixMojibake() en cleanT() repara después los patrones específicos.
   console.log('[profeco] re-encoding Windows-1252 → UTF-8...');
   const decoded = new TextDecoder('windows-1252', { fatal: false }).decode(buf);
   buf = Buffer.from(decoded, 'utf8');
@@ -131,7 +158,7 @@ async function descargarYParsear(url, onBatch) {
   }
 
   for await (const raw of parser) {
-    if (!firstLogged) { console.log('[profeco] PRIMER RECORD:', JSON.stringify(raw).slice(0,400)); firstLogged = true; }
+    if (!firstLogged) { console.log('[profeco] PRIMER RECORD (fixed):', JSON.stringify(normalizeRow(raw)).slice(0,400)); firstLogged = true; }
     const n = normalizeRow(raw);
     if (!n) continue;
     batch.push(n);
@@ -147,7 +174,7 @@ async function descargarYParsear(url, onBatch) {
 
 const started_at = new Date().toISOString();
 (async () => {
-  console.log('[profeco] inicio · run', RUN_ID);
+  console.log('[profeco] inicio · run', RUN_ID, '· v11');
   let inserted = 0, sourceUrl = CATALOGO_URL;
   try {
     let url = await descubrirURL(ANIO_OBJETIVO);
@@ -162,7 +189,7 @@ const started_at = new Date().toISOString();
       status: (result.skipped>0||result.failedBatches>0||result.deduped>0) ? 'partial' : 'ok',
       rows_inserted: inserted, rows_skipped: result.skipped + result.deduped,
       http_status: 200, fuente_url: sourceUrl,
-      notes: `año ${ANIO_OBJETIVO} insert=${inserted} skip=${result.skipped} dedup=${result.deduped} fail=${result.failedBatches}`,
+      notes: `v11 año ${ANIO_OBJETIVO} insert=${inserted} skip=${result.skipped} dedup=${result.deduped} fail=${result.failedBatches}`,
       started_at,
     });
     process.exit(0);
