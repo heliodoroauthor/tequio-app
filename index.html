@@ -24987,13 +24987,25 @@ window.addEventListener('message', function(e) {
     });
   };
   window.tequioShareLey = function (id) {
-    var src = (typeof leyesDB !== 'undefined') ? leyesDB : (window.LEYES || []);
+    // Buscar en leyesData (el array real); fallback a leyesDB/window.LEYES por compatibilidad
+    var src = (typeof leyesData !== 'undefined') ? leyesData :
+              (typeof leyesDB   !== 'undefined') ? leyesDB :
+              (window.LEYES || []);
     var l = src.find ? src.find(function (x) { return x.id === id; }) : null;
-    if (!l) return;
+    if (!l) {
+      console.warn('[tequioShareLey] no encontrada:', id);
+      // Fallback: compartir solo el ID + URL de Tequio
+      tequioShare({
+        titulo: '⚖️ Ley ' + id + ' · Tequio',
+        texto:  'Mira esta ley en Tequio.',
+        url:    'https://tequio.app/?ley=' + encodeURIComponent(id)
+      });
+      return;
+    }
     tequioShare({
       titulo: '⚖️ ' + l.titulo,
       texto:  (l.desc || '') + (l.fuente ? '\n— ' + l.fuente : ''),
-      url:    l.url || 'https://tequio.app/'
+      url:    l.url || ('https://tequio.app/?ley=' + encodeURIComponent(l.id))
     });
   };
   document.addEventListener('keydown', function (e) {
