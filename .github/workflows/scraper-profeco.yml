@@ -1,6 +1,5 @@
 name: PROFECO Quien es Quien Weekly
 
-# Corre cada lunes a las 13:00 UTC (07:00 CDMX).
 on:
   schedule:
     - cron: '0 13 * * 1'
@@ -21,7 +20,7 @@ jobs:
 
       - name: Install deps
         run: |
-          npm install --no-save csv-parse
+          npm install --no-save csv-parse node-unrar-js
 
       - name: Run PROFECO scraper
         env:
