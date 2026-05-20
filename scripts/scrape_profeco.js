@@ -212,10 +212,22 @@ async function descargarYParsear(url, onBatch) {
     relax_column_count: true,
     bom: true,
     trim: true,
+    // Filas malformadas no abortan el run — se cuentan y se siguen
+    skip_records_with_error: true,
+    // Algunos CSV de PROFECO mezclan escape inconsistente; deshabilitamos el escape
+    // backslash para que el parser solo respete comillas dobles.
+    escape: '"',
   }));
 
   let batch = [];
   let total = 0;
+  let skipped = 0;
+  parser.on('skip', (err) => {
+    skipped++;
+    if (skipped <= 5) console.warn(`[profeco] skip · ${err?.code || ''} · ${(err?.message || '').slice(0, 120)}`);
+    if (skipped === 6) console.warn('[profeco] (más errores de parsing — silenciando)');
+  });
+
   for await (const raw of parser) {
     const norm = normalizeRow(raw);
     if (!norm) continue;
@@ -231,7 +243,8 @@ async function descargarYParsear(url, onBatch) {
     await onBatch(batch);
     total += batch.length;
   }
-  return total;
+  console.log(`[profeco] resumen parsing · ok=${total} · skipped=${skipped}`);
+  return { total, skipped };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -254,7 +267,7 @@ const started_at = new Date().toISOString();
     sourceUrl = url;
     console.log('[profeco] URL del dataset:', url);
 
-    const total = await descargarYParsear(url, async (batch) => {
+    const { total, skipped } = await descargarYParsear(url, async (batch) => {
       await sbInsert('profeco_precios', batch, {
         onConflict: 'producto,marca,presentacion,nombre_comercial,fecha_registro',
         merge: true,
@@ -262,16 +275,16 @@ const started_at = new Date().toISOString();
       inserted += batch.length;
     });
 
-    console.log(`[profeco] OK · ${total} filas procesadas`);
+    console.log(`[profeco] OK · ${total} filas procesadas · ${skipped} filas malformadas omitidas`);
 
     await logRun({
-      status:        'ok',
+      status:        skipped > 0 ? 'partial' : 'ok',
       rows_inserted: inserted,
       rows_updated:  0,
-      rows_skipped:  0,
+      rows_skipped:  skipped,
       http_status:   200,
       fuente_url:    sourceUrl,
-      notes:         `PROFECO QQP año ${ANIO_OBJETIVO}`,
+      notes:         `PROFECO QQP año ${ANIO_OBJETIVO} · skip=${skipped}`,
       started_at,
     });
     process.exit(0);
