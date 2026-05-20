@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /panel/
+Disallow: /admin/
+
+Sitemap: https://tequio.app/sitemap.xml
