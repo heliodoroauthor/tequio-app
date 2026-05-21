@@ -31,8 +31,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 try:
     import cloudscraper
     _CS = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False})
+    _CS.verify = False  # urllib3<2 lo soporta sin SSL context dance
     def gob_get(url, **kw):
-        kw.pop('verify', None)
+        kw.setdefault('verify', False)
         return _CS.get(url, **kw)
     print("  [cloudscraper] OK -- anti-bot gob.mx activo")
 except ImportError:
