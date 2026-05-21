@@ -338,7 +338,12 @@
       html += `    <div class="rep-info">`;
       html += `      <div class="name">${esc(d.nombre)}</div>`;
       html += `      <div class="meta">${esc(distrito)} · ${esc(d.curul || '')}</div>`;
-      if (d.partido) html += `      <span class="partido-badge ${pc}">${esc(d.partido)}</span>`;
+      if (d.partido) {
+        html += `      <span class="partido-badge ${pc}">${esc(d.partido)}</span>`;
+      } else {
+        // H2.2-01 Diputados sin partido (probable aliado coalicion PVEM/PT sin confirmar via SITL)
+        html += `      <span class="partido-badge" style="background:rgba(156,163,175,0.15);border:1px solid rgba(156,163,175,0.35);color:#cbd5e1" title="Partido no registrado en datos abiertos. Verificable en sitl.diputados.gob.mx">🤝 Aliado coalición · sin confirmar</span>`;
+      }
       html += `    </div>`;
       html += `    <div class="expand-arrow">▼</div>`;
       html += `  </div>`;
