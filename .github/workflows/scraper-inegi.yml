@@ -1,6 +1,7 @@
 name: INEGI Monthly
 
 # Corre los dias 5 y 20 de cada mes a las 13:00 UTC
+# FIX-26 2026-05-21: captura rows_inserted (FIX-22)
 on:
   schedule:
     - cron: '0 13 5,20 * *'
@@ -9,7 +10,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,19 +19,28 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
+          pip install requests
       - name: Run INEGI scraper
         id: scraper
         env:
           INEGI_TOKEN: ${{ secrets.INEGI_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python scripts/scrape_inegi.py
+        run: |
+          set -o pipefail
+          python scripts/scrape_inegi.py 2>&1 | tee /tmp/scraper.log
+      - name: Extract rows
+        id: rows
+        if: always()
+        run: |
+          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t) or re.search(r'(\d+)\s+filas\s+totales', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
       - name: Log scraper run
         if: always()
         uses: ./.github/actions/log-scraper
         with:
           slug: inegi
           status: ${{ job.status }}
+          rows_inserted: ${{ steps.rows.outputs.rows }}
+          fuente_url: 'https://www.inegi.org.mx/app/api/indicadores/'
           supabase_url: ${{ secrets.SUPABASE_URL }}
           supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
