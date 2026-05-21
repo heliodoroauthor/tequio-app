@@ -7,6 +7,34 @@ import json, os, re, sys, unicodedata
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
+import ssl as _ssl
+from requests.adapters import HTTPAdapter as _HA
+try:
+    from urllib3.util.ssl_ import create_urllib3_context as _mkctx
+except ImportError:
+    _mkctx = None
+
+# FIX-28 2026-05-21: cloudscraper + NoVerifyAdapter para Imperva en portales.sre.gob.mx
+class _NoVerify(_HA):
+    def init_poolmanager(self, *a, **kw):
+        if _mkctx:
+            c = _mkctx()
+            c.check_hostname = False
+            c.verify_mode = _ssl.CERT_NONE
+            kw['ssl_context'] = c
+        return super().init_poolmanager(*a, **kw)
+
+try:
+    import cloudscraper
+    _CS = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False})
+    _CS.verify = False
+    _CS.mount('https://', _NoVerify())
+    print("[sre] cloudscraper + NoVerifyAdapter activo")
+except ImportError:
+    _CS = requests.Session()
+    _CS.mount('https://', _NoVerify())
+    _CS.verify = False
+    print("[sre] cloudscraper NO disponible, requests con NoVerifyAdapter")
 
 SB_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SB_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -56,7 +84,7 @@ def fetch_html(url, intentos=3):
     }
     for i in range(intentos):
         try:
-            r = requests.get(url, headers=h, timeout=30, allow_redirects=True)
+            r = _CS.get(url, headers=h, timeout=30, allow_redirects=True)
             r.raise_for_status()
             r.encoding = r.apparent_encoding or "utf-8"
             print(f"[sre] fetch {url}: status={r.status_code} bytes={len(r.text)}")
