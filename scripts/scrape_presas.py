@@ -8,9 +8,10 @@ scrape_presas.py — CONAGUA SIH dam levels (replaces broken SINA scraper)
 
 Fuente: https://sih.conagua.gob.mx/basedatos/Presas/
 
-H2.6-01b 2026-05-21: agregado cloudscraper para bypass de anti-bot Imperva
-en sih.conagua.gob.mx. Si la libreria no esta disponible, hace fallback
-silencioso a requests (comportamiento original).
+H2.6-01b 2026-05-21 fix 3: agregado cloudscraper para bypass de anti-bot
+Imperva en sih.conagua.gob.mx. urllib3 v2 rechaza verify=False con
+check_hostname=True, asi que dejamos verify=True (default) y confiamos en
+el cert valido de SIH. cs_get pop()ea verify=False legacy de llamadas.
 """
 import os, sys, time, requests
 from datetime import datetime
@@ -19,24 +20,20 @@ import urllib3
 urllib3.disable_warnings()
 
 # ---- Anti-bot bypass (Imperva/Akamai en gob.mx) ----
-# H2.6-01b fix 3: urllib3 v2 rechaza verify=False con check_hostname=True
-# tanto a nivel session como per-request. Solucion: dejar verify=True (default)
-# y confiar en el cert valido de SIH. Si cert fallara, habria que pinear
-# urllib3<2 en el workflow, pero asi evitamos el SSL context dance.
 try:
     import cloudscraper
     _SCRAPER = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False}
     )
     def cs_get(url, **kw):
-        kw.pop('verify', None)  # ignorar verify=False legacy de llamadas
+        kw.pop('verify', None)
         return _SCRAPER.get(url, **kw)
-    print("  [cloudscraper] OK — bypass anti-bot activo")
+    print("  [cloudscraper] OK -- bypass anti-bot activo")
 except ImportError:
     def cs_get(url, **kw):
         kw.pop('verify', None)
         return requests.get(url, **kw)
-    print("  [cloudscraper] NO disponible — usando requests plano")
+    print("  [cloudscraper] NO disponible -- usando requests plano")
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SERVICE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
@@ -54,28 +51,27 @@ HEADERS_SB = {
 }
 
 # -- Capacidades NAMO (hm3) de las ~50 presas mas grandes de Mexico --
-# Fuente: CONAGUA - Inventario Nacional de Presas. Match por substring lowercase
-# Esta tabla actua como fallback cuando el XLS-catalog no se parsea correctamente
+# Fuente: CONAGUA - Inventario Nacional de Presas
 CAPACIDAD_FALLBACK = {
-    'angostura': 19737,        'malpaso': 12373,         'nezahualcoyotl': 12373,
-    'chicoasen': 1376,         'penitas': 1090,          'infiernillo': 12000,
-    'aguamilpa': 6960,         'cerro de oro': 2400,     'cerro prieto': 393,
-    'cuchillo': 1123,          'rodrigo gomez': 39,      'la boca': 39,
-    'vicente guerrero': 5340,  'falcon': 4080,           'amistad': 7069,
-    'marte r': 740,            'marte r. gomez': 740,    'solis': 800,
-    'allende': 178,            'begona': 60,             'capulin': 26,
-    'zimapan': 1070,           'lazaro cardenas': 4419,  'el palmito': 4419,
-    'huites': 4568,            'adolfo lopez mateos': 3386, 'humaya': 3386,
-    'sanalona': 845,           'bacurato': 1860,         'comedero': 3395,
+    'angostura': 19737, 'malpaso': 12373, 'nezahualcoyotl': 12373,
+    'chicoasen': 1376, 'penitas': 1090, 'infiernillo': 12000,
+    'aguamilpa': 6960, 'cerro de oro': 2400, 'cerro prieto': 393,
+    'cuchillo': 1123, 'rodrigo gomez': 39, 'la boca': 39,
+    'vicente guerrero': 5340, 'falcon': 4080, 'amistad': 7069,
+    'marte r': 740, 'marte r. gomez': 740, 'solis': 800,
+    'allende': 178, 'begona': 60, 'capulin': 26,
+    'zimapan': 1070, 'lazaro cardenas': 4419, 'el palmito': 4419,
+    'huites': 4568, 'adolfo lopez mateos': 3386, 'humaya': 3386,
+    'sanalona': 845, 'bacurato': 1860, 'comedero': 3395,
     'jose lopez portillo': 3395, 'plutarco elias calles': 339, 'cazadero': 50,
-    'la boquilla': 2894,       'lago toronto': 2894,     'francisco i. madero': 351,
-    'francisco i madero': 351, 'las virgenes': 388,      'luis l. leon': 326,
-    'luis l leon': 326,        'el granero': 326,        'caracol': 1190,
-    'la villita': 700,         'tepuxtepec': 370,        'don martin': 1329,
-    'venustiano carranza': 1329, 'trigomil': 309,        'calderon': 80,
-    'santa rosa': 366,         'yuriria': 188,           'necaxa': 47,
-    'la angostura, son': 921,  'el novillo': 2925,       'oviachic': 3023,
-    'alvaro obregon': 3023,    'el carrizo': 156,
+    'la boquilla': 2894, 'lago toronto': 2894, 'francisco i. madero': 351,
+    'francisco i madero': 351, 'las virgenes': 388, 'luis l. leon': 326,
+    'luis l leon': 326, 'el granero': 326, 'caracol': 1190,
+    'la villita': 700, 'tepuxtepec': 370, 'don martin': 1329,
+    'venustiano carranza': 1329, 'trigomil': 309, 'calderon': 80,
+    'santa rosa': 366, 'yuriria': 188, 'necaxa': 47,
+    'la angostura, son': 921, 'el novillo': 2925, 'oviachic': 3023,
+    'alvaro obregon': 3023, 'el carrizo': 156,
 }
 
 
@@ -83,7 +79,9 @@ def buscar_capacidad_fallback(nombre_presa):
     """Si el XLS no dio capacidad, intenta match por nombre con dict hardcoded."""
     if not nombre_presa:
         return None
-    n = nombre_presa.lower().replace('é','e').replace('ó','o').replace('í','i').replace('á','a').replace('ú','u').replace('ñ','n')
+    n = nombre_presa.lower()
+    n = n.replace('é','e').replace('ó','o').replace('í','i')
+    n = n.replace('á','a').replace('ú','u').replace('ñ','n')
     for key, cap in CAPACIDAD_FALLBACK.items():
         if key in n:
             return cap
@@ -103,7 +101,7 @@ def cargar_catalogo():
     """Baja el .xls maestro y extrae (clave, presa, estado, capacidad_NAMO)."""
     print(f"\n[CATALOGO] GET {CATALOGO_URL}")
     try:
-        r = cs_get(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
+        r = cs_get(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT)
         print(f"  Status: {r.status_code}, bytes: {len(r.content)}")
         # Detectar anti-bot challenge
         if r.status_code == 200 and len(r.content) < 5000:
@@ -132,7 +130,6 @@ def cargar_catalogo():
         print(f"  EXC parse xls: {e}")
         return []
 
-    # Detectar encabezados en las primeras 8 filas. Imprimir todo lo que vemos.
     header_row = None
     col_map = {}
     for ri in range(min(8, sheet.nrows)):
@@ -190,10 +187,10 @@ def cargar_catalogo():
 
 
 def ultimo_volumen(clave):
-    """Descarga CSV y devuelve (fecha_iso, volumen_hm3) mas reciente con VolumenAlm no nulo."""
+    """Descarga CSV y devuelve (fecha_iso, volumen_hm3) mas reciente."""
     url = f"{CSV_BASE}/{clave}.csv"
     try:
-        r = cs_get(url, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
+        r = cs_get(url, headers=HEADERS_WEB, timeout=TIMEOUT)
         if not r.ok:
             return None, None
     except Exception:
@@ -229,7 +226,7 @@ def ultimo_volumen(clave):
 
 
 def upsert_presa(row):
-    """Insert sin upsert estricto (acepta historia). El frontend toma fecha_corte DESC."""
+    """Insert sin upsert estricto (acepta historia)."""
     url = f"{SUPABASE_URL}/rest/v1/presas_cuencas?on_conflict=presa,fecha_corte"
     h = {**HEADERS_SB, 'Prefer': 'resolution=merge-duplicates,return=minimal'}
     try:
@@ -276,4 +273,15 @@ def main():
         }
         if upsert_presa(row):
             ok += 1
-            if i 
+            if i % 25 == 0 or i == len(presas):
+                pct_str = f"{pct:.0f}%" if pct is not None else 'n/a'
+                print(f"  [{i}/{len(presas)}] {p['presa'][:32]:32} {fecha}  {vol:>8.1f} hm3  {pct_str}")
+        else:
+            falla += 1
+        time.sleep(0.12)
+
+    print(f"\nResumen: {ok} actualizadas, {falla} fallidas, {sin_dato} sin dato reciente")
+
+
+if __name__ == '__main__':
+    main()
