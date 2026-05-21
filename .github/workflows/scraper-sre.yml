@@ -1,7 +1,7 @@
 name: SRE Directorio Mensual
 
 # Corre el dia 5 de cada mes a las 12:00 UTC (06:00 CDMX)
-# Lee embajadas y consulados oficiales de portales.sre.gob.mx
+# FIX-28 2026-05-21: cloudscraper + NoVerifyAdapter para portales.sre.gob.mx + FIX-22
 on:
   schedule:
     - cron: '0 12 5 * *'
@@ -10,24 +10,39 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
-
+          pip install 'urllib3<2' requests beautifulsoup4 lxml cloudscraper
       - name: Run SRE scraper
+        id: scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GITHUB_RUN_ID: ${{ github.run_id }}
-        run: python scripts/scrape_sre.py
+        run: |
+          set -o pipefail
+          python scripts/scrape_sre.py 2>&1 | tee /tmp/scraper.log
+      - name: Extract rows
+        id: rows
+        if: always()
+        run: |
+          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t) or re.search(r'inserted[\":\s]+(\d+)', t) or re.search(r'(\d+)\s+embajadas', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
+      - name: Log scraper run
+        if: always()
+        uses: ./.github/actions/log-scraper
+        with:
+          slug: sre_directorio
+          status: ${{ job.status }}
+          rows_inserted: ${{ steps.rows.outputs.rows }}
+          fuente_url: 'https://portales.sre.gob.mx/directorio/'
+          supabase_url: ${{ secrets.SUPABASE_URL }}
+          supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
