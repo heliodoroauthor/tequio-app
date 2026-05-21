@@ -2,7 +2,7 @@
 """
 backfill_embeddings.py v3 — gemini-embedding-001 con MRL 768d
 =============================================================
-Llena embeddings NULL en leyes/jurisprudencia.
+Llena embeddings NULL en leyes/jurisprudencia_scjn (fix H2.6-01b auditoria 2026-05-21).
 Usa filtro en Python (no PostgREST) para evitar bugs con columnas vector.
 v3: text-embedding-004 fue deprecado por Google; usa gemini-embedding-001
     con outputDimensionality=768 (Matryoshka Representation Learning).
@@ -158,7 +158,7 @@ def main():
         print("ERROR: Gemini no responde. Abortando.")
         sys.exit(1)
     backfill_table('leyes', 'id', ['nombre', 'texto'])
-    backfill_table('jurisprudencia', 'id', ['rubro', 'texto'])
+    backfill_table('jurisprudencia_scjn', 'id', ['rubro', 'texto'])
     print("\nBackfill completo.")
 
 
