@@ -19,12 +19,16 @@ import urllib3
 urllib3.disable_warnings()
 
 # ---- Anti-bot bypass (Imperva/Akamai en gob.mx) ----
+# H2.6-01b fix 2: verify=False debe ir a nivel de sesion, no per-request.
+# urllib3 >= 2 rechaza per-request verify=False con check_hostname enabled.
 try:
     import cloudscraper
     _SCRAPER = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False}
     )
+    _SCRAPER.verify = False  # SIH a veces tiene cert chain incompleto
     def cs_get(url, **kw):
+        kw.pop('verify', None)  # nunca a nivel per-request
         return _SCRAPER.get(url, **kw)
     print("  [cloudscraper] OK — bypass anti-bot activo")
 except ImportError:
