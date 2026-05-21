@@ -1,7 +1,8 @@
 name: Gaceta Diputados Pendientes
 
 # Corre todos los dias a las 12:00 UTC (06:00 CDMX)
-# Gaceta publica votaciones programadas con anticipacion
+# FIX-23 2026-05-21: parser usa Anexo I + 60 dias historia
+# FIX-22 2026-05-21: captura rows_inserted del stdout
 on:
   schedule:
     - cron: '0 12 * * *'
@@ -10,7 +11,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,12 +26,22 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python scripts/scrape_gaceta_pendientes.py
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -o pipefail
+          python scripts/scrape_gaceta_pendientes.py 2>&1 | tee /tmp/scraper.log
+      - name: Extract rows
+        id: rows
+        if: always()
+        run: |
+          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
       - name: Log scraper run
         if: always()
         uses: ./.github/actions/log-scraper
         with:
           slug: gaceta_pendientes
           status: ${{ job.status }}
+          rows_inserted: ${{ steps.rows.outputs.rows }}
+          fuente_url: 'https://gaceta.diputados.gob.mx/'
           supabase_url: ${{ secrets.SUPABASE_URL }}
           supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
