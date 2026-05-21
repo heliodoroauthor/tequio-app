@@ -2210,7 +2210,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:11px;opacity:0.9" id="dash-dolar-variacion">cargando…</div>
             </div>
             <div class="dash-card" style="background:linear-gradient(135deg,#7c2d12,#ea580c);border-radius:14px;padding:14px;color:#fff">
-              <div style="font-size:9px;letter-spacing:1.3px;opacity:0.8;font-weight:600">INFLACIÓN</div>
+              <div style="font-size:9px;letter-spacing:1.3px;opacity:0.8;font-weight:600">INFLACIÓN MENSUAL</div>
               <div style="font-size:28px;font-weight:800;margin:4px 0 2px;font-family:var(--font-display)" id="dash-inflacion">—</div>
               <div style="font-size:11px;opacity:0.9" id="dash-inflacion-mes">cargando…</div>
             </div>
@@ -2650,7 +2650,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div class="section-header">
               <div>
                 <div class="card-title">Actividad Legislativa Reciente</div>
-                <div class="card-subtitle" id="dash-leg-subtitle">Últimas votaciones en el Congreso · LXVI</div>
+                <div class="card-subtitle" id="dash-leg-subtitle">Últimas votaciones · LXVI · 🟡 Período de receso (1 may – 31 ago)</div>
               </div>
               <div style="display:flex;gap:6px;align-items:center">
                 <button class="btn btn-ghost" id="dash-leg-filtro-btn" onclick="dashLegToggleFiltro()" title="Filtrar por mi tema" style="font-size:11px;padding:4px 10px">🎯 Mi tema</button>
@@ -2674,7 +2674,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <!-- GASTO PÚBLICO + DERECHOS -->
         <div class="grid-2">
           <div class="card">
-            <div class="card-title mb-8">💰 Gasto Público Hoy</div>
+            <div class="card-title mb-8">💰 Gasto Público Hoy <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🧪 DEMO · cifras de ejemplo</span></div>
             <div class="card-subtitle mb-12">Ejercido del presupuesto federal</div>
             <div class="flex flex-col gap-10">
               <div><div class="flex justify-between text-xs mb-8"><span>🏥 Salud</span><span class="mono">$148.3B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:72%"></div></div></div>
@@ -2685,7 +2685,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <button class="btn btn-ghost w-full" onclick="showPage('dinero')" style="justify-content:center;margin-top:12px">Ver desglose completo →</button>
           </div>
           <div class="card">
-            <div class="card-title mb-8">🛡️ Derechos más Consultados</div>
+            <div class="card-title mb-8">🛡️ Derechos más Consultados <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🧪 DEMO · cifras de ejemplo</span></div>
             <div class="card-subtitle mb-12">Esta semana</div>
             <div class="flex flex-col gap-10">
               <div class="flex items-center gap-10"><span style="font-size:18px">⚖️</span><div><div style="font-size:13px;font-weight:500">Derechos en detención</div><div class="text-xs">8,420 consultas</div></div></div>
@@ -2844,7 +2844,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             const flecha = v > 0 ? '↑' : v < 0 ? '↓' : '→';
             const color = v > 0 ? '#fecaca' : v < 0 ? '#bbf7d0' : '#e5e7eb';
             document.getElementById('dash-dolar-variacion').innerHTML =
-              '<span style="color:' + color + '">' + flecha + ' ' + Math.abs(v).toFixed(2) + '%</span>';
+              '<span style="color:' + color + '">' + flecha + ' ' + Math.abs(v).toFixed(2) + '%</span>' +
+              (d.dolar.fecha ? ' <span style="opacity:0.65;font-size:10px">· al ' + (new Date(d.dolar.fecha + 'T12:00:00')).toLocaleDateString('es-MX', {day:'numeric',month:'short'}) + '</span>' : '');
           }
           if (d.inflacion) {
             document.getElementById('dash-inflacion').textContent = d.inflacion.valor.toFixed(2) + '%';
@@ -2852,6 +2853,10 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           }
           if (d.tasa_banxico) {
             document.getElementById('dash-tasa').textContent = d.tasa_banxico.valor.toFixed(2) + '%';
+            var refLabel = document.querySelector('#dash-tasa + div');
+            if (refLabel && d.tasa_banxico.fecha) {
+              refLabel.innerHTML = 'Referencia <span style="opacity:0.75">· al ' + (new Date(d.tasa_banxico.fecha + 'T12:00:00')).toLocaleDateString('es-MX', {day:'numeric',month:'short'}) + '</span>';
+            }
           }
         } catch (e) {
           console.error('Dashboard data load failed:', e);
@@ -5932,12 +5937,12 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div style="position:relative">
           <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:#93c5fd;margin-bottom:8px">📸 TESTIGO CÍVICO · DOCUMENTACIÓN LEGAL</div>
           <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.2">Documenta con validez.<br>Tu teléfono como testigo.</div>
-          <div style="font-size:12px;color:#93c5fd;line-height:1.6;max-width:520px">Captura fotos con GPS, timestamp y hash SHA-256 integrados. Genera un acta digital con valor probatorio para denuncias, amparos y quejas ante autoridades.</div>
+          <div style="font-size:12px;color:#93c5fd;line-height:1.6;max-width:520px">Reporta hechos de interés público con foto y ubicación aproximada. Esto es un registro técnico ciudadano — para fuerza probatoria plena en juicio requieres certificación NOM-151 vía un Prestador de Servicios de Certificación (PSC) autorizado por la Secretaría de Economía + peritaje informático.</div>
           <!-- Legal basis -->
           <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-            <span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">GPS · TIMESTAMP · SHA-256</span>
-            <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#86efac;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">Art. 210-A CFPC</span>
-            <span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#d8b4fe;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">EVIDENCIA DIGITAL</span>
+            <span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">📍 GPS aproximado</span>
+            <span style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);color:#fbbf24;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">📰 Reporte ciudadano</span>
+            <span style="background:rgba(156,163,175,0.10);border:1px solid rgba(156,163,175,0.30);color:#9ca3af;font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">⚖️ No es prueba certificada</span>
           </div>
         </div>
       </div>
@@ -5956,13 +5961,13 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
             <div style="font-size:20px;margin-bottom:4px">🔐</div>
-            <div style="font-size:10px;font-weight:700;color:var(--text2)">Hash SHA-256</div>
-            <div style="font-size:9px;color:var(--text3)">Integridad garantizada</div>
+            <div style="font-size:10px;font-weight:700;color:var(--text2)">Hash interno</div>
+            <div style="font-size:9px;color:var(--text3)">ID anti-duplicado</div>
           </div>
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
             <div style="font-size:20px;margin-bottom:4px">📄</div>
-            <div style="font-size:10px;font-weight:700;color:var(--text2)">Acta digital</div>
-            <div style="font-size:9px;color:var(--text3)">Descargable</div>
+            <div style="font-size:10px;font-weight:700;color:var(--text2)">Reporte ciudadano</div>
+            <div style="font-size:9px;color:var(--text3)">Publica en feed</div>
           </div>
         </div>
         <!-- Tipo de incidente -->
@@ -6054,10 +6059,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:4px">
           <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:8px">⚖️ BASE LEGAL</div>
           <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text2);line-height:1.55">
-            <div>📜 <strong>Art. 210-A CFPC</strong> — Reconoce como prueba los mensajes de datos e información generada por medios electrónicos.</div>
-            <div>📜 <strong>NOM-151-SCFI-2016</strong> — Establece los requisitos de conservación de mensajes de datos con cadena de custodia.</div>
-            <div>📜 <strong>Art. 217 CPF</strong> — El falso testimonio aplica también a evidencia fabricada o alterada digitalmente.</div>
-            <div>⚠️ <strong>Nota:</strong> Esta herramienta genera metadatos del dispositivo. Para uso en juicio, se recomienda complementar con peritaje informático certificado.</div>
+            <div>📜 <strong>Art. 210-A CFPC</strong> — Reconoce los mensajes de datos como prueba <em>siempre que se acredite autenticidad e integridad</em>. Esta herramienta NO produce esa cadena de custodia.</div>
+            <div>📜 <strong>NOM-151-SCFI-2016</strong> — Exige certificación de un Prestador de Servicios de Certificación (PSC) autorizado por la Secretaría de Economía. Tequio NO es PSC.</div>
+            <div>⚠️ <strong>Honestidad:</strong> Este módulo es un registro técnico ciudadano + feed de denuncias. Para validez probatoria plena en juicio, consigue peritaje informático certificado + tu propia firma electrónica avanzada (e.firma SAT u otro PSC).</div>
           </div>
         </div>
       </div>
@@ -11718,7 +11722,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           cerrarMunNoticia();
           if (typeof navegarCon === 'function') {
             navegarCon('accion', { iaPrompt: 'Quiero presentar una queja o denuncia sobre: ' + (_munNoticiaActual?.titulo || '') });
-          } else { showPage('accion'); }
+          } else { showPage('acciones'); }
         }
         </script>
         <!-- GRID DE NOTICIAS -->
