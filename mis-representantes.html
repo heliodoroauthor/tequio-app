@@ -351,13 +351,14 @@
   function renderSenadores() {
     const sens = currentData.senadores || [];
     if (sens.length === 0) {
-      $results.innerHTML = '<div class="empty">⚠️ El dataset del Senado no tiene asociado el estado representado. Estamos trabajando en enriquecerlo.<br><br>Por ahora puedes ver la lista en <a href="https://www.senado.gob.mx" target="_blank">senado.gob.mx</a></div>';
+      $results.innerHTML = '<div class="empty">No hay senadores para mostrar.</div>';
       return;
     }
     let html = '';
-    sens.forEach(s => {
+    sens.forEach((s, idx) => {
       const pc = partidoClass(s.partido);
-      html += `<div class="rep-card">`;
+      const sid = 'sen-' + idx;
+      html += `<div class="rep-card" data-sen="${sid}" onclick="window.__toggleSen('${sid}')">`;
       html += `  <div class="rep-header">`;
       html += `    <div class="rep-foto">${s.foto_url ? `<img src="${esc(s.foto_url)}" alt="${esc(s.nombre_completo)}" loading="lazy">` : `<div class="placeholder">👤</div>`}</div>`;
       html += `    <div class="rep-info">`;
@@ -365,11 +366,47 @@
       html += `      <div class="meta">${esc(s.tipo_eleccion || '')} ${s.cargo_especial ? ' · ' + esc(s.cargo_especial) : ''}</div>`;
       if (s.partido) html += `      <span class="partido-badge ${pc}">${esc(s.partido)}</span>`;
       html += `    </div>`;
+      html += `    <div class="expand-arrow">▼</div>`;
       html += `  </div>`;
+      html += `  <div class="rep-detail">${renderSenDetail(s)}</div>`;
       html += `</div>`;
     });
     $results.innerHTML = html;
   }
+
+  function renderSenDetail(s) {
+    let h = '';
+    const renderComs = (arr, label, icon) => {
+      if (!arr || arr.length === 0) return '';
+      let x = '<div class="detail-section"><h4>' + icon + ' ' + label + '</h4><div class="comisiones-list">';
+      arr.forEach(c => {
+        x += '<span class="comision-item">' + (c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.nombre) + ' ↗</a>' : esc(c.nombre)) + '</span>';
+      });
+      x += '</div></div>';
+      return x;
+    };
+    h += renderComs(s.comisiones_presidente, 'Presidente(a) de Comisión', '🏛️');
+    h += renderComs(s.comisiones_secretario, 'Secretario(a) de Comisión', '📋');
+    h += renderComs(s.comisiones_integrante, 'Integrante de Comisión', '👥');
+    if (s.email || s.url) {
+      h += '<div class="detail-section"><h4>📞 Contacto</h4><div class="contact-row">';
+      if (s.email) h += '<a class="contact-pill" href="mailto:' + esc(s.email) + '">✉️ ' + esc(s.email) + '</a>';
+      if (s.url) h += '<a class="contact-pill" href="' + esc(s.url) + '" target="_blank" rel="noopener">🔗 Perfil oficial</a>';
+      h += '</div></div>';
+    }
+    if (s.semblanza) {
+      h += '<div class="detail-section"><h4>📄 Semblanza</h4><div style="white-space:pre-line;font-size:12px;line-height:1.6;max-height:280px;overflow-y:auto;color:var(--text2);padding:10px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">' + esc(s.semblanza) + '</div></div>';
+    }
+    return h || '<div class="detail-section" style="color:var(--text3);font-size:12px;text-align:center;padding:8px">Sin datos públicos adicionales en Senado.gob.mx</div>';
+  }
+
+  window.__toggleSen = function(sid) {
+    const $card = document.querySelector('.rep-card[data-sen="' + sid + '"]');
+    if (!$card) return;
+    const wasExpanded = $card.classList.contains('expanded');
+    document.querySelectorAll('.rep-card.expanded').forEach(c => c.classList.remove('expanded'));
+    if (!wasExpanded) $card.classList.add('expanded');
+  };
 
   window.__toggleDip = async function(diptId) {
     const $card = document.querySelector(`.rep-card[data-id="${diptId}"]`);
