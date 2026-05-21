@@ -28,18 +28,40 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # FIX-27 2026-05-21: cloudscraper para bypass de anti-bot Imperva en gob.mx
+# FIX-27 fix 3: NoVerifyAdapter para SMN cert chain broken
+import ssl as _ssl
+from requests.adapters import HTTPAdapter as _HA
+try:
+    from urllib3.util.ssl_ import create_urllib3_context as _ctx
+except ImportError:
+    _ctx = None
+
+class _NoVerify(_HA):
+    def init_poolmanager(self, *a, **kw):
+        if _ctx:
+            c = _ctx()
+            c.check_hostname = False
+            c.verify_mode = _ssl.CERT_NONE
+            kw['ssl_context'] = c
+        return super().init_poolmanager(*a, **kw)
+
 try:
     import cloudscraper
     _CS = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False})
-    _CS.verify = False  # urllib3<2 lo soporta sin SSL context dance
+    _CS.verify = False
+    _CS.mount('https://', _NoVerify())
     def gob_get(url, **kw):
         kw.setdefault('verify', False)
         return _CS.get(url, **kw)
-    print("  [cloudscraper] OK -- anti-bot gob.mx activo")
+    print("  [cloudscraper] OK -- anti-bot gob.mx + NoVerifyAdapter activo")
 except ImportError:
+    _S = requests.Session()
+    _S.mount('https://', _NoVerify())
+    _S.verify = False
     def gob_get(url, **kw):
-        return requests.get(url, **kw)
-    print("  [cloudscraper] NO disponible -- requests plano")
+        kw.setdefault('verify', False)
+        return _S.get(url, **kw)
+    print("  [cloudscraper] NO disponible -- requests con NoVerifyAdapter")
 
 SUPABASE_URL = os.environ['SUPABASE_URL'].rstrip('/')
 SERVICE_KEY  = os.environ['SUPABASE_SERVICE_ROLE_KEY']
