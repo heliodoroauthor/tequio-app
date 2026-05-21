@@ -1,7 +1,7 @@
 name: CONAGUA Sequia Quincenal
 
 # Corre los jueves a las 15:00 UTC
-# FIX-27 2026-05-21: cloudscraper para SMN + captura rows_inserted (FIX-22)
+# FIX-27 2026-05-21: cloudscraper para SMN + urllib3<2 (cert chain SSL fix) + FIX-22
 on:
   schedule:
     - cron: '0 15 * * 4'
@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml pdfplumber openpyxl cloudscraper
+          pip install 'urllib3<2' requests beautifulsoup4 lxml pdfplumber openpyxl cloudscraper
       - name: Run CONAGUA Sequia scraper
         id: scraper
         env:
@@ -32,7 +32,7 @@ jobs:
         id: rows
         if: always()
         run: |
-          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t) or re.search(r'\[SEQUIA\].*?(\d+)\s+estados', t, re.S) or re.search(r'(\d+)\s+filas?\s+insertad', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
+          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t) or re.search(r'sequia.*?(\d+)\s+estados', t, re.I|re.S) or re.search(r'(\d+)\s+filas?\s+insertad', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
       - name: Log scraper run
         if: always()
         uses: ./.github/actions/log-scraper
