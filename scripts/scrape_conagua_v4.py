@@ -27,6 +27,19 @@ from urllib.parse import urljoin
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# FIX-27 2026-05-21: cloudscraper para bypass de anti-bot Imperva en gob.mx
+try:
+    import cloudscraper
+    _CS = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False})
+    def gob_get(url, **kw):
+        kw.pop('verify', None)
+        return _CS.get(url, **kw)
+    print("  [cloudscraper] OK -- anti-bot gob.mx activo")
+except ImportError:
+    def gob_get(url, **kw):
+        return requests.get(url, **kw)
+    print("  [cloudscraper] NO disponible -- requests plano")
+
 SUPABASE_URL = os.environ['SUPABASE_URL'].rstrip('/')
 SERVICE_KEY  = os.environ['SUPABASE_SERVICE_ROLE_KEY']
 
@@ -266,7 +279,7 @@ def scrape_monitor_sequia():
     print("\n[SEQUIA] Monitor de Sequia (XLSX wide-format)...")
     url_xlsx = "https://smn.conagua.gob.mx/tools/RESOURCES/Monitor%20de%20Sequia%20en%20Mexico/MunicipiosSequia.xlsx"
     try:
-        r = requests.get(url_xlsx, headers=HEADERS, timeout=TIMEOUT, verify=False)
+        r = gob_get(url_xlsx, headers=HEADERS, timeout=TIMEOUT)
         if not r.ok:
             print(f"   [WARN] HTTP {r.status_code}")
             return
