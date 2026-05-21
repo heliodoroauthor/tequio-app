@@ -5,12 +5,12 @@
 //
 // Requiere env vars:
 //   SUPABASE_URL
-//   SUPABASE_SERVICE_KEY
+//   SUPABASE_SERVICE_ROLE_KEY
 //
 // 🦎 Cero invención: cada campo proviene de senado.gob.mx/66/senador/{id}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const USER_AGENT = 'Tequio Civic Bot (+https://tequio.app)';
 const PACING_MS = 2000;   // 2s entre fetches
 const FETCH_TIMEOUT_MS = 25000;
@@ -18,7 +18,7 @@ const RETRY_503_DELAY = 5000;
 const MAX_RETRIES = 3;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
@@ -150,9 +150,9 @@ async function main() {
     if (i < senadores.length - 1) await new Promise(res => setTimeout(res, PACING_MS));
   }
 
-  console.log(`\nResumen: ${ok} OK, ${fail} fallidos, ${com_total} comisiones totales scrapeadas`);
+  console.log(`\nResumen: ${ok} OK, ${fail} fallidos, ${com_total} comisiones totales scrapeadas`) 
   if (fail > senadores.length * 0.2) {
-    console.error('More than 20% failed — exiting con error');
+    console.error('More than 20% failed — exiting with error');
     process.exit(1);
   }
 }
