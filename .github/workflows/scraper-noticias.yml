@@ -2,6 +2,7 @@ name: Noticias Oficiales RSS Daily
 
 # Corre todos los dias a las 13:00 UTC (07:00 CDMX)
 # Lee RSS de DOF, SEGOB, Presidencia y SCJN
+# H2.6-01b 2026-05-21: agregado cloudscraper para bypass de anti-bot en gob.mx
 on:
   schedule:
     - cron: '0 13 * * *'
@@ -23,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml
+          pip install requests beautifulsoup4 lxml cloudscraper
 
       - name: Run noticias scraper
         id: scraper
