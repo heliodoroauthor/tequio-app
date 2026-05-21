@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-scrape_diputados.py — Cámara de Diputados LXVI Legislatura (2024-2027)
+scrape_diputados.py -- Camara de Diputados LXVI Legislatura (2024-2027)
 =======================================================================
-Conecta Tequio al SITL (Sistema de Información Legislativa) oficial.
+H2.2-01 fix (2026-05-21): iteracion atomica por dipt_id en lugar de
+scrapear el listado raiz. El endpoint listado_diputados_gpnp.php tuvo
+silent_fails (responde 200 pero a veces sin links). curricula.php?dipt=N
+es estable (200 para todo N en rango y 404/HTML vacio fuera de rango).
+
+Tambien fix: PVEM usa logo 'verde.webp' (no 'pvem.webp'). PRD usa 'sol'.
+Esto resuelve los 63 diputados con partido=NULL en la base.
 
 Fuente: https://sitl.diputados.gob.mx/LXVI_leg/
 
 Etapas:
-  A) Iterar 32 estados → extraer dipt_id de cada uno de los 500 diputados
-  B) Para cada diputado, fetchear curricula.php y parsear:
-     - nombre, partido (vía logo), entidad, distrito, principio elección
-     - email, teléfono, curul, fecha nacimiento, suplente, comisiones
-  C) Iterar 5 periodos legislativos → extraer votaciones nominales:
-     - votacion_id, fecha, asunto, tipo
-  D) Embedding del nombre+partido+entidad para búsqueda semántica
-
-No incluye (próxima iteración):
-  E) Breakdown individual de votos por diputado (URL devuelve vacío sin sesión)
+  A) Iterar dipt_id en rango [1..1000] -> curricula.php?dipt=N
+  B) Parsear datos por diputado y upsert en politicos_diputados
+  C) Iterar 5 periodos legislativos -> votaciones nominales
+  D) Embedding del nombre+partido+entidad para busqueda semantica
 """
 import os, sys, re, time, json, requests
 from datetime import datetime
@@ -33,9 +33,10 @@ UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
 HEADERS_WEB = {'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9'}
 TIMEOUT = 30
 
-MAX_ESTADOS = int(os.environ.get('MAX_ESTADOS', '32'))
-MAX_DIPUTADOS_DEBUG = int(os.environ.get('MAX_DIPUTADOS', '600'))  # safety cap
-SLEEP_BETWEEN = float(os.environ.get('SLEEP', '0.2'))
+# H2.2-01 fix: rango atomico de dipt_id en vez de listado
+DIPT_ID_MIN = int(os.environ.get('DIPT_ID_MIN', '1'))
+DIPT_ID_MAX = int(os.environ.get('DIPT_ID_MAX', '1000'))
+SLEEP_BETWEEN = float(os.environ.get('SLEEP', '0.15'))
 SKIP_DIPUTADOS = os.environ.get('SKIP_DIPUTADOS', '0') == '1'
 SKIP_VOTACIONES = os.environ.get('SKIP_VOTACIONES', '0') == '1'
 
@@ -45,14 +46,17 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-# Mapeo logo → partido oficial
+# Mapeo logo -> partido oficial.
+# IMPORTANTE: SITL usa 'verde' para PVEM y 'sol' para PRD (no los acronimos).
 LOGO_PARTIDO = {
     'morena': ('MORENA', 'morena'),
     'pan':    ('PAN', 'pan'),
     'pri':    ('PRI', 'pri'),
-    'pvem':   ('Partido Verde Ecologista de México', 'pvem'),
+    'verde':  ('Partido Verde Ecologista de Mexico', 'pvem'),
+    'pvem':   ('Partido Verde Ecologista de Mexico', 'pvem'),  # fallback por si cambian
     'pt':     ('Partido del Trabajo', 'pt'),
     'mc':     ('Movimiento Ciudadano', 'mc'),
+    'sol':    ('PRD', 'prd'),
     'prd':    ('PRD', 'prd'),
     'na':     ('Nueva Alianza', 'na'),
     'es':     ('Encuentro Solidario', 'es'),
@@ -60,18 +64,24 @@ LOGO_PARTIDO = {
     'sg':     ('Sin Grupo Parlamentario', 'sg'),
 }
 
-print("Tequio · Scraper Cámara de Diputados LXVI")
+# Regex que captura cualquiera de los logos arriba
+LOGO_RE = re.compile(
+    r'images/(' + '|'.join(LOGO_PARTIDO.keys()) + r')\.(?:webp|png|jpg|gif|svg)',
+    re.I
+)
+
+print("Tequio - Scraper Camara de Diputados LXVI (iteracion atomica)")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE_URL: {'OK' if SUPABASE_URL else 'MISSING'}")
 print(f"  SERVICE_KEY:  {'OK' if SERVICE_KEY else 'MISSING'}")
 print(f"  GEMINI_KEY:   {'OK' if GEMINI_KEY else 'MISSING (embeddings disabled)'}")
+print(f"  Rango dipt_id: {DIPT_ID_MIN}..{DIPT_ID_MAX}")
 
 if not (SUPABASE_URL and SERVICE_KEY):
     print("ERROR: env vars faltantes.")
     sys.exit(1)
 
 
-# ─────────────────────────────────────────────────────────────────
 def http_get(url, retries=2):
     """GET con reintentos y delay anti-rate-limit."""
     last_err = None
@@ -85,46 +95,24 @@ def http_get(url, retries=2):
             last_err = f'{type(e).__name__}: {e}'
         if i < retries:
             time.sleep(2)
-    print(f"    [WARN] {url} → {last_err}")
     return None
 
 
-def extraer_dipt_ids_por_estado(edot):
-    """Recorre la lista de diputados de un estado y extrae los IDs únicos."""
-    url = f"{BASE}/listado_diputados_gpnp.php?tipot=Edo&edot={edot}"
-    html = http_get(url)
-    if not html:
-        return []
-    return list(set(int(m) for m in re.findall(r'curricula\.php\?dipt=(\d+)', html)))
-
-
 def parse_curricula(html, dipt_id):
-    """Parsea la página de currícula. v2: usa BeautifulSoup sobre HTML real (no markdown)."""
+    """Parsea la pagina de curricula. Devuelve None si no hay nombre (dipt invalido)."""
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, 'lxml')
 
-    # Texto plano sin tags, normalizado
     texto = soup.get_text(separator='\n')
-    # Comprimir whitespace pero preservar saltos de línea
     lineas = [ln.strip() for ln in texto.split('\n')]
     lineas = [ln for ln in lineas if ln]
     texto_norm = '\n'.join(lineas)
 
-    def find_after_label(label, multiline=False):
-        # Busca "LABEL:" o "LABEL: valor" — toma el texto siguiente al colon
-        pattern = re.compile(re.escape(label) + r'\s*:?\s*(.+)', re.I)
-        for ln in lineas:
-            m = pattern.match(ln)
-            if m:
-                return m.group(1).strip()
-        return None
-
     def find_inline(label):
-        # Buscar "Label: valor" en el texto completo
         m = re.search(re.escape(label) + r'\s*:\s*([^\n]+)', texto_norm, re.I)
         return m.group(1).strip() if m else None
 
-    # Nombre: línea "DIP. NOMBRE COMPLETO"
+    # Nombre: linea "DIP. NOMBRE COMPLETO"
     nombre = None
     for ln in lineas:
         m = re.match(r'^DIP\.?\s+(.+?)$', ln, re.I)
@@ -132,40 +120,46 @@ def parse_curricula(html, dipt_id):
             nombre = m.group(1).strip().title()
             break
 
-    principio = find_inline('Principio de elección') or find_inline('Principio de elecci')
+    # Si no hay nombre, dipt_id no existe / no es LXVI
+    if not nombre:
+        return None
+
+    principio = find_inline('Principio de eleccion') or find_inline('Principio de elecci')
     entidad = find_inline('Entidad')
-    distrito = find_inline('Distrito') or find_inline('Circunscripción') or find_inline('Circunscripci')
+    distrito = find_inline('Distrito') or find_inline('Circunscripcion') or find_inline('Circunscripci')
     curul = find_inline('Curul')
     reelecto = find_inline('Reelecto')
     suplente = find_inline('Suplente')
 
-    # Email — buscar en todo el texto
+    # Email
     email_m = re.search(r'\b([\w.+-]+@[\w.-]+\.[a-zA-Z]{2,})\b', texto_norm)
     email = email_m.group(1) if email_m else None
 
-    # Foto: extraer src del img que apunta a fotos_lxviconfondo
+    # Foto
     foto_url = None
     for img in soup.find_all('img'):
         src = img.get('src', '')
-        if 'fotos_lxviconfondo' in src:
+        if 'fotos_lxviconfondo' in src or 'fotos_lxvi' in src:
             if src.startswith('http'):
                 foto_url = src
+            elif src.startswith('/'):
+                foto_url = f"https://sitl.diputados.gob.mx{src}"
             else:
-                foto_url = f"{BASE}/{src.lstrip('/')}" if not src.startswith('/') else f"https://sitl.diputados.gob.mx{src}"
+                foto_url = f"{BASE}/{src.lstrip('./')}"
             break
 
-    # Partido: imagen logo (morena.webp, pan.webp, etc)
+    # Partido: imagen logo. H2.2-01 fix: ahora cubre verde, sol, etc.
     partido = None
     partido_codigo = None
     for img in soup.find_all('img'):
         src = img.get('src', '').lower()
-        m = re.search(r'images/(morena|pan|pri|pvem|pt|mc|prd|na|es|ind|sg)\.(webp|png|jpg|gif)', src)
+        m = LOGO_RE.search(src)
         if m:
-            codigo = m.group(1)
+            codigo = m.group(1).lower()
             partido, partido_codigo = LOGO_PARTIDO.get(codigo, (codigo.upper(), codigo))
             break
 
-    # Comisiones: <a href="...comt=N">Nombre (Rol)</a>
+    # Comisiones
     comisiones = []
     for a in soup.find_all('a', href=True):
         href = a.get('href', '')
@@ -187,11 +181,13 @@ def parse_curricula(html, dipt_id):
             'rol': rol[:50]
         })
 
-    # Fecha nacimiento: "13-abril - 1963" o similar
+    # Fecha nacimiento
     fecha_nacimiento = None
     meses_es = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
                 'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
-    fnac_m = re.search(r'\b(\d{1,2})\s*[-–\s]\s*(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s*[-–\s]\s*(\d{4})\b', texto_norm, re.I)
+    fnac_m = re.search(
+        r'\b(\d{1,2})\s*[-–\s]\s*(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s*[-–\s]\s*(\d{4})\b',
+        texto_norm, re.I)
     if fnac_m:
         try:
             d = int(fnac_m.group(1))
@@ -217,11 +213,12 @@ def parse_curricula(html, dipt_id):
         'foto_url': foto_url,
         'curricula_url': f"{BASE}/curricula.php?dipt={dipt_id}",
         'comisiones': comisiones if comisiones else None,
+        'legislatura': 'LXVI',
     }
 
 
 def get_embedding(texto):
-    """Embedding 768d via gemini-embedding-001 (MRL truncation)."""
+    """Embedding 768d via gemini-embedding-001."""
     if not GEMINI_KEY:
         return None
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={GEMINI_KEY}"
@@ -241,11 +238,10 @@ def get_embedding(texto):
 
 def upsert_diputado(d):
     """Upsert via PostgREST on_conflict=dipt_id."""
-    txt_emb = f"{d.get('nombre','')} · {d.get('partido','')} · {d.get('entidad','')} · {d.get('distrito','')}"
+    txt_emb = f"{d.get('nombre','')} - {d.get('partido','')} - {d.get('entidad','')} - {d.get('distrito','')}"
     emb = get_embedding(txt_emb)
     if emb:
         d['embedding'] = emb
-
     url = f"{SUPABASE_URL}/rest/v1/politicos_diputados?on_conflict=dipt_id"
     h = {**HEADERS_SB, 'Prefer': 'resolution=merge-duplicates,return=minimal'}
     try:
@@ -256,11 +252,7 @@ def upsert_diputado(d):
 
 
 def extraer_votaciones_de_periodo(pert):
-    """v3: el HTML real tiene <tr> con [<td>fecha</td>] o [<td><a>1</a></td><td>ASUNTO</td>].
-
-    El asunto vive en el <tr> que contiene el link votaciont=NNN, en otro <td>.
-    La fecha vive en una fila SEPARADA que precede a las votaciones de ese día.
-    """
+    """Extrae lista de votaciones nominales en un periodo."""
     from bs4 import BeautifulSoup
     url = f"{BASE}/votacionesxperiodonplxvi.php?pert={pert}"
     html = http_get(url)
@@ -273,15 +265,15 @@ def extraer_votaciones_de_periodo(pert):
 
     votaciones = []
     fecha_actual = None
-    fecha_re = re.compile(r'^(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})\s*$', re.I)
+    fecha_re = re.compile(
+        r'^(\d{1,2})\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre)\s+(\d{4})\s*$',
+        re.I)
 
-    # Iterar SÓLO <tr>s en orden del documento
     for tr in soup.find_all('tr'):
         texto_tr = tr.get_text(separator=' ', strip=True)
         if not texto_tr:
             continue
 
-        # ¿Es una fila de fecha? "10 Febrero 2026"
         fm = fecha_re.match(texto_tr)
         if fm:
             try:
@@ -293,7 +285,6 @@ def extraer_votaciones_de_periodo(pert):
                 pass
             continue
 
-        # ¿Tiene un link con votaciont=NNN?
         link = tr.find('a', href=re.compile(r'votaciont=\d+'))
         if not link:
             continue
@@ -302,18 +293,15 @@ def extraer_votaciones_de_periodo(pert):
             continue
         votacion_id = int(mvot.group(1))
 
-        # Deduplicar
         if any(v['votacion_id'] == votacion_id for v in votaciones):
             continue
 
-        # Extraer asunto: el <tr> tiene <td>1</td><td>ASUNTO</td>. Buscar el TD más largo.
         tds = tr.find_all('td')
         asunto = ''
         for td in tds:
             t = td.get_text(strip=True)
             if len(t) > len(asunto) and not t.isdigit():
                 asunto = t
-        # Fallback: texto entero del tr sin el número del link
         if len(asunto) < 10:
             asunto = texto_tr
             num_link = link.get_text(strip=True)
@@ -343,7 +331,6 @@ def extraer_votaciones_de_periodo(pert):
 
 
 def upsert_votacion(v):
-    """Upsert vía PostgREST on_conflict=votacion_id."""
     if not v.get('fecha'):
         return False, 'sin fecha'
     txt_emb = f"{v.get('asunto','')}"
@@ -359,64 +346,48 @@ def upsert_votacion(v):
         return False, str(e)
 
 
-# ─────────────────────────────────────────────────────────────────
-def main():
-    if SKIP_DIPUTADOS:
-        print("\n[A+B] SALTADO (SKIP_DIPUTADOS=1)")
-    else:
-        scrapear_diputados()
-    if SKIP_VOTACIONES:
-        print("\n[C] SALTADO (SKIP_VOTACIONES=1)")
-        print("\nScrape Diputados completo (sin votaciones).")
-        return
-    scrapear_votaciones()
-    print("\nScrape Diputados LXVI completo.")
-
-
 def scrapear_diputados():
-    # ETAPA A+B: Diputados
-    print("\n[A+B] Extracción diputados por estado + curriculas")
-    todos_dipt_ids = set()
-    for edot in range(1, MAX_ESTADOS + 1):
-        ids = extraer_dipt_ids_por_estado(edot)
-        if ids:
-            todos_dipt_ids.update(ids)
-            print(f"  Estado {edot:02d}: {len(ids)} diputados")
-        time.sleep(SLEEP_BETWEEN)
-    print(f"\n  Total diputados únicos: {len(todos_dipt_ids)}")
-
-    ok = fail = 0
-    todos_ids = sorted(todos_dipt_ids)[:MAX_DIPUTADOS_DEBUG]
-    for i, dipt_id in enumerate(todos_ids, 1):
+    """H2.2-01 fix: iteracion atomica por dipt_id, sin scrape de listados."""
+    print(f"\n[A+B] Iteracion atomica dipt_id {DIPT_ID_MIN}..{DIPT_ID_MAX}")
+    ok = fail = no_existe = 0
+    procesados = 0
+    for dipt_id in range(DIPT_ID_MIN, DIPT_ID_MAX + 1):
         html = http_get(f"{BASE}/curricula.php?dipt={dipt_id}")
         if not html:
             fail += 1
             continue
         d = parse_curricula(html, dipt_id)
-        if not d.get('nombre'):
-            fail += 1
+        if d is None:
+            # dipt_id sin nombre = no es de LXVI o no existe
+            no_existe += 1
             continue
+        procesados += 1
         ok_db, err = upsert_diputado(d)
         if ok_db:
             ok += 1
-            if i % 20 == 0 or i == len(todos_ids):
-                print(f"  [{i}/{len(todos_ids)}] dipt={dipt_id} {d['nombre'][:30]:30} {d.get('partido','')}")
+            if procesados % 25 == 0:
+                p = d.get('partido') or 'sin_partido'
+                print(f"  [{procesados}] dipt={dipt_id:>4} {d['nombre'][:30]:30} {p}")
         else:
             fail += 1
-            print(f"  [FAIL dipt={dipt_id}] {err}")
+            if fail <= 5:
+                print(f"  [FAIL dipt={dipt_id}] {err[:120]}")
         time.sleep(SLEEP_BETWEEN)
-    print(f"\n  Diputados: {ok} actualizados, {fail} fallidos")
+
+    print(f"\n  Diputados: {ok} actualizados, {fail} fallidos, {no_existe} dipt_id sin diputado LXVI")
+    # Stdout marcador para que el workflow capture el conteo
+    print(f"  rows_inserted={ok}")
+    return ok
 
 
 def scrapear_votaciones():
-    # ETAPA C: Votaciones
-    print("\n[C] Extracción votaciones nominales por periodo")
-    periodos = [1, 3, 5, 6, 8]  # pert IDs conocidos LXVI
+    print("\n[C] Extraccion votaciones nominales por periodo")
+    periodos = [1, 3, 5, 6, 8]
     total_vot = 0
     total_skipped = 0
     for pert in periodos:
         vots = extraer_votaciones_de_periodo(pert)
-        print(f"  Periodo {pert}: {len(vots)} votaciones extraídas")
+        print(f"  Periodo {pert}: {len(vots)} votaciones extraidas")
         for v in vots:
             ok_db, err = upsert_votacion(v)
             if ok_db:
@@ -428,6 +399,23 @@ def scrapear_votaciones():
             time.sleep(0.1)
         time.sleep(SLEEP_BETWEEN)
     print(f"\n  Votaciones: {total_vot} actualizadas, {total_skipped} sin fecha")
+
+
+def main():
+    total = 0
+    if SKIP_DIPUTADOS:
+        print("\n[A+B] SALTADO (SKIP_DIPUTADOS=1)")
+    else:
+        total = scrapear_diputados()
+    if SKIP_VOTACIONES:
+        print("\n[C] SALTADO (SKIP_VOTACIONES=1)")
+    else:
+        scrapear_votaciones()
+
+    if total == 0 and not SKIP_DIPUTADOS:
+        print("\nERROR: 0 diputados procesados. Abortando con exit 2.")
+        sys.exit(2)
+    print(f"\nScrape Diputados LXVI completo. Total upserts diputados: {total}")
 
 
 if __name__ == '__main__':
