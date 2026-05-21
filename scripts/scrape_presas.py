@@ -2,17 +2,35 @@
 """
 scrape_presas.py — CONAGUA SIH dam levels (replaces broken SINA scraper)
 ========================================================================
-1. Descarga el catálogo maestro (.xls) con clave, nombre, estado, NAMO.
-2. Para cada presa, descarga su CSV diario y extrae el último VolumenAlm.
+1. Descarga el catalogo maestro (.xls) con clave, nombre, estado, NAMO.
+2. Para cada presa, descarga su CSV diario y extrae el ultimo VolumenAlm.
 3. Calcula % de llenado vs NAMO y hace UPSERT en presas_cuencas.
 
 Fuente: https://sih.conagua.gob.mx/basedatos/Presas/
+
+H2.6-01b 2026-05-21: agregado cloudscraper para bypass de anti-bot Imperva
+en sih.conagua.gob.mx. Si la libreria no esta disponible, hace fallback
+silencioso a requests (comportamiento original).
 """
 import os, sys, time, requests
 from datetime import datetime
 
 import urllib3
 urllib3.disable_warnings()
+
+# ---- Anti-bot bypass (Imperva/Akamai en gob.mx) ----
+try:
+    import cloudscraper
+    _SCRAPER = cloudscraper.create_scraper(
+        browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False}
+    )
+    def cs_get(url, **kw):
+        return _SCRAPER.get(url, **kw)
+    print("  [cloudscraper] OK — bypass anti-bot activo")
+except ImportError:
+    def cs_get(url, **kw):
+        return requests.get(url, **kw)
+    print("  [cloudscraper] NO disponible — usando requests plano")
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SERVICE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
@@ -29,9 +47,9 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-# ── Capacidades NAMO (hm³) de las ~50 presas más grandes de México ──
-# Fuente: CONAGUA · Inventario Nacional de Presas. Match por substring lowercase
-# Esta tabla actúa como fallback cuando el XLS-catalog no se parsea correctamente
+# -- Capacidades NAMO (hm3) de las ~50 presas mas grandes de Mexico --
+# Fuente: CONAGUA - Inventario Nacional de Presas. Match por substring lowercase
+# Esta tabla actua como fallback cuando el XLS-catalog no se parsea correctamente
 CAPACIDAD_FALLBACK = {
     'angostura': 19737,        'malpaso': 12373,         'nezahualcoyotl': 12373,
     'chicoasen': 1376,         'penitas': 1090,          'infiernillo': 12000,
@@ -65,7 +83,7 @@ def buscar_capacidad_fallback(nombre_presa):
             return cap
     return None
 
-print("Tequio Presas Scraper — CONAGUA SIH")
+print("Tequio Presas Scraper - CONAGUA SIH")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE_URL: {'OK' if SUPABASE_URL else 'MISSING'}")
 print(f"  SERVICE_KEY:  {'OK' if SERVICE_KEY else 'MISSING'}")
@@ -79,8 +97,14 @@ def cargar_catalogo():
     """Baja el .xls maestro y extrae (clave, presa, estado, capacidad_NAMO)."""
     print(f"\n[CATALOGO] GET {CATALOGO_URL}")
     try:
-        r = requests.get(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
+        r = cs_get(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
         print(f"  Status: {r.status_code}, bytes: {len(r.content)}")
+        # Detectar anti-bot challenge
+        if r.status_code == 200 and len(r.content) < 5000:
+            head = r.content[:600].decode('latin-1', errors='ignore').lower()
+            if 'challenge' in head or 'imperva' in head or 'akamai' in head:
+                print("  WARN: respuesta parece anti-bot challenge, no XLS real")
+                return []
         if not r.ok:
             return []
     except Exception as e:
@@ -95,7 +119,7 @@ def cargar_catalogo():
 
     try:
         book = xlrd.open_workbook(file_contents=r.content)
-        print(f"  Hojas: {book.nsheets} → {book.sheet_names()}")
+        print(f"  Hojas: {book.nsheets} -> {book.sheet_names()}")
         sheet = book.sheet_by_index(0)
         print(f"  Hoja[0]: {sheet.name}, filas={sheet.nrows}, cols={sheet.ncols}")
     except Exception as e:
@@ -128,13 +152,11 @@ def cargar_catalogo():
             break
 
     if header_row is None or 'clave' not in col_map:
-        # Imprimir las primeras filas crudas para debug
         print(f"  ERR: encabezados no encontrados. col_map: {col_map}")
         for ri in range(min(6, sheet.nrows)):
             print(f"    [{ri}] {[str(sheet.cell_value(ri,c))[:20] for c in range(min(sheet.ncols,12))]}")
         return []
     print(f"  Encabezados fila {header_row}, mapeo: {col_map}")
-    # Mostrar primera fila de datos como sanity check
     if sheet.nrows > header_row + 1:
         sample = {k: sheet.cell_value(header_row+1, ci) for k, ci in col_map.items()}
         print(f"  Sample fila {header_row+1}: {sample}")
@@ -157,15 +179,15 @@ def cargar_catalogo():
             presas.append({'clave': clave, 'presa': presa or clave, 'estado': estado, 'capacidad': cap})
         except Exception:
             continue
-    print(f"  Total presas en catálogo: {len(presas)}")
+    print(f"  Total presas en catalogo: {len(presas)}")
     return presas[:MAX_PRESAS]
 
 
 def ultimo_volumen(clave):
-    """Descarga CSV y devuelve (fecha_iso, volumen_hm3) más reciente con VolumenAlm no nulo."""
+    """Descarga CSV y devuelve (fecha_iso, volumen_hm3) mas reciente con VolumenAlm no nulo."""
     url = f"{CSV_BASE}/{clave}.csv"
     try:
-        r = requests.get(url, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
+        r = cs_get(url, headers=HEADERS_WEB, timeout=TIMEOUT, verify=False)
         if not r.ok:
             return None, None
     except Exception:
@@ -180,7 +202,6 @@ def ultimo_volumen(clave):
     if data_start is None:
         return None, None
 
-    # Buscar de atrás hacia adelante
     for ln in reversed(lines[data_start:]):
         ln = ln.strip()
         if not ln:
@@ -194,7 +215,6 @@ def ultimo_volumen(clave):
             continue
         try:
             vol = float(vol_raw)
-            # Validar fecha YYYY-MM-DD
             datetime.strptime(fecha, '%Y-%m-%d')
             return fecha, vol
         except Exception:
@@ -210,7 +230,6 @@ def upsert_presa(row):
         r = requests.post(url, json=row, headers=h, timeout=20)
         if r.ok:
             return True
-        # Si la constraint no existe, hacer INSERT plano
         if r.status_code == 400 and 'on_conflict' in r.text.lower():
             r2 = requests.post(f"{SUPABASE_URL}/rest/v1/presas_cuencas",
                                json=row, headers={**HEADERS_SB, 'Prefer': 'return=minimal'}, timeout=20)
@@ -223,7 +242,7 @@ def upsert_presa(row):
 def main():
     presas = cargar_catalogo()
     if not presas:
-        print("ERROR: catálogo vacío. Abortando.")
+        print("ERROR: catalogo vacio. Abortando.")
         sys.exit(1)
 
     ok = falla = sin_dato = 0
@@ -232,14 +251,13 @@ def main():
         if not fecha or vol is None:
             sin_dato += 1
             continue
-        # Usar capacidad del catálogo XLS si existe; sino fallback hardcoded
         cap = p['capacidad']
         if not cap:
             cap = buscar_capacidad_fallback(p['presa'])
         pct = None
         if cap and cap > 0:
             pct = round((vol / cap) * 100, 2)
-            if pct > 200:  # sanity: si vol es > 2× capacidad, descarta como dato erróneo
+            if pct > 200:
                 pct = None
         row = {
             'fecha_corte': fecha,
