@@ -19,20 +19,22 @@ import urllib3
 urllib3.disable_warnings()
 
 # ---- Anti-bot bypass (Imperva/Akamai en gob.mx) ----
-# H2.6-01b fix 2: verify=False debe ir a nivel de sesion, no per-request.
-# urllib3 >= 2 rechaza per-request verify=False con check_hostname enabled.
+# H2.6-01b fix 3: urllib3 v2 rechaza verify=False con check_hostname=True
+# tanto a nivel session como per-request. Solucion: dejar verify=True (default)
+# y confiar en el cert valido de SIH. Si cert fallara, habria que pinear
+# urllib3<2 en el workflow, pero asi evitamos el SSL context dance.
 try:
     import cloudscraper
     _SCRAPER = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'darwin', 'mobile': False}
     )
-    _SCRAPER.verify = False  # SIH a veces tiene cert chain incompleto
     def cs_get(url, **kw):
-        kw.pop('verify', None)  # nunca a nivel per-request
+        kw.pop('verify', None)  # ignorar verify=False legacy de llamadas
         return _SCRAPER.get(url, **kw)
     print("  [cloudscraper] OK — bypass anti-bot activo")
 except ImportError:
     def cs_get(url, **kw):
+        kw.pop('verify', None)
         return requests.get(url, **kw)
     print("  [cloudscraper] NO disponible — usando requests plano")
 
@@ -274,15 +276,4 @@ def main():
         }
         if upsert_presa(row):
             ok += 1
-            if i % 25 == 0 or i == len(presas):
-                pct_str = f"{pct:.0f}%" if pct is not None else 'n/a'
-                print(f"  [{i}/{len(presas)}] {p['presa'][:32]:32} {fecha}  {vol:>8.1f} hm3  {pct_str}")
-        else:
-            falla += 1
-        time.sleep(0.12)
-
-    print(f"\nResumen: {ok} actualizadas, {falla} fallidas, {sin_dato} sin dato reciente")
-
-
-if __name__ == '__main__':
-    main()
+            if i 
