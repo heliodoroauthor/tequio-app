@@ -2,6 +2,7 @@ name: Camara Diputados Weekly
 
 # Corre los lunes a las 11:00 UTC (05:00 CDMX)
 # SITL actualiza datos de diputados con baja frecuencia (titulares, suplentes, comisiones)
+# H2.2-01 + FIX-22 2026-05-21: captura rows_inserted del stdout y lo pasa a log-scraper.
 on:
   schedule:
     - cron: '0 11 * * 1'
@@ -10,7 +11,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,12 +26,32 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python scripts/scrape_diputados.py
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -o pipefail
+          python scripts/scrape_diputados.py 2>&1 | tee /tmp/scraper.log
+          echo "exit_code=${PIPESTATUS[0]}"
+      - name: Extract rows_inserted from log
+        id: rows
+        if: always()
+        run: |
+          # Busca el marker `rows_inserted=N` (preferido) o `Resumen: N actualizada` como fallback
+          if [ -f /tmp/scraper.log ]; then
+            ROWS=$(grep -oE 'rows_inserted=[0-9]+' /tmp/scraper.log | tail -1 | cut -d= -f2 || true)
+            if [ -z "$ROWS" ]; then
+              ROWS=$(grep -oE 'Resumen:[[:space:]]+[0-9]+[[:space:]]+actualizada' /tmp/scraper.log | grep -oE '[0-9]+' | tail -1 || true)
+            fi
+          fi
+          ROWS=${ROWS:-0}
+          echo "rows=$ROWS" >> "$GITHUB_OUTPUT"
+          echo "[rows-extract] rows_inserted=$ROWS"
       - name: Log scraper run
         if: always()
         uses: ./.github/actions/log-scraper
         with:
           slug: diputados
           status: ${{ job.status }}
+          rows_inserted: ${{ steps.rows.outputs.rows }}
+          fuente_url: 'https://sitl.diputados.gob.mx/LXVI_leg/'
           supabase_url: ${{ secrets.SUPABASE_URL }}
           supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
