@@ -22,9 +22,11 @@ urllib3.disable_warnings()
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SERVICE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 
+# FIX-25 2026-05-21: hacienda.gob.mx no resuelve, todos en buengobierno + 2026.
 CSV_URLS = [
+    'https://upcp-compranet.buengobierno.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2026.csv',
     'https://upcp-compranet.buengobierno.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2025.csv',
-    'https://upcp-compranet.hacienda.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2024.csv',
+    'https://upcp-compranet.buengobierno.gob.mx/cnetassets/datos_abiertos_contratos_expedientes/Contratos_CompraNet2024.csv',
 ]
 
 UA = 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio.app)'
@@ -468,6 +470,7 @@ def main():
             break
 
     print(f"\nTotal insertado: {inserted_total}")
+    print(f"rows_inserted={inserted_total}")
     print(f"\nRefrescando vista proveedores_agregados...")
     if refresh_view():
         print("  Refresh OK.")
