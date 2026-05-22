@@ -28,7 +28,7 @@ SERIES = {
     'SF43936':  ('CETES 28 dias - Tasa anualizada',          '%'),
     'SP1':      ('INPC General (Mensual)',                   'Indice 2QJUL2018=100'),
     'SP30577':  ('INPC variacion mensual',                   '%'),
-    'SP74661':  ('Inflacion general anual',                  '%'),
+    'SP74625':  ('Inflacion general anual',                  '%'),
     'SP30578':  ('Inflacion subyacente anual',               '%'),
     'SF311408': ('Reservas internacionales',                 'Millones USD'),
     'SL12089':  ('Salario minimo zona libre frontera norte', 'MXN/dia'),
@@ -36,7 +36,7 @@ SERIES = {
 }
 
 HOY = dt.date.today()
-DESDE = (HOY - dt.timedelta(days=365)).isoformat()
+DESDE = (HOY - dt.timedelta(days=730)).isoformat()
 HASTA = HOY.isoformat()
 
 
