@@ -120,7 +120,7 @@ export default async function handler(req, res) {
         if (vista === 'dashboard') {
       const [dolar, inflacion, tasa, leyesCount] = await Promise.all([
         sb('econ_banxico?serie_id=eq.SF43718&order=fecha.desc&limit=2&select=valor,fecha'),
-        sb('econ_banxico?serie_id=eq.SP74625&order=fecha.desc&limit=1&select=valor,fecha'),
+        sb('econ_banxico?serie_id=eq.SP1&order=fecha.desc&limit=13&select=valor,fecha'),
         sb('econ_banxico?serie_id=eq.SF61745&order=fecha.desc&limit=1&select=valor,fecha'),
         sb('leyes?select=count'),
       ]);
@@ -137,7 +137,7 @@ export default async function handler(req, res) {
       };
       return res.status(200).json({
         dolar: dolarHoy ? { valor: dolarHoy.valor, fecha: dolarHoy.fecha, variacion_pct: variacion } : null,
-        inflacion: inflacion?.[0] ? { valor: inflacion[0].valor, mes: fmtMes(inflacion[0].fecha) } : null,
+        inflacion: (inflacion && inflacion.length >= 13) ? { valor: ((inflacion[0].valor - inflacion[12].valor) / inflacion[12].valor) * 100, mes: fmtMes(inflacion[0].fecha), tipo: "anual_inpc_computado" } : null,
         tasa_banxico: tasa?.[0] ? { valor: tasa[0].valor, fecha: tasa[0].fecha } : null,
         leyes_count: leyesCount?.[0]?.count || 0,
       });
