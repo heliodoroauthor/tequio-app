@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contratos públicos · Tequio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e5e7eb; padding: 1.5rem; min-height: 100vh; }
+  h1 { font-size: 1.5rem; color: #fbbf24; margin-bottom: 0.25rem; }
+  .subtitle { color: #9ca3af; font-size: 0.9rem; margin-bottom: 1rem; }
+  .banner-transicion { background: rgba(251,191,36,0.08); border-left: 4px solid #fbbf24; color: #fde68a; padding: 0.85rem 1rem; border-radius: 0.4rem; margin-bottom: 1.25rem; font-size: 0.88rem; line-height: 1.5; }
+  .banner-transicion strong { color: #fbbf24; }
+  .toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+  input[type="text"], select { background: #1f2937; color: #e5e7eb; border: 1px solid #374151; padding: 0.55rem 0.85rem; border-radius: 0.4rem; font-size: 0.9rem; min-width: 220px; }
+  button { background: #fbbf24; color: #111; font-weight: 700; padding: 0.55rem 1.1rem; border-radius: 0.4rem; border: none; cursor: pointer; font-size: 0.9rem; }
+  button:hover { background: #f59e0b; }
+  .stats { color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.85rem; }
+  table { width: 100%; border-collapse: collapse; background: #1f2937; border-radius: 0.5rem; overflow: hidden; font-size: 0.85rem; }
+  thead { background: #111827; }
+  th { text-align: left; padding: 0.75rem 0.9rem; color: #fbbf24; font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; }
+  td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #2d3748; vertical-align: top; }
+  tr:hover { background: rgba(251,191,36,0.04); }
+  .monto { text-align: right; font-variant-numeric: tabular-nums; color: #fbbf24; font-weight: 600; }
+  .muted { color: #9ca3af; font-size: 0.8rem; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+  .badge.alerta { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .loading, .empty { padding: 2rem; text-align: center; color: #9ca3af; }
+  .err-banner { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.85rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+  .table-wrap { overflow-x: auto; border-radius: 0.5rem; }
+  @media (max-width: 640px) {
+    body { padding: 0.85rem; }
+    h1 { font-size: 1.2rem; }
+    th, td { padding: 0.5rem; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+  <h1>Contratos públicos</h1>
+  <div class="subtitle">Compras del gobierno federal — fuente CompraNet OCDS</div>
+
+  <div class="banner-transicion">
+    <strong>⚠ Datos en transición.</strong> En 2024 la fuente CompraNet migró de
+    <code>upcp-compranet.hacienda.gob.mx</code> a <code>buengobierno.gob.mx</code>.
+    Tequio mantiene el histórico de ambas fuentes pero la cobertura del periodo de migración puede tener huecos.
+    Los contratos publicados desde 2025 reflejan la nueva nomenclatura SHCP+Buen Gobierno.
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="qInput" placeholder="Buscar título, proveedor o dependencia..." />
+    <select id="tipoProc">
+      <option value="">Todos los tipos</option>
+      <option value="adjudicacion directa">Adjudicación directa</option>
+      <option value="licitacion publica">Licitación pública</option>
+      <option value="invitacion">Invitación a 3</option>
+    </select>
+    <button id="btnBuscar">Buscar</button>
+  </div>
+
+  <div class="stats" id="stats">Cargando...</div>
+  <div id="contenido"><div class="loading">Cargando contratos...</div></div>
+
+<script>
+(function(){
+  const contenido = document.getElementById('contenido');
+  const statsEl = document.getElementById('stats');
+  const qInput = document.getElementById('qInput');
+  const tipoProc = document.getElementById('tipoProc');
+  const btnBuscar = document.getElementById('btnBuscar');
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+  function fmtMonto(v) {
+    if (v == null || v === '') return '<span class="muted">-</span>';
+    const n = Number(v);
+    if (!isFinite(n)) return '<span class="muted">-</span>';
+    return '$' + n.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+  }
+  function fmtFecha(s) {
+    if (!s) return '<span class="muted">-</span>';
+    try {
+      return new Date(s).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch(e) { return s; }
+  }
+
+  function render(rows) {
+    if (!rows.length) {
+      contenido.innerHTML = '<div class="empty">Sin contratos para los filtros seleccionados.</div>';
+      statsEl.textContent = '0 contratos';
+      return;
+    }
+    const totalMonto = rows.reduce((s, r) => s + (Number(r.monto_mxn) || 0), 0);
+    statsEl.innerHTML = `<strong>${rows.length}</strong> contratos · monto total: <strong>${fmtMonto(totalMonto).replace(/<[^>]+>/g,'')}</strong> MXN`;
+    const html = `
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dependencia</th>
+            <th>Proveedor</th>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th style="text-align:right">Monto MXN</th>
+            <th>Fecha firma</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `<tr>
+            <td>${escapeHtml(r.dependencia || '-')}<div class="muted">${escapeHtml(r.entidad_federativa || '')}</div></td>
+            <td>${escapeHtml(r.proveedor_nombre || '-')}<div class="muted">${escapeHtml(r.proveedor_rfc || '')}</div></td>
+            <td>${escapeHtml((r.titulo || '').slice(0, 140))}${r.flag_adjudicacion_directa_alta ? ' <span class="badge alerta">AD alta</span>' : ''}</td>
+            <td>${escapeHtml(r.tipo_procedimiento || '-')}</td>
+            <td class="monto">${fmtMonto(r.monto_mxn)}</td>
+            <td>${fmtFecha(r.fecha_firma)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+    `;
+    contenido.innerHTML = html;
+  }
+
+  async function cargar() {
+    contenido.innerHTML = '<div class="loading">Cargando contratos...</div>';
+    statsEl.textContent = 'Cargando...';
+    const params = new URLSearchParams({ vista: 'contratos', limit: '50', orden: 'monto' });
+    const q = qInput.value.trim();
+    if (q) params.set('q', q);
+    if (tipoProc.value) params.set('tipo_proc', tipoProc.value);
+    try {
+      const r = await fetch('/api/data?' + params.toString(), { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      const rows = Array.isArray(data) ? data : (data.contratos || data.items || data.rows || data.data || []);
+      render(rows);
+    } catch(e) {
+      contenido.innerHTML = '<div class="err-banner">Error: ' + escapeHtml(e.message) + '</div>';
+      statsEl.textContent = '';
+    }
+  }
+
+  btnBuscar.addEventListener('click', cargar);
+  qInput.addEventListener('keydown', e => { if (e.key === 'Enter') cargar(); });
+  tipoProc.addEventListener('change', cargar);
+  cargar();
+})();
+</script>
+</body>
+</html>
