@@ -2141,6 +2141,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('emergencia')" style="background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(127,29,29,0.05)); border-left: 3px solid #dc2626;">
         <span class="icon">🚨</span> Modo Emergencia
       </div>
+      <div class="nav-item" onclick="cargarPanel('asistente-ia')" style="background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(217,119,6,0.05)); border-left: 3px solid #fbbf24;">
+        <span class="icon">🤖</span> Asistente Legal IA
+      </div>
       <div class="nav-item" data-page="pide-ayuda" onclick="showPage('pide-ayuda')">
         <span class="icon">🤝</span> Pide Ayuda Legal
       </div>
@@ -12960,6 +12963,7 @@ function cargarPanel(slug) {
   const PANELS = {
     'mi-rep': '/panel/mi-rep-vs-yo.html?embedded=1',
     'chat': '/panel/chat.html?embedded=1',
+    'asistente-ia': '/panel/asistente-ia.html?embedded=1',
     'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
