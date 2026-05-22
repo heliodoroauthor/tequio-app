@@ -1,0 +1,36 @@
+name: Scrape Leyes Texto (manual)
+
+# FIX-38: descarga texto completo de leyes federales desde www.diputados.gob.mx
+# Manual dispatch para rellenar columna leyes.texto que queda NULL/corta.
+# Despues de correr esto, re-disparar backfill-embeddings para regenerar embeddings ricos.
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Por que estas corriendo el scrape de texto (queda en logs)'
+        required: false
+        default: 'manual scrape texto leyes'
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install requests beautifulsoup4 lxml
+      - name: Run scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          echo "Reason: ${{ inputs.reason }}"
+          python scripts/scrape_leyes_texto.py
