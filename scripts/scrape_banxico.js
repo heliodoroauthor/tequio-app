@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 /**
- * Tequio · Scraper Banxico SIE
+ * Tequio · Scraper Banxico SIE (FIX-35 v2)
  *
- * Pull diario de tipo de cambio, tasa Banxico, TIIE 28d, remesas mensuales e IED trimestral.
- * Inserta en tabla `econ_banxico` (histórico) y refresca `indicadores_fiscales` cuando aplica.
- * Cada ejecución registra status en `scraper_logs`.
+ * Pull diario de tipo de cambio, tasa Banxico, TIIE 28d, remesas mensuales, IED trimestral.
+ * v2 (FIX-35): Agrega INPC mensual (SP1) + subyacente anual (SP30578) + variacion mensual (SP30577)
+ * para permitir computo de inflacion general anual desde INPC (la serie SP74661/SP74625 no
+ * existen en Banxico SIE, hay que computarla del INPC mensual).
+ *
+ * Inserta en tabla `econ_banxico` (historico) y refresca `indicadores_fiscales` cuando aplica.
+ * Cada ejecucion registra status en `scraper_logs`.
  *
  * Variables de entorno requeridas:
- *   BANXICO_TOKEN              — Token gratuito de https://www.banxico.org.mx/SieAPIRest/service/v1/token
+ *   BANXICO_TOKEN              — Token gratuito de banxico.org.mx/SieAPIRest/service/v1/token
  *   SUPABASE_URL               — URL Supabase del proyecto
- *   SUPABASE_SERVICE_ROLE_KEY  — Service role key (NO anon)
- *
- * Uso local:
- *   BANXICO_TOKEN=xxx SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/scrape_banxico.js
- *
- * Promesa "cero invención": cada fila guarda fuente_url exacto al endpoint Banxico consultado.
+ *   SUPABASE_SERVICE_ROLE_KEY  — Service role key
  */
 
 const BANXICO_TOKEN = process.env.BANXICO_TOKEN;
@@ -28,18 +27,38 @@ if (!BANXICO_TOKEN || !SB_URL || !SB_KEY) {
   process.exit(1);
 }
 
+// freq: 'diaria' => /datos/oportuno (solo ultimo)
+// freq: 'mensual'/'trimestral' => /datos/{desde}/{hasta} con 730d de rango
 const SERIES = {
-  tipo_cambio_fix: { id: 'SF43718', freq: 'diaria',     nombre: 'Tipo de cambio FIX (MXN/USD)',       unidad: 'MXN por USD' },
-  tasa_referencia: { id: 'SF61745', freq: 'diaria',     nombre: 'Tasa Objetivo Banxico',              unidad: '% anual' },
-  tiie_28:         { id: 'SF43783', freq: 'diaria',     nombre: 'TIIE 28 días',                       unidad: '% anual' },
-  remesas:         { id: 'SE27803', freq: 'mensual',    nombre: 'Remesas familiares',                 unidad: 'USD millones' },
-  ied:             { id: 'SE45712', freq: 'trimestral', nombre: 'Inversión Extranjera Directa total', unidad: 'USD millones' },
+  tipo_cambio_fix:           { id: 'SF43718', freq: 'diaria',     nombre: 'Tipo de cambio FIX (MXN/USD)',  unidad: 'MXN por USD' },
+  tasa_referencia:           { id: 'SF61745', freq: 'diaria',     nombre: 'Tasa Objetivo Banxico',         unidad: '% anual' },
+  tiie_28:                   { id: 'SF43783', freq: 'diaria',     nombre: 'TIIE 28 dias',                  unidad: '% anual' },
+  remesas:                   { id: 'SE27803', freq: 'mensual',    nombre: 'Remesas familiares',            unidad: 'USD millones' },
+  ied:                       { id: 'SE45712', freq: 'trimestral', nombre: 'Inversion Extranjera Directa',  unidad: 'USD millones' },
+  inpc_general:              { id: 'SP1',     freq: 'mensual',    nombre: 'INPC General',                  unidad: 'Indice 2QJUL2018=100' },
+  inpc_var_mensual:          { id: 'SP30577', freq: 'mensual',    nombre: 'INPC variacion mensual',        unidad: '%' },
+  inflacion_subyacente_anual:{ id: 'SP30578', freq: 'mensual',    nombre: 'Inflacion subyacente anual',    unidad: '%' },
 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchSerie(serieId, intentos = 3) {
-  const url = `https://www.banxico.org.mx/SieAPIRest/service/v1/series/${serieId}/datos/oportuno?token=${BANXICO_TOKEN}`;
+function rangeDates(days) {
+  const hasta = new Date();
+  const desde = new Date(hasta.getTime() - days * 86400000);
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  return { desde: fmt(desde), hasta: fmt(hasta) };
+}
+
+async function fetchSerie(serieId, freq, intentos = 3) {
+  // Daily series usan oportuno (ultimo dato).
+  // Mensuales/trimestrales bajan 730 dias de historial para permitir computos anuales.
+  let url;
+  if (freq === 'diaria') {
+    url = `https://www.banxico.org.mx/SieAPIRest/service/v1/series/${serieId}/datos/oportuno?token=${BANXICO_TOKEN}`;
+  } else {
+    const { desde, hasta } = rangeDates(730);
+    url = `https://www.banxico.org.mx/SieAPIRest/service/v1/series/${serieId}/datos/${desde}/${hasta}?token=${BANXICO_TOKEN}`;
+  }
   for (let i = 0; i < intentos; i++) {
     try {
       const r = await fetch(url, { headers: { Accept: 'application/json' } });
@@ -51,7 +70,6 @@ async function fetchSerie(serieId, intentos = 3) {
       const j = await r.json();
       const datos = j?.bmx?.series?.[0]?.datos;
       if (!datos || !datos.length) throw new Error('Respuesta sin datos');
-      // Banxico devuelve fecha 'dd/mm/yyyy' → normalizar a yyyy-mm-dd
       return datos
         .filter((d) => d.dato && d.dato !== 'N/E')
         .map((d) => {
@@ -118,8 +136,6 @@ async function logScraper(status, summary, errorMsg, startedAt) {
   }
 }
 
-// Refresca indicadores_fiscales con el dato más reciente de tipo de cambio (slug 'dolar_hoy')
-// Si no existe el indicador, lo crea. Si existe, actualiza valor_display y fecha_dato.
 async function refrescarIndicador(slug, label, valor, fecha, fuenteUrl, orden) {
   const valor_display = `$${valor.toFixed(2)}`;
   const row = {
@@ -150,7 +166,7 @@ async function main() {
 
   for (const [slug, cfg] of Object.entries(SERIES)) {
     try {
-      const datos = await fetchSerie(cfg.id);
+      const datos = await fetchSerie(cfg.id, cfg.freq);
       const rows = datos.map((d) => ({
         serie_id: cfg.id,
         serie_slug: slug,
@@ -167,13 +183,11 @@ async function main() {
       seriesProcesadas[slug] = upRes.inserted;
       console.log(`[banxico] ${slug}: ${upRes.inserted} filas`);
 
-      // Guardar el último dato de tipo de cambio para refrescar el KPI del dashboard
       if (slug === 'tipo_cambio_fix' && datos.length) {
         const ultimo = datos[datos.length - 1];
         dolarMasReciente = { valor: ultimo.valor, fecha: ultimo.fecha, fuenteUrl: rows[0].fuente_url };
       }
-
-      await sleep(250); // rate limit Banxico
+      await sleep(250);
     } catch (e) {
       huboError = true;
       primerError = primerError || `${slug}: ${e.message}`;
@@ -181,12 +195,11 @@ async function main() {
     }
   }
 
-  // Refrescar KPI del dashboard con el último FIX
   if (dolarMasReciente) {
     try {
       await refrescarIndicador(
         'dolar_hoy',
-        'DÓLAR HOY (FIX Banxico)',
+        'DOLAR HOY (FIX Banxico)',
         dolarMasReciente.valor,
         dolarMasReciente.fecha,
         dolarMasReciente.fuenteUrl,
@@ -201,6 +214,7 @@ async function main() {
   const status = huboError ? 'partial' : 'ok';
   await logScraper(status, { inserted: totalInsertado, series: seriesProcesadas }, primerError, startedAt);
   console.log(`[banxico] DONE status=${status} total=${totalInsertado}`);
+  console.log(`rows_inserted=${totalInsertado}`);
   process.exit(huboError ? 1 : 0);
 }
 
