@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """
-scrape_banxico.py (v2 - FIX)
-=============================
+scrape_banxico.py (v3 - FIX-35)
+================================
+Cambios respecto v2:
+  - SP30577 era reportada como "Inflacion general anual" pero la serie devuelve
+    en realidad la VARIACION MENSUAL del INPC (no anual). Se re-etiqueta como tal.
+  - Se agrega SP74661 = "Inflacion General Anual" (la serie correcta para
+    inflacion anual general).
+  - SP30578 (Inflacion subyacente anual) queda intacta porque si reporta anual.
+
 Cambios respecto v1:
   - Series corregidas segun catalogo oficial Banxico SIE
   - Series viejas/incorrectas reemplazadas
@@ -20,7 +27,8 @@ SERIES = {
     'SF61745':  ('Tasa objetivo de Banxico',                 '%'),
     'SF43936':  ('CETES 28 dias - Tasa anualizada',          '%'),
     'SP1':      ('INPC General (Mensual)',                   'Indice 2QJUL2018=100'),
-    'SP30577':  ('Inflacion general anual',                  '%'),
+    'SP30577':  ('INPC variacion mensual',                   '%'),
+    'SP74661':  ('Inflacion general anual',                  '%'),
     'SP30578':  ('Inflacion subyacente anual',               '%'),
     'SF311408': ('Reservas internacionales',                 'Millones USD'),
     'SL12089':  ('Salario minimo zona libre frontera norte', 'MXN/dia'),
@@ -83,7 +91,7 @@ def supa_upsert(table, rows, on_conflict):
 
 
 def main():
-    print("Tequio Banxico Scraper v2")
+    print("Tequio Banxico Scraper v3 (FIX-35)")
     print(f"   Rango: {DESDE} -> {HASTA}")
     total_filas = 0
     for serie_id, (nombre, unidad) in SERIES.items():
@@ -106,6 +114,7 @@ def main():
         print(f"      [OK] {n} puntos guardados")
         total_filas += n
     print(f"\nBanxico scrape completo. {total_filas} filas totales.")
+    print(f"rows_inserted={total_filas}")
 
 
 if __name__ == '__main__':
