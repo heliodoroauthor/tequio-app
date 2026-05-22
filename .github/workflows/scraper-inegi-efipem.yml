@@ -1,5 +1,7 @@
 name: INEGI EFIPEM Finanzas Municipales
 
+# Annual cron + manual dispatch
+# FIX-29 2026-05-21: cloudscraper para inegi.org.mx Imperva + FIX-22 captura rows
 on:
   schedule:
     - cron: '0 14 15 6 *'
@@ -17,7 +19,7 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests openpyxl
+          pip install 'urllib3<2' requests openpyxl cloudscraper
       - name: Run INEGI EFIPEM scraper
         id: scraper
         env:
@@ -37,12 +39,21 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           EFIPEM_ANIOS: ${{ github.event.inputs.anios }}
           EFIPEM_URL: ${{ github.event.inputs.url }}
-        run: python scripts/scrape_inegi_efipem_municipios.py
+        run: |
+          set -o pipefail
+          python scripts/scrape_inegi_efipem_municipios.py 2>&1 | tee /tmp/scraper.log
+      - name: Extract rows
+        id: rows
+        if: always()
+        run: |
+          python3 -c "import re,os; t=open('/tmp/scraper.log').read() if os.path.exists('/tmp/scraper.log') else ''; m=re.search(r'rows_inserted=(\d+)', t) or re.search(r'inserted[\":\s]+(\d+)', t) or re.search(r'total=(\d+)', t); n = m.group(1) if m else '0'; open(os.environ['GITHUB_OUTPUT'],'a').write(f'rows={n}\n')"
       - name: Log scraper run
         if: always()
         uses: ./.github/actions/log-scraper
         with:
           slug: inegi_efipem
           status: ${{ job.status }}
+          rows_inserted: ${{ steps.rows.outputs.rows }}
+          fuente_url: 'https://www.inegi.org.mx/contenidos/programas/finanzas/datosabiertos/efipem.zip'
           supabase_url: ${{ secrets.SUPABASE_URL }}
           supabase_key: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
