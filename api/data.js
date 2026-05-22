@@ -120,7 +120,7 @@ export default async function handler(req, res) {
         if (vista === 'dashboard') {
       const [dolar, inflacion, tasa, leyesCount] = await Promise.all([
         sb('econ_banxico?serie_id=eq.SF43718&order=fecha.desc&limit=2&select=valor,fecha'),
-        sb('econ_banxico?serie_id=eq.SP30577&order=fecha.desc&limit=1&select=valor,fecha'),
+        sb('econ_banxico?serie_id=eq.SP74661&order=fecha.desc&limit=1&select=valor,fecha'),
         sb('econ_banxico?serie_id=eq.SF61745&order=fecha.desc&limit=1&select=valor,fecha'),
         sb('leyes?select=count'),
       ]);
