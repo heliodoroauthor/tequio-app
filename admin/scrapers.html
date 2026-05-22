@@ -22,6 +22,7 @@
   .stat.ok .stat-value { color: #10b981; }
   .stat.fail .stat-value { color: #ef4444; }
   .stat.partial .stat-value { color: #f59e0b; }
+  .stat.stale .stat-value { color: #94a3b8; }
   table { width: 100%; border-collapse: collapse; background: #1f2937; border-radius: 0.5rem; overflow: hidden; font-size: 0.82rem; }
   thead { background: #111827; }
   th { text-align: left; padding: 0.7rem 0.85rem; color: #fbbf24; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #374151; }
@@ -32,6 +33,7 @@
   .badge.fail { background: rgba(239,68,68,0.15); color: #ef4444; }
   .badge.partial { background: rgba(245,158,11,0.15); color: #f59e0b; }
   .badge.running { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .badge.stale { background: rgba(148,163,184,0.15); color: #94a3b8; }
   .slug { font-family: 'Courier New', monospace; color: #fbbf24; font-weight: 600; }
   .muted { color: #9ca3af; font-size: 0.78rem; }
   .err { color: #fca5a5; font-family: 'Courier New', monospace; font-size: 0.75rem; max-width: 320px; word-break: break-word; }
@@ -49,7 +51,7 @@
 </head>
 <body>
   <h1>Scrapers Health</h1>
-  <div class="subtitle">Monitoreo de scrapers — ultimos runs por fuente</div>
+  <div class="subtitle">Monitoreo de scrapers — ultimo run por fuente. Vista <code>v_scrapers_health</code>.</div>
   <div class="toolbar">
     <label class="muted">Status:
       <select id="filtroStatus">
@@ -57,15 +59,7 @@
         <option value="ok">OK</option>
         <option value="fail">Fail</option>
         <option value="partial">Partial</option>
-        <option value="running">Running</option>
-      </select>
-    </label>
-    <label class="muted">Periodo:
-      <select id="filtroPeriodo">
-        <option value="24h">Ultimas 24h</option>
-        <option value="7d" selected>Ultima semana</option>
-        <option value="30d">Ultimo mes</option>
-        <option value="">Todo</option>
+        <option value="stale">Stale (&gt;7d)</option>
       </select>
     </label>
     <button class="primary" id="btnRefresh">Refresh</button>
@@ -76,13 +70,14 @@
 
 <script>
 (function(){
+  const STALE_HOURS = 168; // 7d
+
   const params = new URLSearchParams(location.search);
   if (params.get('embedded') === '1') document.body.classList.add('embedded');
 
   const contenido = document.getElementById('contenido');
   const statsEl = document.getElementById('stats');
   const fStatus = document.getElementById('filtroStatus');
-  const fPeriodo = document.getElementById('filtroPeriodo');
   const btnRefresh = document.getElementById('btnRefresh');
   const lastUpdate = document.getElementById('lastUpdate');
 
@@ -110,43 +105,48 @@
     try { return new Date(s).toLocaleString('es-MX'); } catch(e) { return s; }
   }
 
-  function periodoToDate(p) {
-    const now = Date.now();
-    if (p === '24h') return new Date(now - 86400000).toISOString();
-    if (p === '7d') return new Date(now - 7*86400000).toISOString();
-    if (p === '30d') return new Date(now - 30*86400000).toISOString();
-    return null;
+  function isStale(r) {
+    if (!r.last_finished_at) return true;
+    const hoursAgo = (Date.now() - new Date(r.last_finished_at).getTime()) / 3600000;
+    return hoursAgo > STALE_HOURS;
+  }
+
+  function effectiveStatus(r) {
+    if (r.last_status === 'fail') return 'fail';
+    if (r.last_status === 'partial') return 'partial';
+    if (isStale(r)) return 'stale';
+    return r.last_status || '-';
   }
 
   function filtrar(rows) {
     const st = fStatus.value;
-    const pd = periodoToDate(fPeriodo.value);
     return rows.filter(r => {
-      if (st && r.status !== st) return false;
-      if (pd && r.started_at && r.started_at < pd) return false;
-      return true;
+      if (!st) return true;
+      return effectiveStatus(r) === st;
     });
   }
 
   function renderStats(rows) {
-    const counts = { ok: 0, fail: 0, partial: 0, running: 0, total: rows.length };
+    const counts = { ok: 0, fail: 0, partial: 0, stale: 0, total: rows.length };
     let totalRows = 0;
     rows.forEach(r => {
-      if (counts[r.status] != null) counts[r.status]++;
-      totalRows += (r.rows_inserted || 0) + (r.rows_updated || 0);
+      const eff = effectiveStatus(r);
+      if (counts[eff] != null) counts[eff]++;
+      totalRows += (r.last_rows_inserted || 0) + (r.last_rows_updated || 0);
     });
     statsEl.innerHTML = `
-      <div class="stat"><div class="stat-label">Total runs</div><div class="stat-value">${counts.total}</div></div>
+      <div class="stat"><div class="stat-label">Total scrapers</div><div class="stat-value">${counts.total}</div></div>
       <div class="stat ok"><div class="stat-label">OK</div><div class="stat-value">${counts.ok}</div></div>
       <div class="stat fail"><div class="stat-label">Fail</div><div class="stat-value">${counts.fail}</div></div>
       <div class="stat partial"><div class="stat-label">Partial</div><div class="stat-value">${counts.partial}</div></div>
+      <div class="stat stale"><div class="stat-label">Stale (&gt;7d)</div><div class="stat-value">${counts.stale}</div></div>
       <div class="stat"><div class="stat-label">Filas (ins+upd)</div><div class="stat-value">${totalRows.toLocaleString('es-MX')}</div></div>
     `;
   }
 
   function renderTabla(rows) {
     if (!rows.length) {
-      contenido.innerHTML = '<div class="empty"><div class="icon">[--]</div>Sin runs en el periodo seleccionado.</div>';
+      contenido.innerHTML = '<div class="empty"><div class="icon">[--]</div>Sin scrapers en el filtro seleccionado.</div>';
       return;
     }
     const html = `
@@ -158,26 +158,27 @@
             <th>Status</th>
             <th class="num">Insertadas</th>
             <th class="num">Actualizadas</th>
-            <th class="num">Omitidas</th>
-            <th>HTTP</th>
-            <th>Iniciado</th>
+            <th class="num">Runs 30d</th>
+            <th class="num">Fails 30d</th>
+            <th>Ultimo run</th>
             <th>Duracion</th>
-            <th>Error / Notas</th>
+            <th>Error</th>
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
-            const dur = (r.started_at && r.finished_at) ? Math.round((new Date(r.finished_at) - new Date(r.started_at))/1000) + 's' : '-';
+            const dur = (r.last_started_at && r.last_finished_at) ? Math.round((new Date(r.last_finished_at) - new Date(r.last_started_at))/1000) + 's' : '-';
+            const eff = effectiveStatus(r);
             return `<tr>
-              <td><span class="slug">${escapeHtml(r.scraper_slug)}</span>${r.fuente_url ? `<div class="muted"><a href="${escapeHtml(r.fuente_url)}" target="_blank" style="color:#9ca3af;">fuente</a></div>` : ''}</td>
-              <td><span class="badge ${escapeHtml(r.status||'')}">${escapeHtml(r.status||'-')}</span></td>
-              <td class="num">${(r.rows_inserted||0).toLocaleString('es-MX')}</td>
-              <td class="num">${(r.rows_updated||0).toLocaleString('es-MX')}</td>
-              <td class="num">${(r.rows_skipped||0).toLocaleString('es-MX')}</td>
-              <td>${r.http_status || '<span class="muted">-</span>'}</td>
-              <td title="${escapeHtml(fmtDateFull(r.started_at))}">${fmtDate(r.started_at)}</td>
+              <td><span class="slug">${escapeHtml(r.scraper_slug)}</span>${r.fuente_url ? `<div class="muted"><a href="${escapeHtml(r.fuente_url)}" target="_blank" rel="noopener" style="color:#9ca3af;">fuente</a></div>` : ''}</td>
+              <td><span class="badge ${escapeHtml(eff)}">${escapeHtml(eff)}</span></td>
+              <td class="num">${(r.last_rows_inserted||0).toLocaleString('es-MX')}</td>
+              <td class="num">${(r.last_rows_updated||0).toLocaleString('es-MX')}</td>
+              <td class="num">${(r.runs_30d||0).toLocaleString('es-MX')}</td>
+              <td class="num">${(r.failures_30d||0).toLocaleString('es-MX')}</td>
+              <td title="${escapeHtml(fmtDateFull(r.last_finished_at))}">${fmtDate(r.last_finished_at)}</td>
               <td>${dur}</td>
-              <td>${r.error_msg ? `<div class="err">${escapeHtml(r.error_msg)}</div>` : ''}${r.notes ? `<div class="muted">${escapeHtml(r.notes)}</div>` : ''}</td>
+              <td>${r.last_error ? `<div class="err">${escapeHtml(r.last_error)}</div>` : ''}</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -199,7 +200,8 @@
       const r = await fetch('/api/data?vista=scrapers_health', { cache: 'no-store' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
-      const rows = Array.isArray(data) ? data : (data.items || data.rows || data.data || []);
+      // Backend returns { scrapers: [...] }; tolerate other shapes too.
+      const rows = Array.isArray(data) ? data : (data.scrapers || data.items || data.rows || data.data || []);
       allRows = rows;
       lastUpdate.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX');
       aplicarFiltrosYRender();
@@ -210,7 +212,6 @@
 
   btnRefresh.addEventListener('click', cargar);
   fStatus.addEventListener('change', aplicarFiltrosYRender);
-  fPeriodo.addEventListener('change', aplicarFiltrosYRender);
 
   cargar();
 })();
