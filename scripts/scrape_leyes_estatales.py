@@ -234,8 +234,8 @@ def process_ley(ley):
         resp.encoding = resp.apparent_encoding or 'utf-8'
     html = resp.text
 
-    # Anti-bot detection → fallback Playwright
-    if is_antibot_response(html):
+    # FIX-39 v2: SKIP en anti-bot (Playwright muy lento para 448 URLs)
+    if False and is_antibot_response(html):
         print(f"  [antibot detected on {url[:80]}] trying Playwright...")
         html = fetch_with_playwright(url) or ''
         if not html or is_antibot_response(html):
