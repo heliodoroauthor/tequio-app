@@ -3,7 +3,7 @@
 // Protegido con shared secret simple para evitar abuse público.
 // Uso interno: ingest de leyes_chunks · NO expone PII ni datos sensibles.
 
-const GEMINI_EMBED_MODEL = 'gemini-embedding-001';
+const GEMINI_EMBED_MODEL = 'text-embedding-004';
 const BATCH_LIMIT = 100; // Gemini batchEmbedContents acepta hasta 100
 const SHARED_SECRET = process.env.EMBED_BATCH_SECRET || 'tequio-embed-2026';
 
