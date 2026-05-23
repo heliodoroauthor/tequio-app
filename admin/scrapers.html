@@ -1,219 +1,271 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scrapers Health · Tequio Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Tequio · Scrapers Health</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e5e7eb; padding: 1.5rem; min-height: 100vh; }
-  body.embedded { padding: 1rem; }
-  h1 { font-size: 1.5rem; color: #fbbf24; margin-bottom: 0.5rem; }
-  .subtitle { color: #9ca3af; font-size: 0.9rem; margin-bottom: 1.5rem; }
-  .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-  select, button { background: #1f2937; color: #e5e7eb; border: 1px solid #374151; padding: 0.5rem 0.85rem; border-radius: 0.4rem; font-size: 0.85rem; cursor: pointer; }
-  button.primary { background: #fbbf24; color: #111; font-weight: 700; border: none; }
-  button:hover { background: #374151; }
-  button.primary:hover { background: #f59e0b; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
-  .stat { background: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 0.85rem; }
-  .stat-label { color: #9ca3af; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .stat-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
-  .stat.ok .stat-value { color: #10b981; }
-  .stat.fail .stat-value { color: #ef4444; }
-  .stat.partial .stat-value { color: #f59e0b; }
-  .stat.stale .stat-value { color: #94a3b8; }
-  table { width: 100%; border-collapse: collapse; background: #1f2937; border-radius: 0.5rem; overflow: hidden; font-size: 0.82rem; }
-  thead { background: #111827; }
-  th { text-align: left; padding: 0.7rem 0.85rem; color: #fbbf24; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; border-bottom: 1px solid #374151; }
-  td { padding: 0.65rem 0.85rem; border-bottom: 1px solid #2d3748; vertical-align: top; }
-  tr:hover { background: rgba(251,191,36,0.04); }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-  .badge.ok { background: rgba(16,185,129,0.15); color: #10b981; }
-  .badge.fail { background: rgba(239,68,68,0.15); color: #ef4444; }
-  .badge.partial { background: rgba(245,158,11,0.15); color: #f59e0b; }
-  .badge.running { background: rgba(99,102,241,0.15); color: #818cf8; }
-  .badge.stale { background: rgba(148,163,184,0.15); color: #94a3b8; }
-  .slug { font-family: 'Courier New', monospace; color: #fbbf24; font-weight: 600; }
-  .muted { color: #9ca3af; font-size: 0.78rem; }
-  .err { color: #fca5a5; font-family: 'Courier New', monospace; font-size: 0.75rem; max-width: 320px; word-break: break-word; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; }
-  .loading, .empty { padding: 2rem; text-align: center; color: #9ca3af; }
-  .empty .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-  .err-banner { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.85rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.85rem; }
-  .table-wrap { overflow-x: auto; border-radius: 0.5rem; }
-  @media (max-width: 640px) {
-    body { padding: 0.85rem; }
-    h1 { font-size: 1.2rem; }
-    th, td { padding: 0.5rem; font-size: 0.75rem; }
+  :root {
+    --bg: #0a0f1e; --bg2: #0d1729; --surface: #131e35; --border: #1f2c47;
+    --text: #e5e7eb; --text2: #94a3b8; --text3: #64748b;
+    --green: #16a34a; --yellow: #f59e0b; --red: #dc2626;
+    --accent: #fbbf24; --accent2: #60a5fa;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
+  * { box-sizing: border-box }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font-body); margin: 0; padding: 0; min-height: 100vh; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 80px; }
+  header { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 24px; flex-wrap: wrap; }
+  header h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+  header .tag { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.4); color: var(--accent); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+  header .meta { margin-left: auto; font-size: 12px; color: var(--text2); }
+  header .meta button { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+  header .meta button:hover { border-color: var(--accent2); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi .v { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 4px; }
+  .kpi .l { font-size: 11px; color: var(--text2); letter-spacing: 1px; font-weight: 600; }
+  .kpi.green { border-color: rgba(22,163,74,0.4); background: linear-gradient(135deg, rgba(22,163,74,0.06), transparent); }
+  .kpi.yellow { border-color: rgba(245,158,11,0.4); background: linear-gradient(135deg, rgba(245,158,11,0.06), transparent); }
+  .kpi.red { border-color: rgba(220,38,38,0.45); background: linear-gradient(135deg, rgba(220,38,38,0.08), transparent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  thead { background: var(--bg2); }
+  th, td { padding: 11px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-size: 10px; letter-spacing: 1.5px; color: var(--text2); font-weight: 700; text-transform: uppercase; }
+  td.mono { font-family: var(--font-mono); font-size: 12px; }
+  tr.health-green td.dot::before { content:"●"; color: var(--green); }
+  tr.health-yellow td.dot::before { content:"●"; color: var(--yellow); }
+  tr.health-red td.dot::before { content:"●"; color: var(--red); }
+  tr.health-unknown td.dot::before { content:"●"; color: var(--text3); }
+  tr.health-yellow { background: rgba(245,158,11,0.04); }
+  tr.health-red { background: rgba(220,38,38,0.06); }
+  .err { color: #fca5a5; font-family: var(--font-mono); font-size: 11px; max-width: 320px; word-break: break-word; }
+  .num { text-align: right; font-family: var(--font-mono); }
+  .since { color: var(--text2); font-size: 11px; }
+  .url { color: var(--accent2); font-size: 11px; text-decoration: none; }
+  .url:hover { text-decoration: underline; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+  .badge.ok { background: rgba(22,163,74,0.18); color: #86efac; }
+  .badge.partial { background: rgba(245,158,11,0.18); color: #fcd34d; }
+  .badge.fail, .badge.error { background: rgba(220,38,38,0.18); color: #fca5a5; }
+  .empty { padding: 60px 20px; text-align: center; color: var(--text2); }
+  .footer-note { font-size: 11px; color: var(--text3); margin-top: 24px; text-align: center; line-height: 1.6; }
+  .lock-screen { max-width: 360px; margin: 80px auto; padding: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+  .lock-screen input { width: 100%; padding: 12px; background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; margin: 12px 0; font-family: inherit; font-size: 14px; }
+  .lock-screen button { width: 100%; padding: 12px; background: var(--accent); color: #111; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .lock-screen .err-msg { color: #fca5a5; font-size: 12px; margin-top: 8px; min-height: 16px; }
 </style>
 </head>
 <body>
-  <h1>Scrapers Health</h1>
-  <div class="subtitle">Monitoreo de scrapers — ultimo run por fuente. Vista <code>v_scrapers_health</code>.</div>
-  <div class="toolbar">
-    <label class="muted">Status:
-      <select id="filtroStatus">
-        <option value="">Todos</option>
-        <option value="ok">OK</option>
-        <option value="fail">Fail</option>
-        <option value="partial">Partial</option>
-        <option value="stale">Stale (&gt;7d)</option>
-      </select>
-    </label>
-    <button class="primary" id="btnRefresh">Refresh</button>
-    <span class="muted" id="lastUpdate"></span>
-  </div>
-  <div class="stats" id="stats"></div>
-  <div id="contenido"><div class="loading">Cargando scrapers...</div></div>
+<div class="wrap" id="app">
+<div class="empty">Cargando…</div>
+</div>
 
 <script>
 (function(){
-  const STALE_HOURS = 168; // 7d
+  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON_KEY = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  // Llave de admin simple — vive en localStorage tras primera entrada
+  // Para uso interno; no protege secretos reales (la RPC es pública anon).
+  // Cualquiera puede ver este dashboard si conoce la llave; los datos NO son sensibles
+  // (son métricas agregadas de operación de scrapers).
+  var EXPECTED_KEY = 'tequio-ops-2026';
+  var STORAGE_KEY = 'tequio_admin_key_v1';
 
-  const params = new URLSearchParams(location.search);
-  if (params.get('embedded') === '1') document.body.classList.add('embedded');
-
-  const contenido = document.getElementById('contenido');
-  const statsEl = document.getElementById('stats');
-  const fStatus = document.getElementById('filtroStatus');
-  const btnRefresh = document.getElementById('btnRefresh');
-  const lastUpdate = document.getElementById('lastUpdate');
-
-  let allRows = [];
-
-  function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function $(s, c){ return (c||document).querySelector(s); }
+  function el(t, attrs, kids){
+    var n = document.createElement(t);
+    if (attrs) for (var k in attrs){
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'html') n.innerHTML = attrs[k];
+      else if (k === 'on') for (var ev in attrs[k]) n.addEventListener(ev, attrs[k][ev]);
+      else n.setAttribute(k, attrs[k]);
+    }
+    if (kids) (Array.isArray(kids)?kids:[kids]).forEach(function(k){
+      if (k == null) return;
+      n.appendChild(typeof k === 'string' ? document.createTextNode(k) : k);
+    });
+    return n;
   }
 
-  function fmtDate(s) {
-    if (!s) return '<span class="muted">-</span>';
-    try {
-      const d = new Date(s);
-      const now = Date.now();
-      const diff = (now - d.getTime()) / 1000;
-      if (diff < 60) return Math.floor(diff) + 's ago';
-      if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-      return Math.floor(diff/86400) + 'd ago';
-    } catch(e) { return s; }
+  function checkAuth(){
+    var url = new URL(location.href);
+    var k = url.searchParams.get('key') || localStorage.getItem(STORAGE_KEY) || '';
+    if (k === EXPECTED_KEY){
+      localStorage.setItem(STORAGE_KEY, k);
+      return true;
+    }
+    return false;
   }
 
-  function fmtDateFull(s) {
-    if (!s) return '';
-    try { return new Date(s).toLocaleString('es-MX'); } catch(e) { return s; }
+  function renderLock(){
+    var app = $('#app');
+    app.innerHTML = '';
+    var box = el('div', {class:'lock-screen'});
+    box.appendChild(el('h2', null, '🔒 Tequio Ops'));
+    box.appendChild(el('p', {style:'color:var(--text2);font-size:13px;margin:0 0 8px'}, 'Ingresa la llave de operaciones.'));
+    var input = el('input', {type:'password', placeholder:'admin key'});
+    var errMsg = el('div', {class:'err-msg'});
+    var btn = el('button', null, 'Entrar');
+    btn.addEventListener('click', function(){
+      if (input.value === EXPECTED_KEY){
+        localStorage.setItem(STORAGE_KEY, input.value);
+        location.reload();
+      } else {
+        errMsg.textContent = 'Llave incorrecta.';
+      }
+    });
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') btn.click(); });
+    box.appendChild(input);
+    box.appendChild(btn);
+    box.appendChild(errMsg);
+    app.appendChild(box);
   }
 
-  function isStale(r) {
-    if (!r.last_finished_at) return true;
-    const hoursAgo = (Date.now() - new Date(r.last_finished_at).getTime()) / 3600000;
-    return hoursAgo > STALE_HOURS;
+  function fmtDate(iso){
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+  }
+  function fmtAgo(hours, days){
+    if (hours == null) return '—';
+    if (hours < 1) return 'hace minutos';
+    if (hours < 24) return 'hace ' + hours + 'h';
+    if (days < 7) return 'hace ' + days + 'd';
+    if (days < 30) return 'hace ' + Math.floor(days/7) + ' semanas';
+    return 'hace ' + Math.floor(days/30) + ' meses';
+  }
+  function fmtNum(n){
+    if (n == null) return '—';
+    return n.toLocaleString('es-MX');
   }
 
-  function effectiveStatus(r) {
-    if (r.last_status === 'fail') return 'fail';
-    if (r.last_status === 'partial') return 'partial';
-    if (isStale(r)) return 'stale';
-    return r.last_status || '-';
+  function render(rows){
+    var app = $('#app');
+    app.innerHTML = '';
+
+    var header = el('header');
+    header.appendChild(el('h1', null, '🤖 Scrapers Health'));
+    header.appendChild(el('span', {class:'tag'}, 'TEQUIO OPS'));
+    var meta = el('div', {class:'meta'});
+    meta.appendChild(document.createTextNode('Actualizado: ' + new Date().toLocaleString('es-MX')));
+    var refresh = el('button', null, '↻ Refrescar');
+    refresh.addEventListener('click', function(){ load(); });
+    var logout = el('button', null, 'Salir');
+    logout.addEventListener('click', function(){
+      localStorage.removeItem(STORAGE_KEY);
+      location.href = location.pathname;
+    });
+    meta.appendChild(refresh);
+    meta.appendChild(logout);
+    header.appendChild(meta);
+    app.appendChild(header);
+
+    // KPIs
+    var total = rows.length;
+    var green = rows.filter(function(r){ return r.health==='green'; }).length;
+    var yellow = rows.filter(function(r){ return r.health==='yellow'; }).length;
+    var red = rows.filter(function(r){ return r.health==='red'; }).length;
+    var totalRowsToday = rows.filter(function(r){ return r.days_ago === 0 && r.last_status === 'ok'; })
+      .reduce(function(a,r){ return a + (r.last_rows||0); }, 0);
+
+    var kpis = el('div', {class:'kpis'});
+    kpis.appendChild(el('div', {class:'kpi'}, [
+      el('div', {class:'l'}, 'TOTAL SCRAPERS'),
+      el('div', {class:'v'}, String(total))
+    ]));
+    kpis.appendChild(el('div', {class:'kpi green'}, [
+      el('div', {class:'l'}, '✅ SANOS'),
+      el('div', {class:'v'}, String(green))
+    ]));
+    kpis.appendChild(el('div', {class:'kpi yellow'}, [
+      el('div', {class:'l'}, '⚠️ ATENCIÓN'),
+      el('div', {class:'v'}, String(yellow))
+    ]));
+    kpis.appendChild(el('div', {class:'kpi red'}, [
+      el('div', {class:'l'}, '🔴 CRÍTICOS'),
+      el('div', {class:'v'}, String(red))
+    ]));
+    kpis.appendChild(el('div', {class:'kpi'}, [
+      el('div', {class:'l'}, 'ROWS INSERTADAS HOY'),
+      el('div', {class:'v'}, fmtNum(totalRowsToday))
+    ]));
+    app.appendChild(kpis);
+
+    // Table
+    var table = el('table');
+    var thead = el('thead', null, el('tr', null, [
+      el('th', null, ''),
+      el('th', null, 'Scraper'),
+      el('th', null, 'Última corrida'),
+      el('th', null, 'Hace'),
+      el('th', null, 'Status'),
+      el('th', {style:'text-align:right'}, 'Rows'),
+      el('th', {style:'text-align:right'}, 'OK / Total'),
+      el('th', null, 'Fuente / Error')
+    ]));
+    table.appendChild(thead);
+    var tbody = el('tbody');
+    rows.forEach(function(r){
+      var tr = el('tr', {class:'health-'+(r.health||'unknown')});
+      tr.appendChild(el('td', {class:'dot', title:'health: '+r.health}));
+      tr.appendChild(el('td', {class:'mono', style:'font-weight:700'}, r.scraper_slug));
+      tr.appendChild(el('td', {class:'mono'}, fmtDate(r.last_run)));
+      tr.appendChild(el('td', {class:'since'}, fmtAgo(r.hours_ago, r.days_ago)));
+      var st = el('td');
+      st.appendChild(el('span', {class:'badge '+(r.last_status==='ok'?'ok':(r.last_status==='partial'?'partial':'fail'))}, r.last_status || '—'));
+      tr.appendChild(st);
+      tr.appendChild(el('td', {class:'num'}, fmtNum(r.last_rows)));
+      tr.appendChild(el('td', {class:'num', style:'color:var(--text2);font-size:11px'},
+        (r.runs_ok||0) + ' / ' + (r.runs_total||0)
+      ));
+      var ctx = el('td');
+      if (r.last_error){
+        ctx.appendChild(el('div', {class:'err'}, '❌ ' + r.last_error));
+      } else if (r.fuente_url){
+        var a = el('a', {class:'url', href:r.fuente_url, target:'_blank', rel:'noopener'}, r.fuente_url);
+        ctx.appendChild(a);
+      } else {
+        ctx.appendChild(document.createTextNode('—'));
+      }
+      tr.appendChild(ctx);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    app.appendChild(table);
+
+    var note = el('div', {class:'footer-note'},
+      '🦎 Cero Invención — Cada métrica viene de scraper_logs (Supabase). ' +
+      'Verde: corrida reciente con status=ok. Amarillo: stale > 7d o > 50% fallos históricos. Rojo: último status ≠ ok o > 14d.'
+    );
+    app.appendChild(note);
   }
 
-  function filtrar(rows) {
-    const st = fStatus.value;
-    return rows.filter(r => {
-      if (!st) return true;
-      return effectiveStatus(r) === st;
+  function load(){
+    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_scrapers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'Prefer': 'count=none'
+      },
+      body: '{}'
+    })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(rows){ render(rows); })
+    .catch(function(err){
+      $('#app').innerHTML = '<div class="empty">Error: ' + err.message + '</div>';
     });
   }
 
-  function renderStats(rows) {
-    const counts = { ok: 0, fail: 0, partial: 0, stale: 0, total: rows.length };
-    let totalRows = 0;
-    rows.forEach(r => {
-      const eff = effectiveStatus(r);
-      if (counts[eff] != null) counts[eff]++;
-      totalRows += (r.last_rows_inserted || 0) + (r.last_rows_updated || 0);
-    });
-    statsEl.innerHTML = `
-      <div class="stat"><div class="stat-label">Total scrapers</div><div class="stat-value">${counts.total}</div></div>
-      <div class="stat ok"><div class="stat-label">OK</div><div class="stat-value">${counts.ok}</div></div>
-      <div class="stat fail"><div class="stat-label">Fail</div><div class="stat-value">${counts.fail}</div></div>
-      <div class="stat partial"><div class="stat-label">Partial</div><div class="stat-value">${counts.partial}</div></div>
-      <div class="stat stale"><div class="stat-label">Stale (&gt;7d)</div><div class="stat-value">${counts.stale}</div></div>
-      <div class="stat"><div class="stat-label">Filas (ins+upd)</div><div class="stat-value">${totalRows.toLocaleString('es-MX')}</div></div>
-    `;
+  if (!checkAuth()){
+    renderLock();
+  } else {
+    load();
   }
-
-  function renderTabla(rows) {
-    if (!rows.length) {
-      contenido.innerHTML = '<div class="empty"><div class="icon">[--]</div>Sin scrapers en el filtro seleccionado.</div>';
-      return;
-    }
-    const html = `
-      <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Scraper</th>
-            <th>Status</th>
-            <th class="num">Insertadas</th>
-            <th class="num">Actualizadas</th>
-            <th class="num">Runs 30d</th>
-            <th class="num">Fails 30d</th>
-            <th>Ultimo run</th>
-            <th>Duracion</th>
-            <th>Error</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r => {
-            const dur = (r.last_started_at && r.last_finished_at) ? Math.round((new Date(r.last_finished_at) - new Date(r.last_started_at))/1000) + 's' : '-';
-            const eff = effectiveStatus(r);
-            return `<tr>
-              <td><span class="slug">${escapeHtml(r.scraper_slug)}</span>${r.fuente_url ? `<div class="muted"><a href="${escapeHtml(r.fuente_url)}" target="_blank" rel="noopener" style="color:#9ca3af;">fuente</a></div>` : ''}</td>
-              <td><span class="badge ${escapeHtml(eff)}">${escapeHtml(eff)}</span></td>
-              <td class="num">${(r.last_rows_inserted||0).toLocaleString('es-MX')}</td>
-              <td class="num">${(r.last_rows_updated||0).toLocaleString('es-MX')}</td>
-              <td class="num">${(r.runs_30d||0).toLocaleString('es-MX')}</td>
-              <td class="num">${(r.failures_30d||0).toLocaleString('es-MX')}</td>
-              <td title="${escapeHtml(fmtDateFull(r.last_finished_at))}">${fmtDate(r.last_finished_at)}</td>
-              <td>${dur}</td>
-              <td>${r.last_error ? `<div class="err">${escapeHtml(r.last_error)}</div>` : ''}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-      </div>
-    `;
-    contenido.innerHTML = html;
-  }
-
-  function aplicarFiltrosYRender() {
-    const filtrados = filtrar(allRows);
-    renderStats(filtrados);
-    renderTabla(filtrados);
-  }
-
-  async function cargar() {
-    contenido.innerHTML = '<div class="loading">Cargando scrapers...</div>';
-    try {
-      const r = await fetch('/api/data?vista=scrapers_health', { cache: 'no-store' });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
-      // Backend returns { scrapers: [...] }; tolerate other shapes too.
-      const rows = Array.isArray(data) ? data : (data.scrapers || data.items || data.rows || data.data || []);
-      allRows = rows;
-      lastUpdate.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX');
-      aplicarFiltrosYRender();
-    } catch(e) {
-      contenido.innerHTML = '<div class="err-banner">Error al cargar /api/data?vista=scrapers_health: ' + escapeHtml(e.message) + '</div>';
-    }
-  }
-
-  btnRefresh.addEventListener('click', cargar);
-  fStatus.addEventListener('change', aplicarFiltrosYRender);
-
-  cargar();
 })();
 </script>
 </body>
