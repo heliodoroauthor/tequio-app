@@ -123,10 +123,27 @@ def discover_dataset_url():
         print(f"[sesnsp] usando override URL: {url}")
         return url, "OVERRIDE"
     print(f"[sesnsp] descubriendo URL desde {SESNSP_PAGE}")
-    r = _CS.get(SESNSP_PAGE, headers={"User-Agent": UA}, timeout=60)
-    r.raise_for_status()
-    print(f"[sesnsp] HTML len={len(r.text)} status={r.status_code}")
-    url, label = find_dataset_url(r.text)
+    # FIX-40b: usar Playwright para resolver Imperva crypto challenge
+    print(f"[sesnsp] descubriendo URL via Playwright (bypass Imperva)")
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as _p:
+        _br = _p.chromium.launch(headless=True, args=["--no-sandbox","--disable-blink-features=AutomationControlled"])
+        _ctx = _br.new_context(user_agent=UA, locale="es-MX", viewport={"width":1366,"height":768})
+        _pg = _ctx.new_page()
+        _pg.goto(SESNSP_PAGE, wait_until="domcontentloaded", timeout=90000)
+        # Esperar a que el challenge auto-resuelva y la pagina real cargue
+        _resolved = False
+        for _try in range(12):  # hasta 60s
+            _pg.wait_for_timeout(5000)
+            _title = _pg.title()
+            if "Challenge" not in _title and "Validation" not in _title:
+                _resolved = True
+                break
+            print(f"[sesnsp] Playwright wait try={_try+1} title={_title!r}")
+        html = _pg.content()
+        print(f"[sesnsp] Playwright HTML len={len(html)} title={_pg.title()!r} resolved={_resolved}")
+        _br.close()
+    url, label = find_dataset_url(html)
     if not url:
         raise RuntimeError("No se encontro link SharePoint con 'Fuero comun - Delitos - municipal'")
     print(f"[sesnsp] dataset elegido: {label[:120]!r}")
