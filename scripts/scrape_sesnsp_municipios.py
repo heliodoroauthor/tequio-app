@@ -87,7 +87,7 @@ def find_dataset_url(html):
     if not candidates:
         # FIX-40 dbg: log all anchors to BD so we can see what changed
         try:
-            sample = [(t[:120], h[:200]) for a in anchors[:80] for t,h in [((a.get_text() or "").strip(), a.get("href",""))] if t or h]
+            sample = {"n_anchors": len(anchors), "html_head": html[:500], "html_tail": html[-500:], "anchors_first10": [(((a.get_text() or "").strip())[:80], (a.get("href","") or "")[:150]) for a in anchors[:10]]}
             _payload = [{
                 "scraper_slug": "sesnsp_municipios",
                 "status": "partial",
@@ -97,7 +97,7 @@ def find_dataset_url(html):
                 "fuente_url": "https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva",
                 "http_status": 200,
                 "error_msg": "DEBUG: anchors sample",
-                "notes": json.dumps(sample)[:1000],
+                "notes": json.dumps(sample, ensure_ascii=False)[:2500],
                 "started_at": datetime.now(timezone.utc).isoformat(),
                 "finished_at": datetime.now(timezone.utc).isoformat(),
             }]
