@@ -77,17 +77,24 @@ async function searchLegalContext(apiKey, queryText) {
 function buildRagSystem(originalSystem, docs) {
   if (!docs || docs.length === 0) return originalSystem;
 
-  let context = '\n\n📚 FUENTES LEGALES MEXICANAS RELEVANTES (úsalas para responder):\n';
+  let context = '\n\n📚 FUENTES LEGALES MEXICANAS (texto literal del PDF oficial · Cero Invención):\n';
   let usedChars = 0;
   for (let i = 0; i < docs.length; i++) {
     const d = docs[i];
-    const tipo = d.tipo === 'ley' ? 'LEY' : 'JURISPRUDENCIA';
-    const block = `\n── ${tipo} ${i + 1}: ${d.titulo || ''} ──\nFuente: ${d.fuente || ''}${d.fecha ? ' · ' + d.fecha : ''}\n${(d.texto || '').substring(0, 800)}\n`;
+    let header;
+    if (d.tipo === 'articulo' && d.articulo) {
+      header = `── Artículo ${d.articulo} de ${d.titulo || ''} ──`;
+    } else if (d.tipo === 'ley') {
+      header = `── LEY ${i + 1}: ${d.titulo || ''} (referencia, sin texto completo) ──`;
+    } else {
+      header = `── ${(d.tipo || 'FUENTE').toUpperCase()} ${i + 1}: ${d.titulo || ''} ──`;
+    }
+    const block = `\n${header}\nFuente: ${d.fuente || ''}${d.fecha ? ' · ' + d.fecha : ''}\n${(d.texto || '').substring(0, 1200)}\n`;
     if (usedChars + block.length > RAG_MAX_CONTEXT_CHARS) break;
     context += block;
     usedChars += block.length;
   }
-  context += `\n\nINSTRUCCIÓN: cita estas fuentes explícitamente cuando sean pertinentes. Si las fuentes NO cubren la pregunta, indica honestamente que no encontraste leyes específicas y aporta orientación general.\n`;
+  context += `\n\nINSTRUCCIONES ESTRICTAS:\n1. Cuando cites un artículo, usa formato exacto: "Artículo X de [Nombre de la Ley]".\n2. Si la respuesta requiere un artículo NO incluido arriba, di literalmente: "No tengo el texto del Artículo X cargado completo" y NO inventes el contenido.\n3. Si las fuentes NO cubren la pregunta del usuario, di honestamente que no encontraste el artículo aplicable.\n4. Nunca confundas tu conocimiento general con los textos provistos. Marca claramente qué viene de las fuentes y qué es orientación general.\n`;
 
   return (originalSystem || '') + context;
 }
