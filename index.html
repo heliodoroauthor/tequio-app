@@ -5805,103 +5805,56 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── CHAT COMUNITARIO ───── -->
     <div id="page-comunidad" class="page">
       <div class="content">
-        <div class="section-header mb-16">
-          <div>
-            <div style="font-size:22px;font-weight:700">💬 Chat Comunitario</div>
-            <div class="card-subtitle">Denuncias, ideas y alertas de tu estado · Voz ciudadana en tiempo real</div>
-          </div>
-          <div id="chat-online-count" style="font-size:11px;color:#a5b4fc;font-weight:600;white-space:nowrap">🧪 Modo demo</div>
-        </div>
-        <!-- Banner: chat simulado -->
-        <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:16px;flex-shrink:0;margin-top:1px">🧪</span>
-          <div style="font-size:12px;color:#a5b4fc;line-height:1.6">
-            <strong>Demostración del chat comunitario.</strong> Los mensajes que ves son ejemplos simulados — no hay usuarios reales leyendo. En producción, este chat conectará con ciudadanos reales de tu estado. <strong>No compartas información personal o sensible aquí.</strong>
-          </div>
-        </div>
-        <!-- Selector de estado -->
-        <div class="card mb-16" style="padding:14px 16px">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">📍 Ver mensajes de:</span>
-            <select id="chat-estado-sel" onchange="cambiarEstadoChat(this.value)"
-              style="flex:1;min-width:160px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer">
-              <option>Ciudad de México</option>
-              <option>Jalisco</option>
-              <option>Estado de México</option>
-              <option>Nuevo León</option>
-              <option>Veracruz</option>
-              <option>Puebla</option>
-              <option>Guanajuato</option>
-              <option>Chiapas</option>
-              <option>Oaxaca</option>
-              <option>Guerrero</option>
-              <option>Michoacán</option>
-              <option>Tabasco</option>
-              <option>Hidalgo</option>
-              <option>Tamaulipas</option>
-              <option>Sonora</option>
-              <option>Sinaloa</option>
-              <option>Baja California</option>
-              <option>Querétaro</option>
-              <option>Yucatán</option>
-              <option>Coahuila</option>
-              <option>Durango</option>
-              <option>Nayarit</option>
-              <option>San Luis Potosí</option>
-              <option>Nacional</option>
-            </select>
+        <div style="background:linear-gradient(135deg,#312e81 0%,#5b21b6 50%,#312e81 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(91,33,182,0.30)">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <div style="font-size:54px;line-height:1">💬</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:26px;font-weight:800;margin:0;color:#fff;font-family:var(--font-display)">Plaza Pública · Discord</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Conversación ciudadana en vivo · canales por estado y por tema · moderación humana 24/7.</p>
+            </div>
+            <a href="https://discord.gg/" target="_blank" rel="noopener" id="discord-invite-btn"
+               style="background:rgba(255,255,255,0.18);color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.25);white-space:nowrap">
+              Abrir en Discord →
+            </a>
           </div>
         </div>
-        <!-- Filtros -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
-          <button id="cm-todos" onclick="filtrarMensajes('todos')"
-            style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            Todos
-          </button>
-          <button id="cm-denuncia" onclick="filtrarMensajes('denuncia')"
-            style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            🚨 Denuncias
-          </button>
-          <button id="cm-idea" onclick="filtrarMensajes('idea')"
-            style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            💡 Ideas
-          </button>
-          <button id="cm-organizacion" onclick="filtrarMensajes('organizacion')"
-            style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            ✊ Organización
-          </button>
-          <button id="cm-alerta" onclick="filtrarMensajes('alerta')"
-            style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-            ⚠️ Alertas
-          </button>
+
+        <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.30);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#c4b5fd;line-height:1.6">
+          🦎 <strong>Cero Invención:</strong> Tequio NO modera el chat. Los mensajes son de usuarios reales con cuenta Discord. Para escribir necesitas iniciar sesión; para leer no.
         </div>
-        <!-- Feed de mensajes -->
-        <div id="chat-feed" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-          <!-- Renderizado por JS -->
+
+        <!-- WidgetBot embed -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:600px;max-height:80vh">
+          <iframe
+            src="https://e.widgetbot.io/channels/1507826237169467562/1507826238125772923"
+            style="width:100%;height:100%;border:none;display:block"
+            allow="clipboard-write"
+            referrerpolicy="no-referrer"
+            title="Tequio Plaza Pública · Discord"
+          ></iframe>
         </div>
-        <!-- Formulario para publicar -->
-        <div class="card" style="border-color:rgba(99,102,241,0.35);background:linear-gradient(135deg,rgba(99,102,241,0.05),rgba(168,85,247,0.03))">
-          <div style="font-size:13px;font-weight:700;margin-bottom:12px">✍️ Publicar un mensaje</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-            <input id="cm-nick" type="text" placeholder="Tu apodo (ej: Vecino_CDMX)"
-              style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit">
-            <select id="cm-tipo"
-              style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;cursor:pointer">
-              <option value="idea">💡 Idea</option>
-              <option value="denuncia">🚨 Denuncia</option>
-              <option value="alerta">⚠️ Alerta</option>
-              <option value="organizacion">✊ Organización</option>
-            </select>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px">🌎</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Canales por estado</div>
           </div>
-          <textarea id="cm-texto" rows="3" placeholder="Escribe tu denuncia, idea, alerta u organización... (mínimo 5 caracteres)"
-            style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
-          <button onclick="publicarMensaje()"
-            style="background:linear-gradient(135deg,var(--accent),var(--purple));border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
-            📢 Publicar
-          </button>
-          <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.6">
-            🧪 <strong style="color:#a5b4fc">Modo demo</strong> · Tus mensajes se guardan solo en este dispositivo. No hay comunidad real conectada. No compartas datos personales.
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px">📋</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Canales por tema</div>
           </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px">🔐</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Moderación humana</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px">🆓</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Gratis · sin ads</div>
+          </div>
+        </div>
+
+        <div style="padding:20px 0 0;font-size:11px;color:var(--text3);text-align:center;line-height:1.6">
+          Comunidad alojada en Discord · Server ID <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px">1507826237169467562</code> · Tequio NO almacena tus mensajes (los aloja Discord)
         </div>
       </div>
     </div>
