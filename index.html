@@ -2138,6 +2138,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ── ACCIÓN ── -->
     <div class="nav-section">
       <div class="nav-label">🛡️ Acción</div>
+      <div class="nav-item" onclick="cargarPanel('envivo')" style="background:linear-gradient(135deg,rgba(239,68,68,0.10),rgba(127,29,29,0.05));border-left:3px solid #ef4444">
+        <span class="icon">📺</span> <span>En Vivo</span> <span id="nav-live-badge" style="display:none;background:#dc2626;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:auto;animation:livepulse 1.5s infinite">🔴 LIVE</span>
+      </div>
       <div class="nav-item" onclick="cargarPanel('emergencia')" style="background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(127,29,29,0.05)); border-left: 3px solid #dc2626;">
         <span class="icon">🚨</span> Modo Emergencia
       </div>
