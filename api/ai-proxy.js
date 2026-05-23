@@ -54,15 +54,15 @@ async function searchLegalContext(apiKey, queryText) {
     const embedding = embedData?.embedding?.values;
     if (!Array.isArray(embedding)) return [];
 
-    // 2) Call Supabase RPC match_legal_documents
-    const rpcRes = await fetch(`${supaUrl}/rest/v1/rpc/match_legal_documents`, {
+    // 2) Call Supabase RPC match_legal_chunks_hybrid (chunks FTS + leyes vector)
+    const rpcRes = await fetch(`${supaUrl}/rest/v1/rpc/match_legal_chunks_hybrid`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         apikey: supaKey,
         Authorization: `Bearer ${supaKey}`,
       },
-      body: JSON.stringify({ query_embedding: embedding, match_count: RAG_TOP_K }),
+      body: JSON.stringify({ query_embedding: embedding, query_text: queryText.substring(0, 2000), match_count: RAG_TOP_K }),
     });
     if (!rpcRes.ok) return [];
     const docs = await rpcRes.json();
