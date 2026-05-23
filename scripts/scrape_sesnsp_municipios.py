@@ -85,6 +85,25 @@ def find_dataset_url(html):
     for h, t in candidates[:10]:
         print(f"  - {t[:80]!r}: {h[:100]}")
     if not candidates:
+        # FIX-40 dbg: log all anchors to BD so we can see what changed
+        try:
+            sample = [(t[:120], h[:200]) for a in anchors[:80] for t,h in [((a.get_text() or "").strip(), a.get("href",""))] if t or h]
+            _payload = [{
+                "scraper_slug": "sesnsp_municipios",
+                "status": "partial",
+                "rows_inserted": 0,
+                "rows_updated": 0,
+                "rows_skipped": 0,
+                "fuente_url": "https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva",
+                "http_status": 200,
+                "error_msg": "DEBUG: anchors sample",
+                "notes": json.dumps(sample)[:1000],
+                "started_at": datetime.now(timezone.utc).isoformat(),
+                "finished_at": datetime.now(timezone.utc).isoformat(),
+            }]
+            requests.post(f"{SB_URL}/rest/v1/scraper_logs", headers={"apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}", "Content-Type":"application/json", "Prefer":"return=minimal"}, json=_payload, timeout=10)
+        except Exception as _e:
+            print(f"[sesnsp dbg log err] {_e}")
         return None, None
 
     def score(text):
