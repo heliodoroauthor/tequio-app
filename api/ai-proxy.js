@@ -163,6 +163,7 @@ function geminiToAnthropic(data, originalModel, docs) {
     tequio_sources: (docs || []).map(d => ({
       tipo: d.tipo,
       titulo: d.titulo,
+      articulo: d.articulo || null,
       fuente: d.fuente,
       fecha: d.fecha,
       similarity: d.similarity,
