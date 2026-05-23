@@ -7463,6 +7463,23 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
       </div>
     </div>
+<!-- ═════ MODO SILENCIO · overlay fullscreen ═════ -->
+    <div id="silencio-overlay" role="dialog" aria-modal="true" aria-label="Mis derechos en pantalla grande" style="display:none;position:fixed;inset:0;z-index:100000;background:linear-gradient(135deg,#0a0f1e 0%,#1a0f0f 100%);color:#fff;flex-direction:column;font-family:var(--font-body)">
+      <div style="padding:14px 18px;background:rgba(220,38,38,0.20);border-bottom:1px solid rgba(220,38,38,0.45);display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div style="flex:1">
+          <div style="font-size:11px;letter-spacing:2px;color:#fca5a5;font-weight:800">📃 MUESTRA ESTA PANTALLA AL OFICIAL</div>
+          <div style="font-size:11px;color:#fca5a5;opacity:0.85;margin-top:3px;line-height:1.4">Permanece en silencio. Tu silencio es tu derecho · Art. 20 CPEUM</div>
+        </div>
+        <button onclick="silencioCerrar()" aria-label="Cerrar modo silencio" style="background:rgba(255,255,255,0.18);border:none;color:#fff;width:46px;height:46px;border-radius:12px;font-size:22px;cursor:pointer;font-family:inherit;flex-shrink:0">✕</button>
+      </div>
+      <div id="silencio-slide" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;overflow-y:auto"></div>
+      <div style="padding:16px 18px;background:rgba(0,0,0,0.55);display:flex;align-items:center;gap:12px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.08)">
+        <button onclick="silencioPrev()" id="silencio-prev" aria-label="Derecho anterior" style="background:rgba(255,255,255,0.12);border:none;color:#fff;width:64px;height:64px;border-radius:14px;font-size:28px;cursor:pointer;font-family:inherit;font-weight:800">←</button>
+        <div id="silencio-paginador" style="flex:1;text-align:center;font-size:15px;color:#fca5a5;font-weight:800;letter-spacing:1px">1 / 5</div>
+        <button onclick="silencioNext()" id="silencio-next" aria-label="Derecho siguiente" style="background:rgba(255,255,255,0.12);border:none;color:#fff;width:64px;height:64px;border-radius:14px;font-size:28px;cursor:pointer;font-family:inherit;font-weight:800">→</button>
+      </div>
+    </div>
+    <!-- ═════ /MODO SILENCIO ═════ -->
     <!-- ───── GENERADOR DE ACCIONES ───── -->
     <div id="page-acciones" class="page">
       <div class="content" style="max-width:900px">
