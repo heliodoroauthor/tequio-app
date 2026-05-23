@@ -1,0 +1,38 @@
+name: Scrape Leyes Estatales (manual)
+
+# FIX-39: descarga texto de marco juridico de 32 congresos estatales.
+# HTML/PDF/Playwright fallback automatico.
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Por que estas corriendo el scrape (queda en logs)'
+        required: false
+        default: 'manual scrape estatales'
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml pdfplumber playwright
+          python -m playwright install chromium --with-deps
+      - name: Run scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          echo "Reason: ${{ inputs.reason }}"
+          python scripts/scrape_leyes_estatales.py
