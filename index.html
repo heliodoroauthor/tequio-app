@@ -21554,6 +21554,92 @@ let REDES_ENLACES = [
   {a:'banxico',b:'judicatura',tipo:'institucional',peso:1},
   {a:'sheinbaum',b:'ine',tipo:'institucional',peso:2},
 ];
+
+// ═════ Hydratación desde DB · dashboard_red_poder ═════
+// Reemplaza el seed hardcoded por curaduría en vivo de Supabase
+// si la respuesta es válida. Si falla, el seed queda como fallback.
+(function hydrateRedesDeDB(){
+  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  // Map id->emoji (reusado del seed)
+  var EMOJI_FALLBACK = {politico:'🏛️',empresa:'🏢',medio:'📺',sociedad:'✊',academico:'🎓',militar:'⭐',religioso:'⛪'};
+  // Tipos DB → tipos del JS (4 buckets)
+  function mapTipo(t){
+    if (t === 'empresa' || t === 'medio' || t === 'sociedad') return t;
+    if (t === 'academico' || t === 'religioso') return 'sociedad';
+    return 'politico';
+  }
+  function tryFetch(){
+    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_red_poder', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON },
+      body: JSON.stringify({ p_limit: 35 })
+    })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data){
+      if (!data || !data.nodes || !Array.isArray(data.nodes) || data.nodes.length < 5) return;
+      // Mantener emojis del seed para los que ya existían
+      var emojiBySlug = {};
+      try { REDES_NODOS.forEach(function(n){ emojiBySlug[n.id] = n.emoji; }); } catch(e){}
+      // Mapeo de slugs DB largos → ids cortos del seed (para alineación visual)
+      var slugAlias = {
+        'claudia-sheinbaum':'sheinbaum',
+        'ricardo-monreal':'monreal',
+        'carlos-slim':'slim',
+        'ricardo-salinas':'salinas',
+        'gerardo-fernandez-norona':'noroña'
+      };
+      var idOf = function(slug){ return slugAlias[slug] || slug; };
+      // Construir conexiones por nodo desde edges
+      var conexionesPorId = {};
+      (data.edges || []).forEach(function(e){
+        var a = idOf(e.origen), b = idOf(e.destino);
+        conexionesPorId[a] = conexionesPorId[a] || [];
+        conexionesPorId[b] = conexionesPorId[b] || [];
+        if (conexionesPorId[a].indexOf(b) < 0) conexionesPorId[a].push(b);
+        if (conexionesPorId[b].indexOf(a) < 0) conexionesPorId[b].push(a);
+      });
+      // Reemplazar REDES_NODOS preservando el array
+      var nuevosNodos = data.nodes.map(function(n){
+        var id = idOf(n.id);
+        var tipo = mapTipo(n.tipo);
+        var peso = Math.max(1, Math.min(5, Number(n.peso) || 3));
+        var nombre = (n.label || '').replace(/ /g, '\n');
+        return {
+          id: id,
+          label: nombre,
+          tipo: tipo,
+          peso: peso,
+          emoji: emojiBySlug[id] || EMOJI_FALLBACK[tipo] || '◆',
+          info: n.info || '',
+          conexiones: conexionesPorId[id] || []
+        };
+      });
+      // Reemplazar REDES_ENLACES desde edges
+      var nuevosEnlaces = (data.edges || []).map(function(e){
+        var a = idOf(e.origen), b = idOf(e.destino);
+        // Map tipos DB válidos al CSS color que ya tenemos
+        var t = e.tipo;
+        if (t !== 'institucional' && t !== 'financiero' && t !== 'mediatico') t = 'partido';
+        return { a:a, b:b, tipo:t, peso: 2 };
+      });
+      REDES_NODOS.length = 0;
+      Array.prototype.push.apply(REDES_NODOS, nuevosNodos);
+      REDES_ENLACES.length = 0;
+      Array.prototype.push.apply(REDES_ENLACES, nuevosEnlaces);
+      // Si la red ya está dibujada, re-init
+      if (typeof window.initRedes === 'function' && document.getElementById('redes-canvas')) {
+        try { window.initRedes(); } catch(e){}
+      }
+      console.log('[Tequio] Red de Poder hydratada desde DB:', nuevosNodos.length, 'nodos /', nuevosEnlaces.length, 'enlaces');
+    })
+    .catch(function(){ /* silencio: queda el seed como fallback */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryFetch);
+  else setTimeout(tryFetch, 0);
+})();
+// ═════ /Hydratación ═════
+
 // ── Estado del grafo ──
 let redesCanvas, redesCtx;
 let redesNodos = [];
