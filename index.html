@@ -19973,6 +19973,82 @@ const VOZ_DERECHOS_CRITICOS = [
   'Tercero: No firmaré ningún documento sin que mi abogado lo revise primero.',
   'Estos derechos están garantizados por el artículo 20 de la Constitución Política de los Estados Unidos Mexicanos.',
 ];
+
+// ═════ MODO SILENCIO · control del overlay fullscreen ═════
+// Para situaciones de tensión donde TTS puede ser confrontacional.
+// El usuario muestra la pantalla al oficial sin generar audio.
+const SILENCIO_SLIDES = [
+  { icon: '🔇', titulo: 'PERMANEZCO EN SILENCIO', texto: 'Hago uso de mi derecho constitucional al silencio. No declararé nada sin la presencia de mi abogado.', ref: 'Art. 20-B-II CPEUM' },
+  { icon: '⚖️', titulo: 'EXIJO UN ABOGADO', texto: 'Solicito hablar con un abogado de inmediato, antes de responder cualquier pregunta.', ref: 'Art. 20-B-VIII CPEUM' },
+  { icon: '✍️', titulo: 'NO FIRMARÉ NADA', texto: 'No firmaré ningún documento sin que mi abogado lo revise primero.', ref: 'Art. 20-B-II CPEUM' },
+  { icon: '❓', titulo: 'MOTIVO DE LA DETENCIÓN', texto: 'Solicito que me informen el motivo legal exacto de mi detención.', ref: 'Art. 16 y 20-B-III CPEUM' },
+  { icon: '📜', titulo: 'BASE CONSTITUCIONAL', texto: 'Estos derechos están garantizados por el artículo 20 de la Constitución Política de los Estados Unidos Mexicanos.', ref: 'CPEUM · vigente' }
+];
+let silencioIdx = 0;
+let __silencioWakeLock = null;
+function silencioRender() {
+  const s = SILENCIO_SLIDES[silencioIdx];
+  const total = SILENCIO_SLIDES.length;
+  const slide = document.getElementById('silencio-slide');
+  if (!slide) return;
+  slide.innerHTML =
+    '<div style="font-size:72px;line-height:1;margin-bottom:18px" aria-hidden="true">' + s.icon + '</div>' +
+    '<div style="font-size:clamp(26px,5.5vw,40px);font-weight:900;letter-spacing:-0.5px;line-height:1.12;margin-bottom:22px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.6);max-width:760px">' + s.titulo + '</div>' +
+    '<div style="font-size:clamp(18px,3.2vw,24px);line-height:1.5;color:#fef2f2;max-width:680px;font-weight:500">' + s.texto + '</div>' +
+    '<div style="margin-top:24px;font-size:11px;color:#fca5a5;letter-spacing:1.5px;font-weight:700;opacity:0.85">' + s.ref + '</div>';
+  const pag = document.getElementById('silencio-paginador');
+  if (pag) pag.textContent = (silencioIdx + 1) + ' / ' + total;
+  const prev = document.getElementById('silencio-prev');
+  if (prev) { prev.style.opacity = silencioIdx === 0 ? '0.3' : '1'; prev.disabled = silencioIdx === 0; }
+  const next = document.getElementById('silencio-next');
+  if (next) { next.style.opacity = silencioIdx === total - 1 ? '0.3' : '1'; next.disabled = silencioIdx === total - 1; }
+}
+function silencioAbrir() {
+  silencioIdx = 0;
+  const ov = document.getElementById('silencio-overlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  document.documentElement.style.overflow = 'hidden';
+  silencioRender();
+  // Wake lock — mantiene pantalla encendida durante la detención
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').then(w => { __silencioWakeLock = w; }).catch(() => {});
+  }
+  // Atajos de teclado
+  document.addEventListener('keydown', silencioKey);
+}
+function silencioCerrar() {
+  const ov = document.getElementById('silencio-overlay');
+  if (ov) ov.style.display = 'none';
+  document.documentElement.style.overflow = '';
+  if (__silencioWakeLock) { try { __silencioWakeLock.release(); } catch (e) {} __silencioWakeLock = null; }
+  document.removeEventListener('keydown', silencioKey);
+}
+function silencioPrev() { if (silencioIdx > 0) { silencioIdx--; silencioRender(); } }
+function silencioNext() { if (silencioIdx < SILENCIO_SLIDES.length - 1) { silencioIdx++; silencioRender(); } }
+function silencioKey(e) {
+  if (e.key === 'Escape') silencioCerrar();
+  else if (e.key === 'ArrowLeft') silencioPrev();
+  else if (e.key === 'ArrowRight' || e.key === ' ') silencioNext();
+}
+// Swipe táctil
+(function attachSilencioSwipe(){
+  let x0 = null;
+  document.addEventListener('touchstart', function(e){
+    const ov = document.getElementById('silencio-overlay');
+    if (!ov || ov.style.display !== 'flex') return;
+    x0 = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    const ov = document.getElementById('silencio-overlay');
+    if (!ov || ov.style.display !== 'flex' || x0 == null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) { if (dx < 0) silencioNext(); else silencioPrev(); }
+    x0 = null;
+  }, { passive: true });
+})();
+// ═════ /MODO SILENCIO ═════
+
 let vozSpeaking   = false;
 let vozSupportOk  = null;  // null = not checked, true/false after check
 function vozCheckSupport() {
