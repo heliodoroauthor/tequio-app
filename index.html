@@ -24828,7 +24828,12 @@ document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
     }
     if (typeof pib === 'number') {
       const elPib = document.querySelector('[data-deuda-pib]');
-      if (elPib) elPib.textContent = pib.toFixed(1) + '% PIB · SHCP';
+      if (elPib) {
+        const yr = u.anio || '';
+        const estTag = u.es_estimacion ? ' (est.)' : '';
+        elPib.textContent = pib.toFixed(1) + '% PIB · SHCP ' + yr + estTag;
+        if (u.es_estimacion) elPib.title = 'Cifra estimada (PEF). Se actualiza con cierre fiscal definitivo.';
+      }
     }
   } catch(e){}
 })();
