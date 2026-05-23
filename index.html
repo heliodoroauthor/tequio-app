@@ -5823,16 +5823,35 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           🦎 <strong>Cero Invención:</strong> Tequio NO modera el chat. Los mensajes son de usuarios reales con cuenta Discord. Para escribir necesitas iniciar sesión; para leer no.
         </div>
 
-        <!-- WidgetBot embed -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:600px;max-height:80vh">
-          <iframe
-            src="https://e.widgetbot.io/channels/1507826237169467562/1507826238125772923"
-            style="width:100%;height:100%;border:none;display:block"
-            allow="clipboard-write"
-            referrerpolicy="no-referrer"
-            title="Tequio Plaza Pública · Discord"
-          ></iframe>
+        <!-- Discord Native Widget · funciona sin invitar bot extra -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" id="discord-grid">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:500px;display:flex;align-items:center;justify-content:center">
+            <iframe
+              src="https://discord.com/widget?id=1507826237169467562&theme=dark"
+              width="350" height="500"
+              style="border:none;display:block;max-width:100%"
+              allowtransparency="true"
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+              title="Tequio Plaza Pública · Discord"
+            ></iframe>
+          </div>
+          <div style="background:linear-gradient(160deg,#1e1b4b,#312e81);border:1px solid rgba(99,102,241,0.4);border-radius:14px;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px">
+            <div style="font-size:36px">💬</div>
+            <h3 style="font-size:20px;color:#fff;margin:0;font-family:var(--font-display);line-height:1.2">¿Quieres ver el chat completo?</h3>
+            <p style="font-size:13px;color:#c4b5fd;line-height:1.5;margin:0">Abre el server en Discord (web/app) para leer y participar en todos los canales por estado y por tema.</p>
+            <a href="https://discord.com/channels/1507826237169467562" target="_blank" rel="noopener"
+               style="background:#5865F2;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 00-.07.03c-.18.33-.39.76-.53 1.09-1.6-.24-3.2-.24-4.8 0-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09-.01.11-.52.31-1.07.56-1.64.78-.04.01-.05.06-.04.09.32.61.68 1.19 1.07 1.74.03.02.06.03.09.02 1.72-.53 3.45-1.33 5.25-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12 0 1.17-.83 2.12-1.89 2.12z"/></svg>
+              Abrir Discord
+            </a>
+            <div style="font-size:11px;color:#a5b4fc;line-height:1.5;margin-top:auto">
+              💡 Para ver el chat embebido aquí mismo, instala el bot WidgetBot en <a href="https://invite.widgetbot.io/" target="_blank" style="color:#fde68a">invite.widgetbot.io</a>
+            </div>
+          </div>
         </div>
+        <style>
+          @media (max-width: 700px) { #discord-grid { grid-template-columns: 1fr !important; } }
+        </style>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
