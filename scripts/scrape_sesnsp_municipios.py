@@ -23,6 +23,13 @@ import zipfile
 from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
+try:
+    import cloudscraper
+    _CS = cloudscraper.create_scraper(browser={"browser":"chrome","platform":"windows","mobile":False})
+    print("[sesnsp] cloudscraper activo para bypass Imperva")
+except Exception as _e:
+    import requests as _CS
+    print(f"[sesnsp] cloudscraper NO disponible ({_e}); usando requests")
 
 SB_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SB_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -97,7 +104,7 @@ def discover_dataset_url():
         print(f"[sesnsp] usando override URL: {url}")
         return url, "OVERRIDE"
     print(f"[sesnsp] descubriendo URL desde {SESNSP_PAGE}")
-    r = requests.get(SESNSP_PAGE, headers={"User-Agent": UA}, timeout=60)
+    r = _CS.get(SESNSP_PAGE, headers={"User-Agent": UA}, timeout=60)
     r.raise_for_status()
     print(f"[sesnsp] HTML len={len(r.text)} status={r.status_code}")
     url, label = find_dataset_url(r.text)
