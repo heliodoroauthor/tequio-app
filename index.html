@@ -7196,7 +7196,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           <!-- Botones de voz -->
           <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
             <!-- BOTÓN PRINCIPAL — derechos críticos -->
-            <button id="voz-btn-main" onclick="vozLeerDerechosCriticos(this)"
+            <!-- MODO SILENCIO · pantalla grande para mostrar al oficial sin audio --><button id="silencio-btn-main" onclick="silencioAbrir()" style="width:100%;padding:16px 20px;background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid #475569;border-radius:12px;color:#e2e8f0;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;transition:all 0.15s;margin-bottom:10px" onmouseover="this.style.background='linear-gradient(135deg,#334155,#1e293b)'" onmouseout="this.style.background='linear-gradient(135deg,#1e293b,#0f172a)'"><span style="font-size:22px">🤫</span> MODO SILENCIO · MOSTRAR AL OFICIAL</button><!-- TTS · lee derechos en voz alta --><button id="voz-btn-main" onclick="vozLeerDerechosCriticos(this)"
               style="width:100%;padding:16px 20px;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;transition:opacity 0.15s;box-shadow:0 4px 16px rgba(220,38,38,0.35)"
               onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
               <span style="font-size:22px">🎤</span>
