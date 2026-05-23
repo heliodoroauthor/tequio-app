@@ -16968,6 +16968,57 @@ let embMexData = [
   { pais:'Venezuela', ciudad:'(Sin embajador residente)', flag:'🇻🇪', titular:'Relaciones suspendidas (2024)', cargo:'— ', desde:'2024', nota:'México no reconoció resultados electorales de 2024. Sin embajador residente. Normalización parcial en proceso.', temas:['Crisis diplomática','DDHH','Elecciones'] },
   { pais:'Ecuador', ciudad:'(Sin relaciones plenas)', flag:'🇪🇨', titular:'Relaciones rotas (abr 2024)', cargo:'—', desde:'2024', nota:'México rompió relaciones por allanamiento de su embajada para detener a Jorge Glas. Caso ante la CIJ.', temas:['Asilo diplomático','CIJ','Crisis'] },
 ];
+
+// ═════ Hydratación embMexData desde DB · dashboard_embajadas_mx ═════
+// Reemplaza el seed (18 hardcoded) por curaduría en vivo si la respuesta es válida.
+// Si falla, el seed queda como fallback.
+(function hydrateEmbMex(){
+  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  function tryFetch(){
+    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_embajadas_mx', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON },
+      body: JSON.stringify({ p_solo_curadas: true })
+    })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(data){
+      if (!data || !Array.isArray(data.embajadas) || data.embajadas.length < 5) return;
+      // Conservar ciudad del seed (la DB no la tiene)
+      var ciudadBySlug = {};
+      try { embMexData.forEach(function(e){ ciudadBySlug[(e.pais||'').toLowerCase()] = e.ciudad; }); } catch(e){}
+      var nuevos = data.embajadas.map(function(em){
+        var key = (em.pais || '').toLowerCase();
+        return {
+          pais: em.pais || '',
+          ciudad: ciudadBySlug[key] || '(según directorio SRE)',
+          flag: em.flag || '🏛️',
+          titular: em.titular || 'Sin info',
+          cargo: em.cargo || '',
+          desde: em.desde || '',
+          nota: em.nota || '',
+          temas: Array.isArray(em.temas) ? em.temas : []
+        };
+      });
+      embMexData.length = 0;
+      Array.prototype.push.apply(embMexData, nuevos);
+      // Si la vista de embajadas ya está renderizada, re-render
+      if (typeof window.renderDiplEmbajadasMX === 'function') {
+        try { window.renderDiplEmbajadasMX(); } catch(e){}
+      } else if (document.getElementById('dipl-embajadas-mx-grid')) {
+        // Trigger refresh por tab si la página geopolitica está activa
+        var tab = document.querySelector('[onclick*="dipl-embajadas-mx"]');
+        if (tab && tab.classList.contains('active')) tab.click();
+      }
+      console.log('[Tequio] embMexData hydratado desde DB:', nuevos.length, 'embajadas (de', data.total, 'totales,', data.curadas, 'curadas)');
+    })
+    .catch(function(){ /* fallback al seed */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryFetch);
+  else setTimeout(tryFetch, 0);
+})();
+// ═════ /Hydratación embajadas ═════
+
 // ── Data: Embajadas extranjeras en México ──
 const embExtData = [
   { pais:'Estados Unidos', ciudad:'CDMX · Paseo de la Reforma 305', flag:'🇺🇸', titular:'Ronald Johnson (encargado de negocios)', cargo:'Encargado de Negocios', nota:'La embajada más grande del mundo en México. Visa section, cooperación en seguridad, DEA, ATF.', temas:['T-MEC','Seguridad','Migración','Energía'] },
