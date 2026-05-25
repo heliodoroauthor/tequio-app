@@ -135,7 +135,7 @@ footer a{color:var(--muted)}
 </head>
 <body>
 <div class="wrap">
-<a href="/panel/buscador.html" class="back">← Otro municipio</a>
+<a href="#" class="back" onclick="event.preventDefault();try{if(window.parent&&window.parent!==window&&window.parent.history){window.parent.history.back();return;}}catch(e){}window.location.href='/panel/buscador.html';">← Atrás</a>
 
 <div id="content">
 <div class="loading">Cargando datos del municipio…</div>
