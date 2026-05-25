@@ -512,7 +512,17 @@ load();
   <div style="background:rgba(0,0,0,0.3);border-radius:8px;height:12px;overflow:hidden;margin-bottom:16px">
     <div id="tc-bar" style="height:100%;background:linear-gradient(90deg,#22c55e,#10b981);width:0;transition:width .6s"></div>
   </div>
-  <div id="tc-categorias" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:16px"></div>
+  <div id="tc-categorias" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:14px"></div>
+  <div id="tc-share-bar" style="display:none;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:12px;margin-bottom:14px">
+    <div style="font-size:13px;margin-bottom:8px;line-height:1.4">📣 <strong>Falta info de este municipio.</strong> Comparte para que más ciudadanos contribuyan:</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="tcShare('wa')" style="background:#25d366;border:none;border-radius:8px;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💬 WhatsApp</button>
+      <button onclick="tcShare('x')" style="background:#000;border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">𝕏 Compartir</button>
+      <button onclick="tcShare('fb')" style="background:#1877f2;border:none;border-radius:8px;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📘 Facebook</button>
+      <button onclick="tcShare('copy')" style="background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#a8b0c0;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🔗 Copiar</button>
+    </div>
+    <div id="tc-share-msg" style="font-size:11px;color:#22c55e;margin-top:8px;min-height:14px"></div>
+  </div>
   <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px;display:flex;flex-direction:column;gap:8px">
     <div style="font-size:13px;line-height:1.5">
       <strong>¿Tienes información oficial de este municipio?</strong><br>
