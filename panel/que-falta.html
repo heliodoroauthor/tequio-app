@@ -223,7 +223,7 @@
     if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('municipiosMenos').innerHTML = arr.map(function(m){
       var p=m.pct||0;
-      return '<div class="muni-row" onclick="abrirMuni('+m.id+')"><div><div class="muni-name">'+esc(m.nombre)+'</div><div class="muni-meta">'+esc(m.estado)+'</div></div><div class="muni-pop">'+num(m.poblacion)+'<br><span style="font-size:9px">hab</span></div><div class="muni-pct '+muniPctClass(p)+'">'+p+'%</div></div>';
+      return '<div class="muni-row" onclick="abrirMuni(\''+esc(m.clave_inegi||m.id)+'\')"><div><div class="muni-name">'+esc(m.nombre)+'</div><div class="muni-meta">'+esc(m.estado)+'</div></div><div class="muni-pop">'+num(m.poblacion)+'<br><span style="font-size:9px">hab</span></div><div class="muni-pct '+muniPctClass(p)+'">'+p+'%</div></div>';
     }).join('');
   }
   
