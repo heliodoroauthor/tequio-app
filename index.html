@@ -6912,162 +6912,119 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
       </div>
     </div>
-    <!-- ───── DEBATES ───── -->
+    <!-- ───── DEBATES (Pol.is) ───── -->
     <div id="page-debates" class="page">
-      <div class="content" style="max-width:900px">
+      <div class="content" style="max-width:1100px">
         <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-          <div>
-            <div style="font-size:22px;font-weight:800;margin-bottom:4px">💬 Debates Estructurados</div>
-            <div style="font-size:13px;color:var(--text3)">Argumenta, vota y deja que la IA modere · Basado en hechos, no en emociones</div>
-          </div>
-          <button onclick="debateAbrirCrear()" style="background:var(--accent);border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px">
-            ✏️ Proponer debate
-          </button>
+        <div style="margin-bottom:18px">
+          <div style="font-size:22px;font-weight:800;margin-bottom:4px">🗣️ Debates Pol.is</div>
+          <div style="font-size:13px;color:var(--text3)">Deliberación cívica abierta · 5 temas seleccionados · Powered by <a href="https://pol.is/about" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">pol.is</a></div>
         </div>
-        <!-- Filtros -->
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="debate-filtros">
-          <button class="tema-chip active" onclick="debateSetFiltro(this,'todos')">Todos</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'politica')">🏛️ Política</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'economia')">💰 Economía</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'sociedad')">👥 Sociedad</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'ambiente')">🌿 Ambiente</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'derechos')">⚖️ Derechos</button>
-          <button class="tema-chip" onclick="debateSetFiltro(this,'tecnologia')">🤖 Tecnología</button>
+
+        <!-- Banner Cero Invención -->
+        <div class="alert alert-info" style="background:rgba(0,150,200,0.08);border-left:3px solid #0096c8;padding:12px 14px;border-radius:8px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:18px;line-height:1">🦎</span>
+          <div style="font-size:13px;line-height:1.5">
+            <strong>Cero Invención · Pol.is open-source.</strong> Tequio no modera el contenido ni los votos.
+            Cada debate vive en pol.is (servicio externo). Los votos son anónimos y agregados por consenso.
+          </div>
         </div>
-        <!-- Lista de debates -->
-        <div id="debate-lista" style="display:flex;flex-direction:column;gap:12px"></div>
-        <!-- Debate abierto (detalle) -->
-        <div id="debate-detalle" style="display:none">
-          <!-- Back -->
-          <button onclick="debateCerrarDetalle()" style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit;margin-bottom:16px">
-            ← Volver a debates
-          </button>
-          <!-- Header del debate -->
-          <div class="card mb-12" id="debate-header-card">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px" id="debate-det-badges"></div>
-            <div style="font-size:20px;font-weight:800;font-family:var(--font-display);margin-bottom:6px" id="debate-det-titulo"></div>
-            <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px" id="debate-det-desc"></p>
-            <!-- Barra de votación -->
-            <div style="margin-bottom:14px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                <span style="font-size:12px;font-weight:700;color:var(--green2)" id="debate-det-si-label">A FAVOR</span>
-                <span style="font-size:12px;font-weight:700;color:var(--red2)" id="debate-det-no-label">EN CONTRA</span>
-              </div>
-              <div style="height:10px;border-radius:5px;overflow:hidden;display:flex">
-                <div id="debate-barra-si" style="background:var(--green);height:100%;transition:width 0.5s"></div>
-                <div id="debate-barra-no" style="background:var(--red);height:100%;transition:width 0.5s"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;margin-top:6px">
-                <span style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--green2)" id="debate-det-si-pct"></span>
-                <span style="font-size:11px;color:var(--text3)" id="debate-det-total"></span>
-                <span style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--red2)" id="debate-det-no-pct"></span>
-              </div>
-            </div>
-            <!-- Botones de voto -->
-            <div id="debate-voto-btns" style="display:flex;gap:8px">
-              <button id="debate-btn-si" onclick="debateVotar('si')"
-                style="flex:1;padding:12px;background:rgba(34,197,94,0.1);border:2px solid rgba(34,197,94,0.3);border-radius:10px;color:var(--green2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">
-                ✅ A favor
-              </button>
-              <button id="debate-btn-no" onclick="debateVotar('no')"
-                style="flex:1;padding:12px;background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.3);border-radius:10px;color:var(--red2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">
-                ❌ En contra
-              </button>
-            </div>
-            <div id="debate-voto-confirmado" style="display:none;text-align:center;font-size:13px;color:var(--text3);margin-top:10px;padding:8px;background:var(--bg3);border-radius:8px">
-              ✓ Ya votaste en este debate
-            </div>
-          </div>
-          <!-- Grid: argumentos A FAVOR / EN CONTRA -->
-          <div class="grid-2 mb-12">
-            <div class="card" style="border-top:3px solid var(--green)">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <div style="font-size:10px;font-weight:700;color:var(--green2);letter-spacing:1.5px">✅ ARGUMENTOS A FAVOR</div>
-                <span id="debate-count-si" class="badge badge-green"></span>
-              </div>
-              <div id="debate-args-si" style="display:flex;flex-direction:column;gap:8px"></div>
-            </div>
-            <div class="card" style="border-top:3px solid var(--red)">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <div style="font-size:10px;font-weight:700;color:var(--red2);letter-spacing:1.5px">❌ ARGUMENTOS EN CONTRA</div>
-                <span id="debate-count-no" class="badge badge-red"></span>
-              </div>
-              <div id="debate-args-no" style="display:flex;flex-direction:column;gap:8px"></div>
-            </div>
-          </div>
-          <!-- Generar argumentos con IA -->
-          <div class="card mb-12" style="background:rgba(59,130,246,0.04);border-color:rgba(59,130,246,0.2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-              <div>
-                <div style="font-size:10px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:3px">🧠 MODERADOR IA</div>
-                <div style="font-size:13px;font-weight:600">Análisis imparcial del debate</div>
-              </div>
-              <button id="debate-ia-gen-btn" onclick="debateGenerarIA()"
-                style="background:var(--accent);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit">
-                Generar análisis
-              </button>
-            </div>
-            <div id="debate-ia-resultado" style="display:none;font-size:13px;color:var(--text2);line-height:1.7;padding:12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)"></div>
-          </div>
-          <!-- Añadir argumento -->
-          <div class="card mb-12">
-            <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:12px">✍️ AÑADE TU ARGUMENTO</div>
-            <div style="display:flex;gap:8px;margin-bottom:10px">
-              <button id="debate-arg-tipo-si" onclick="debateSetTipoArg('si',this)"
-                style="flex:1;padding:8px;background:rgba(34,197,94,0.1);border:2px solid var(--green);border-radius:8px;color:var(--green2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
-                ✅ A favor
-              </button>
-              <button id="debate-arg-tipo-no" onclick="debateSetTipoArg('no',this)"
-                style="flex:1;padding:8px;background:var(--surface);border:2px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
-                ❌ En contra
-              </button>
-            </div>
-            <textarea id="debate-arg-texto" rows="3" placeholder="Escribe tu argumento con datos, cifras o fuentes. La IA evaluará si es factualmente correcto..."
-              style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;outline:none;line-height:1.5;margin-bottom:10px"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-            <button onclick="debateEnviarArgumento()"
-              style="width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-              🧠 Enviar y verificar con IA
+
+        <!-- Grid 5 temas -->
+        <div id="polisGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:20px">
+          <!-- Hidratado por debatesPolisInit() -->
+        </div>
+
+        <!-- Iframe activo (oculto hasta que se abra una conversación) -->
+        <div id="polisFrameWrap" style="display:none;margin-top:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <div id="polisFrameTitle" style="font-size:16px;font-weight:700"></div>
+            <button onclick="debatesPolisClose()" style="background:transparent;border:1px solid var(--text3);border-radius:8px;color:var(--text2);padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit">
+              ✕ Cerrar debate
             </button>
-            <div id="debate-arg-verificando" style="display:none;text-align:center;font-size:12px;color:var(--text3);margin-top:8px">⏳ Verificando factualidad con IA...</div>
+          </div>
+          <div style="position:relative;width:100%;background:#0a0a0a;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)">
+            <iframe id="polisFrame" src="about:blank"
+              style="width:100%;height:720px;border:0;display:block"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+              allow="clipboard-read; clipboard-write"
+              loading="lazy"
+              referrerpolicy="no-referrer">
+            </iframe>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center">
+            ¿No carga? <a id="polisOpenExt" href="#" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">Abrir en pol.is</a>
           </div>
         </div>
-        <!-- Modal: proponer debate -->
-        <div id="debate-crear-modal" style="display:none" class="card mb-12" style="border-color:var(--accent)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <div style="font-size:15px;font-weight:800;font-family:var(--font-display)">✏️ Proponer nuevo debate</div>
-            <button onclick="debateCerrarCrear()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px">✕</button>
-          </div>
-          <div style="margin-bottom:12px">
-            <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px">PREGUNTA DEL DEBATE</div>
-            <input id="debate-crear-titulo" type="text" placeholder="¿Debe México adoptar el voto electrónico?"
-              style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-          <div style="margin-bottom:12px">
-            <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px">CONTEXTO (opcional)</div>
-            <textarea id="debate-crear-desc" rows="2" placeholder="Describe brevemente el contexto del debate..."
-              style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;resize:none;box-sizing:border-box;outline:none"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-          </div>
-          <div style="margin-bottom:16px">
-            <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px">CATEGORÍA</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap" id="debate-crear-cats">
-              <button class="sim-param-btn active" onclick="debateCrearSetCat(this,'politica')">🏛️ Política</button>
-              <button class="sim-param-btn" onclick="debateCrearSetCat(this,'economia')">💰 Economía</button>
-              <button class="sim-param-btn" onclick="debateCrearSetCat(this,'sociedad')">👥 Sociedad</button>
-              <button class="sim-param-btn" onclick="debateCrearSetCat(this,'ambiente')">🌿 Ambiente</button>
-              <button class="sim-param-btn" onclick="debateCrearSetCat(this,'derechos')">⚖️ Derechos</button>
-              <button class="sim-param-btn" onclick="debateCrearSetCat(this,'tecnologia')">🤖 Tecnología</button>
-            </div>
-          </div>
-          <button onclick="debateCrearEnviar()"
-            style="width:100%;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
-            🧠 Crear debate con IA
-          </button>
-        </div>
+
       </div>
+      <script>
+      (function(){
+        var TEMAS = [
+          { id:'5ca2fdeshw', emoji:'💧', titulo:'Agua',               desc:'¿Cómo garantizar acceso justo al agua frente a la crisis hídrica?' },
+          { id:'5fta4ehdhm', emoji:'⚖️', titulo:'Reforma Judicial',   desc:'Elección popular de jueces: ¿avance democrático o riesgo institucional?' },
+          { id:'3junykaarc', emoji:'💰', titulo:'Salario Mínimo',     desc:'¿Hasta dónde puede subir sin generar inflación o desempleo?' },
+          { id:'23ecj5pjm8', emoji:'🛡️', titulo:'Militarización',     desc:'Guardia Nacional bajo SEDENA: ¿seguridad o riesgo democrático?' },
+          { id:'8xt4kmejfv', emoji:'🌽', titulo:'Maíz Transgénico',   desc:'Soberanía alimentaria vs. mercado global: ¿qué priorizar?' }
+        ];
+        window.__TEQUIO_POLIS_TEMAS = TEMAS;
+
+        function esc(s){
+          return String(s||'').replace(/[&<>"']/g, function(c){
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+          });
+        }
+
+        window.debatesPolisOpen = function(id){
+          var t = TEMAS.find(function(x){ return x.id === id; });
+          if (!t) return;
+          var url   = 'https://pol.is/' + encodeURIComponent(id);
+          var frame = document.getElementById('polisFrame');
+          var wrap  = document.getElementById('polisFrameWrap');
+          var title = document.getElementById('polisFrameTitle');
+          var ext   = document.getElementById('polisOpenExt');
+          if (frame) frame.src = url;
+          if (title) title.textContent = t.emoji + ' ' + t.titulo;
+          if (ext)   ext.href = url;
+          if (wrap)  { wrap.style.display = 'block'; wrap.scrollIntoView({ behavior:'smooth', block:'start' }); }
+        };
+
+        window.debatesPolisClose = function(){
+          var frame = document.getElementById('polisFrame');
+          var wrap  = document.getElementById('polisFrameWrap');
+          if (frame) frame.src = 'about:blank';
+          if (wrap)  wrap.style.display = 'none';
+        };
+
+        window.debatesPolisInit = function(){
+          var grid = document.getElementById('polisGrid');
+          if (!grid || grid.dataset.hydrated === '1') return;
+          grid.innerHTML = TEMAS.map(function(t){
+            return ''+
+            '<div data-tema="'+esc(t.id)+'" '+
+            '     onclick="debatesPolisOpen(\''+esc(t.id)+'\')" '+
+            '     style="background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px;cursor:pointer;transition:transform .15s,border-color .15s" '+
+            '     onmouseover="this.style.transform=\'translateY(-2px)\';this.style.borderColor=\'var(--accent)\'" '+
+            '     onmouseout="this.style.transform=\'translateY(0)\';this.style.borderColor=\'rgba(255,255,255,0.08)\'">'+
+            '  <div style="font-size:32px;margin-bottom:8px;line-height:1">'+t.emoji+'</div>'+
+            '  <div style="font-size:16px;font-weight:700;margin-bottom:6px">'+esc(t.titulo)+'</div>'+
+            '  <div style="font-size:12px;color:var(--text3);line-height:1.4;margin-bottom:12px">'+esc(t.desc)+'</div>'+
+            '  <div style="font-size:11px;color:var(--accent);font-weight:600">Abrir debate →</div>'+
+            '</div>';
+          }).join('');
+          grid.dataset.hydrated = '1';
+        };
+
+        // Hook al router legacy (initDebates lo llama showPage('debates'))
+        window.initDebates = window.debatesPolisInit;
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', window.debatesPolisInit);
+        } else {
+          setTimeout(window.debatesPolisInit, 0);
+        }
+      })();
+      </script>
     </div>
     <!-- ───── DERECHOS ───── -->
     <div id="page-derechos" class="page">
