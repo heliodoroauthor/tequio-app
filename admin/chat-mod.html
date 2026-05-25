@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>🦎 Tequio · Moderación de Chat</title>
+<style>
+  :root {
+    --bg:#0a0f1e; --card:#141b2e; --text1:#e4e7ee; --text2:#a8b0c0;
+    --text3:#6b7388; --accent:#7c3aed; --green:#22c55e; --red:#ef4444;
+    --orange:#fb923c; --border:rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         margin: 0; background: var(--bg); color: var(--text1); padding: 20px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--text3); font-size: 13px; margin-bottom: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .btn { background: var(--accent); border: none; border-radius: 8px; color: #fff; padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 600; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; font-weight: 500; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+  .btn-danger { background: var(--red); }
+  .btn-warn { background: var(--orange); }
+  .btn-green { background: var(--green); }
+  input[type=email], input[type=text], input[type=number] {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--text1); font-size: 14px; font-family: inherit; width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .stat-val { font-size: 22px; font-weight: 800; color: var(--text1); }
+  .stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .msg-row { border-bottom: 1px solid var(--border); padding: 14px 0; }
+  .msg-row:last-child { border-bottom: none; }
+  .msg-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; font-size: 12px; }
+  .msg-nick { font-weight: 700; color: var(--accent); }
+  .msg-sala { background: rgba(124,58,237,0.15); color: #c4b5fd; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+  .msg-time { color: var(--text3); }
+  .msg-reportes { background: rgba(239,68,68,0.15); color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+  .msg-oculto { background: rgba(251,146,60,0.15); color: #fed7aa; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+  .msg-baneado { background: rgba(239,68,68,0.3); color: #fecaca; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .msg-body { font-size: 14px; line-height: 1.5; margin: 6px 0; word-break: break-word; padding: 10px 12px; background: rgba(0,0,0,0.2); border-radius: 6px; border-left: 3px solid var(--orange); }
+  .msg-motivos { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .msg-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .msg-uid { font-family: monospace; font-size: 10px; color: var(--text3); }
+  .toast { position: fixed; top: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; max-width: 320px; }
+  .toast.ok { border-color: var(--green); }
+  .toast.err { border-color: var(--red); }
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🦎 Tequio · Moderación de Chat</h1>
+  <div class="sub">Panel admin · Cero Invención · Solo helio.gomez1336@gmail.com</div>
+
+  <!-- LOGIN -->
+  <div id="card-login" class="card">
+    <div style="margin-bottom: 14px">
+      <strong>Sign in con magic link</strong>
+      <div style="color: var(--text3); font-size: 12px; margin-top: 4px">
+        Pon tu email → te llega un link por correo → click → entras. Sin contraseñas.
+      </div>
+    </div>
+    <div class="row">
+      <input id="email" type="email" placeholder="helio.gomez1336@gmail.com" autocomplete="email" />
+      <button id="btnSendLink" class="btn" onclick="sendMagicLink()">Enviar link</button>
+    </div>
+    <div id="loginStatus" style="margin-top: 10px; font-size: 12px; color: var(--text3); min-height: 16px"></div>
+  </div>
+
+  <!-- LOGGED IN UI -->
+  <div id="ui-admin" style="display: none">
+
+    <div class="card row" style="justify-content: space-between">
+      <div>
+        <strong id="userEmail"></strong>
+        <div style="color: var(--text3); font-size: 11px">Admin verificado</div>
+      </div>
+      <div class="row">
+        <button class="btn btn-ghost btn-sm" onclick="refresh()">↻ Refrescar</button>
+        <button class="btn btn-ghost btn-sm" onclick="signOut()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div id="stats" class="stats">
+      <!-- llenado por loadStats() -->
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 12px">
+        <strong>🚩 Mensajes reportados</strong>
+        <span id="reportadosCount" style="color: var(--text3); font-size: 12px"></span>
+      </div>
+      <div id="reportadosList">
+        <div class="empty">Cargando…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom: 10px"><strong>⚙️ Acción manual</strong></div>
+      <div style="font-size: 12px; color: var(--text3); margin-bottom: 10px">Banear o desbanear un user_id directamente.</div>
+      <div class="row">
+        <input id="manualUid" type="text" placeholder="user_id UUID" style="flex: 1; min-width: 280px; font-family: monospace; font-size: 12px" />
+        <input id="manualMotivo" type="text" placeholder="Motivo (opcional)" style="flex: 1; min-width: 200px" />
+        <input id="manualHoras" type="number" min="1" placeholder="Horas (vacío=permanente)" style="width: 200px" />
+      </div>
+      <div class="row" style="margin-top: 10px">
+        <button class="btn btn-danger btn-sm" onclick="manualBan()">🚫 Banear</button>
+        <button class="btn btn-green btn-sm" onclick="manualUnban()">✓ Desbanear</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div id="toast" class="toast" style="display: none"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  const SB_URL  = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  const SB_ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  const ADMIN_EMAIL = 'helio.gomez1336@gmail.com';
+
+  let sb = null;
+
+  function toast(msg, kind) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (kind || '');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 4500);
+  }
+
+  function fmt(iso) {
+    try { return new Date(iso).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }); }
+    catch (e) { return iso; }
+  }
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+  function uidShort(uid) { return String(uid || '').slice(0, 8) + '…'; }
+
+  async function init() {
+    sb = supabase.createClient(SB_URL, SB_ANON, {
+      auth: { persistSession: true, storage: localStorage, storageKey: 'tequio-admin-auth' }
+    });
+
+    // Si ya hay sesión, verificar y mostrar UI admin
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      if (session.user.email === ADMIN_EMAIL) {
+        showAdminUI(session.user);
+      } else {
+        toast('Email no autorizado: ' + session.user.email, 'err');
+        await sb.auth.signOut();
+      }
+    }
+
+    // Listener: capturar magic link al hacer click desde email
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        if (session.user.email === ADMIN_EMAIL) {
+          showAdminUI(session.user);
+        } else {
+          toast('Email no autorizado: ' + session.user.email, 'err');
+          sb.auth.signOut();
+        }
+      }
+      if (event === 'SIGNED_OUT') {
+        document.getElementById('ui-admin').style.display = 'none';
+        document.getElementById('card-login').style.display = 'block';
+      }
+    });
+  }
+
+  async function sendMagicLink() {
+    const email = (document.getElementById('email').value || '').trim().toLowerCase();
+    const status = document.getElementById('loginStatus');
+    if (!email) { status.textContent = 'Pon tu email primero'; status.style.color = 'var(--red)'; return; }
+    if (email !== ADMIN_EMAIL) {
+      status.textContent = 'Email no autorizado.';
+      status.style.color = 'var(--red)';
+      return;
+    }
+    status.textContent = 'Enviando link…';
+    status.style.color = 'var(--text3)';
+
+    const { error } = await sb.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: window.location.href }
+    });
+
+    if (error) {
+      status.textContent = 'Error: ' + error.message;
+      status.style.color = 'var(--red)';
+      return;
+    }
+    status.textContent = '✓ Link enviado a ' + email + ' · revisa tu inbox (o spam) · expira en 1h';
+    status.style.color = 'var(--green)';
+  }
+
+  async function signOut() {
+    await sb.auth.signOut();
+  }
+
+  function showAdminUI(user) {
+    document.getElementById('card-login').style.display = 'none';
+    document.getElementById('ui-admin').style.display = 'block';
+    document.getElementById('userEmail').textContent = user.email;
+    refresh();
+  }
+
+  async function refresh() {
+    await loadStats();
+    await loadReportados();
+  }
+
+  async function loadStats() {
+    const { data, error } = await sb.rpc('admin_chat_stats');
+    const box = document.getElementById('stats');
+    if (error) { box.innerHTML = '<div class="empty">Error: ' + esc(error.message) + '</div>'; return; }
+    const s = data || {};
+    box.innerHTML = [
+      ['mensajes_total',       'Mensajes totales'],
+      ['mensajes_24h',         'Últimas 24h'],
+      ['usuarios_activos_24h', 'Usuarios activos 24h'],
+      ['reportes_total',       'Reportes totales'],
+      ['reportes_24h',         'Reportes 24h'],
+      ['ocultos_total',        'Mensajes ocultos'],
+      ['baneados',             'Baneados activos']
+    ].map(([k, lbl]) => `
+      <div class="stat">
+        <div class="stat-val">${s[k] ?? '—'}</div>
+        <div class="stat-lbl">${lbl}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadReportados() {
+    const { data, error } = await sb.rpc('admin_chat_reportados', { p_limit: 100 });
+    const list = document.getElementById('reportadosList');
+    const counter = document.getElementById('reportadosCount');
+    if (error) { list.innerHTML = '<div class="empty">Error: ' + esc(error.message) + '</div>'; return; }
+    const arr = Array.isArray(data) ? data : [];
+    counter.textContent = arr.length + ' mensajes con reportes';
+    if (!arr.length) { list.innerHTML = '<div class="empty">Sin mensajes reportados. ¡Todo limpio!</div>'; return; }
+    list.innerHTML = arr.map(m => `
+      <div class="msg-row" data-id="${m.id}">
+        <div class="msg-head">
+          <span class="msg-nick">${esc(m.nick || 'anon')}</span>
+          <span class="msg-sala">#${esc(m.sala)}</span>
+          <span class="msg-time">${fmt(m.ts)}</span>
+          <span class="msg-reportes">⚑ ${m.reportes}</span>
+          ${m.oculto  ? '<span class="msg-oculto">oculto</span>' : ''}
+          ${m.baneado ? '<span class="msg-baneado">user baneado</span>' : ''}
+        </div>
+        <div class="msg-body">${esc(m.mensaje)}</div>
+        ${m.motivos ? `<div class="msg-motivos">Motivos: ${esc(m.motivos)}</div>` : ''}
+        <div class="msg-uid">user_id: ${esc(m.user_id)}</div>
+        <div class="msg-actions">
+          ${m.oculto
+            ? `<button class="btn btn-green btn-sm" onclick="accionOcultar(${m.id}, false)">↶ Mostrar</button>`
+            : `<button class="btn btn-warn btn-sm" onclick="accionOcultar(${m.id}, true)">👁 Ocultar</button>`
+          }
+          ${m.baneado
+            ? `<button class="btn btn-green btn-sm" onclick="accionDesbanear('${esc(m.user_id)}')">✓ Desbanear user</button>`
+            : `<button class="btn btn-danger btn-sm" onclick="accionBanear('${esc(m.user_id)}', 24)">🚫 Ban 24h</button>
+               <button class="btn btn-danger btn-sm" onclick="accionBanear('${esc(m.user_id)}', null)">🚫 Ban permanente</button>`
+          }
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function accionOcultar(msgId, oculto) {
+    const { data, error } = await sb.rpc('admin_chat_ocultar', { p_msg_id: msgId, p_oculto: oculto });
+    if (error) { toast('Error: ' + error.message, 'err'); return; }
+    toast(oculto ? 'Mensaje oculto' : 'Mensaje mostrado', 'ok');
+    refresh();
+  }
+
+  async function accionBanear(uid, horas) {
+    if (!confirm(horas ? `¿Banear este user por ${horas}h?` : '¿Banear este user PERMANENTEMENTE?')) return;
+    const motivo = prompt('Motivo del ban (opcional):', 'Violación de normas comunitarias') || '';
+    const { data, error } = await sb.rpc('admin_chat_banear', {
+      p_user_id: uid, p_motivo: motivo, p_horas: horas
+    });
+    if (error) { toast('Error: ' + error.message, 'err'); return; }
+    toast('User baneado', 'ok');
+    refresh();
+  }
+
+  async function accionDesbanear(uid) {
+    if (!confirm('¿Desbanear este user?')) return;
+    const { data, error } = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
+    if (error) { toast('Error: ' + error.message, 'err'); return; }
+    toast('User desbaneado', 'ok');
+    refresh();
+  }
+
+  async function manualBan() {
+    const uid = document.getElementById('manualUid').value.trim();
+    const motivo = document.getElementById('manualMotivo').value.trim() || 'Ban manual';
+    const horasInput = document.getElementById('manualHoras').value.trim();
+    const horas = horasInput ? parseInt(horasInput, 10) : null;
+    if (!uid) { toast('Pon un user_id', 'err'); return; }
+    if (!confirm(`¿Banear ${uid} ${horas ? 'por ' + horas + 'h' : 'PERMANENTEMENTE'}?`)) return;
+    const { data, error } = await sb.rpc('admin_chat_banear', { p_user_id: uid, p_motivo: motivo, p_horas: horas });
+    if (error) { toast('Error: ' + error.message, 'err'); return; }
+    toast('User baneado', 'ok');
+    document.getElementById('manualUid').value = '';
+    document.getElementById('manualMotivo').value = '';
+    document.getElementById('manualHoras').value = '';
+    refresh();
+  }
+
+  async function manualUnban() {
+    const uid = document.getElementById('manualUid').value.trim();
+    if (!uid) { toast('Pon un user_id', 'err'); return; }
+    if (!confirm(`¿Desbanear ${uid}?`)) return;
+    const { data, error } = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
+    if (error) { toast('Error: ' + error.message, 'err'); return; }
+    toast('User desbaneado', 'ok');
+    document.getElementById('manualUid').value = '';
+    refresh();
+  }
+
+  // Enter en email field = enviar link
+  document.getElementById('email').addEventListener('keypress', e => {
+    if (e.key === 'Enter') { e.preventDefault(); sendMagicLink(); }
+  });
+
+  init();
+</script>
+</body>
+</html>
