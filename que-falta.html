@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎯 Lo que falta · Tequio</title>
+<meta name="description" content="Mapa de gaps de información cívica en México. Encuentra qué falta en tu municipio o estado y contribuye.">
+<style>
+  :root {
+    --bg:#0a0f1e; --card:#141b2e; --card2:#1a2340;
+    --text1:#e4e7ee; --text2:#a8b0c0; --text3:#6b7388;
+    --accent:#22c55e; --orange:#fb923c; --red:#ef4444;
+    --purple:#7c3aed; --border:rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text1);padding:20px;min-height:100vh;}
+  .container{max-width:1100px;margin:0 auto;}
+  
+  .hero{background:linear-gradient(135deg,#3b0764 0%,#581c87 100%);border-radius:20px;padding:32px;margin-bottom:28px;text-align:center;}
+  .hero h1{font-size:34px;margin-bottom:6px;font-weight:800;}
+  .hero .lead{color:#e9d5ff;font-size:15px;line-height:1.5;max-width:600px;margin:0 auto;}
+  .hero-counter{display:inline-block;background:rgba(0,0,0,0.3);padding:18px 28px;border-radius:14px;margin-top:18px;}
+  .hero-counter strong{font-size:42px;font-weight:800;color:#fff;display:block;line-height:1;}
+  .hero-counter span{font-size:12px;color:#e9d5ff;text-transform:uppercase;letter-spacing:0.6px;}
+  
+  .search-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:24px;}
+  .search-card h3{font-size:16px;margin-bottom:10px;}
+  .search-row{display:flex;gap:8px;}
+  .search-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text1);font-size:14px;font-family:inherit;}
+  .search-row input:focus{outline:none;border-color:var(--purple);}
+  .search-row button{background:var(--purple);border:none;border-radius:8px;color:#fff;padding:10px 20px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .search-results{margin-top:12px;}
+  .search-result{padding:10px 12px;background:rgba(124,58,237,0.06);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+  .search-result:hover{background:rgba(124,58,237,0.12);}
+  
+  .section-title{font-size:20px;font-weight:800;margin:32px 0 14px;display:flex;align-items:center;gap:10px;}
+  .section-title small{font-size:13px;color:var(--text3);font-weight:400;margin-left:auto;}
+  
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:768px){.grid-2{grid-template-columns:1fr;}}
+  
+  /* CATEGORÍAS NACIONALES */
+  .cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;}
+  .cat-row{display:grid;grid-template-columns:30px 1fr auto auto;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);}
+  .cat-row:last-child{border-bottom:none;}
+  .cat-icon{font-size:18px;}
+  .cat-name{font-size:13px;}
+  .cat-bar{width:100px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;}
+  .cat-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--accent));transition:width 1s;}
+  .cat-pct{font-weight:700;font-size:12px;color:var(--purple);min-width:36px;text-align:right;}
+  
+  /* ESTADOS */
+  .estado-row{display:grid;grid-template-columns:130px 1fr 50px 60px;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;}
+  .estado-row:last-child{border-bottom:none;}
+  .estado-row:hover{background:rgba(255,255,255,0.02);}
+  .estado-name{font-weight:600;}
+  .estado-track{height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
+  .estado-fill{height:100%;border-radius:4px;transition:width 1s;}
+  .estado-fill.low{background:linear-gradient(90deg,#ef4444,#fb923c);}
+  .estado-fill.mid{background:linear-gradient(90deg,#fb923c,#fbbf24);}
+  .estado-fill.high{background:linear-gradient(90deg,#22c55e,#10b981);}
+  .estado-pct{font-weight:700;color:var(--orange);}
+  .estado-faltan{color:var(--red);font-size:11px;}
+  
+  /* MUNICIPIOS */
+  .muni-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+  .muni-row{display:grid;grid-template-columns:1fr 60px 80px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;}
+  .muni-row:last-child{border-bottom:none;}
+  .muni-row:hover{background:rgba(255,255,255,0.02);padding:10px 8px;border-radius:8px;}
+  .muni-name{font-weight:600;font-size:14px;}
+  .muni-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+  .muni-pop{font-size:11px;color:var(--text3);text-align:right;}
+  .muni-pct{font-weight:800;color:var(--red);text-align:right;font-size:16px;}
+  .muni-pct.mid{color:var(--orange);}
+  .muni-pct.high{color:var(--accent);}
+  
+  /* DOCS FALTANTES */
+  .docs-faltantes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;max-height:480px;overflow-y:auto;}
+  .doc-row{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .doc-row:last-child{border-bottom:none;}
+  .doc-info{flex:1;font-size:13px;line-height:1.4;}
+  .doc-info strong{display:block;}
+  .doc-info span{color:var(--text3);font-size:11px;}
+  .doc-tag{background:rgba(251,146,60,0.15);color:#fed7aa;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;text-transform:uppercase;}
+  .doc-link{color:var(--purple);font-size:11px;text-decoration:none;border:1px solid rgba(124,58,237,0.3);padding:4px 10px;border-radius:6px;flex-shrink:0;}
+  .doc-link:hover{background:rgba(124,58,237,0.1);}
+  
+  /* FILTERS */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .filter-chip{background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .filter-chip.active{background:var(--purple);border-color:var(--purple);color:#fff;}
+  
+  /* CTA */
+  .cta{background:linear-gradient(135deg,#16a34a,#0f766e);border-radius:18px;padding:32px;margin:32px 0;text-align:center;color:#fff;}
+  .cta h2{font-size:24px;margin-bottom:8px;}
+  .cta p{opacity:0.92;margin-bottom:18px;}
+  .cta a{display:inline-block;background:#fff;color:#10b981;padding:14px 32px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px;}
+  .cta a:hover{transform:translateY(-2px);}
+  
+  .empty{text-align:center;padding:24px;color:var(--text3);font-size:13px;}
+  .footer{text-align:center;color:var(--text3);font-size:12px;padding:24px 0;}
+  .footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🎯 Lo que falta</h1>
+    <div class="lead">Cada gap es una oportunidad para contribuir a la transparencia de tu pueblo, tu estado, tu país.</div>
+    <div class="hero-counter">
+      <strong id="totalFaltantes">…</strong>
+      <span>documentos / categorías faltantes</span>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <h3>🔍 Busca tu municipio</h3>
+    <div class="search-row">
+      <input id="muniQ" type="text" placeholder="ej: Acatlán, Oaxaca, Coatzintla..." autocomplete="off">
+      <button onclick="doSearch()">Buscar</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+
+  <div class="section-title">📊 Categorías de info más incompletas <small>a nivel nacional</small></div>
+  <div class="cat-card" id="categoriasNacional"><div class="empty">Cargando…</div></div>
+
+  <div class="grid-2">
+    <div>
+      <div class="section-title">🏛️ Estados con info legal incompleta</div>
+      <div class="cat-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
+    </div>
+    <div>
+      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes</small></div>
+      <div class="muni-card" id="municipiosMenos"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">📜 Documentos legales específicos faltantes <small id="docsCount">— total</small></div>
+  <div class="filters">
+    <button class="filter-chip active" onclick="filterDocs('all',this)">Todos</button>
+    <button class="filter-chip" onclick="filterDocs('codigo',this)">Códigos</button>
+    <button class="filter-chip" onclick="filterDocs('ley',this)">Leyes</button>
+  </div>
+  <div class="docs-faltantes" id="docsList"><div class="empty">Cargando…</div></div>
+
+  <div class="cta">
+    <h2>¿Encontraste algo que tienes?</h2>
+    <p>Cada documento oficial que aportes sube la transparencia del país. Tu nombre va al Hall of Fame.</p>
+    <a href="/colaboradores.html">🦎 Ver Tequieros</a>
+  </div>
+
+  <div class="footer">
+    <strong>🎯 Cero Invención · Tequio · 2026</strong><br>
+    <a href="https://tequio.app">tequio.app</a>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  var sb=null;
+  var allDocs=[],currentFilter='all';
+  
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+  function num(n){if(n==null)return '0';return Number(n).toLocaleString('es-MX');}
+  
+  function pctClass(p){if(p<33)return 'low';if(p<66)return 'mid';return 'high';}
+  function muniPctClass(p){if(p<33)return '';if(p<66)return 'mid';return 'high';}
+  
+  async function init(){
+    sb = window.supabase.createClient(SB,ANON);
+    var cats = await sb.rpc('tc_categorias_nacional');
+    var estados = await sb.rpc('tc_estados_legal');
+    var munis = await sb.rpc('tc_municipios_menos_completos',{p_limit:20});
+    var docs = await sb.rpc('tc_docs_legales_faltantes',{p_limit:500});
+    renderCategorias(cats.data||[]);
+    renderEstados(estados.data||[]);
+    renderMunicipios(munis.data||[]);
+    allDocs = docs.data||[];
+    renderDocs();
+    calcTotalFaltantes(cats.data||[],estados.data||[],docs.data||[]);
+  }
+  
+  function calcTotalFaltantes(cats,estados,docs){
+    var totalDocsLegales = docs.length;
+    var totalGapsMuni = 0;
+    cats.forEach(function(c){ totalGapsMuni += ((c.municipios_total||0) - (c.municipios_con||0)); });
+    var total = totalDocsLegales + totalGapsMuni;
+    $('totalFaltantes').textContent = num(total);
+  }
+  
+  function renderCategorias(arr){
+    if(!arr.length){$('categoriasNacional').innerHTML='<div class="empty">Sin datos</div>';return;}
+    var sorted = arr.slice().sort(function(a,b){return (a.pct||0) - (b.pct||0);});
+    $('categoriasNacional').innerHTML = sorted.map(function(c){
+      var pct = c.pct||0;
+      return '<div class="cat-row"><div class="cat-icon">'+(c.icono||'📄')+'</div><div class="cat-name">'+esc(c.nombre)+'</div><div class="cat-bar"><div class="cat-bar-fill" style="width:0%" data-w="'+pct+'"></div></div><div class="cat-pct">'+pct+'%</div></div>';
+    }).join('');
+    setTimeout(function(){document.querySelectorAll('#categoriasNacional .cat-bar-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
+  }
+  
+  function renderEstados(arr){
+    if(!arr.length){$('estadosLegal').innerHTML='<div class="empty">Sin datos</div>';return;}
+    $('estadosLegal').innerHTML = arr.map(function(e){
+      var p=e.pct||0;
+      return '<div class="estado-row"><div class="estado-name">'+esc(e.entidad)+'</div><div class="estado-track"><div class="estado-fill '+pctClass(p)+'" style="width:0%" data-w="'+p+'"></div></div><div class="estado-pct">'+p+'%</div><div class="estado-faltan">faltan '+e.faltantes+'</div></div>';
+    }).join('');
+    setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
+  }
+  
+  function renderMunicipios(arr){
+    if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
+    $('municipiosMenos').innerHTML = arr.map(function(m){
+      var p=m.pct||0;
+      return '<div class="muni-row" onclick="window.open(\'/panel/municipio.html?id='+m.id+'\',\'_blank\')"><div><div class="muni-name">'+esc(m.nombre)+'</div><div class="muni-meta">'+esc(m.estado)+'</div></div><div class="muni-pop">'+num(m.poblacion)+'<br><span style="font-size:9px">hab</span></div><div class="muni-pct '+muniPctClass(p)+'">'+p+'%</div></div>';
+    }).join('');
+  }
+  
+  function renderDocs(){
+    var arr = allDocs;
+    if(currentFilter!=='all') arr = arr.filter(function(d){return d.tipo===currentFilter;});
+    $('docsCount').textContent = num(arr.length)+' faltantes';
+    if(!arr.length){$('docsList').innerHTML='<div class="empty">Sin docs para mostrar</div>';return;}
+    $('docsList').innerHTML = arr.slice(0,100).map(function(d){
+      return '<div class="doc-row"><div class="doc-info"><strong>'+esc(d.nombre)+'</strong><span>'+esc(d.entidad)+' · <span class="doc-tag">'+esc(d.tipo)+'</span></span></div>'+
+        (d.url?'<a class="doc-link" href="'+esc(d.url)+'" target="_blank" rel="noopener">Ir a fuente →</a>':'')+'</div>';
+    }).join('');
+  }
+  
+  window.filterDocs = function(t,el){
+    currentFilter=t;
+    document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});
+    el.classList.add('active');
+    renderDocs();
+  };
+  
+  window.doSearch = async function(){
+    var q=$('muniQ').value.trim();
+    if(q.length<2){$('searchResults').innerHTML='<div class="empty">Escribe al menos 2 caracteres</div>';return;}
+    var r=await sb.rpc('tc_buscar_municipio',{p_q:q,p_limit:15});
+    if(r.error||!r.data){$('searchResults').innerHTML='<div class="empty">Error</div>';return;}
+    var arr=r.data;
+    if(!arr.length){$('searchResults').innerHTML='<div class="empty">Sin resultados para "'+esc(q)+'"</div>';return;}
+    $('searchResults').innerHTML = arr.map(function(m){
+      return '<div class="search-result" onclick="window.open(\'/panel/municipio.html?id='+m.id+'\',\'_blank\')"><div><strong>'+esc(m.nombre)+'</strong> · <span style="color:var(--text3)">'+esc(m.estado)+'</span></div><div><span style="color:var(--orange);font-weight:700">'+m.pct+'%</span> <span style="color:var(--text3);font-size:11px;margin-left:6px">faltan '+m.faltantes+'</span></div></div>';
+    }).join('');
+  };
+  
+  $('muniQ').addEventListener('keypress',function(e){if(e.key==='Enter')doSearch();});
+  
+  init().catch(function(e){console.error(e);});
+})();
+</script>
+</body>
+</html>
