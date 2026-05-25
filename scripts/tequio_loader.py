@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
 """
-tequio_loader.py — Carga masiva de leyes federales pendientes a Supabase.
+tequio_loader.py v2 — Carga masiva de leyes federales pendientes a Supabase.
 
-Diseñado para que Helio lo corra de su máquina con Python 3.10+.
-Lee la cola `_overnight_progress`, baja los PDFs de diputados.gob.mx,
-extrae texto, y postea a la RPC chat_load_leyes_chunks.
+v2: Agrega fallback discover_pdf_from_ref() cuando /pdf/X.pdf da 404.
 
 Uso:
-    pip install requests pdfplumber supabase
-    export SUPABASE_URL="https://mhsuihwjgtzxflesbnxv.supabase.co"
-    export SUPABASE_SERVICE_ROLE_KEY="<service role>"
+    pip install requests pdfplumber
+    export SUPABASE_URL="..."
+    export SUPABASE_SERVICE_ROLE_KEY="..."
     python tequio_loader.py --priority P2 --limit 50
-
-Args:
-    --priority  P2 (federales), P3 (reglamentos), P1 (constituciones estatales)
-    --limit     Cuántos procesar antes de salir (default 20)
-    --dry-run   Solo lista lo que haría, no carga
-    --verbose   Más logging
 
 🦎 Cero Invención · Tequio · 2026
 """
@@ -41,7 +33,7 @@ SB_URL = os.environ.get("SUPABASE_URL", "https://mhsuihwjgtzxflesbnxv.supabase.c
 SB_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 if not SB_KEY:
-    print("ERROR: falta SUPABASE_SERVICE_ROLE_KEY en env. Cópiala de Supabase Dashboard → Settings → API.")
+    print("ERROR: falta SUPABASE_SERVICE_ROLE_KEY en env.")
     sys.exit(1)
 
 
@@ -54,7 +46,6 @@ def headers():
 
 
 def fetch_queue(priority: str, limit: int) -> list:
-    """Get pending docs from queue."""
     r = requests.get(
         f"{SB_URL}/rest/v1/_overnight_progress",
         params={
@@ -71,7 +62,6 @@ def fetch_queue(priority: str, limit: int) -> list:
 
 
 def transform_url_to_pdf(url: str) -> Optional[str]:
-    """diputados.gob.mx/ref/X.htm → diputados.gob.mx/pdf/X.pdf (primer intento)"""
     if not url:
         return None
     m = re.match(r"https?://www\.diputados\.gob\.mx/LeyesBiblio/ref/([a-zA-Z0-9_]+)\.htm", url)
@@ -84,31 +74,23 @@ def transform_url_to_pdf(url: str) -> Optional[str]:
 
 
 def discover_pdf_from_ref(ref_url: str, timeout: int = 20) -> Optional[str]:
-    """Fallback: si /pdf/X.pdf no funciona, fetch /ref/X.htm y busca link real al PDF.
-
-    Las páginas /ref/ tienen un link tipo:
-      <a href="../pdf/LAREFAM.pdf">Texto vigente</a>
-    o también pueden tener pdf con sufijos como _LFT, _ref01, etc.
-    """
+    """Fetch /ref/X.htm and parse for real PDF link."""
     try:
-        r = requests.get(ref_url, timeout=timeout, headers={"User-Agent": "Tequio-Loader/1.0"})
+        r = requests.get(ref_url, timeout=timeout, headers={"User-Agent": "Tequio-Loader/2.0"})
         r.raise_for_status()
         html = r.text
-        # Busca cualquier link a /pdf/X.pdf en el HTML
         matches = re.findall(r'(?:\.\./|/)?(?:LeyesBiblio/)?pdf/([A-Z0-9_]+\.pdf)', html, re.IGNORECASE)
         if matches:
-            # Devuelve el primero (el más reciente / texto vigente)
             pdf_name = matches[0]
             return f"https://www.diputados.gob.mx/LeyesBiblio/pdf/{pdf_name}"
     except Exception as e:
-        print(f"  · discover_pdf_from_ref failed: {e}")
+        print(f"  - discover failed: {e}")
     return None
 
 
 def fetch_pdf_text(url: str, timeout: int = 30) -> Optional[str]:
-    """Download PDF and extract text via pdfplumber."""
     try:
-        r = requests.get(url, timeout=timeout, headers={"User-Agent": "Tequio-Loader/1.0"})
+        r = requests.get(url, timeout=timeout, headers={"User-Agent": "Tequio-Loader/2.0"})
         r.raise_for_status()
         if "pdf" not in r.headers.get("content-type", "").lower():
             return None
@@ -117,14 +99,12 @@ def fetch_pdf_text(url: str, timeout: int = 30) -> Optional[str]:
             pages = [page.extract_text() or "" for page in pdf.pages]
             return "\n".join(pages).strip()
     except Exception as e:
-        print(f"  ✗ fetch failed: {e}")
+        print(f"  X fetch failed: {e}")
         return None
 
 
-def chunk_text(text: str, chunk_size: int = 4000, overlap: int = 200) -> list:
-    """Simple chunker by article boundaries + size."""
-    # Split on "Artículo N" markers
-    articles = re.split(r"(?=Art[íi]culo\s+\d+[º°.\-]?)", text)
+def chunk_text(text: str, chunk_size: int = 4000) -> list:
+    articles = re.split(r"(?=Art[ií]culo\s+\d+)", text)
     chunks = []
     buf = ""
     for art in articles:
@@ -143,12 +123,11 @@ def chunk_text(text: str, chunk_size: int = 4000, overlap: int = 200) -> list:
 
 
 def extract_articulo_num(chunk_text: str) -> Optional[str]:
-    m = re.search(r"Art[íi]culo\s+(\d+[A-Z]?)", chunk_text)
+    m = re.search(r"Art[ií]culo\s+(\d+[A-Z]?)", chunk_text)
     return m.group(1) if m else None
 
 
-def insert_chunks(ley_id: int, ley_nombre: str, chunks: list, verbose: bool = False) -> int:
-    """Bulk insert chunks via REST. Returns count inserted."""
+def insert_chunks(ley_id, ley_nombre, chunks, verbose=False) -> int:
     rows = []
     for idx, c in enumerate(chunks):
         rows.append({
@@ -156,7 +135,7 @@ def insert_chunks(ley_id: int, ley_nombre: str, chunks: list, verbose: bool = Fa
             "ley_nombre": ley_nombre,
             "chunk_idx": idx,
             "articulo_num": extract_articulo_num(c),
-            "texto": c[:8000],  # safety cap
+            "texto": c[:8000],
             "caracteres": len(c),
         })
     if not rows:
@@ -168,12 +147,12 @@ def insert_chunks(ley_id: int, ley_nombre: str, chunks: list, verbose: bool = Fa
         timeout=60,
     )
     if r.status_code >= 300:
-        print(f"  ✗ insert failed {r.status_code}: {r.text[:200]}")
+        print(f"  X insert failed {r.status_code}: {r.text[:200]}")
         return 0
     return len(rows)
 
 
-def mark_done(progress_id: int, status: str, chunks_count: int = 0, error: str = None):
+def mark_done(progress_id, status, chunks_count=0, error=None):
     payload = {
         "estado": status,
         "chunks_creados": chunks_count,
@@ -181,7 +160,7 @@ def mark_done(progress_id: int, status: str, chunks_count: int = 0, error: str =
     }
     if error:
         payload["error"] = error[:500]
-    r = requests.patch(
+    requests.patch(
         f"{SB_URL}/rest/v1/_overnight_progress",
         params={"id": f"eq.{progress_id}"},
         json=payload,
@@ -190,8 +169,7 @@ def mark_done(progress_id: int, status: str, chunks_count: int = 0, error: str =
     )
 
 
-def process_one(item: dict, dry_run: bool, verbose: bool) -> str:
-    """Returns 'ok', 'no_pdf_url', 'fetch_fail', 'no_text', 'insert_fail'."""
+def process_one(item, dry_run, verbose):
     progress_id = item["id"]
     ley_id = item.get("ley_id")
     nombre = item["nombre"]
@@ -199,24 +177,23 @@ def process_one(item: dict, dry_run: bool, verbose: bool) -> str:
 
     pdf_url = transform_url_to_pdf(raw_url)
     if not pdf_url:
-        print(f"  · sin PDF derivable de {raw_url}")
+        print(f"  - sin PDF derivable de {raw_url}")
         if not dry_run:
             mark_done(progress_id, "failed", error="no_pdf_url")
         return "no_pdf_url"
 
     if dry_run:
-        print(f"  → would fetch {pdf_url}")
+        print(f"  -> would fetch {pdf_url}")
         return "dry"
 
-    print(f"  → fetching {pdf_url}")
+    print(f"  -> fetching {pdf_url}")
     text = fetch_pdf_text(pdf_url)
 
-    # Fallback: si el PDF directo no existe (404), buscar el link real desde la página /ref/
     if (not text or len(text) < 500) and raw_url and "/ref/" in raw_url:
-        print(f"  · primer intento falló · buscando PDF real en {raw_url}")
+        print(f"  - primer intento falló, buscando link real en {raw_url}")
         alt_url = discover_pdf_from_ref(raw_url)
         if alt_url and alt_url != pdf_url:
-            print(f"  → fetching (fallback) {alt_url}")
+            print(f"  -> fetching (fallback) {alt_url}")
             text = fetch_pdf_text(alt_url)
 
     if not text or len(text) < 500:
@@ -225,8 +202,48 @@ def process_one(item: dict, dry_run: bool, verbose: bool) -> str:
 
     chunks = chunk_text(text)
     if verbose:
-        print(f"  → {len(text)} chars, {len(chunks)} chunks")
+        print(f"  - {len(text)} chars, {len(chunks)} chunks")
 
     inserted = insert_chunks(ley_id, nombre, chunks, verbose=verbose)
     if inserted == 0:
-        mark_done(progress_id, "fai
+        mark_done(progress_id, "failed", error="insert_returned_0")
+        return "insert_fail"
+
+    mark_done(progress_id, "embedded", chunks_count=inserted)
+    print(f"  OK {inserted} chunks insertados")
+    return "ok"
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--priority", default="P2", choices=["P1", "P2", "P3"])
+    p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--verbose", action="store_true")
+    args = p.parse_args()
+
+    print(f"Tequio Loader v2 - prioridad={args.priority} limit={args.limit}")
+    queue = fetch_queue(args.priority, args.limit)
+    print(f"{len(queue)} documentos en cola")
+    if not queue:
+        return
+
+    stats = {"ok": 0, "no_pdf_url": 0, "no_text": 0, "insert_fail": 0, "dry": 0}
+    for i, item in enumerate(queue, 1):
+        print(f"\n[{i}/{len(queue)}] {item['nombre'][:80]}")
+        try:
+            result = process_one(item, args.dry_run, args.verbose)
+            stats[result] = stats.get(result, 0) + 1
+        except Exception as e:
+            print(f"  X exception: {e}")
+            stats["no_text"] = stats.get("no_text", 0) + 1
+        time.sleep(2)
+
+    print("\n=== RESUMEN ===")
+    for k, v in stats.items():
+        print(f"  {k}: {v}")
+    print("\nEmbeddings se generan via pg_cron (50/min).")
+
+
+if __name__ == "__main__":
+    main()
