@@ -13253,8 +13253,9 @@ function switchTab(el) {
 }
 // ─── Navigation ───
 // ─── Panel iframe loader & Próximamente placeholder ───
-function cargarPanel(slug) {
+function cargarPanel(slug, extras) {
   const PANELS = {
+    'municipio': '/panel/municipio.html?embedded=1',
     'colaboradores': '/panel/colaboradores.html?embedded=1',
     'que-falta': '/panel/que-falta.html?embedded=1',
     'mi-rep': '/panel/mi-rep-vs-yo.html?embedded=1',
