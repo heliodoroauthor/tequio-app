@@ -253,7 +253,7 @@
     var arr=r.data;
     if(!arr.length){$('searchResults').innerHTML='<div class="empty">Sin resultados para "'+esc(q)+'"</div>';return;}
     $('searchResults').innerHTML = arr.map(function(m){
-      return '<div class="search-result" onclick="abrirMuni('+m.id+')"><div><strong>'+esc(m.nombre)+'</strong> · <span style="color:var(--text3)">'+esc(m.estado)+'</span></div><div><span style="color:var(--orange);font-weight:700">'+m.pct+'%</span> <span style="color:var(--text3);font-size:11px;margin-left:6px">faltan '+m.faltantes+'</span></div></div>';
+      return '<div class="search-result" onclick="abrirMuni(\''+esc(m.clave_inegi||m.id)+'\')"><div><strong>'+esc(m.nombre)+'</strong> · <span style="color:var(--text3)">'+esc(m.estado)+'</span></div><div><span style="color:var(--orange);font-weight:700">'+m.pct+'%</span> <span style="color:var(--text3);font-size:11px;margin-left:6px">faltan '+m.faltantes+'</span></div></div>';
     }).join('');
   };
   
