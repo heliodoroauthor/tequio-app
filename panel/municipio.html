@@ -540,9 +540,15 @@ load();
 (function(){
   var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
   var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  var TURNSTILE_SITE='0x4AAAAAADVsqa6-gYYg2pDO';
   var MUNI_ID=null, CATEGORIAS=[];
+  var TOKEN=null, USER_ID=null;
   function $(id){return document.getElementById(id);}
-  function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+  function authHeader(){return TOKEN?('Bearer '+TOKEN):('Bearer '+ANON);}
+  function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':authHeader()},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+  function loadTurnstile(){return new Promise(function(res,rej){if(window.turnstile&&window.turnstile.render)return res(window.turnstile);var ex=document.querySelector('script[data-tc-ts]');if(ex){var w=0;var iv=setInterval(function(){if(window.turnstile&&window.turnstile.render){clearInterval(iv);res(window.turnstile);}else if(w>10000){clearInterval(iv);rej(new Error('TS timeout'));}w+=100;},100);return;}var s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js';s.async=true;s.defer=true;s.setAttribute('data-tc-ts','1');s.onload=function(){res(window.turnstile);};s.onerror=function(){rej(new Error('No carga Turnstile'));};document.head.appendChild(s);});}
+  function getCaptcha(){return new Promise(function(res,rej){loadTurnstile().then(function(ts){var c=document.getElementById('tc-turnstile');if(!c){c=document.createElement('div');c.id='tc-turnstile';c.style.cssText='margin:10px 0;display:flex;justify-content:center';var msg=$('tc-msg');if(msg&&msg.parentNode)msg.parentNode.insertBefore(c,msg);}else{try{ts.remove(c);}catch(e){}c.innerHTML='';}try{ts.render(c,{sitekey:TURNSTILE_SITE,theme:'dark',callback:function(t){res(t);},'error-callback':function(){rej(new Error('Captcha falló'));}});}catch(e){rej(e);}}).catch(rej);});}
+  function signInAnon(){return new Promise(function(resolve){var saved=sessionStorage.getItem('tc_jwt');var savedUid=sessionStorage.getItem('tc_uid');if(saved&&savedUid){TOKEN=saved;USER_ID=savedUid;return resolve(true);}getCaptcha().then(function(captchaToken){return fetch(SB+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON},body:JSON.stringify({data:{},gotrue_meta_security:{captcha_token:captchaToken}})}).then(function(r){return r.json();});}).then(function(j){if(j&&j.access_token&&j.user){TOKEN=j.access_token;USER_ID=j.user.id;sessionStorage.setItem('tc_jwt',TOKEN);sessionStorage.setItem('tc_uid',USER_ID);var c=document.getElementById('tc-turnstile');if(c)c.style.display='none';resolve(true);}else{resolve(false);}}).catch(function(){resolve(false);});});}
   function getMuniId(){var m=location.pathname.match(/municipio[\-_](\d+)/);if(m)return parseInt(m[1]);var u=new URLSearchParams(location.search);return parseInt(u.get('id')||u.get('municipio_id')||u.get('m'));}
   function render(catList,score){
     if(score && score.pct!=null){
