@@ -573,12 +573,29 @@ load();
     $('tc-cat').innerHTML=CATEGORIAS.filter(function(c){return !c.cubierto;}).map(function(c){return '<option value="'+c.categoria_id+'">'+c.icono+' '+c.categoria_nombre+'</option>';}).join('');
   };
   window.tcCancelar=function(){$('tc-form').style.display='none';$('tc-msg').textContent='';};
+  function doEnviar(){
+    var url=($('tc-url').value||'').trim();
+    return rpc('enviar_contribucion',{p_municipio_id:MUNI_ID,p_categoria_id:$('tc-cat').value,p_url:url,p_nick:$('tc-nick').value||null});
+  }
   window.tcEnviar=function(){
     var url=($('tc-url').value||'').trim();
     if(!url){$('tc-msg').textContent='Pon el URL del documento';$('tc-msg').style.color='#ef4444';return;}
-    rpc('enviar_contribucion',{p_municipio_id:MUNI_ID,p_categoria_id:$('tc-cat').value,p_url:url,p_nick:$('tc-nick').value||null}).then(function(r){
-      if(r && r.ok){$('tc-msg').textContent='✓ '+r.mensaje;$('tc-msg').style.color='#22c55e';setTimeout(function(){tcCancelar();},3000);}
-      else $('tc-msg').textContent=(r&&r.error)||'Error · ¿iniciaste sesión?';
+    $('tc-msg').textContent='Enviando...';$('tc-msg').style.color='#a8b0c0';
+    function trySend(){return doEnviar().then(function(r){
+      if(r && r.ok){$('tc-msg').textContent='✓ '+r.mensaje;$('tc-msg').style.color='#22c55e';setTimeout(function(){tcCancelar();},3000);return true;}
+      return r;
+    });}
+    trySend().then(function(r){
+      if(r===true)return;
+      if(r && r.error && (r.error.indexOf('Auth')>=0||r.error.indexOf('sesión')>=0||r.error.indexOf('iniciar')>=0)){
+        $('tc-msg').textContent='Verificando que no eres bot...';
+        return signInAnon().then(function(ok){
+          if(!ok){$('tc-msg').textContent='Captcha falló. Reintenta.';$('tc-msg').style.color='#ef4444';return;}
+          $('tc-msg').textContent='Enviando...';
+          return trySend().then(function(r2){if(r2!==true && r2 && r2.error){$('tc-msg').textContent=r2.error;$('tc-msg').style.color='#ef4444';}});
+        });
+      }
+      if(r && r.error){$('tc-msg').textContent=r.error;$('tc-msg').style.color='#ef4444';}
     }).catch(function(){$('tc-msg').textContent='Error de red';$('tc-msg').style.color='#ef4444';});
   };
   function init(){
