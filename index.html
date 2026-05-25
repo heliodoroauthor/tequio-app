@@ -3083,7 +3083,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <a href="https://sih.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA SIH →</a>
           </div>
         </div>
+        <div style="background:rgba(8,145,178,0.08);border:1px solid rgba(8,145,178,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5;color:var(--text2)">ℹ️ <strong>CONAGUA publica telemetría diaria solo de un subconjunto de presas principales</strong> (~30-200 según fecha). Las presas grandes operativas que no aparecen aquí (Nezahualcóyotl, Infiernillo, La Amistad) SÍ tienen agua — simplemente no están en el feed público diario. Para data completa, ver <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#0891b2">SINA</a>.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+          <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" id="presas-solo-telemetria" checked onchange="presasFiltrar()"> Solo con telemetría</label>
           <input id="presas-filtro" type="text" placeholder="🔍 Filtrar por presa o estado..."
             oninput="presasFiltrar()"
             style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
