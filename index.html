@@ -21436,7 +21436,7 @@ async function debateCrearEnviar() {
   }
 }
 // Init al cargar la página de debates
-function initDebates() {
+function _legacyInitDebatesDEMO_DISABLED() { return; /* superseded by debatesPolisInit */ } function __legacyDebatesBody_NOT_CALLED() {
   debateRenderLista();
   document.getElementById('debate-lista').style.display = 'flex';
   document.getElementById('debate-lista').style.flexDirection = 'column';
