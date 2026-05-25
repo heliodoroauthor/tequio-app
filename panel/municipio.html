@@ -497,5 +497,97 @@ switchMunTab(initialTab);
 
 load();
 </script>
+<!-- ───── TEQUIO CIUDADANO · Widget de completitud + contribución ───── -->
+<div id="tequio-ciudadano" style="margin:24px auto;max-width:900px;background:linear-gradient(135deg,#0a2540,#0d4e3b);border-radius:14px;padding:20px;color:#e4e7ee;display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div>
+      <div style="font-size:18px;font-weight:800">🦎 Tequio Ciudadano</div>
+      <div style="font-size:12px;color:#a8b0c0">Cobertura de información de este municipio</div>
+    </div>
+    <div style="text-align:right">
+      <div id="tc-score-pct" style="font-size:32px;font-weight:800;color:#22c55e">—</div>
+      <div style="font-size:11px;color:#a8b0c0"><span id="tc-score-cov">0</span> de <span id="tc-score-tot">12</span> categorías</div>
+    </div>
+  </div>
+  <div style="background:rgba(0,0,0,0.3);border-radius:8px;height:12px;overflow:hidden;margin-bottom:16px">
+    <div id="tc-bar" style="height:100%;background:linear-gradient(90deg,#22c55e,#10b981);width:0;transition:width .6s"></div>
+  </div>
+  <div id="tc-categorias" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:16px"></div>
+  <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:13px;line-height:1.5">
+      <strong>¿Tienes información oficial de este municipio?</strong><br>
+      <span style="color:#a8b0c0">Comparte la URL del documento oficial y aparecerás en el Hall of Fame.</span>
+    </div>
+    <button id="tc-contribuir-btn" onclick="tcAbrirForm()" style="background:#22c55e;border:none;border-radius:8px;color:#fff;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;align-self:flex-start">📤 Contribuir información</button>
+  </div>
+  <div id="tc-form" style="display:none;margin-top:14px;background:rgba(0,0,0,0.3);border-radius:10px;padding:14px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px">Comparte información oficial</div>
+    <label style="font-size:11px;color:#a8b0c0;display:block;margin-bottom:4px">Categoría:</label>
+    <select id="tc-cat" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px;color:#fff;font-family:inherit;margin-bottom:10px"></select>
+    <label style="font-size:11px;color:#a8b0c0;display:block;margin-bottom:4px">URL del documento oficial: *</label>
+    <input id="tc-url" type="url" placeholder="https://..." style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px;color:#fff;font-family:inherit;margin-bottom:10px">
+    <label style="font-size:11px;color:#a8b0c0;display:block;margin-bottom:4px">Tu nombre o nick (público):</label>
+    <input id="tc-nick" type="text" maxlength="24" placeholder="Anónimo" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px;color:#fff;font-family:inherit;margin-bottom:10px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="tcEnviar()" style="background:#22c55e;border:none;border-radius:6px;color:#fff;padding:8px 14px;font-weight:600;cursor:pointer;font-family:inherit">Enviar</button>
+      <button onclick="tcCancelar()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#a8b0c0;padding:8px 14px;cursor:pointer;font-family:inherit">Cancelar</button>
+    </div>
+    <div id="tc-msg" style="font-size:12px;margin-top:8px;min-height:16px"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  var MUNI_ID=null, CATEGORIAS=[];
+  function $(id){return document.getElementById(id);}
+  function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+  function getMuniId(){var m=location.pathname.match(/municipio[\-_](\d+)/);if(m)return parseInt(m[1]);var u=new URLSearchParams(location.search);return parseInt(u.get('id')||u.get('municipio_id')||u.get('m'));}
+  function render(catList,score){
+    if(score && score.pct!=null){
+      $('tc-score-pct').textContent=score.pct+'%';
+      $('tc-score-cov').textContent=score.categorias_cubiertas;
+      $('tc-score-tot').textContent=score.categorias_totales;
+      $('tc-bar').style.width=score.pct+'%';
+      if(score.pct<33)$('tc-score-pct').style.color='#ef4444';
+      else if(score.pct<66)$('tc-score-pct').style.color='#fb923c';
+      else $('tc-score-pct').style.color='#22c55e';
+    }
+    $('tc-categorias').innerHTML=catList.map(function(c){
+      var status=c.cubierto?'✅':'⚠️';
+      var col=c.cubierto?'#22c55e':'#a8b0c0';
+      var bg=c.cubierto?'rgba(34,197,94,0.1)':'rgba(255,255,255,0.04)';
+      var src=c.cubierto?'<a href="'+(c.url||'#')+'" target="_blank" style="color:#22c55e;font-size:10px">'+(c.fuente||'')+'</a>':'<span style="color:#a8b0c0;font-size:10px">faltante</span>';
+      return '<div style="padding:8px 10px;background:'+bg+';border-radius:6px;border:1px solid rgba(255,255,255,0.06)"><div style="font-size:13px;color:'+col+'">'+status+' '+c.icono+' '+c.categoria_nombre+'</div><div style="margin-top:2px">'+src+'</div></div>';
+    }).join('');
+  }
+  window.tcAbrirForm=function(){
+    $('tc-form').style.display='block';
+    $('tc-cat').innerHTML=CATEGORIAS.filter(function(c){return !c.cubierto;}).map(function(c){return '<option value="'+c.categoria_id+'">'+c.icono+' '+c.categoria_nombre+'</option>';}).join('');
+  };
+  window.tcCancelar=function(){$('tc-form').style.display='none';$('tc-msg').textContent='';};
+  window.tcEnviar=function(){
+    var url=($('tc-url').value||'').trim();
+    if(!url){$('tc-msg').textContent='Pon el URL del documento';$('tc-msg').style.color='#ef4444';return;}
+    rpc('enviar_contribucion',{p_municipio_id:MUNI_ID,p_categoria_id:$('tc-cat').value,p_url:url,p_nick:$('tc-nick').value||null}).then(function(r){
+      if(r && r.ok){$('tc-msg').textContent='✓ '+r.mensaje;$('tc-msg').style.color='#22c55e';setTimeout(function(){tcCancelar();},3000);}
+      else $('tc-msg').textContent=(r&&r.error)||'Error · ¿iniciaste sesión?';
+    }).catch(function(){$('tc-msg').textContent='Error de red';$('tc-msg').style.color='#ef4444';});
+  };
+  function init(){
+    MUNI_ID=getMuniId();
+    if(!MUNI_ID)return;
+    Promise.all([rpc('municipio_completitud',{p_municipio_id:MUNI_ID}),rpc('municipio_score',{p_municipio_id:MUNI_ID})]).then(function(res){
+      CATEGORIAS=res[0]||[];
+      if(!CATEGORIAS.length){return;}
+      $('tequio-ciudadano').style.display='block';
+      render(CATEGORIAS,res[1]||{});
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+  else setTimeout(init,500);
+})();
+</script>
 </body>
 </html>
