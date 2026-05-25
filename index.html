@@ -7234,6 +7234,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       </div>
       <script>
       (function(){
+        var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+        var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
         var TEMAS = [
           { id:'5ca2fdeshw', emoji:'💧', titulo:'Agua',               desc:'¿Cómo garantizar acceso justo al agua frente a la crisis hídrica?' },
           { id:'5fta4ehdhm', emoji:'⚖️', titulo:'Reforma Judicial',   desc:'Elección popular de jueces: ¿avance democrático o riesgo institucional?' },
@@ -7241,6 +7243,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           { id:'23ecj5pjm8', emoji:'🛡️', titulo:'Militarización',     desc:'Guardia Nacional bajo SEDENA: ¿seguridad o riesgo democrático?' },
           { id:'8xt4kmejfv', emoji:'🌽', titulo:'Maíz Transgénico',   desc:'Soberanía alimentaria vs. mercado global: ¿qué priorizar?' }
         ];
+        // Fetch dinámico desde DB; si falla queda el hardcoded
+        fetch(SB+'/rest/v1/rpc/polis_debates_publicos',{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:'{}'}).then(function(r){return r.json();}).then(function(arr){if(Array.isArray(arr)&&arr.length){TEMAS=arr.map(function(d){return {id:d.pol_id,emoji:d.emoji,titulo:d.titulo,desc:d.descripcion};});window.__TEQUIO_POLIS_TEMAS=TEMAS;if(window.debatesPolisInit){var grid=document.getElementById('polisGrid');if(grid){grid.dataset.hydrated='0';window.debatesPolisInit();}}}}).catch(function(){});
         window.__TEQUIO_POLIS_TEMAS = TEMAS;
 
         function esc(s){
