@@ -109,6 +109,29 @@
 
     <div class="card">
       <div class="row" style="justify-content: space-between; margin-bottom: 12px">
+        <strong>🗣️ Debates Pol.is</strong>
+        <button class="btn btn-green btn-sm" onclick="window.polisNuevo()">+ Nuevo debate</button>
+      </div>
+      <div id="polisAdminList"><div class="empty">Cargando…</div></div>
+      <div id="polisForm" style="display:none;margin-top:14px;padding:14px;background:rgba(0,0,0,0.2);border-radius:10px">
+        <input type="hidden" id="polisFormId">
+        <div class="row" style="margin-bottom:8px">
+          <input id="polisFormPolId" type="text" placeholder="pol_id (ej: 5ca2fdeshw)" style="flex:1;min-width:160px">
+          <input id="polisFormEmoji" type="text" placeholder="💬" style="width:80px">
+          <input id="polisFormOrden" type="number" placeholder="orden" style="width:80px">
+        </div>
+        <input id="polisFormTitulo" type="text" placeholder="Título del debate" style="margin-bottom:8px">
+        <input id="polisFormDesc" type="text" placeholder="Descripción / pregunta" style="margin-bottom:8px">
+        <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:10px"><input type="checkbox" id="polisFormActivo" checked> Activo</label>
+        <div class="row">
+          <button class="btn btn-sm btn-green" onclick="window.polisGuardar()">Guardar</button>
+          <button class="btn btn-sm btn-ghost" onclick="window.polisCancelar()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 12px">
         <strong>🦎 Contribuciones Ciudadanas (Tequio)</strong>
         <span style="color: var(--text3); font-size: 12px"><span id="tcPendientesCount">0</span> pendientes</span>
       </div>
