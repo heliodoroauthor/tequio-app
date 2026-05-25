@@ -640,5 +640,51 @@ load();
   else setTimeout(init,500);
 })();
 </script>
+<!-- ───── CAMPANA NOTIFICACIONES ───── -->
+<div id="tc-bell" style="display:none;position:fixed;top:16px;right:16px;z-index:9999;font-family:-apple-system,sans-serif">
+  <button onclick="tcToggleNotif()" style="background:#141b2e;border:1px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);position:relative">🔔 <span id="tc-bell-count" style="background:#ef4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px;display:none">0</span></button>
+  <div id="tc-notif-panel" style="display:none;position:absolute;top:48px;right:0;width:340px;max-height:400px;overflow-y:auto;background:#141b2e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,0.5)">
+    <div style="font-size:14px;font-weight:700;color:#e4e7ee;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center"><span>🦎 Tus Tequio</span><button onclick="tcMarcarLeidas()" style="background:transparent;border:none;color:#a8b0c0;font-size:11px;cursor:pointer;font-family:inherit">Marcar todas leídas</button></div>
+    <div id="tc-notif-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+  function fmt(iso){try{var d=new Date(iso);var ago=(Date.now()-d.getTime())/1000;if(ago<60)return 'ahora';if(ago<3600)return Math.floor(ago/60)+'m';if(ago<86400)return Math.floor(ago/3600)+'h';return Math.floor(ago/86400)+'d';}catch(e){return '';}}
+  function getToken(){return sessionStorage.getItem('tc_jwt');}
+  function rpc(name,body){var t=getToken();return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+(t||ANON)},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+  window.tcToggleNotif=function(){var p=$('tc-notif-panel');p.style.display=(p.style.display==='block')?'none':'block';if(p.style.display==='block')loadNotif();};
+  window.tcMarcarLeidas=function(){rpc('marcar_notif_leidas').then(function(){loadNotif();updateBadge();});};
+  function loadNotif(){
+    if(!getToken()){$('tc-notif-list').innerHTML='<div style="color:#6b7388;font-size:12px;text-align:center;padding:10px">Aún sin notificaciones</div>';return;}
+    rpc('mis_notificaciones',{p_limit:20}).then(function(r){
+      if(!Array.isArray(r)||!r.length){$('tc-notif-list').innerHTML='<div style="color:#6b7388;font-size:12px;text-align:center;padding:10px">Sin notificaciones aún</div>';return;}
+      $('tc-notif-list').innerHTML=r.map(function(n){
+        var bg=n.leida?'rgba(255,255,255,0.02)':'rgba(124,58,237,0.1)';
+        var link=n.link_url?'cursor:pointer':'';
+        return '<div onclick="'+(n.link_url?'window.location.href=\''+esc(n.link_url)+'\'':'')+'" style="background:'+bg+';border-radius:8px;padding:10px 12px;'+link+'"><div style="display:flex;gap:8px"><div style="font-size:20px">'+(n.icono||'🔔')+'</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#e4e7ee">'+esc(n.titulo)+'</div><div style="font-size:12px;color:#a8b0c0;margin-top:2px;line-height:1.4">'+esc(n.mensaje||'')+'</div><div style="font-size:10px;color:#6b7388;margin-top:4px">'+fmt(n.created_at)+'</div></div></div></div>';
+      }).join('');
+    });
+  }
+  function updateBadge(){
+    if(!getToken()){$('tc-bell').style.display='none';return;}
+    rpc('mis_notificaciones',{p_limit:20}).then(function(r){
+      if(!Array.isArray(r))return;
+      $('tc-bell').style.display='block';
+      var unread=r.filter(function(n){return !n.leida;}).length;
+      var b=$('tc-bell-count');
+      if(unread>0){b.textContent=unread;b.style.display='inline-block';}else{b.style.display='none';}
+    }).catch(function(){});
+  }
+  // Inicializar tras delay (esperar auth)
+  setTimeout(updateBadge,1500);
+  // Refrescar cada 60s
+  setInterval(updateBadge,60000);
+})();
+</script>
 </body>
 </html>
