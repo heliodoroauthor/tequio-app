@@ -214,9 +214,9 @@
     setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
   
-  function abrirMuni(id){
-    try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('municipio', '&id=' + id); return; } } catch(e){}
-    window.location.href = '/panel/municipio.html?id=' + id;
+  function abrirMuni(clave){
+    try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('municipio', '&clave_inegi=' + clave); return; } } catch(e){}
+    window.location.href = '/panel/municipio.html?clave_inegi=' + clave;
   }
   window.abrirMuni = abrirMuni;
   function renderMunicipios(arr){
