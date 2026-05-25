@@ -5924,24 +5924,86 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         }
 
         // ---- Auth anónimo ----
+        // ---- Cloudflare Turnstile (captcha invisible) ----
+        function loadTurnstile(){
+          return new Promise(function(resolve, reject){
+            if (window.turnstile && window.turnstile.render) return resolve(window.turnstile);
+            // Si el script ya está cargando, esperar al global
+            var existing = document.querySelector('script[data-tequio-turnstile]');
+            if (existing) {
+              var waited = 0;
+              var iv = setInterval(function(){
+                if (window.turnstile && window.turnstile.render) { clearInterval(iv); resolve(window.turnstile); }
+                else if (waited > 10000) { clearInterval(iv); reject(new Error('Turnstile timeout')); }
+                waited += 100;
+              }, 100);
+              return;
+            }
+            var s = document.createElement('script');
+            s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+            s.async = true; s.defer = true;
+            s.setAttribute('data-tequio-turnstile','1');
+            s.onload  = function(){ resolve(window.turnstile); };
+            s.onerror = function(){ reject(new Error('No se pudo cargar Turnstile')); };
+            document.head.appendChild(s);
+          });
+        }
+
+        function getCaptchaToken(){
+          return new Promise(function(resolve, reject){
+            loadTurnstile().then(function(ts){
+              var c = document.getElementById('turnstile-container');
+              if (!c) {
+                c = document.createElement('div');
+                c.id = 'turnstile-container';
+                c.style.cssText = 'margin:8px 0;display:flex;justify-content:center';
+                var iw = document.getElementById('chatInputWrap');
+                if (iw && iw.parentNode) iw.parentNode.insertBefore(c, iw);
+              } else {
+                try { ts.remove(c); } catch(e){}
+                c.innerHTML = '';
+                c.style.display = 'flex';
+              }
+              try {
+                ts.render(c, {
+                  sitekey: TURNSTILE_SITE,
+                  theme: 'dark',
+                  callback: function(token){ resolve(token); },
+                  'error-callback': function(){ reject(new Error('Turnstile rechazó la verificación')); },
+                  'expired-callback': function(){ /* el siguiente intento re-renderiza */ }
+                });
+              } catch(e){ reject(e); }
+            }).catch(reject);
+          });
+        }
+
         function ensureAuth(){
-          var cached = sessionStorage.getItem('tequio_chat_uid');
           return state.sb.auth.getSession().then(function(res){
             if (res.data && res.data.session && res.data.session.access_token) {
               state.token = res.data.session.access_token;
               state.userId = res.data.session.user.id;
               return true;
             }
-            return state.sb.auth.signInAnonymously().then(function(r){
-              if (r.error) {
-                setStatus('#ef4444', 'Auth anónima deshabilitada · pídele al admin habilitarla');
+            setStatus('#666', 'Verificando captcha…');
+            return getCaptchaToken().then(function(captchaToken){
+              setStatus('#666', 'Autenticando…');
+              return state.sb.auth.signInAnonymously({ options: { captchaToken: captchaToken } });
+            }).then(function(r){
+              if (r && r.error) {
+                setStatus('#ef4444', 'Auth fallida · ' + (r.error.message || 'error'));
                 console.error('signInAnonymously:', r.error);
                 return false;
               }
-              state.token = r.data.session.access_token;
+              state.token  = r.data.session.access_token;
               state.userId = r.data.user.id;
               sessionStorage.setItem('tequio_chat_uid', state.userId);
+              var c = document.getElementById('turnstile-container');
+              if (c) c.style.display = 'none';
               return true;
+            }).catch(function(err){
+              setStatus('#ef4444', 'Captcha fallido · ' + (err && err.message || 'error'));
+              console.error('captcha/auth:', err);
+              return false;
             });
           });
         }
