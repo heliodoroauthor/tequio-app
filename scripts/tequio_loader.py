@@ -128,28 +128,34 @@ def extract_articulo_num(chunk_text: str) -> Optional[str]:
 
 
 def insert_chunks(ley_id, ley_nombre, chunks, verbose=False) -> int:
-    rows = []
-    for idx, c in enumerate(chunks):
-        rows.append({
-            "ley_id": ley_id,
-            "ley_nombre": ley_nombre,
-            "chunk_idx": idx,
-            "articulo_num": extract_articulo_num(c),
-            "texto": c[:8000],
-            "caracteres": len(c),
-        })
-    if not rows:
+    if not chunks:
         return 0
-    r = requests.post(
-        f"{SB_URL}/rest/v1/leyes_chunks",
-        json=rows,
-        headers={**headers(), "Prefer": "return=minimal"},
-        timeout=60,
-    )
-    if r.status_code >= 300:
-        print(f"  X insert failed {r.status_code}: {r.text[:200]}")
-        return 0
-    return len(rows)
+    total_inserted = 0
+    BATCH = 50
+    for batch_start in range(0, len(chunks), BATCH):
+        batch = chunks[batch_start:batch_start+BATCH]
+        rows = []
+        for offset, c in enumerate(batch):
+            idx = batch_start + offset
+            rows.append({
+                "ley_id": ley_id,
+                "ley_nombre": ley_nombre,
+                "chunk_idx": idx,
+                "articulo_num": extract_articulo_num(c),
+                "texto": c[:8000],
+                "caracteres": len(c),
+            })
+        r = requests.post(
+            f"{SB_URL}/rest/v1/leyes_chunks",
+            json=rows,
+            headers={**headers(), "Prefer": "return=minimal"},
+            timeout=60,
+        )
+        if r.status_code >= 300:
+            print(f"  X batch {batch_start} failed {r.status_code}: {r.text[:150]}")
+            return total_inserted
+        total_inserted += len(rows)
+    return total_inserted
 
 
 def mark_done(progress_id, status, chunks_count=0, error=None):
