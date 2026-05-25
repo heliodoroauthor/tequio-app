@@ -233,7 +233,81 @@
     refresh();
   }
 
-  async function refresh(){ await loadStats(); await loadReportados(); await tcRefresh(); }
+  async function refresh(){ await loadStats(); await loadReportados(); await tcRefresh(); await polisRefresh(); }
+
+  async function polisRefresh(){
+    try {
+      var r = await sb.rpc('admin_polis_listar');
+      var list = $('polisAdminList');
+      if (r.error) { list.innerHTML = '<div class="empty">Error: '+esc(r.error.message)+'</div>'; return; }
+      var arr = Array.isArray(r.data) ? r.data : [];
+      if (!arr.length) { list.innerHTML = '<div class="empty">Sin debates · agrega el primero</div>'; return; }
+      list.innerHTML = arr.map(function(d){
+        var statusBg = d.activo ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+        return '<div class="msg-row" style="background:'+statusBg+'">'+
+          '<div class="msg-head">'+
+            '<span style="font-size:18px">'+esc(d.emoji||'💬')+'</span>'+
+            '<span class="msg-nick">'+esc(d.titulo)+'</span>'+
+            '<span class="msg-sala">orden '+d.orden+'</span>'+
+            '<span class="msg-time">'+(d.activo?'activo':'inactivo')+' · '+d.vistas+' vistas</span>'+
+          '</div>'+
+          '<div class="msg-body" style="font-size:12px">'+esc(d.descripcion||'')+'<br><code style="font-size:10px;opacity:0.7">pol.is/'+esc(d.pol_id)+'</code></div>'+
+          '<div class="msg-actions">'+
+            '<button class="btn btn-sm" onclick="window.polisEditar('+d.id+')">✏️ Editar</button> '+
+            '<button class="btn btn-sm btn-danger" onclick="window.polisEliminar('+d.id+',\''+esc(d.titulo).replace(/\x27/g,"\\x27")+'\')">🗑️ Eliminar</button>'+
+          '</div></div>';
+      }).join('');
+      window.__polis_data = arr;
+    } catch(e) { console.error('polisRefresh:', e); }
+  }
+
+  function polisNuevo(){
+    $('polisForm').style.display='block';
+    $('polisFormId').value='';
+    $('polisFormPolId').value='';
+    $('polisFormEmoji').value='💬';
+    $('polisFormTitulo').value='';
+    $('polisFormDesc').value='';
+    $('polisFormOrden').value=99;
+    $('polisFormActivo').checked=true;
+  }
+  function polisEditar(id){
+    var d = (window.__polis_data||[]).find(function(x){return x.id===id;});
+    if (!d) return;
+    $('polisForm').style.display='block';
+    $('polisFormId').value=d.id;
+    $('polisFormPolId').value=d.pol_id;
+    $('polisFormEmoji').value=d.emoji||'💬';
+    $('polisFormTitulo').value=d.titulo;
+    $('polisFormDesc').value=d.descripcion||'';
+    $('polisFormOrden').value=d.orden;
+    $('polisFormActivo').checked=d.activo;
+  }
+  function polisCancelar(){ $('polisForm').style.display='none'; }
+  async function polisGuardar(){
+    var id = parseInt($('polisFormId').value) || 0;
+    var pol_id = $('polisFormPolId').value.trim();
+    var titulo = $('polisFormTitulo').value.trim();
+    if (!pol_id || !titulo) { toast('Falta pol_id o título', 'err'); return; }
+    var r = await sb.rpc('admin_polis_upsert', {
+      p_id: id, p_pol_id: pol_id, p_emoji: $('polisFormEmoji').value || '💬',
+      p_titulo: titulo, p_descripcion: $('polisFormDesc').value, 
+      p_orden: parseInt($('polisFormOrden').value) || 0, p_activo: $('polisFormActivo').checked
+    });
+    if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
+    toast('Guardado', 'ok'); polisCancelar(); polisRefresh();
+  }
+  async function polisEliminar(id, titulo){
+    if (!confirm('¿Eliminar debate "'+titulo+'"?')) return;
+    var r = await sb.rpc('admin_polis_eliminar', { p_id: id });
+    if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
+    toast('Eliminado', 'ok'); polisRefresh();
+  }
+  window.polisNuevo = polisNuevo;
+  window.polisEditar = polisEditar;
+  window.polisCancelar = polisCancelar;
+  window.polisGuardar = polisGuardar;
+  window.polisEliminar = polisEliminar;
 
   async function tcRefresh(){
     try {
