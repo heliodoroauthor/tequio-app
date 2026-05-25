@@ -74,17 +74,56 @@ def fetch_sina_data(headed=False, verbose=False):
         try:
             r = context.request.get(SINA_FECHA_URL, headers={"Accept": "application/json,text/plain,*/*"})
             print(f"  → {r.status} · {len(r.text())}b")
-            fecha_raw = r.text().strip().strip('"').strip("'")
+            raw_text = r.text()
+            if verbose: print(f"  raw: {raw_text[:200]}")
+            # Parse as JSON
+            try:
+                parsed = r.json()
+            except Exception:
+                # Maybe it's a plain string date
+                fecha = raw_text.strip().strip('"').strip("'")
+                if "T" in fecha: fecha = fecha.split("T")[0]
+                fecha = fecha[:10]
+            else:
+                # JSON: could be string, list, or dict
+                if isinstance(parsed, str):
+                    fecha = parsed[:10]
+                elif isinstance(parsed, list) and parsed:
+                    first = parsed[0]
+                    if isinstance(first, dict):
+                        # Look for fecha-like fields
+                        for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date', 'dateUltimo']:
+                            if k in first and first[k]:
+                                v = first[k]
+                                fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
+                                break
+                        else:
+                            # Pick any value that looks like a date
+                            fecha = None
+                            for v in first.values():
+                                if isinstance(v, str) and re.match(r'^\d{4}-\d{2}-\d{2}', v):
+                                    fecha = v[:10]; break
+                    else:
+                        fecha = str(first)[:10]
+                elif isinstance(parsed, dict):
+                    for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date']:
+                        if k in parsed and parsed[k]:
+                            v = parsed[k]
+                            fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
+                            break
+                    else:
+                        fecha = None
+                else:
+                    fecha = None
         except Exception as e:
             print(f"❌ Error fecha: {e}")
             browser.close()
             return None
         
-        # Clean date format
-        if "T" in fecha_raw:
-            fecha = fecha_raw.split("T")[0]
-        else:
-            fecha = fecha_raw[:10]
+        if not fecha:
+            print("❌ No pude extraer fecha de la respuesta")
+            browser.close()
+            return None
         print(f"📅 Fecha de monitoreo más reciente: {fecha}")
         
         url = SINA_PRESAS_URL.format(fecha=fecha)
