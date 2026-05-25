@@ -57,11 +57,9 @@
 </head>
 <body>
 <div class="container">
-
   <h1>🦎 Tequio · Moderación de Chat</h1>
   <div class="sub">Panel admin · Cero Invención · Solo helio.gomez1336@gmail.com</div>
 
-  <!-- LOGIN -->
   <div id="card-login" class="card">
     <div style="margin-bottom: 14px">
       <strong>Sign in con magic link</strong>
@@ -71,39 +69,30 @@
     </div>
     <div class="row">
       <input id="email" type="email" placeholder="helio.gomez1336@gmail.com" autocomplete="email" />
-      <button id="btnSendLink" class="btn" onclick="sendMagicLink()">Enviar link</button>
+      <button id="btnSendLink" class="btn" onclick="window.sendMagicLink()">Enviar link</button>
     </div>
     <div id="loginStatus" style="margin-top: 10px; font-size: 12px; color: var(--text3); min-height: 16px"></div>
   </div>
 
-  <!-- LOGGED IN UI -->
   <div id="ui-admin" style="display: none">
-
     <div class="card row" style="justify-content: space-between">
       <div>
         <strong id="userEmail"></strong>
         <div style="color: var(--text3); font-size: 11px">Admin verificado</div>
       </div>
       <div class="row">
-        <button class="btn btn-ghost btn-sm" onclick="refresh()">↻ Refrescar</button>
-        <button class="btn btn-ghost btn-sm" onclick="signOut()">Cerrar sesión</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.refresh()">↻ Refrescar</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.signOut()">Cerrar sesión</button>
       </div>
     </div>
-
-    <div id="stats" class="stats">
-      <!-- llenado por loadStats() -->
-    </div>
-
+    <div id="stats" class="stats"></div>
     <div class="card">
       <div class="row" style="justify-content: space-between; margin-bottom: 12px">
         <strong>🚩 Mensajes reportados</strong>
         <span id="reportadosCount" style="color: var(--text3); font-size: 12px"></span>
       </div>
-      <div id="reportadosList">
-        <div class="empty">Cargando…</div>
-      </div>
+      <div id="reportadosList"><div class="empty">Cargando…</div></div>
     </div>
-
     <div class="card">
       <div style="margin-bottom: 10px"><strong>⚙️ Acción manual</strong></div>
       <div style="font-size: 12px; color: var(--text3); margin-bottom: 10px">Banear o desbanear un user_id directamente.</div>
@@ -113,245 +102,215 @@
         <input id="manualHoras" type="number" min="1" placeholder="Horas (vacío=permanente)" style="width: 200px" />
       </div>
       <div class="row" style="margin-top: 10px">
-        <button class="btn btn-danger btn-sm" onclick="manualBan()">🚫 Banear</button>
-        <button class="btn btn-green btn-sm" onclick="manualUnban()">✓ Desbanear</button>
+        <button class="btn btn-danger btn-sm" onclick="window.manualBan()">🚫 Banear</button>
+        <button class="btn btn-green btn-sm" onclick="window.manualUnban()">✓ Desbanear</button>
       </div>
     </div>
-
   </div>
-
 </div>
-
 <div id="toast" class="toast" style="display: none"></div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  const SB_URL  = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
-  const SB_ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-  const TURNSTILE_SITE = '0x4AAAAAADVsqa6-gYYg2pDO';
-  const ADMIN_EMAIL = 'helio.gomez1336@gmail.com';
+(function(){
+  var SB_URL  = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var SB_ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  var TURNSTILE_SITE = '0x4AAAAAADVsqa6-gYYg2pDO';
+  var ADMIN_EMAIL = 'helio.gomez1336@gmail.com';
+  var sb = null;
 
-  let sb = null;
+  function $(id){ return document.getElementById(id); }
+  function toast(msg, kind){
+    var t = $('toast'); if (!t) return;
+    t.textContent = msg; t.className = 'toast ' + (kind || ''); t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 4500);
+  }
+  function fmt(iso){ try { return new Date(iso).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }); } catch (e) { return iso; } }
+  function esc(s){ return String(s || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 
-  // ---- Cloudflare Turnstile lazy loader ----
-  function loadTurnstile() {
-    return new Promise((resolve, reject) => {
+  function loadTurnstile(){
+    return new Promise(function(resolve, reject){
       if (window.turnstile && window.turnstile.render) return resolve(window.turnstile);
-      const existing = document.querySelector('script[data-tequio-turnstile]');
+      var existing = document.querySelector('script[data-tequio-turnstile]');
       if (existing) {
-        let waited = 0;
-        const iv = setInterval(() => {
+        var waited = 0;
+        var iv = setInterval(function(){
           if (window.turnstile && window.turnstile.render) { clearInterval(iv); resolve(window.turnstile); }
           else if (waited > 10000) { clearInterval(iv); reject(new Error('Turnstile timeout')); }
           waited += 100;
         }, 100);
         return;
       }
-      const s = document.createElement('script');
+      var s = document.createElement('script');
       s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       s.async = true; s.defer = true;
-      s.setAttribute('data-tequio-turnstile', '1');
-      s.onload  = () => resolve(window.turnstile);
-      s.onerror = () => reject(new Error('No se pudo cargar Turnstile'));
+      s.setAttribute('data-tequio-turnstile','1');
+      s.onload  = function(){ resolve(window.turnstile); };
+      s.onerror = function(){ reject(new Error('No se pudo cargar Turnstile')); };
       document.head.appendChild(s);
     });
   }
 
-  function getCaptchaToken() {
-    return new Promise((resolve, reject) => {
-      loadTurnstile().then(ts => {
-        let c = document.getElementById('turnstile-container');
+  function getCaptchaToken(){
+    return new Promise(function(resolve, reject){
+      loadTurnstile().then(function(ts){
+        var c = $('turnstile-container');
         if (!c) {
           c = document.createElement('div');
           c.id = 'turnstile-container';
           c.style.cssText = 'margin:10px 0;display:flex;justify-content:center';
-          const status = document.getElementById('loginStatus');
+          var status = $('loginStatus');
           if (status && status.parentNode) status.parentNode.insertBefore(c, status);
-        } else {
-          try { ts.remove(c); } catch(e){}
-          c.innerHTML = '';
-          c.style.display = 'flex';
-        }
+        } else { try { ts.remove(c); } catch(e){} c.innerHTML = ''; c.style.display = 'flex'; }
         try {
           ts.render(c, {
-            sitekey: TURNSTILE_SITE,
-            theme: 'dark',
-            callback: token => resolve(token),
-            'error-callback': () => reject(new Error('Turnstile rechazó la verificación')),
-            'expired-callback': () => { /* el siguiente intento re-renderiza */ }
+            sitekey: TURNSTILE_SITE, theme: 'dark',
+            callback: function(token){ resolve(token); },
+            'error-callback': function(){ reject(new Error('Turnstile rechazó la verificación')); },
+            'expired-callback': function(){}
           });
-        } catch(e) { reject(e); }
+        } catch(e){ reject(e); }
       }).catch(reject);
     });
   }
 
-  function toast(msg, kind) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast ' + (kind || '');
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 4500);
-  }
-
-  function fmt(iso) {
-    try { return new Date(iso).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }); }
-    catch (e) { return iso; }
-  }
-  function esc(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-  }
-  function uidShort(uid) { return String(uid || '').slice(0, 8) + '…'; }
-
-  async function init() {
-    sb = supabase.createClient(SB_URL, SB_ANON, {
-      auth: { persistSession: true, storage: localStorage, storageKey: 'tequio-admin-auth' }
-    });
-
-    // Si ya hay sesión, verificar y mostrar UI admin
-    const { data: { session } } = await sb.auth.getSession();
-    if (session && session.user) {
-      if (session.user.email === ADMIN_EMAIL) {
-        showAdminUI(session.user);
-      } else {
-        toast('Email no autorizado: ' + session.user.email, 'err');
-        await sb.auth.signOut();
-      }
-    }
-
-    // Listener: capturar magic link al hacer click desde email
-    sb.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session && session.user) {
-        if (session.user.email === ADMIN_EMAIL) {
-          showAdminUI(session.user);
-        } else {
-          toast('Email no autorizado: ' + session.user.email, 'err');
-          sb.auth.signOut();
-        }
-      }
-      if (event === 'SIGNED_OUT') {
-        document.getElementById('ui-admin').style.display = 'none';
-        document.getElementById('card-login').style.display = 'block';
-      }
-    });
-  }
-
-  async function sendMagicLink() {
-    const email = (document.getElementById('email').value || '').trim().toLowerCase();
-    const status = document.getElementById('loginStatus');
+  async function sendMagicLink(){
+    var email = ($('email').value || '').trim().toLowerCase();
+    var status = $('loginStatus');
     if (!email) { status.textContent = 'Pon tu email primero'; status.style.color = 'var(--red)'; return; }
-    if (email !== ADMIN_EMAIL) {
-      status.textContent = 'Email no autorizado.';
-      status.style.color = 'var(--red)';
-      return;
-    }
-
-    status.textContent = 'Verificando captcha…';
-    status.style.color = 'var(--text3)';
-
-    let captchaToken;
-    try {
-      captchaToken = await getCaptchaToken();
-    } catch (e) {
-      status.textContent = 'Captcha falló: ' + (e.message || 'error');
-      status.style.color = 'var(--red)';
-      return;
-    }
-
-    status.textContent = 'Enviando link…';
-    status.style.color = 'var(--text3)';
-
-    const { error } = await sb.auth.signInWithOtp({
-      email: email,
-      options: {
-        emailRedirectTo: window.location.href,
-        captchaToken: captchaToken
-      }
-    });
-
-    // Ocultar widget Turnstile después
-    const c = document.getElementById('turnstile-container');
-    if (c) c.style.display = 'none';
-
-    if (error) {
-      status.textContent = 'Error: ' + error.message;
-      status.style.color = 'var(--red)';
-      return;
-    }
+    if (email !== ADMIN_EMAIL) { status.textContent = 'Email no autorizado.'; status.style.color = 'var(--red)'; return; }
+    status.textContent = 'Verificando captcha…'; status.style.color = 'var(--text3)';
+    var captchaToken;
+    try { captchaToken = await getCaptchaToken(); }
+    catch (e) { status.textContent = 'Captcha falló: ' + (e.message || 'error'); status.style.color = 'var(--red)'; return; }
+    status.textContent = 'Enviando link…'; status.style.color = 'var(--text3)';
+    var resp = await sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.origin + '/admin/chat-mod.html', captchaToken: captchaToken } });
+    var c = $('turnstile-container'); if (c) c.style.display = 'none';
+    if (resp.error) { status.textContent = 'Error: ' + resp.error.message; status.style.color = 'var(--red)'; return; }
     status.textContent = '✓ Link enviado a ' + email + ' · revisa tu inbox (o spam) · expira en 1h';
     status.style.color = 'var(--green)';
   }
 
-  async function signOut() {
-    await sb.auth.signOut();
-  }
+  async function signOut(){ await sb.auth.signOut(); }
 
-  function showAdminUI(user) {
-    document.getElementById('card-login').style.display = 'none';
-    document.getElementById('ui-admin').style.display = 'block';
-    document.getElementById('userEmail').textContent = user.email;
+  function showAdminUI(user){
+    $('card-login').style.display = 'none';
+    $('ui-admin').style.display = 'block';
+    $('userEmail').textContent = user.email;
     refresh();
   }
 
-  async function refresh() {
-    await loadStats();
-    await loadReportados();
+  async function refresh(){ await loadStats(); await loadReportados(); }
+
+  async function loadStats(){
+    var res = await sb.rpc('admin_chat_stats');
+    var box = $('stats');
+    if (res.error) { box.innerHTML = '<div class="empty">Error: ' + esc(res.error.message) + '</div>'; return; }
+    var s = res.data || {};
+    var rows = [['mensajes_total','Mensajes totales'],['mensajes_24h','Últimas 24h'],['usuarios_activos_24h','Usuarios activos 24h'],['reportes_total','Reportes totales'],['reportes_24h','Reportes 24h'],['ocultos_total','Mensajes ocultos'],['baneados','Baneados activos']];
+    box.innerHTML = rows.map(function(r){
+      var k = r[0], lbl = r[1];
+      var v = (s[k] !== undefined && s[k] !== null) ? s[k] : '—';
+      return '<div class="stat"><div class="stat-val">' + esc(v) + '</div><div class="stat-lbl">' + esc(lbl) + '</div></div>';
+    }).join('');
   }
 
-  async function loadStats() {
-    const { data, error } = await sb.rpc('admin_chat_stats');
-    const box = document.getElementById('stats');
-    if (error) { box.innerHTML = '<div class="empty">Error: ' + esc(error.message) + '</div>'; return; }
-    const s = data || {};
-    box.innerHTML = [
-      ['mensajes_total',       'Mensajes totales'],
-      ['mensajes_24h',         'Últimas 24h'],
-      ['usuarios_activos_24h', 'Usuarios activos 24h'],
-      ['reportes_total',       'Reportes totales'],
-      ['reportes_24h',         'Reportes 24h'],
-      ['ocultos_total',        'Mensajes ocultos'],
-      ['baneados',             'Baneados activos']
-    ].map(([k, lbl]) => `
-      <div class="stat">
-        <div class="stat-val">${s[k] ?? '—'}</div>
-        <div class="stat-lbl">${lbl}</div>
-      </div>
-    `).join('');
-  }
-
-  async function loadReportados() {
-    const { data, error } = await sb.rpc('admin_chat_reportados', { p_limit: 100 });
-    const list = document.getElementById('reportadosList');
-    const counter = document.getElementById('reportadosCount');
-    if (error) { list.innerHTML = '<div class="empty">Error: ' + esc(error.message) + '</div>'; return; }
-    const arr = Array.isArray(data) ? data : [];
+  async function loadReportados(){
+    var res = await sb.rpc('admin_chat_reportados', { p_limit: 100 });
+    var list = $('reportadosList'); var counter = $('reportadosCount');
+    if (res.error) { list.innerHTML = '<div class="empty">Error: ' + esc(res.error.message) + '</div>'; return; }
+    var arr = Array.isArray(res.data) ? res.data : [];
     counter.textContent = arr.length + ' mensajes con reportes';
     if (!arr.length) { list.innerHTML = '<div class="empty">Sin mensajes reportados. ¡Todo limpio!</div>'; return; }
-    list.innerHTML = arr.map(m => `
-      <div class="msg-row" data-id="${m.id}">
-        <div class="msg-head">
-          <span class="msg-nick">${esc(m.nick || 'anon')}</span>
-          <span class="msg-sala">#${esc(m.sala)}</span>
-          <span class="msg-time">${fmt(m.ts)}</span>
-          <span class="msg-reportes">⚑ ${m.reportes}</span>
-          ${m.oculto  ? '<span class="msg-oculto">oculto</span>' : ''}
-          ${m.baneado ? '<span class="msg-baneado">user baneado</span>' : ''}
-        </div>
-        <div class="msg-body">${esc(m.mensaje)}</div>
-        ${m.motivos ? `<div class="msg-motivos">Motivos: ${esc(m.motivos)}</div>` : ''}
-        <div class="msg-uid">user_id: ${esc(m.user_id)}</div>
-        <div class="msg-actions">
-          ${m.oculto
-            ? `<button class="btn btn-green btn-sm" onclick="accionOcultar(${m.id}, false)">↶ Mostrar</button>`
-            : `<button class="btn btn-warn btn-sm" onclick="accionOcultar(${m.id}, true)">👁 Ocultar</button>`
-          }
-          ${m.baneado
-            ? `<button class="btn btn-green btn-sm" onclick="accionDesbanear('${esc(m.user_id)}')">✓ Desbanear user</button>`
-            : `<button class="btn btn-danger btn-sm" onclick="accionBanear('${esc(m.user_id)}', 24)">🚫 Ban 24h</button>
-               <button class="btn btn-danger btn-sm" onclick="accionBanear('${esc(m.user_id)}', null)">🚫 Ban permanente</button>`
-          }
-        </div>
-      </div>
-    `).join('');
+    list.innerHTML = arr.map(function(m){
+      var actions = '';
+      if (m.oculto) actions += '<button class="btn btn-green btn-sm" onclick="window.accionOcultar(' + m.id + ', false)">↶ Mostrar</button>';
+      else actions += '<button class="btn btn-warn btn-sm" onclick="window.accionOcultar(' + m.id + ', true)">👁 Ocultar</button>';
+      if (m.baneado) actions += ' <button class="btn btn-green btn-sm" onclick="window.accionDesbanear(\x27' + esc(m.user_id) + '\x27)">✓ Desbanear user</button>';
+      else { actions += ' <button class="btn btn-danger btn-sm" onclick="window.accionBanear(\x27' + esc(m.user_id) + '\x27, 24)">🚫 Ban 24h</button>'; actions += ' <button class="btn btn-danger btn-sm" onclick="window.accionBanear(\x27' + esc(m.user_id) + '\x27, null)">🚫 Ban permanente</button>'; }
+      return '<div class="msg-row" data-id="' + m.id + '"><div class="msg-head"><span class="msg-nick">' + esc(m.nick || 'anon') + '</span><span class="msg-sala">#' + esc(m.sala) + '</span><span class="msg-time">' + fmt(m.ts) + '</span><span class="msg-reportes">⚑ ' + m.reportes + '</span>' + (m.oculto ? '<span class="msg-oculto">oculto</span>' : '') + (m.baneado ? '<span class="msg-baneado">user baneado</span>' : '') + '</div><div class="msg-body">' + esc(m.mensaje) + '</div>' + (m.motivos ? '<div class="msg-motivos">Motivos: ' + esc(m.motivos) + '</div>' : '') + '<div class="msg-uid">user_id: ' + esc(m.user_id) + '</div><div class="msg-actions">' + actions + '</div></div>';
+    }).join('');
   }
 
-  async function accionOcul
+  async function accionOcultar(msgId, oculto){
+    var res = await sb.rpc('admin_chat_ocultar', { p_msg_id: msgId, p_oculto: oculto });
+    if (res.error) { toast('Error: ' + res.error.message, 'err'); return; }
+    toast(oculto ? 'Mensaje oculto' : 'Mensaje mostrado', 'ok'); refresh();
+  }
+  async function accionBanear(uid, horas){
+    if (!confirm(horas ? '¿Banear este user por ' + horas + 'h?' : '¿Banear este user PERMANENTEMENTE?')) return;
+    var motivo = prompt('Motivo del ban (opcional):', 'Violación de normas comunitarias') || '';
+    var res = await sb.rpc('admin_chat_banear', { p_user_id: uid, p_motivo: motivo, p_horas: horas });
+    if (res.error) { toast('Error: ' + res.error.message, 'err'); return; }
+    toast('User baneado', 'ok'); refresh();
+  }
+  async function accionDesbanear(uid){
+    if (!confirm('¿Desbanear este user?')) return;
+    var res = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
+    if (res.error) { toast('Error: ' + res.error.message, 'err'); return; }
+    toast('User desbaneado', 'ok'); refresh();
+  }
+  async function manualBan(){
+    var uid = $('manualUid').value.trim();
+    var motivo = $('manualMotivo').value.trim() || 'Ban manual';
+    var horasInput = $('manualHoras').value.trim();
+    var horas = horasInput ? parseInt(horasInput, 10) : null;
+    if (!uid) { toast('Pon un user_id', 'err'); return; }
+    if (!confirm('¿Banear ' + uid + (horas ? ' por ' + horas + 'h' : ' PERMANENTEMENTE') + '?')) return;
+    var res = await sb.rpc('admin_chat_banear', { p_user_id: uid, p_motivo: motivo, p_horas: horas });
+    if (res.error) { toast('Error: ' + res.error.message, 'err'); return; }
+    toast('User baneado', 'ok');
+    $('manualUid').value = ''; $('manualMotivo').value = ''; $('manualHoras').value = '';
+    refresh();
+  }
+  async function manualUnban(){
+    var uid = $('manualUid').value.trim();
+    if (!uid) { toast('Pon un user_id', 'err'); return; }
+    if (!confirm('¿Desbanear ' + uid + '?')) return;
+    var res = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
+    if (res.error) { toast('Error: ' + res.error.message, 'err'); return; }
+    toast('User desbaneado', 'ok'); $('manualUid').value = ''; refresh();
+  }
+
+  async function init(){
+    if (!window.supabase || !window.supabase.createClient) {
+      $('loginStatus').textContent = 'Error: Supabase SDK no cargó'; return;
+    }
+    sb = window.supabase.createClient(SB_URL, SB_ANON, { auth: { persistSession: true, storage: localStorage, storageKey: 'tequio-admin-auth' } });
+    var sess = await sb.auth.getSession();
+    if (sess.data && sess.data.session && sess.data.session.user) {
+      var u = sess.data.session.user;
+      if (u.email === ADMIN_EMAIL) showAdminUI(u);
+      else { toast('Email no autorizado: ' + u.email, 'err'); await sb.auth.signOut(); }
+    }
+    sb.auth.onAuthStateChange(function(event, session){
+      if (event === 'SIGNED_IN' && session && session.user) {
+        if (session.user.email === ADMIN_EMAIL) showAdminUI(session.user);
+        else { toast('Email no autorizado: ' + session.user.email, 'err'); sb.auth.signOut(); }
+      }
+      if (event === 'SIGNED_OUT') { $('ui-admin').style.display = 'none'; $('card-login').style.display = 'block'; }
+    });
+  }
+
+  window.sendMagicLink   = sendMagicLink;
+  window.signOut         = signOut;
+  window.refresh         = refresh;
+  window.accionOcultar   = accionOcultar;
+  window.accionBanear    = accionBanear;
+  window.accionDesbanear = accionDesbanear;
+  window.manualBan       = manualBan;
+  window.manualUnban     = manualUnban;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var emailEl = $('email');
+    if (emailEl) emailEl.addEventListener('keypress', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); sendMagicLink(); }
+    });
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>
