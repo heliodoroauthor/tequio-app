@@ -3616,7 +3616,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       function presasFiltrar() {
         const q = (document.getElementById('presas-filtro').value || '').toLowerCase().trim();
         const orden = document.getElementById('presas-orden').value;
+        const soloTel = (document.getElementById('presas-solo-telemetria') || {}).checked;
         let filas = window.__presasData.filter(p => {
+          if (soloTel && (p.pct_almacenamiento == null || p.pct_almacenamiento <= 0)) return false;
           if (!q) return true;
           return (p.presa || '').toLowerCase().includes(q) || (p.estado || '').toLowerCase().includes(q);
         });
