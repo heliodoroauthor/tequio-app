@@ -222,7 +222,7 @@ def process_one(item, dry_run, verbose):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--priority", default="P2", choices=["P1", "P2", "P3"])
+    p.add_argument("--priority", default="P2", choices=["P1","P2","P3","P4","P5"])
     p.add_argument("--limit", type=int, default=20)
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--verbose", action="store_true")
