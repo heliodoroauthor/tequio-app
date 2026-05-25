@@ -210,7 +210,62 @@
     refresh();
   }
 
-  async function refresh(){ await loadStats(); await loadReportados(); }
+  async function refresh(){ await loadStats(); await loadReportados(); await tcRefresh(); }
+
+  async function tcRefresh(){
+    try {
+      var s = await sb.rpc('admin_tc_stats');
+      var p = await sb.rpc('admin_contribuciones_pendientes', { p_limit: 50 });
+      var statsBox = $('tcStatsRow');
+      var listBox = $('tcPendientesList');
+      var counter = $('tcPendientesCount');
+      if (s.data && !s.error) {
+        var rows = [['pendientes','Pendientes'],['aprobadas_total','Aprobadas'],['rechazadas_total','Rechazadas'],['docs_aprobados','Docs comunidad'],['colaboradores','Colaboradores'],['municipios_con_extras','Municipios apoyados']];
+        statsBox.innerHTML = rows.map(function(r){var v=s.data[r[0]];return '<div class="stat"><div class="stat-val">'+(v!=null?v:0)+'</div><div class="stat-lbl">'+r[1]+'</div></div>';}).join('');
+      }
+      if (p.error) { listBox.innerHTML = '<div class="empty">Error: '+esc(p.error.message)+'</div>'; return; }
+      var arr = Array.isArray(p.data) ? p.data : [];
+      counter.textContent = arr.length;
+      if (!arr.length) { listBox.innerHTML = '<div class="empty">Sin contribuciones pendientes ✓</div>'; return; }
+      listBox.innerHTML = arr.map(function(c){
+        return '<div class="msg-row"><div class="msg-head">'+
+          '<span class="msg-nick">'+esc(c.contribuidor_nick||'Anónimo')+'</span>'+
+          '<span class="msg-sala">'+esc(c.categoria_icono||'')+' '+esc(c.categoria_nombre||c.categoria_id)+'</span>'+
+          '<span class="msg-time">'+fmt(c.created_at)+'</span>'+
+          '</div>'+
+          '<div class="msg-body"><strong>'+esc(c.municipio_nombre||'?')+', '+esc(c.estado||'?')+'</strong>'+
+          (c.nombre_doc?'<br>'+esc(c.nombre_doc):'')+
+          '<br><a href="'+esc(c.url)+'" target="_blank" rel="noopener" style="color:#7c3aed;word-break:break-all">'+esc(c.url)+'</a>'+
+          (c.notas?'<br><span style="color:var(--text3);font-size:12px">Notas: '+esc(c.notas)+'</span>':'')+
+          '</div>'+
+          '<div class="msg-actions">'+
+          '<button class="btn btn-green btn-sm" onclick="window.tcAprobar('+c.id+')">✓ Aprobar</button> '+
+          '<button class="btn btn-danger btn-sm" onclick="window.tcRechazar('+c.id+')">✕ Rechazar</button>'+
+          '</div></div>';
+      }).join('');
+    } catch(e) { console.error('tcRefresh:', e); }
+  }
+
+  async function tcAprobar(id){
+    if (!confirm('¿Aprobar esta contribución?')) return;
+    var r = await sb.rpc('admin_aprobar_contribucion', { p_contrib_id: id });
+    if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
+    var bg = (r.data && r.data.badges && r.data.badges.length) ? ' · Badges: '+r.data.badges.join(' ') : '';
+    toast('Aprobado'+bg, 'ok');
+    refresh();
+  }
+
+  async function tcRechazar(id){
+    var motivo = prompt('Motivo del rechazo:', 'URL no oficial / doc incorrecto');
+    if (motivo === null) return;
+    var r = await sb.rpc('admin_rechazar_contribucion', { p_contrib_id: id, p_motivo: motivo });
+    if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
+    toast('Rechazado', 'ok');
+    refresh();
+  }
+
+  window.tcAprobar = tcAprobar;
+  window.tcRechazar = tcRechazar;
 
   async function loadStats(){
     var res = await sb.rpc('admin_chat_stats');
