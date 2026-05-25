@@ -214,11 +214,16 @@
     setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
   
+  function abrirMuni(id){
+    try { if (window.parent && window.parent !== window && window.parent.cargarPanel) { window.parent.cargarPanel('municipio', '&id=' + id); return; } } catch(e){}
+    window.location.href = '/panel/municipio.html?id=' + id;
+  }
+  window.abrirMuni = abrirMuni;
   function renderMunicipios(arr){
     if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('municipiosMenos').innerHTML = arr.map(function(m){
       var p=m.pct||0;
-      return '<div class="muni-row" onclick="window.open(\'/panel/municipio.html?id='+m.id+'\',\'_blank\')"><div><div class="muni-name">'+esc(m.nombre)+'</div><div class="muni-meta">'+esc(m.estado)+'</div></div><div class="muni-pop">'+num(m.poblacion)+'<br><span style="font-size:9px">hab</span></div><div class="muni-pct '+muniPctClass(p)+'">'+p+'%</div></div>';
+      return '<div class="muni-row" onclick="abrirMuni('+m.id+')"><div><div class="muni-name">'+esc(m.nombre)+'</div><div class="muni-meta">'+esc(m.estado)+'</div></div><div class="muni-pop">'+num(m.poblacion)+'<br><span style="font-size:9px">hab</span></div><div class="muni-pct '+muniPctClass(p)+'">'+p+'%</div></div>';
     }).join('');
   }
   
