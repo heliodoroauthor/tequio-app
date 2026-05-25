@@ -106,6 +106,16 @@
         <button class="btn btn-green btn-sm" onclick="window.manualUnban()">✓ Desbanear</button>
       </div>
     </div>
+
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 12px">
+        <strong>🦎 Contribuciones Ciudadanas (Tequio)</strong>
+        <span style="color: var(--text3); font-size: 12px"><span id="tcPendientesCount">0</span> pendientes</span>
+      </div>
+      <div id="tcStatsRow" class="stats" style="grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));margin-bottom:14px"></div>
+      <div id="tcPendientesList"><div class="empty">Cargando…</div></div>
+    </div>
+
   </div>
 </div>
 <div id="toast" class="toast" style="display: none"></div>
