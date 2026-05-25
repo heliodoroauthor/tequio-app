@@ -3,108 +3,158 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🦎 Tequiero · Colaboradores de Tequio</title>
-<meta name="description" content="Hall of Fame de ciudadanos que aportan información oficial de sus municipios a Tequio · Cero Invención · Soberanía digital mexicana">
-<meta property="og:title" content="🦎 Tequieros · Colaboradores de Tequio">
-<meta property="og:description" content="Estos mexicanos están construyendo la base de datos cívica abierta más completa del país.">
+<title>🦎 Tequieros · Colaboradores de Tequio</title>
+<meta name="description" content="Hall of Fame de ciudadanos que aportan información oficial de sus municipios a Tequio">
 <style>
   :root {
-    --bg:#0a0f1e; --card:#141b2e; --text1:#e4e7ee; --text2:#a8b0c0;
-    --text3:#6b7388; --accent:#22c55e; --accent2:#7c3aed;
+    --bg:#0a0f1e; --bg2:#0f1729; --card:#141b2e; --card2:#1a2340;
+    --text1:#e4e7ee; --text2:#a8b0c0; --text3:#6b7388;
+    --accent:#22c55e; --accent-d:#16a34a; --accent2:#7c3aed;
     --gold:#fbbf24; --silver:#cbd5e1; --bronze:#fb923c;
     --border:rgba(255,255,255,0.08);
   }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text1); padding:20px; min-height:100vh; }
-  .container { max-width:1100px; margin:0 auto; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text1);padding:20px;min-height:100vh;}
+  .container{max-width:1100px;margin:0 auto;}
   
-  /* Hero */
-  .hero { background:linear-gradient(135deg,#0a2540,#0d4e3b); border-radius:18px; padding:32px; margin-bottom:24px; text-align:center; }
-  .hero h1 { font-size:32px; margin-bottom:8px; }
-  .hero .lead { color:var(--text2); font-size:15px; line-height:1.5; max-width:600px; margin:0 auto; }
-  .hero-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-top:24px; }
-  .hero-stat { background:rgba(0,0,0,0.25); border-radius:12px; padding:16px; }
-  .hero-stat-v { font-size:28px; font-weight:800; color:var(--accent); }
-  .hero-stat-l { font-size:11px; color:var(--text2); margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#0a2540 0%,#0d4e3b 100%);border-radius:20px;padding:36px 28px;margin-bottom:28px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(34,197,94,0.08) 0%,transparent 50%);animation:pulse 6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:0.5;}50%{transform:scale(1.1);opacity:0.8;}}
+  .hero-content{position:relative;}
+  .hero h1{font-size:36px;margin-bottom:6px;font-weight:800;letter-spacing:-0.5px;}
+  .hero .lead{color:var(--text2);font-size:15px;line-height:1.55;max-width:620px;margin:0 auto 24px;}
+  .hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:24px;}
+  .hero-stat{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px 14px;transition:transform .2s, border-color .2s;}
+  .hero-stat:hover{transform:translateY(-2px);border-color:rgba(34,197,94,0.3);}
+  .hero-stat-v{font-size:32px;font-weight:800;color:var(--accent);line-height:1;}
+  .hero-stat-l{font-size:11px;color:var(--text2);margin-top:8px;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;}
   
-  /* Section */
-  .section-title { font-size:18px; font-weight:700; margin:24px 0 14px; display:flex; align-items:center; gap:10px; }
+  /* SECTIONS */
+  .section-title{font-size:20px;font-weight:800;margin:32px 0 16px;display:flex;align-items:center;gap:10px;}
+  .section-title small{font-size:13px;color:var(--text3);font-weight:400;margin-left:auto;}
   
-  /* Top 3 podium */
-  .podium { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
-  @media (max-width:600px) { .podium { grid-template-columns:1fr; } }
-  .pod { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; position:relative; }
-  .pod.gold   { border-color:var(--gold);   box-shadow:0 0 32px rgba(251,191,36,0.15); }
-  .pod.silver { border-color:var(--silver); }
-  .pod.bronze { border-color:var(--bronze); }
-  .pod-medal { font-size:48px; margin-bottom:8px; }
-  .pod-name { font-size:18px; font-weight:800; margin-bottom:4px; }
-  .pod-meta { font-size:12px; color:var(--text3); margin-bottom:10px; }
-  .pod-stats { display:flex; gap:14px; justify-content:center; font-size:12px; }
-  .pod-stats div { color:var(--text2); }
-  .pod-stats strong { color:var(--text1); font-size:16px; display:block; }
+  /* PODIUM */
+  .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+  @media(max-width:600px){.podium{grid-template-columns:1fr;}}
+  .pod{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;text-align:center;position:relative;transition:transform .2s;}
+  .pod:hover{transform:translateY(-3px);}
+  .pod.gold{border-color:var(--gold);background:linear-gradient(180deg,rgba(251,191,36,0.05),var(--card));box-shadow:0 0 32px rgba(251,191,36,0.12);}
+  .pod.silver{border-color:var(--silver);background:linear-gradient(180deg,rgba(203,213,225,0.04),var(--card));}
+  .pod.bronze{border-color:var(--bronze);background:linear-gradient(180deg,rgba(251,146,60,0.04),var(--card));}
+  .pod-medal{font-size:52px;margin-bottom:10px;}
+  .pod-name{font-size:18px;font-weight:800;margin-bottom:4px;}
+  .pod-meta{font-size:12px;color:var(--text3);margin-bottom:14px;}
+  .pod-stats{display:flex;gap:18px;justify-content:center;font-size:12px;}
+  .pod-stats div{color:var(--text2);}
+  .pod-stats strong{color:var(--text1);font-size:18px;display:block;margin-bottom:2px;}
   
-  /* Leaderboard */
-  .leaderboard { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
-  .lb-row { display:grid; grid-template-columns:50px 1fr auto auto; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border); align-items:center; }
-  .lb-row:last-child { border-bottom:none; }
-  .lb-row:hover { background:rgba(255,255,255,0.02); }
-  .lb-pos { font-size:14px; color:var(--text3); font-weight:600; text-align:center; }
-  .lb-name { font-weight:700; }
-  .lb-meta { font-size:11px; color:var(--text3); margin-top:2px; }
-  .lb-badges { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
-  .badge { font-size:10px; padding:2px 8px; border-radius:12px; background:rgba(124,58,237,0.15); color:#c4b5fd; }
-  .lb-num { font-size:18px; font-weight:800; color:var(--accent); text-align:right; }
-  .lb-lbl { font-size:10px; color:var(--text3); text-transform:uppercase; }
+  /* BADGES SYSTEM */
+  .badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+  .badge-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:transform .2s,border-color .2s;}
+  .badge-card:hover{transform:translateY(-2px);border-color:var(--accent2);}
+  .badge-card-icon{font-size:36px;margin-bottom:6px;}
+  .badge-card-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+  .badge-card-req{font-size:11px;color:var(--text3);}
   
-  /* Estados destacados */
-  .estados-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
-  .estado-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
-  .estado-card-name { font-weight:700; font-size:14px; }
-  .estado-card-v { font-size:22px; font-weight:800; color:var(--accent2); margin-top:4px; }
-  .estado-card-l { font-size:10px; color:var(--text3); }
+  /* HOW IT WORKS */
+  .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:700px){.how-grid{grid-template-columns:1fr 1fr;}}
+  .how-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;position:relative;}
+  .how-num{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+  .how-icon{font-size:32px;margin:14px 0 8px;}
+  .how-text{font-size:13px;line-height:1.4;color:var(--text2);}
+  .how-text strong{color:var(--text1);}
+  
+  /* LEADERBOARD */
+  .leaderboard{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .lb-row{display:grid;grid-template-columns:48px 1fr auto auto;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:center;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row:hover{background:rgba(255,255,255,0.02);}
+  .lb-pos{font-size:14px;color:var(--text3);font-weight:700;text-align:center;}
+  .lb-name{font-weight:700;}
+  .lb-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+  .lb-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+  .badge{font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(124,58,237,0.15);color:#c4b5fd;}
+  .lb-num{font-size:18px;font-weight:800;color:var(--accent);text-align:right;}
+  .lb-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;}
+  
+  /* ESTADOS */
+  .estados-bars{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+  .estado-bar{display:grid;grid-template-columns:140px 1fr auto;gap:14px;align-items:center;font-size:13px;}
+  .estado-bar-name{font-weight:600;}
+  .estado-bar-track{background:rgba(255,255,255,0.05);height:8px;border-radius:4px;overflow:hidden;}
+  .estado-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),#a78bfa);border-radius:4px;transition:width 1s ease-out;}
+  .estado-bar-val{font-weight:700;color:var(--accent2);font-size:14px;}
+  
+  /* FEED */
+  .feed{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;max-height:340px;overflow-y:auto;}
+  .feed-row{display:flex;gap:12px;padding:10px;border-radius:8px;margin-bottom:4px;align-items:start;}
+  .feed-row:hover{background:rgba(255,255,255,0.02);}
+  .feed-icon{font-size:22px;flex-shrink:0;}
+  .feed-content{flex:1;font-size:13px;line-height:1.4;}
+  .feed-content strong{color:var(--accent);}
+  .feed-time{font-size:11px;color:var(--text3);margin-top:2px;}
   
   /* CTA */
-  .cta { background:linear-gradient(135deg,#22c55e,#10b981); border-radius:18px; padding:32px; margin:32px 0; text-align:center; color:#fff; }
-  .cta h2 { font-size:24px; margin-bottom:8px; }
-  .cta p { opacity:0.9; margin-bottom:18px; }
-  .cta a { display:inline-block; background:#fff; color:#10b981; padding:12px 28px; border-radius:10px; font-weight:700; text-decoration:none; font-size:15px; }
-  .cta a:hover { transform:translateY(-2px); }
+  .cta{background:linear-gradient(135deg,#16a34a,#0f766e);border-radius:20px;padding:36px;margin:32px 0;text-align:center;color:#fff;}
+  .cta h2{font-size:26px;margin-bottom:8px;}
+  .cta p{opacity:0.92;margin-bottom:20px;font-size:15px;}
+  .cta-btn{display:inline-block;background:#fff;color:#10b981;padding:14px 32px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px;transition:transform .2s;}
+  .cta-btn:hover{transform:translateY(-2px);}
   
-  /* Footer */
-  .footer { text-align:center; color:var(--text3); font-size:12px; padding:24px 0; }
-  .footer a { color:var(--accent); text-decoration:none; }
+  /* FOOTER */
+  .footer{text-align:center;color:var(--text3);font-size:12px;padding:24px 0;line-height:1.6;}
+  .footer a{color:var(--accent);text-decoration:none;}
   
-  .empty { text-align:center; padding:32px; color:var(--text3); }
+  .empty{text-align:center;padding:32px;color:var(--text3);font-size:13px;line-height:1.5;}
+  .empty-big{padding:48px 24px;}
+  .empty-big strong{display:block;font-size:18px;color:var(--text1);margin:8px 0 4px;}
 </style>
 </head>
 <body>
 <div class="container">
 
   <div class="hero">
-    <h1>🦎 Tequieros</h1>
-    <div class="lead">Ciudadanos que construyen la infraestructura cívica abierta de México, un documento a la vez. Cero Invención · Soberanía digital · Open data.</div>
-    <div id="heroStats" class="hero-stats"></div>
+    <div class="hero-content">
+      <h1>🦎 Tequieros</h1>
+      <div class="lead">Ciudadanos que construyen la infraestructura cívica abierta de México, un documento a la vez.<br><strong style="color:var(--accent)">Cero Invención · Soberanía digital · Open data</strong></div>
+      <div id="heroStats" class="hero-stats"></div>
+    </div>
   </div>
 
   <div class="section-title">🥇 Top 3 del mes</div>
-  <div id="podium" class="podium"><div class="empty">Cargando…</div></div>
+  <div id="podium" class="podium"><div class="empty empty-big" style="grid-column:1/-1">Cargando…</div></div>
+
+  <div class="section-title">🏆 Sistema de Badges</div>
+  <div class="badges-grid" id="badgesGrid"></div>
+
+  <div class="section-title">📋 Cómo funciona</div>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">1</div><div class="how-icon">🔍</div><div class="how-text"><strong>Encuentra tu municipio</strong><br>Busca tu lugar en Tequio</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-icon">📤</div><div class="how-text"><strong>Comparte una URL oficial</strong><br>Presupuesto, plan, reglamento</div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-icon">✅</div><div class="how-text"><strong>Admin revisa</strong><br>Aprobamos en 24-48h</div></div>
+    <div class="how-card"><div class="how-num">4</div><div class="how-icon">🦎</div><div class="how-text"><strong>Ganas badges</strong><br>Apareces aquí · presumes en redes</div></div>
+  </div>
+
+  <div class="section-title">📡 Actividad reciente <small>en vivo</small></div>
+  <div id="feed" class="feed"><div class="empty">Cargando…</div></div>
 
   <div class="section-title">📊 Tabla completa</div>
   <div id="leaderboard" class="leaderboard"></div>
 
   <div class="section-title">🌎 Estados que más contribuyen</div>
-  <div id="estados" class="estados-grid"></div>
+  <div id="estados" class="estados-bars"></div>
 
   <div class="cta">
-    <h2>¿Tienes información oficial de tu municipio?</h2>
-    <p>Cada documento que aportes sube la transparencia de tu comunidad. Y te ganas tu lugar aquí.</p>
-    <a href="/">🚀 Explorar mi municipio</a>
+    <h2>¿Tu municipio aparece con info incompleta?</h2>
+    <p>Eres el indicado para cambiarlo. Comparte una URL oficial. Tu nombre aparece aquí. Tu pueblo gana transparencia.</p>
+    <a href="/" class="cta-btn">🚀 Explorar mi municipio</a>
   </div>
 
   <div class="footer">
     <strong>🦎 Cero Invención · Tequio · 2026</strong><br>
-    Plataforma cívica mexicana · sin Big Tech · sin tracking · open data ·
+    Plataforma cívica mexicana · sin Big Tech · sin tracking · open data<br>
     <a href="https://tequio.app">tequio.app</a>
   </div>
 
@@ -116,94 +166,140 @@
   var SB = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
   var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
   
+  // BADGES catalog (debe match con backend en admin_aprobar_contribucion)
+  var BADGES = [
+    { icon:'🌱', name:'Primer aporte', req:'1 documento' },
+    { icon:'🌿', name:'Colaborador',   req:'5 documentos' },
+    { icon:'🌳', name:'Tequiero',      req:'10 documentos' },
+    { icon:'🏛️', name:'Guardián Cívico',req:'25 documentos' },
+    { icon:'🦎', name:'Leyenda Tequio',req:'50 documentos' },
+    { icon:'🗺️', name:'Cartógrafo',    req:'5 municipios' },
+    { icon:'🇲🇽', name:'Explorador Nacional',req:'20 municipios' }
+  ];
+  
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-  function num(n){ return (n||0).toLocaleString('es-MX'); }
+  function num(n){ if(n==null)return '0'; return Number(n).toLocaleString('es-MX'); }
+  function fmtAgo(iso){
+    try{
+      var d=new Date(iso);
+      var ago=(Date.now()-d.getTime())/1000;
+      if(ago<60)return 'hace '+Math.floor(ago)+'s';
+      if(ago<3600)return 'hace '+Math.floor(ago/60)+'m';
+      if(ago<86400)return 'hace '+Math.floor(ago/3600)+'h';
+      if(ago<2592000)return 'hace '+Math.floor(ago/86400)+'d';
+      return d.toLocaleDateString('es-MX');
+    }catch(e){return '';}
+  }
+  function animateCount(el,target){
+    target=Number(target)||0;
+    var start=0,dur=900,t0=performance.now();
+    function step(t){
+      var p=Math.min((t-t0)/dur,1);
+      var v=Math.floor(start+(target-start)*(1-Math.pow(1-p,3)));
+      el.textContent=v.toLocaleString('es-MX')+(el.dataset.suffix||'');
+      if(p<1)requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
   
   async function init(){
     var sb = window.supabase.createClient(SB, ANON);
-    
+    renderBadges();
     var stats = await sb.rpc('tc_stats_publicas');
     var top = await sb.rpc('colaboradores_top', { p_limit: 50 });
-    
+    var feed = await sb.rpc('tc_actividad_reciente', { p_limit: 15 });
     renderHero(stats.data || {});
     renderEstados(stats.data || {});
     renderLeaderboard(top.data || []);
+    renderFeed(feed.data || []);
+  }
+  
+  function renderBadges(){
+    $('badgesGrid').innerHTML = BADGES.map(function(b){
+      return '<div class="badge-card"><div class="badge-card-icon">'+b.icon+'</div><div class="badge-card-name">'+esc(b.name)+'</div><div class="badge-card-req">'+esc(b.req)+'</div></div>';
+    }).join('');
   }
   
   function renderHero(s){
     var rows = [
-      ['total_municipios', 'Municipios', '🗺️'],
-      ['docs_comunidad_total', 'Docs aportados', '📤'],
-      ['colaboradores_activos', 'Tequieros activos', '🦎'],
-      ['municipios_con_extras', 'Municipios con extras', '🏛️'],
-      ['avg_completitud', '% promedio', '📊']
+      ['total_municipios','Municipios','🗺️',''],
+      ['docs_comunidad_total','Docs aportados','📤',''],
+      ['colaboradores_activos','Tequieros activos','🦎',''],
+      ['municipios_con_extras','Municipios apoyados','🏛️',''],
+      ['avg_completitud','% promedio','📊','%']
     ];
     $('heroStats').innerHTML = rows.map(function(r){
       var v = s[r[0]];
-      if (v == null) v = 0;
-      if (r[0] === 'avg_completitud') v = v + '%';
-      else v = num(v);
-      return '<div class="hero-stat"><div class="hero-stat-v">'+r[2]+' '+v+'</div><div class="hero-stat-l">'+r[1]+'</div></div>';
+      if(v==null)v=0;
+      return '<div class="hero-stat"><div class="hero-stat-v" data-target="'+v+'" data-suffix="'+r[3]+'">'+r[2]+' 0'+r[3]+'</div><div class="hero-stat-l">'+r[1]+'</div></div>';
     }).join('');
+    setTimeout(function(){
+      document.querySelectorAll('.hero-stat-v').forEach(function(el){
+        var target=el.getAttribute('data-target');
+        el.textContent=(el.dataset.suffix?'':'')+'';
+        animateCount(el,target);
+      });
+    },100);
   }
   
   function renderEstados(s){
     var arr = s.top_estados_por_extras || [];
-    var box = $('estados');
-    if (!arr.length) {
-      box.innerHTML = '<div class="empty">Aún no hay datos por estado. Sé el primero en contribuir.</div>';
+    if(!arr.length){
+      $('estados').innerHTML = '<div class="empty">Aún no hay datos por estado. Sé el primero en contribuir un documento de tu estado.</div>';
       return;
     }
-    box.innerHTML = arr.map(function(e){
-      return '<div class="estado-card"><div class="estado-card-name">'+esc(e.estado)+'</div><div class="estado-card-v">'+num(e.docs)+'</div><div class="estado-card-l">documentos aportados</div></div>';
+    var max = Math.max.apply(null, arr.map(function(e){return e.docs||0;}));
+    $('estados').innerHTML = arr.map(function(e){
+      var pct = (e.docs/max)*100;
+      return '<div class="estado-bar"><div class="estado-bar-name">'+esc(e.estado)+'</div><div class="estado-bar-track"><div class="estado-bar-fill" style="width:0%"></div></div><div class="estado-bar-val">'+num(e.docs)+'</div></div>';
+    }).join('');
+    setTimeout(function(){
+      var bars=document.querySelectorAll('.estado-bar-fill');
+      arr.forEach(function(e,i){if(bars[i]){var p=(e.docs/max)*100;bars[i].style.width=p+'%';}});
+    },200);
+  }
+  
+  function renderFeed(arr){
+    if(!arr.length){
+      $('feed').innerHTML = '<div class="empty">📡 Esperando primera contribución…<br><span style="font-size:11px">Aquí aparecerán las últimas aprobaciones en tiempo real</span></div>';
+      return;
+    }
+    $('feed').innerHTML = arr.map(function(f){
+      return '<div class="feed-row"><div class="feed-icon">'+(f.categoria_icono||'📄')+'</div><div class="feed-content"><strong>'+esc(f.contrib_nick||'Anónimo')+'</strong> aportó <em>'+esc(f.categoria_nombre)+'</em> a <strong>'+esc(f.municipio_nombre)+', '+esc(f.estado)+'</strong><div class="feed-time">'+fmtAgo(f.created_at)+'</div></div></div>';
     }).join('');
   }
   
   function renderLeaderboard(arr){
-    if (!arr.length) {
-      $('podium').innerHTML = '<div class="pod" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">🌱</div><div style="font-size:16px;font-weight:700;margin-bottom:6px">Aún no hay Tequieros</div><div style="color:var(--text3);font-size:13px">Sé el primero en contribuir información a Tequio. Tu nombre aparecerá aquí.</div></div>';
-      $('leaderboard').innerHTML = '<div class="empty">Sin colaboradores aún · Sé el primero</div>';
+    if(!arr.length){
+      $('podium').innerHTML = '<div class="empty empty-big" style="grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:16px;"><div style="font-size:64px">🌱</div><strong>Aún no hay Tequieros</strong>Sé el primero en aportar un documento oficial.<br>Tu nombre aparecerá aquí cuando sea aprobado.</div>';
+      $('leaderboard').innerHTML = '<div class="empty">Sin colaboradores aún · Sé el primero · <a href="/" style="color:var(--accent)">Empezar →</a></div>';
       return;
     }
-    
-    var top3 = arr.slice(0, 3);
+    var top3 = arr.slice(0,3);
     var rest = arr.slice(3);
     var medals = ['🥇','🥈','🥉'];
     var classes = ['gold','silver','bronze'];
     
-    $('podium').innerHTML = top3.map(function(c, i){
-      return '<div class="pod '+classes[i]+'">'+
-        '<div class="pod-medal">'+medals[i]+'</div>'+
-        '<div class="pod-name">'+esc(c.nombre_publico||'Anónimo')+'</div>'+
-        '<div class="pod-meta">'+esc(c.estado||'')+'</div>'+
-        '<div class="pod-stats">'+
-          '<div><strong>'+num(c.total_aprobados)+'</strong>docs</div>'+
-          '<div><strong>'+num(c.municipios_apoyados)+'</strong>municipios</div>'+
-        '</div>'+
-        (c.badges && c.badges.length ? '<div class="lb-badges" style="justify-content:center;margin-top:10px">'+c.badges.map(function(b){return '<span class="badge">'+esc(b)+'</span>';}).join('')+'</div>' : '')+
-      '</div>';
-    }).join('') + (top3.length < 3 ? Array(3-top3.length).fill('<div></div>').join('') : '');
+    var podHtml = top3.map(function(c,i){
+      return '<div class="pod '+classes[i]+'"><div class="pod-medal">'+medals[i]+'</div><div class="pod-name">'+esc(c.nombre_publico||'Anónimo')+'</div><div class="pod-meta">'+esc(c.estado||'México')+'</div><div class="pod-stats"><div><strong>'+num(c.total_aprobados)+'</strong>docs</div><div><strong>'+num(c.municipios_apoyados)+'</strong>municipios</div></div>'+
+        (c.badges&&c.badges.length?'<div class="lb-badges" style="justify-content:center;margin-top:12px">'+c.badges.map(function(b){return '<span class="badge">'+esc(b)+'</span>';}).join('')+'</div>':'')+'</div>';
+    }).join('');
+    while(top3.length+podHtml.match(/class="pod /g).length<3){podHtml+='<div></div>';}
+    $('podium').innerHTML = podHtml;
     
-    if (!rest.length) {
-      $('leaderboard').innerHTML = '<div class="empty" style="padding:24px">Sólo los primeros 3 colaboradores por ahora. ¡Suma el cuarto!</div>';
+    if(!rest.length){
+      $('leaderboard').innerHTML = '<div class="empty" style="padding:24px">Sólo los primeros 3 colaboradores. ¡Suma el cuarto!</div>';
       return;
     }
-    
-    $('leaderboard').innerHTML = rest.map(function(c, i){
-      return '<div class="lb-row">'+
-        '<div class="lb-pos">#'+(i+4)+'</div>'+
-        '<div><div class="lb-name">'+esc(c.nombre_publico||'Anónimo')+'</div>'+
-        '<div class="lb-meta">'+esc(c.estado||'México')+'</div>'+
-        (c.badges && c.badges.length ? '<div class="lb-badges">'+c.badges.map(function(b){return '<span class="badge">'+esc(b)+'</span>';}).join('')+'</div>' : '')+
-        '</div>'+
-        '<div><div class="lb-num">'+num(c.total_aprobados)+'</div><div class="lb-lbl">docs</div></div>'+
-        '<div><div class="lb-num">'+num(c.municipios_apoyados)+'</div><div class="lb-lbl">muni.</div></div>'+
-      '</div>';
+    $('leaderboard').innerHTML = rest.map(function(c,i){
+      return '<div class="lb-row"><div class="lb-pos">#'+(i+4)+'</div><div><div class="lb-name">'+esc(c.nombre_publico||'Anónimo')+'</div><div class="lb-meta">'+esc(c.estado||'México')+'</div>'+
+        (c.badges&&c.badges.length?'<div class="lb-badges">'+c.badges.map(function(b){return '<span class="badge">'+esc(b)+'</span>';}).join('')+'</div>':'')+
+        '</div><div><div class="lb-num">'+num(c.total_aprobados)+'</div><div class="lb-lbl">docs</div></div><div><div class="lb-num">'+num(c.municipios_apoyados)+'</div><div class="lb-lbl">muni.</div></div></div>';
     }).join('');
   }
   
-  init().catch(function(e){ console.error(e); });
+  init().catch(function(e){console.error(e);});
 })();
 </script>
 </body>
