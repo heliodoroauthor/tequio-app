@@ -128,9 +128,62 @@
 <script>
   const SB_URL  = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
   const SB_ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  const TURNSTILE_SITE = '0x4AAAAAADVsqa6-gYYg2pDO';
   const ADMIN_EMAIL = 'helio.gomez1336@gmail.com';
 
   let sb = null;
+
+  // ---- Cloudflare Turnstile lazy loader ----
+  function loadTurnstile() {
+    return new Promise((resolve, reject) => {
+      if (window.turnstile && window.turnstile.render) return resolve(window.turnstile);
+      const existing = document.querySelector('script[data-tequio-turnstile]');
+      if (existing) {
+        let waited = 0;
+        const iv = setInterval(() => {
+          if (window.turnstile && window.turnstile.render) { clearInterval(iv); resolve(window.turnstile); }
+          else if (waited > 10000) { clearInterval(iv); reject(new Error('Turnstile timeout')); }
+          waited += 100;
+        }, 100);
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      s.async = true; s.defer = true;
+      s.setAttribute('data-tequio-turnstile', '1');
+      s.onload  = () => resolve(window.turnstile);
+      s.onerror = () => reject(new Error('No se pudo cargar Turnstile'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function getCaptchaToken() {
+    return new Promise((resolve, reject) => {
+      loadTurnstile().then(ts => {
+        let c = document.getElementById('turnstile-container');
+        if (!c) {
+          c = document.createElement('div');
+          c.id = 'turnstile-container';
+          c.style.cssText = 'margin:10px 0;display:flex;justify-content:center';
+          const status = document.getElementById('loginStatus');
+          if (status && status.parentNode) status.parentNode.insertBefore(c, status);
+        } else {
+          try { ts.remove(c); } catch(e){}
+          c.innerHTML = '';
+          c.style.display = 'flex';
+        }
+        try {
+          ts.render(c, {
+            sitekey: TURNSTILE_SITE,
+            theme: 'dark',
+            callback: token => resolve(token),
+            'error-callback': () => reject(new Error('Turnstile rechazó la verificación')),
+            'expired-callback': () => { /* el siguiente intento re-renderiza */ }
+          });
+        } catch(e) { reject(e); }
+      }).catch(reject);
+    });
+  }
 
   function toast(msg, kind) {
     const t = document.getElementById('toast');
@@ -191,13 +244,33 @@
       status.style.color = 'var(--red)';
       return;
     }
+
+    status.textContent = 'Verificando captcha…';
+    status.style.color = 'var(--text3)';
+
+    let captchaToken;
+    try {
+      captchaToken = await getCaptchaToken();
+    } catch (e) {
+      status.textContent = 'Captcha falló: ' + (e.message || 'error');
+      status.style.color = 'var(--red)';
+      return;
+    }
+
     status.textContent = 'Enviando link…';
     status.style.color = 'var(--text3)';
 
     const { error } = await sb.auth.signInWithOtp({
       email: email,
-      options: { emailRedirectTo: window.location.href }
+      options: {
+        emailRedirectTo: window.location.href,
+        captchaToken: captchaToken
+      }
     });
+
+    // Ocultar widget Turnstile después
+    const c = document.getElementById('turnstile-container');
+    if (c) c.style.display = 'none';
 
     if (error) {
       status.textContent = 'Error: ' + error.message;
@@ -281,65 +354,4 @@
     `).join('');
   }
 
-  async function accionOcultar(msgId, oculto) {
-    const { data, error } = await sb.rpc('admin_chat_ocultar', { p_msg_id: msgId, p_oculto: oculto });
-    if (error) { toast('Error: ' + error.message, 'err'); return; }
-    toast(oculto ? 'Mensaje oculto' : 'Mensaje mostrado', 'ok');
-    refresh();
-  }
-
-  async function accionBanear(uid, horas) {
-    if (!confirm(horas ? `¿Banear este user por ${horas}h?` : '¿Banear este user PERMANENTEMENTE?')) return;
-    const motivo = prompt('Motivo del ban (opcional):', 'Violación de normas comunitarias') || '';
-    const { data, error } = await sb.rpc('admin_chat_banear', {
-      p_user_id: uid, p_motivo: motivo, p_horas: horas
-    });
-    if (error) { toast('Error: ' + error.message, 'err'); return; }
-    toast('User baneado', 'ok');
-    refresh();
-  }
-
-  async function accionDesbanear(uid) {
-    if (!confirm('¿Desbanear este user?')) return;
-    const { data, error } = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
-    if (error) { toast('Error: ' + error.message, 'err'); return; }
-    toast('User desbaneado', 'ok');
-    refresh();
-  }
-
-  async function manualBan() {
-    const uid = document.getElementById('manualUid').value.trim();
-    const motivo = document.getElementById('manualMotivo').value.trim() || 'Ban manual';
-    const horasInput = document.getElementById('manualHoras').value.trim();
-    const horas = horasInput ? parseInt(horasInput, 10) : null;
-    if (!uid) { toast('Pon un user_id', 'err'); return; }
-    if (!confirm(`¿Banear ${uid} ${horas ? 'por ' + horas + 'h' : 'PERMANENTEMENTE'}?`)) return;
-    const { data, error } = await sb.rpc('admin_chat_banear', { p_user_id: uid, p_motivo: motivo, p_horas: horas });
-    if (error) { toast('Error: ' + error.message, 'err'); return; }
-    toast('User baneado', 'ok');
-    document.getElementById('manualUid').value = '';
-    document.getElementById('manualMotivo').value = '';
-    document.getElementById('manualHoras').value = '';
-    refresh();
-  }
-
-  async function manualUnban() {
-    const uid = document.getElementById('manualUid').value.trim();
-    if (!uid) { toast('Pon un user_id', 'err'); return; }
-    if (!confirm(`¿Desbanear ${uid}?`)) return;
-    const { data, error } = await sb.rpc('admin_chat_desbanear', { p_user_id: uid });
-    if (error) { toast('Error: ' + error.message, 'err'); return; }
-    toast('User desbaneado', 'ok');
-    document.getElementById('manualUid').value = '';
-    refresh();
-  }
-
-  // Enter en email field = enviar link
-  document.getElementById('email').addEventListener('keypress', e => {
-    if (e.key === 'Enter') { e.preventDefault(); sendMagicLink(); }
-  });
-
-  init();
-</script>
-</body>
-</html>
+  async function accionOcul
