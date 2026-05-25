@@ -7256,6 +7256,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         window.debatesPolisOpen = function(id){
           var t = TEMAS.find(function(x){ return x.id === id; });
           if (!t) return;
+          // Registrar vista (fire-and-forget)
+          try { fetch(SB+'/rest/v1/rpc/polis_registrar_vista',{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify({p_pol_id:id})}); } catch(e){}
           var url   = 'https://pol.is/' + encodeURIComponent(id);
           var frame = document.getElementById('polisFrame');
           var wrap  = document.getElementById('polisFrameWrap');
