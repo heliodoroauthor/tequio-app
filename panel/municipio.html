@@ -570,6 +570,7 @@ load();
       else if(score.pct<66)$('tc-score-pct').style.color='#fb923c';
       else $('tc-score-pct').style.color='#22c55e';
     }
+    if(score && score.pct!=null && score.pct < 70){$('tc-share-bar').style.display='block';}
     $('tc-categorias').innerHTML=catList.map(function(c){
       var status=c.cubierto?'✅':'⚠️';
       var col=c.cubierto?'#22c55e':'#a8b0c0';
