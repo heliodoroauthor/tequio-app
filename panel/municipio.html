@@ -627,9 +627,10 @@ load();
     }).catch(function(){$('tc-msg').textContent='Error de red';$('tc-msg').style.color='#ef4444';});
   };
   function init(){
-    MUNI_ID=getMuniId();
-    if(!MUNI_ID)return;
-    Promise.all([rpc('municipio_completitud',{p_municipio_id:MUNI_ID}),rpc('municipio_score',{p_municipio_id:MUNI_ID})]).then(function(res){
+    Promise.resolve(getMuniId()).then(function(mid){
+      MUNI_ID=mid;
+      if(!MUNI_ID)return;
+      return Promise.all([rpc('municipio_completitud',{p_municipio_id:MUNI_ID}),rpc('municipio_score',{p_municipio_id:MUNI_ID})]).then(function(res){
       CATEGORIAS=res[0]||[];
       if(!CATEGORIAS.length){return;}
       $('tequio-ciudadano').style.display='block';
