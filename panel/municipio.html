@@ -578,6 +578,23 @@ load();
       return '<div style="padding:8px 10px;background:'+bg+';border-radius:6px;border:1px solid rgba(255,255,255,0.06)"><div style="font-size:13px;color:'+col+'">'+status+' '+c.icono+' '+c.categoria_nombre+'</div><div style="margin-top:2px">'+src+'</div></div>';
     }).join('');
   }
+  function getMuniNombre(){var h=document.querySelector('h1,h2,h3,.titulo,.municipio-nombre');return h?h.textContent.trim().slice(0,80):'este municipio';}
+  function buildShareText(){
+    var faltantes=CATEGORIAS.filter(function(c){return !c.cubierto;}).slice(0,3).map(function(c){return c.categoria_nombre;}).join(', ');
+    var pct=$('tc-score-pct').textContent;
+    var nombre=getMuniNombre();
+    return '📊 '+nombre+' está al '+pct+' de información en Tequio. Faltan: '+faltantes+'. ¿Tienes esta info? Súbela: '+location.href+' · #TequioCiudadano #DatosAbiertos #México';
+  }
+  window.tcShare=function(target){
+    var text=buildShareText();
+    var url=location.href;
+    var msg=$('tc-share-msg');
+    if(target==='wa'){window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');msg.textContent='✓ Abierto en WhatsApp';}
+    else if(target==='x'){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');msg.textContent='✓ Abierto en X';}
+    else if(target==='fb'){window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'&quote='+encodeURIComponent(text),'_blank');msg.textContent='✓ Abierto en Facebook';}
+    else if(target==='copy'){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){msg.textContent='✓ Texto copiado al portapapeles';});}else{var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');msg.textContent='✓ Copiado';}catch(e){msg.textContent='No se pudo copiar';}document.body.removeChild(ta);}}
+    setTimeout(function(){msg.textContent='';},4000);
+  };
   window.tcAbrirForm=function(){
     $('tc-form').style.display='block';
     $('tc-cat').innerHTML=CATEGORIAS.filter(function(c){return !c.cubierto;}).map(function(c){return '<option value="'+c.categoria_id+'">'+c.icono+' '+c.categoria_nombre+'</option>';}).join('');
