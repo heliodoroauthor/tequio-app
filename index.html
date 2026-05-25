@@ -13322,16 +13322,7 @@ function showPage(id) {
   if (id === 'directorio') safeInit('initDirectorio', typeof initDirectorio !== 'undefined' ? initDirectorio : (typeof renderDirectorio !== 'undefined' ? renderDirectorio : null));
   if (id === 'ombligo') safeInit('initOmbligo', typeof initOmbligo !== 'undefined' ? initOmbligo : null);
   if (id === 'dinero') safeInit('cargarIndicadoresFiscales', typeof cargarIndicadoresFiscales !== 'undefined' ? cargarIndicadoresFiscales : null);
-  if (id === 'comunidad') { try {
-    const estadoGuardado = localStorage.getItem('voto_estado') || 'Ciudad de México';
-    const sel = document.getElementById('chat-estado-sel');
-    if (sel) sel.value = estadoGuardado;
-    if (typeof cambiarEstadoChat === 'function') cambiarEstadoChat(estadoGuardado);
-    document.querySelectorAll('[id^="cm-"]').forEach(b => b.classList.remove('active'));
-    const btnTodos = document.getElementById('cm-todos');
-    if (btnTodos) btnTodos.classList.add('active');
-    chatFiltroActual = 'todos';
-  } catch(e){ console.error('[init crash] comunidad', e); } }
+  if (id === 'comunidad') safeInit('initComunidad', typeof initComunidad !== 'undefined' ? initComunidad : null);
   if (id === 'perfil') safeInit('cargarPerfil', typeof cargarPerfil !== 'undefined' ? cargarPerfil : null);
   if (id === 'diariocivico') { try {
     const estadoGuardado = localStorage.getItem('voto_estado') || 'Ciudad de México';
