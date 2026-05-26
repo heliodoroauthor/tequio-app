@@ -189,20 +189,28 @@ def upload_to_supabase(rows, fecha, verbose=False):
     # - llenado / porcentaje / pct
     payload = []
     for r in rows:
-        # Normalize keys to lowercase
         rk = {k.lower(): v for k, v in r.items()} if isinstance(r, dict) else {}
         
-        nombre = rk.get("nombre") or rk.get("nombrecomun") or rk.get("nombreoficial") or rk.get("clavesih") or "Sin nombre"
-        estado = rk.get("estado") or rk.get("entidad") or rk.get("nom_ent") or ""
-        cap = rk.get("namo") or rk.get("namoalmac") or rk.get("capacidad") or rk.get("capacidad_hm3") or rk.get("capacidad_total")
-        alm = rk.get("almacenaactual") or rk.get("almactual") or rk.get("volumenactual") or rk.get("almacenamiento") or rk.get("vol_actual")
-        pct = rk.get("llenamn") or rk.get("llenoamn") or rk.get("porcentaje") or rk.get("pct") or rk.get("almpct")
+        # SINA real field mapping
+        nombre = rk.get("nombrecomun") or rk.get("nombreoficial") or rk.get("clavesih") or "Sin nombre"
+        estado = rk.get("estado") or ""
+        # NAMO = Nivel Aguas Máximo Ordinario (capacidad útil estándar)
+        cap = rk.get("namoalmac") or rk.get("namealmac") or rk.get("capacidad")
+        alm = rk.get("almacenaactual") or rk.get("almactual") or rk.get("almacenamiento")
+        # SINA returns pct as decimal 0-1, multiply x100
+        pct_raw = rk.get("llenano") or rk.get("llenamn") or rk.get("porcentaje") or rk.get("pct")
         
-        # Calculate pct if missing
         try:
             cap_f = float(cap) if cap is not None else None
             alm_f = float(alm) if alm is not None else None
-            pct_f = float(pct) if pct is not None else (alm_f/cap_f*100 if cap_f and alm_f is not None else None)
+            if pct_raw is not None:
+                p = float(pct_raw)
+                # If pct is 0-1, multiply by 100
+                pct_f = round(p * 100, 2) if p <= 1.5 else round(p, 2)
+            elif cap_f and alm_f is not None and cap_f > 0:
+                pct_f = round(alm_f / cap_f * 100, 2)
+            else:
+                pct_f = None
         except Exception:
             cap_f = alm_f = pct_f = None
         
@@ -214,6 +222,7 @@ def upload_to_supabase(rows, fecha, verbose=False):
             "almacenamiento_hm3": alm_f,
             "pct_almacenamiento": pct_f,
             "fuente": "SINA",
+            "region_hidrologica": (rk.get("regioncna") or "")[:100] if rk.get("regioncna") else None,
         })
     
     print(f"📤 Subiendo {len(payload)} presas a Supabase (fuente=SINA)...")
