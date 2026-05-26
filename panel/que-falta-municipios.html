@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🏘️ Municipios menos completos · Tequio</title>
+<style>
+  :root {
+    --bg:#0a0f1e; --card:#141b2e; --card2:#1a2340;
+    --text1:#e4e7ee; --text2:#a8b0c0; --text3:#6b7388;
+    --accent:#22c55e; --orange:#fb923c; --red:#ef4444;
+    --purple:#7c3aed; --border:rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text1);padding:20px;min-height:100vh;}
+  .container{max-width:1200px;margin:0 auto;}
+
+  .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--purple);text-decoration:none;font-size:13px;margin-bottom:18px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-family:inherit;}
+  .back-btn:hover{background:var(--card2);}
+
+  .hero{background:linear-gradient(135deg,#3b0764 0%,#581c87 100%);border-radius:18px;padding:24px;margin-bottom:22px;}
+  .hero h1{font-size:26px;margin-bottom:4px;font-weight:800;}
+  .hero .lead{color:#e9d5ff;font-size:14px;line-height:1.5;max-width:680px;}
+  .hero-stats{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap;}
+  .hero-stat{background:rgba(0,0,0,0.25);padding:10px 16px;border-radius:10px;}
+  .hero-stat strong{font-size:22px;font-weight:800;color:#fff;display:block;line-height:1;}
+  .hero-stat span{font-size:11px;color:#e9d5ff;text-transform:uppercase;letter-spacing:0.4px;}
+
+  /* FILTROS */
+  .filters-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:18px;display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr;gap:10px;}
+  @media(max-width:768px){.filters-card{grid-template-columns:1fr 1fr;}}
+  .filters-card input,
+  .filters-card select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text1);font-size:13px;font-family:inherit;outline:none;width:100%;}
+  .filters-card input:focus,
+  .filters-card select:focus{border-color:var(--purple);}
+  .filters-card label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;display:block;font-weight:600;}
+
+  .stats-bar{display:flex;gap:14px;font-size:12px;color:var(--text2);margin-bottom:10px;flex-wrap:wrap;align-items:center;}
+  .stats-bar strong{color:var(--text1);}
+  .stats-bar .clear{margin-left:auto;color:var(--purple);cursor:pointer;font-size:11px;}
+
+  /* TABLA */
+  .table-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .table-head{display:grid;grid-template-columns:50px 2fr 1.5fr 1fr 90px 90px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;font-weight:700;}
+  .table-head .sortable{cursor:pointer;user-select:none;}
+  .table-head .sortable:hover{color:var(--text1);}
+  .table-head .sortable.active{color:var(--purple);}
+  .muni-row{display:grid;grid-template-columns:50px 2fr 1.5fr 1fr 90px 90px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;font-size:13px;}
+  .muni-row:hover{background:rgba(124,58,237,0.06);}
+  .muni-row:last-child{border-bottom:none;}
+  .rank{font-weight:700;color:var(--text3);font-size:14px;}
+  .muni-name{font-weight:600;font-size:14px;}
+  .muni-estado{color:var(--text2);font-size:12px;}
+  .muni-pop{color:var(--text3);text-align:right;font-size:12px;}
+  .muni-pct{font-weight:800;text-align:right;font-size:15px;color:var(--red);}
+  .muni-pct.mid{color:var(--orange);}
+  .muni-pct.high{color:var(--accent);}
+  .muni-faltan{text-align:right;color:var(--red);font-size:12px;font-weight:600;}
+
+  .empty{text-align:center;padding:40px;color:var(--text3);font-size:14px;}
+  .loading{text-align:center;padding:60px;color:var(--text2);}
+  .loading::after{content:'…';animation:dots 1.4s infinite;}
+  @keyframes dots{0%,20%{content:'.';}40%{content:'..';}60%,100%{content:'…';}}
+
+  .footer{text-align:center;color:var(--text3);font-size:12px;padding:24px 0;}
+  .footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <button class="back-btn" onclick="volver()">← Lo que falta</button>
+
+  <div class="hero">
+    <h1>🏘️ Municipios menos completos</h1>
+    <div class="lead">Ranking nacional ampliado de los municipios con menor cobertura de información cívica. Cada uno es una oportunidad para contribuir.</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong id="statTotal">…</strong><span>Municipios cargados</span></div>
+      <div class="hero-stat"><strong id="statShown">…</strong><span>Mostrando</span></div>
+      <div class="hero-stat"><strong id="statAvg">…</strong><span>% promedio</span></div>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div>
+      <label>🔍 Buscar por nombre</label>
+      <input id="filtroNombre" type="text" placeholder="ej: Acatlán, Tijuana..." autocomplete="off">
+    </div>
+    <div>
+      <label>📍 Estado</label>
+      <select id="filtroEstado">
+        <option value="">Todos los estados</option>
+      </select>
+    </div>
+    <div>
+      <label>👥 Mínimo habitantes</label>
+      <select id="filtroPop">
+        <option value="0">Todos</option>
+        <option value="10000">10k+</option>
+        <option value="30000">30k+</option>
+        <option value="100000">100k+</option>
+        <option value="500000">500k+</option>
+      </select>
+    </div>
+    <div>
+      <label>📊 % completitud</label>
+      <select id="filtroPct">
+        <option value="100">≤100% (todos)</option>
+        <option value="25">≤25% (crítico)</option>
+        <option value="50">≤50%</option>
+        <option value="75">≤75%</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <span>📊 <strong id="countShown">…</strong> resultados</span>
+    <span>de <strong id="countTotal">…</strong> totales</span>
+    <span class="clear" onclick="limpiarFiltros()">Limpiar filtros</span>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <div>#</div>
+      <div class="sortable" data-sort="nombre" onclick="setSort('nombre')">Municipio</div>
+      <div>Estado</div>
+      <div style="text-align:right" class="sortable" data-sort="poblacion" onclick="setSort('poblacion')">Habitantes</div>
+      <div style="text-align:right" class="sortable active" data-sort="pct" onclick="setSort('pct')">% completo</div>
+      <div style="text-align:right" class="sortable" data-sort="faltantes" onclick="setSort('faltantes')">Faltan</div>
+    </div>
+    <div id="tabla"><div class="loading">Cargando</div></div>
+  </div>
+
+  <div class="footer">
+    <strong>🎯 Cero Invención · Tequio · 2026</strong><br>
+    <a href="https://tequio.app">tequio.app</a>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  var sb=null;
+  var allData=[];
+  var currentSort='pct';
+  var sortDir=1; // 1 asc (worse first), -1 desc
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+  function num(n){if(n==null)return '0';return Number(n).toLocaleString('es-MX');}
+  function pctClass(p){if(p<33)return '';if(p<66)return 'mid';return 'high';}
+
+  window.volver = function(){
+    try {
+      if (window.parent && window.parent !== window && typeof window.parent.tequioBack === 'function') {
+        window.parent.tequioBack();
+        return;
+      }
+      if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+        window.parent.cargarPanel('que-falta');
+        return;
+      }
+    } catch(e) {}
+    window.location.href = '/panel/que-falta.html';
+  };
+
+  window.abrirMuni = function(clave){
+    try {
+      if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+        window.parent.cargarPanel('municipio', '&clave_inegi=' + clave);
+        return;
+      }
+    } catch(e) {}
+    window.location.href = '/panel/municipio.html?clave_inegi=' + clave;
+  };
+
+  window.setSort = function(field){
+    if (currentSort === field) sortDir *= -1;
+    else { currentSort = field; sortDir = 1; }
+    document.querySelectorAll('.table-head .sortable').forEach(function(el){
+      el.classList.toggle('active', el.dataset.sort === field);
+    });
+    render();
+  };
+
+  window.limpiarFiltros = function(){
+    $('filtroNombre').value = '';
+    $('filtroEstado').value = '';
+    $('filtroPop').value = '0';
+    $('filtroPct').value = '100';
+    render();
+  };
+
+  async function init(){
+    sb = window.supabase.createClient(SB, ANON);
+    try {
+      var r = await sb.rpc('tc_municipios_menos_completos', { p_limit: 300 });
+      if (r.error) throw r.error;
+      allData = r.data || [];
+    } catch(e) {
+      $('tabla').innerHTML = '<div class="empty">Error al cargar municipios: ' + esc(e.message || e) + '</div>';
+      return;
+    }
+
+    // Populate state dropdown
+    var estados = [...new Set(allData.map(function(m){return m.estado;}).filter(Boolean))].sort();
+    var sel = $('filtroEstado');
+    estados.forEach(function(e){
+      var o = document.createElement('option');
+      o.value = e; o.textContent = e;
+      sel.appendChild(o);
+    });
+
+    $('statTotal').textContent = num(allData.length);
+    var avg = allData.length ? Math.round(allData.reduce(function(s,m){return s + (m.pct||0);},0) / allData.length) : 0;
+    $('statAvg').textContent = avg + '%';
+    $('countTotal').textContent = num(allData.length);
+
+    // Hook filters
+    ['filtroNombre','filtroEstado','filtroPop','filtroPct'].forEach(function(id){
+      $(id).addEventListener('input', render);
+      $(id).addEventListener('change', render);
+    });
+
+    render();
+  }
+
+  function render(){
+    var q = $('filtroNombre').value.trim().toLowerCase();
+    var estado = $('filtroEstado').value;
+    var minPop = parseInt($('filtroPop').value, 10) || 0;
+    var maxPct = parseInt($('filtroPct').value, 10) || 100;
+
+    var filtered = allData.filter(function(m){
+      if (q && !((m.nombre||'').toLowerCase().includes(q))) return false;
+      if (estado && m.estado !== estado) return false;
+      if ((m.poblacion || 0) < minPop) return false;
+      if ((m.pct || 0) > maxPct) return false;
+      return true;
+    });
+
+    // Sort
+    filtered.sort(function(a,b){
+      var av = a[currentSort], bv = b[currentSort];
+      if (currentSort === 'nombre') return ((a.nombre||'').localeCompare(b.nombre||'')) * sortDir;
+      av = (av == null ? 0 : av);
+      bv = (bv == null ? 0 : bv);
+      return (av - bv) * sortDir;
+    });
+
+    $('statShown').textContent = num(filtered.length);
+    $('countShown').textContent = num(filtered.length);
+
+    if (!filtered.length) {
+      $('tabla').innerHTML = '<div class="empty">Sin resultados para los filtros aplicados</div>';
+      return;
+    }
+
+    var html = filtered.map(function(m, idx){
+      var p = m.pct || 0;
+      var cls = pctClass(p);
+      var clave = m.clave_inegi || m.id || '';
+      return '<div class="muni-row" onclick="abrirMuni(\'' + esc(clave) + '\')">'+
+        '<div class="rank">' + (idx + 1) + '</div>'+
+        '<div class="muni-name">' + esc(m.nombre) + '</div>'+
+        '<div class="muni-estado">' + esc(m.estado||'') + '</div>'+
+        '<div class="muni-pop">' + num(m.poblacion) + '</div>'+
+        '<div class="muni-pct ' + cls + '">' + p + '%</div>'+
+        '<div class="muni-faltan">' + (m.faltantes || 0) + '</div>'+
+      '</div>';
+    }).join('');
+    $('tabla').innerHTML = html;
+  }
+
+  init().catch(function(e){console.error(e);});
+})();
+</script>
+</body>
+</html>
