@@ -271,8 +271,6 @@
       }
       if (!faltan.length && !tienen.length) {
         html = '<div class="exp-empty">Sin datos para este municipio</div>';
-      } else if (faltan.length > 0) {
-        html += '<div class="exp-cta">¿Conoces alguno de estos documentos? <a href="javascript:void(0)" onclick="event.stopPropagation();abrirMuni(\'' + esc(clave) + '\'')">Aporta en el panel del municipio →</a></div>';
       }
       expand.innerHTML = html;
       expand.dataset.loaded = '1';
