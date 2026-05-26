@@ -132,7 +132,7 @@
       <div class="cat-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
     </div>
     <div>
-      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes</small></div>
+      <div class="section-title" style="cursor:pointer" onclick="abrirAmpliado()" title="Click para ver listado ampliado y filtrable">🏘️ Municipios menos completos <small>+30k · click para ver todos →</small></div>
       <div class="muni-card" id="municipiosMenos"><div class="empty">Cargando…</div></div>
     </div>
   </div>
@@ -219,6 +219,10 @@
     window.location.href = '/panel/municipio.html?clave_inegi=' + clave;
   }
   window.abrirMuni = abrirMuni;
+  window.abrirAmpliado = function(){
+    try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('que-falta-municipios'); return; } } catch(e){}
+    window.location.href = '/panel/que-falta-municipios.html';
+  };
   function renderMunicipios(arr){
     if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('municipiosMenos').innerHTML = arr.map(function(m){
