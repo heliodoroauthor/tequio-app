@@ -68,6 +68,24 @@
   .estado-pct{font-weight:700;color:var(--orange);}
   .estado-faltan{color:var(--red);font-size:11px;}
 
+  /* ESTADOS expand */
+  .estado-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;}
+  .estado-item{border-bottom:1px solid var(--border);}
+  .estado-item:last-child{border-bottom:none;}
+  .estado-item .estado-row{display:grid;grid-template-columns:130px 1fr 50px 60px 14px;gap:12px;align-items:center;padding:10px 0;font-size:13px;cursor:pointer;border-bottom:none;}
+  .estado-arrow{color:var(--text3);font-size:10px;transition:transform 0.2s;text-align:right;}
+  .estado-item.open .estado-arrow{transform:rotate(180deg);}
+  .estado-expand{padding:6px 6px 14px;border-top:1px solid var(--border);background:rgba(255,255,255,0.015);display:none;}
+  .estado-item.open .estado-expand{display:block;}
+  .estado-doc{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;margin-bottom:4px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:6px;flex-wrap:wrap;}
+  .estado-doc-name{font-size:12px;font-weight:600;flex:1;min-width:180px;}
+  .estado-doc-tag{background:rgba(251,146,60,0.15);color:#fed7aa;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;text-transform:uppercase;flex-shrink:0;}
+  .estado-doc-link{color:var(--purple);font-size:11px;text-decoration:none;border:1px solid rgba(124,58,237,0.3);padding:3px 8px;border-radius:5px;flex-shrink:0;}
+  .estado-doc-link:hover{background:rgba(124,58,237,0.1);}
+  .ver-mas{width:100%;background:rgba(124,58,237,0.08);border:1px dashed rgba(124,58,237,0.4);color:var(--purple);padding:12px;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;margin-top:8px;}
+  .ver-mas:hover{background:rgba(124,58,237,0.15);}
+  .ver-mas-counter{font-size:11px;color:var(--text3);margin-left:8px;font-weight:400;}
+
   /* MUNICIPIOS */
   .muni-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;}
   .muni-item{border-bottom:1px solid var(--border);}
@@ -186,12 +204,13 @@
 
   <div class="grid-2">
     <div>
-      <div class="section-title">🏛️ Estados con info legal incompleta</div>
-      <div class="cat-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
+      <div class="section-title">🏛️ Estados con info legal incompleta <small>click para ver qué leyes faltan</small></div>
+      <div class="estado-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
     </div>
     <div>
-      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes · click para ver y aportar</small></div>
+      <div class="section-title">🏘️ Municipios menos completos <small id="muniSmall">+30k habitantes</small></div>
       <div class="muni-card" id="municipiosMenos"><div class="empty">Cargando…</div></div>
+      <button id="verMasMuni" class="ver-mas" style="display:none" onclick="verMasMunis()">Ver más municipios <span class="ver-mas-counter" id="muniCounter"></span></button>
     </div>
   </div>
 
@@ -223,6 +242,8 @@
   var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
   var sb=null;
   var allDocs=[],currentFilter='all';
+  var allMunis=[],muniRendered=0;
+  var MUNI_BATCH=50;
 
   function $(id){return document.getElementById(id);}
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
@@ -234,12 +255,14 @@
     sb = window.supabase.createClient(SB,ANON);
     var cats = await sb.rpc('tc_categorias_nacional');
     var estados = await sb.rpc('tc_estados_legal');
-    var munis = await sb.rpc('tc_municipios_menos_completos',{p_limit:20});
-    var docs = await sb.rpc('tc_docs_legales_faltantes',{p_limit:500});
+    var munis = await sb.rpc('tc_municipios_menos_completos',{p_limit:500});
+    var docs = await sb.rpc('tc_docs_legales_faltantes',{p_limit:1500});
     renderCategorias(cats.data||[]);
-    renderEstados(estados.data||[]);
-    renderMunicipios(munis.data||[]);
     allDocs = docs.data||[];
+    renderEstados(estados.data||[]);
+    allMunis = munis.data||[];
+    muniRendered = 0;
+    renderMunisBatch();
     renderDocs();
     calcTotalFaltantes(cats.data||[],estados.data||[],docs.data||[]);
   }
@@ -262,14 +285,56 @@
     setTimeout(function(){document.querySelectorAll('#categoriasNacional .cat-bar-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
 
+  function normalizeEstado(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
   function renderEstados(arr){
     if(!arr.length){$('estadosLegal').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('estadosLegal').innerHTML = arr.map(function(e){
       var p=e.pct||0;
-      return '<div class="estado-row"><div class="estado-name">'+esc(e.entidad)+'</div><div class="estado-track"><div class="estado-fill '+pctClass(p)+'" style="width:0%" data-w="'+p+'"></div></div><div class="estado-pct">'+p+'%</div><div class="estado-faltan">faltan '+e.faltantes+'</div></div>';
+      var safeKey = encodeURIComponent(e.entidad);
+      return '<div class="estado-item" data-entidad="'+esc(e.entidad)+'">'+
+        '<div class="estado-row" onclick="toggleEstado(\''+safeKey+'\')">'+
+          '<div class="estado-name">'+esc(e.entidad)+'</div>'+
+          '<div class="estado-track"><div class="estado-fill '+pctClass(p)+'" style="width:0%" data-w="'+p+'"></div></div>'+
+          '<div class="estado-pct" style="text-align:right">'+p+'%</div>'+
+          '<div class="estado-faltan" style="text-align:right">faltan '+e.faltantes+'</div>'+
+          '<div class="estado-arrow">▼</div>'+
+        '</div>'+
+        '<div class="estado-expand"></div>'+
+      '</div>';
     }).join('');
     setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
+
+  function toggleEstado(safeKey){
+    var entidad = decodeURIComponent(safeKey);
+    var items = document.querySelectorAll('#estadosLegal .estado-item');
+    var item = null;
+    items.forEach(function(it){ if (it.dataset.entidad === entidad) item = it; });
+    if (!item) return;
+    var isOpen = item.classList.contains('open');
+    items.forEach(function(it){ if (it !== item) it.classList.remove('open'); });
+    if (isOpen) { item.classList.remove('open'); return; }
+    item.classList.add('open');
+    var expand = item.querySelector('.estado-expand');
+    if (expand.dataset.loaded === '1') return;
+    var key = normalizeEstado(entidad);
+    var docs = allDocs.filter(function(d){ return normalizeEstado(d.entidad) === key; });
+    if (!docs.length) {
+      expand.innerHTML = '<div class="exp-empty" style="padding:14px">✅ ¡Sin docs legales faltantes para este estado!</div>';
+    } else {
+      var html = '<div class="exp-section-title" style="padding-left:8px">📜 ' + docs.length + ' docs faltantes para ' + esc(entidad) + ':</div>';
+      html += docs.map(function(d){
+        return '<div class="estado-doc">'+
+          '<div class="estado-doc-name">'+esc(d.nombre)+'</div>'+
+          '<span class="estado-doc-tag">'+esc(d.tipo||'')+'</span>'+
+          (d.url ? '<a class="estado-doc-link" href="'+esc(d.url)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ir a fuente oficial →</a>' : '')+
+        '</div>';
+      }).join('');
+      expand.innerHTML = html;
+    }
+    expand.dataset.loaded = '1';
+  }
+  window.toggleEstado = toggleEstado;
 
   // ── EXPANSION + APORTE ─────────────────────────────────
   function buildAporteForm(clave, catId, catNombre, formId){
@@ -432,9 +497,11 @@
   }
   window.abrirMuni = abrirMuni;
 
-  function renderMunicipios(arr){
-    if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
-    $('municipiosMenos').innerHTML = arr.map(function(m){
+  function renderMunisBatch(){
+    if(!allMunis.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';$('verMasMuni').style.display='none';return;}
+    var next = Math.min(muniRendered + MUNI_BATCH, allMunis.length);
+    var slice = allMunis.slice(muniRendered, next);
+    var html = slice.map(function(m){
       var p=m.pct||0;
       var clave = esc(m.clave_inegi||m.id);
       return '<div class="muni-item" data-clave="'+clave+'">'+
@@ -447,7 +514,12 @@
         '<div class="muni-expand"></div>'+
       '</div>';
     }).join('');
+    if (muniRendered === 0) { $('municipiosMenos').innerHTML = html; } else { $('municipiosMenos').insertAdjacentHTML('beforeend', html); }
+    muniRendered = next;
+    if ($('muniSmall')) $('muniSmall').textContent = '+30k habitantes · mostrando ' + muniRendered + ' de ' + allMunis.length;
+    if (muniRendered < allMunis.length) { $('verMasMuni').style.display='block'; $('muniCounter').textContent='(' + (allMunis.length - muniRendered) + ' más)'; } else { $('verMasMuni').style.display='none'; }
   }
+  window.verMasMunis = function(){ renderMunisBatch(); };
 
   function renderDocs(){
     var arr = allDocs;
