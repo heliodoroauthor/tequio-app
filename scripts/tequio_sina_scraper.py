@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-tequio_sina_scraper.py v3 — Carga REAL de SINA via API interna
+tequio_sina_scraper.py v6 — Carga REAL de SINA con coordenadas geo
 
+v6: Agregamos latitud/longitud al payload para el mapa Leaflet.
 v3: Encontramos los endpoints JSON:
   - /SINA45/fechaMonitoreo/ultimo
   - /PresasPG/presas/reporte/{YYYY-MM-DD}
@@ -17,7 +18,7 @@ Uso:
 
 🦎 Cero Invención · Tequio · 2026
 """
-import os, sys, json, argparse, time, tempfile
+import os, sys, json, argparse, time, tempfile, re
 from datetime import date
 
 try:
@@ -60,7 +61,7 @@ def fetch_sina_data(headed=False, verbose=False):
             ignore_https_errors=True,
         )
         page = context.new_page()
-        
+
         # First load the main page to establish session
         print(f"📡 Calentando sesión con {SINA_BASE}Presas/")
         try:
@@ -68,7 +69,7 @@ def fetch_sina_data(headed=False, verbose=False):
             time.sleep(2)
         except Exception as e:
             print(f"⚠️ Warm timeout: {e}")
-        
+
         # Now use page.request for API calls (uses browser context, passes anti-bot)
         print(f"📡 GET {SINA_FECHA_URL}")
         try:
@@ -80,25 +81,21 @@ def fetch_sina_data(headed=False, verbose=False):
             try:
                 parsed = r.json()
             except Exception:
-                # Maybe it's a plain string date
                 fecha = raw_text.strip().strip('"').strip("'")
                 if "T" in fecha: fecha = fecha.split("T")[0]
                 fecha = fecha[:10]
             else:
-                # JSON: could be string, list, or dict
                 if isinstance(parsed, str):
                     fecha = parsed[:10]
                 elif isinstance(parsed, list) and parsed:
                     first = parsed[0]
                     if isinstance(first, dict):
-                        # Look for fecha-like fields
                         for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date', 'dateUltimo']:
                             if k in first and first[k]:
                                 v = first[k]
                                 fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
                                 break
                         else:
-                            # Pick any value that looks like a date
                             fecha = None
                             for v in first.values():
                                 if isinstance(v, str) and re.match(r'^\d{4}-\d{2}-\d{2}', v):
@@ -119,13 +116,13 @@ def fetch_sina_data(headed=False, verbose=False):
             print(f"❌ Error fecha: {e}")
             browser.close()
             return None
-        
+
         if not fecha:
             print("❌ No pude extraer fecha de la respuesta")
             browser.close()
             return None
         print(f"📅 Fecha de monitoreo más reciente: {fecha}")
-        
+
         url = SINA_PRESAS_URL.format(fecha=fecha)
         print(f"📡 GET {url}")
         try:
@@ -136,43 +133,51 @@ def fetch_sina_data(headed=False, verbose=False):
             print(f"❌ Error reporte: {e}")
             browser.close()
             return None
-        
+
         browser.close()
         return {"fecha": fecha, "data": data}
 
 
 def normalize(raw, verbose=False):
-    """Normaliza el JSON de SINA a formato presas_cuencas."""
     items = raw.get("data") if isinstance(raw, dict) else raw
     fecha = items.get("fecha") if isinstance(items, dict) else None
-    
-    # SINA returns various JSON shapes; figure out where the array is
+
     arr = None
     if isinstance(items, list):
         arr = items
     elif isinstance(items, dict):
-        # Try common keys
         for k in ["presas", "data", "items", "rows", "result", "Presas"]:
             if k in items and isinstance(items[k], list):
                 arr = items[k]
                 break
         if arr is None:
-            # Maybe items itself contains nested
             for v in items.values():
                 if isinstance(v, list) and len(v) > 5:
                     arr = v
                     break
-    
+
     if not arr:
         print("⚠️ No pude detectar array de presas en JSON. Inspecciona estructura:")
         if verbose:
             print(json.dumps(items, indent=2, ensure_ascii=False)[:1500])
         return []
-    
+
     print(f"✓ Array detectado: {len(arr)} presas en JSON")
     if verbose and arr:
         print(f"  Sample row: {json.dumps(arr[0], indent=2, ensure_ascii=False)}")
     return arr
+
+
+def _to_float(v):
+    if v is None:
+        return None
+    try:
+        f = float(v)
+        if f != f:  # NaN
+            return None
+        return f
+    except (ValueError, TypeError):
+        return None
 
 
 def upload_to_supabase(rows, fecha, verbose=False):
@@ -180,40 +185,45 @@ def upload_to_supabase(rows, fecha, verbose=False):
     if not rows:
         print("⚠️ Nada que subir")
         return 0
-    
-    # Map SINA fields to presas_cuencas schema. Common keys in SINA JSON:
-    # - nombre / Nombre / nombrecomun
-    # - cve_estado / estado / Estado
-    # - capacidad / NAMO / NAMO_hm3
-    # - almacenamiento / almactual / volumenactual
-    # - llenado / porcentaje / pct
+
+    # Map SINA fields to presas_cuencas schema.
     payload = []
+    geo_ok = 0
     for r in rows:
         rk = {k.lower(): v for k, v in r.items()} if isinstance(r, dict) else {}
-        
-        # SINA real field mapping
+
         nombre = rk.get("nombrecomun") or rk.get("nombreoficial") or rk.get("clavesih") or "Sin nombre"
         estado = rk.get("estado") or ""
-        # NAMO = Nivel Aguas Máximo Ordinario (capacidad útil estándar)
         cap = rk.get("namoalmac") or rk.get("namealmac") or rk.get("capacidad")
         alm = rk.get("almacenaactual") or rk.get("almactual") or rk.get("almacenamiento")
-        # SINA returns pct as decimal 0-1, multiply x100
         pct_raw = rk.get("llenano") or rk.get("llenamn") or rk.get("porcentaje") or rk.get("pct")
-        
+
+        # NEW v6: extract lat/lng
+        lat = _to_float(rk.get("latitud") or rk.get("lat") or rk.get("latitude"))
+        lng = _to_float(rk.get("longitud") or rk.get("lng") or rk.get("lon") or rk.get("longitude"))
+        # Sanity check: México approx bbox lat [14, 33], lng [-119, -86]
+        if lat is not None and lng is not None:
+            if not (10 <= lat <= 35 and -120 <= lng <= -85):
+                lat, lng = None, None
+            else:
+                geo_ok += 1
+
         try:
-            cap_f = float(cap) if cap is not None else None
-            alm_f = float(alm) if alm is not None else None
+            cap_f = _to_float(cap)
+            alm_f = _to_float(alm)
             if pct_raw is not None:
-                p = float(pct_raw)
-                # If pct is 0-1, multiply by 100
-                pct_f = round(p * 100, 2) if p <= 1.5 else round(p, 2)
+                p = _to_float(pct_raw)
+                if p is not None:
+                    pct_f = round(p * 100, 2) if p <= 1.5 else round(p, 2)
+                else:
+                    pct_f = None
             elif cap_f and alm_f is not None and cap_f > 0:
                 pct_f = round(alm_f / cap_f * 100, 2)
             else:
                 pct_f = None
         except Exception:
             cap_f = alm_f = pct_f = None
-        
+
         payload.append({
             "fecha_corte": fecha,
             "presa": str(nombre)[:200],
@@ -223,9 +233,11 @@ def upload_to_supabase(rows, fecha, verbose=False):
             "pct_almacenamiento": pct_f,
             "fuente": "SINA",
             "region_hidrologica": (rk.get("regioncna") or "")[:100] if rk.get("regioncna") else None,
+            "latitud": lat,
+            "longitud": lng,
         })
-    
-    print(f"📤 Subiendo {len(payload)} presas a Supabase (fuente=SINA)...")
+
+    print(f"📤 Subiendo {len(payload)} presas a Supabase (fuente=SINA) · {geo_ok} con geocoord")
     BATCH = 100
     inserted = 0
     for i in range(0, len(payload), BATCH):
@@ -246,26 +258,25 @@ def main():
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--verbose", action="store_true")
     args = p.parse_args()
-    
-    print("🦎 Tequio SINA Scraper v3 · API JSON directa")
+
+    print("🦎 Tequio SINA Scraper v6 · API JSON + geocoord")
     print("=" * 50)
-    
+
     raw = fetch_sina_data(headed=args.headed, verbose=args.verbose)
     if not raw:
         print("❌ Falló fetch SINA")
         sys.exit(1)
-    
-    # Save raw JSON
+
     with open(DATA_JSON, "w", encoding="utf-8") as f:
         json.dump(raw, f, indent=2, ensure_ascii=False)
     print(f"💾 Raw JSON guardado en {DATA_JSON}")
-    
+
     rows = normalize(raw, verbose=args.verbose)
-    
+
     if args.dry_run:
         print(f"🧪 dry-run · {len(rows)} presas detectadas, no subo")
         return
-    
+
     inserted = upload_to_supabase(rows, raw["fecha"], verbose=args.verbose)
     print(f"\n=== RESUMEN ===\n  fecha:    {raw['fecha']}\n  detectadas: {len(rows)}\n  subidas:    {inserted}")
 
