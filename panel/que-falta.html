@@ -74,6 +74,30 @@
   .muni-pct.mid{color:var(--orange);}
   .muni-pct.high{color:var(--accent);}
   
+  /* MUNI EXPANSION */
+  .muni-item { background: var(--card); border-bottom: 1px solid var(--border); }
+  .muni-item:last-child { border-bottom: none; }
+  .muni-item .muni-row { display:grid; grid-template-columns:1fr 60px 70px 18px; gap:10px; padding:10px 0; align-items:center; cursor:pointer; }
+  .muni-item .muni-row:hover { background:rgba(255,255,255,0.02); }
+  .muni-arrow { color: var(--text3); font-size: 10px; transition: transform 0.2s; text-align:right; }
+  .muni-item.open .muni-arrow { transform: rotate(180deg); }
+  .muni-expand { padding: 8px 6px 12px; background: rgba(255,255,255,0.015); border-top: 1px solid var(--border); font-size: 12px; display:none; }
+  .muni-item.open .muni-expand { display: block; }
+  .exp-section-title { font-weight: 700; font-size: 10px; text-transform: uppercase; color: var(--text3); margin: 8px 0 6px; letter-spacing: 0.4px; }
+  .exp-section-title:first-child { margin-top: 4px; }
+  .exp-cat { padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; line-height:1.3; }
+  .exp-cat.falta { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+  .exp-cat.tiene { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
+  .exp-icon { font-size: 14px; flex-shrink: 0; }
+  .exp-name { font-weight: 600; }
+  .exp-desc { color: var(--text3); font-size: 11px; }
+  .exp-link { color: var(--accent); font-size: 11px; text-decoration: none; margin-left: auto; flex-shrink: 0; }
+  .exp-link:hover { text-decoration: underline; }
+  .exp-empty { color: var(--text3); font-size: 11px; padding: 8px; text-align: center; }
+  .exp-cta { margin-top: 10px; padding: 10px 12px; background: rgba(124,58,237,0.08); border: 1px dashed rgba(124,58,237,0.3); border-radius: 8px; font-size: 12px; text-align: center; color: var(--text2); }
+  .exp-cta a { color: var(--purple); text-decoration: none; font-weight: 600; }
+  .exp-cta a:hover { text-decoration: underline; }
+  
   /* DOCS FALTANTES */
   .docs-faltantes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;max-height:480px;overflow-y:auto;}
   .doc-row{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;}
@@ -132,7 +156,7 @@
       <div class="cat-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
     </div>
     <div>
-      <div class="section-title" style="cursor:pointer" onclick="abrirAmpliado()" title="Click para ver listado ampliado y filtrable">🏘️ Municipios menos completos <small>+30k · click para ver todos →</small></div>
+      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes · click una fila para ver qué le falta</small></div>
       <div class="muni-card" id="municipiosMenos"><div class="empty">Cargando…</div></div>
     </div>
   </div>
@@ -214,15 +238,54 @@
     setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
   
+  async function toggleMuni(clave) {
+    var item = document.querySelector('.muni-item[data-clave="' + clave + '"]');
+    if (!item) return;
+    var isOpen = item.classList.contains('open');
+    // close all others
+    document.querySelectorAll('#municipiosMenos .muni-item.open').forEach(function(el){ if (el !== item) el.classList.remove('open'); });
+    if (isOpen) { item.classList.remove('open'); return; }
+    item.classList.add('open');
+    var expand = item.querySelector('.muni-expand');
+    if (expand.dataset.loaded === '1') return;
+    expand.innerHTML = '<div class="exp-empty">Cargando categorías…</div>';
+    try {
+      var r = await sb.rpc('tc_municipio_faltantes', { p_clave_inegi: clave });
+      if (r.error) throw r.error;
+      var rows = r.data || [];
+      var faltan = rows.filter(function(d){return d.tipo === 'falta';});
+      var tienen = rows.filter(function(d){return d.tipo === 'tiene';});
+      var html = '';
+      if (faltan.length) {
+        html += '<div class="exp-section-title">❌ Le faltan ' + faltan.length + ' categorías:</div>';
+        html += faltan.map(function(c){
+          return '<div class="exp-cat falta"><span class="exp-icon">' + (c.icono||'📄') + '</span><span class="exp-name">' + esc(c.nombre) + '</span><span class="exp-desc">' + esc(c.descripcion||'') + '</span></div>';
+        }).join('');
+      }
+      if (tienen.length) {
+        html += '<div class="exp-section-title">✅ Ya tiene ' + tienen.length + ':</div>';
+        html += tienen.map(function(c){
+          var linkHtml = c.url ? '<a class="exp-link" href="' + esc(c.url) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">ver fuente →</a>' : '';
+          return '<div class="exp-cat tiene"><span class="exp-icon">' + (c.icono||'📄') + '</span><span class="exp-name">' + esc(c.nombre) + '</span>' + linkHtml + '</div>';
+        }).join('');
+      }
+      if (!faltan.length && !tienen.length) {
+        html = '<div class="exp-empty">Sin datos para este municipio</div>';
+      } else if (faltan.length > 0) {
+        html += '<div class="exp-cta">¿Conoces alguno de estos documentos? <a href="javascript:void(0)" onclick="event.stopPropagation();abrirMuni(\'' + esc(clave) + '\'')">Aporta en el panel del municipio →</a></div>';
+      }
+      expand.innerHTML = html;
+      expand.dataset.loaded = '1';
+    } catch(e) {
+      expand.innerHTML = '<div class="exp-empty">Error: ' + esc(e.message||e) + '</div>';
+    }
+  }
+  window.toggleMuni = toggleMuni;
   function abrirMuni(clave){
     try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('municipio', '&clave_inegi=' + clave); return; } } catch(e){}
     window.location.href = '/panel/municipio.html?clave_inegi=' + clave;
   }
   window.abrirMuni = abrirMuni;
-  window.abrirAmpliado = function(){
-    try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('que-falta-municipios'); return; } } catch(e){}
-    window.location.href = '/panel/que-falta-municipios.html';
-  };
   function renderMunicipios(arr){
     if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('municipiosMenos').innerHTML = arr.map(function(m){
