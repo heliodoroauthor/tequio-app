@@ -167,8 +167,8 @@ export default async function handler(req, res) {
       // SINA (98.6% data útil) > CONAGUA SIH (1.9% útil). Priorizamos SINA.
       // 1) Tomamos lo último de SINA por presa
       // 2) Para presas que SINA no reporta, fallback a CONAGUA SIH más reciente
-      const sinaRows = await sb('presas_cuencas?fuente=eq.SINA&order=fecha_corte.desc&select=fecha_corte,presa,estado,capacidad_total_hm3,almacenamiento_hm3,pct_almacenamiento,fuente,region_hidrologica&limit=2000');
-      const conaguaRows = await sb('presas_cuencas?fuente=eq.CONAGUA%20SIH&order=fecha_corte.desc&select=fecha_corte,presa,estado,capacidad_total_hm3,almacenamiento_hm3,pct_almacenamiento,fuente,region_hidrologica&limit=2000');
+      const sinaRows = await sb('presas_cuencas?fuente=eq.SINA&order=fecha_corte.desc&select=fecha_corte,presa,estado,capacidad_total_hm3,almacenamiento_hm3,pct_almacenamiento,fuente,region_hidrologica,latitud,longitud&limit=2000');
+      const conaguaRows = await sb('presas_cuencas?fuente=eq.CONAGUA%20SIH&order=fecha_corte.desc&select=fecha_corte,presa,estado,capacidad_total_hm3,almacenamiento_hm3,pct_almacenamiento,fuente,region_hidrologica,latitud,longitud&limit=2000');
       const byNombre = {};
       for (const r of sinaRows) {
         if (!byNombre[r.presa]) byNombre[r.presa] = r;
