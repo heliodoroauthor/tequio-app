@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-tequio_sina_scraper.py v6 — Carga REAL de SINA con coordenadas geo
+tequio_sina_scraper.py v7 — Fetch interno vía page.evaluate (evade Akamai 403)
 
-v6: Agregamos latitud/longitud al payload para el mapa Leaflet.
-v3: Encontramos los endpoints JSON:
-  - /SINA45/fechaMonitoreo/ultimo
-  - /PresasPG/presas/reporte/{YYYY-MM-DD}
+v7: SINA bloquea API directas desde IPs GHA con 403 (Akamai/Imperva WAF).
+    Solución: usar page.evaluate(async () => fetch(...)) para que la llamada
+    se origine desde el JS del DOM, heredando cookies + origin + contexto.
+v6: lat/lng para mapa Leaflet.
+v3: descubrimos los endpoints JSON.
 
 Setup:
     pip install playwright requests
@@ -39,8 +40,8 @@ if not SB_KEY:
     sys.exit(1)
 
 SINA_BASE = "https://sinav30.conagua.gob.mx:8080/"
-SINA_FECHA_URL = SINA_BASE + "SINA45/fechaMonitoreo/ultimo"
-SINA_PRESAS_URL = SINA_BASE + "PresasPG/presas/reporte/{fecha}"
+SINA_FECHA_PATH = "SINA45/fechaMonitoreo/ultimo"
+SINA_REPORTE_PATH = "PresasPG/presas/reporte/{fecha}"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
 
 TMP = tempfile.gettempdir()
@@ -52,85 +53,150 @@ def headers():
 
 
 def fetch_sina_data(headed=False, verbose=False):
-    """Usa Playwright para llamar API JSON de SINA (necesita contexto browser)."""
+    """v7: fetch desde dentro del JS de la página (evade WAF)."""
     print(f"🌐 Lanzando Chromium ({'headed' if headed else 'headless'})...")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not headed, args=['--no-sandbox','--disable-blink-features=AutomationControlled'])
+        browser = p.chromium.launch(
+            headless=not headed,
+            args=[
+                '--no-sandbox',
+                '--disable-blink-features=AutomationControlled',
+                '--disable-features=IsolateOrigins,site-per-process',
+            ],
+        )
         context = browser.new_context(
             user_agent=UA,
             ignore_https_errors=True,
+            locale='es-MX',
+            timezone_id='America/Mexico_City',
+            viewport={'width': 1920, 'height': 1080},
         )
+        # Stealth: remove webdriver flag
+        context.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+            Object.defineProperty(navigator, 'languages', { get: () => ['es-MX', 'es', 'en-US', 'en'] });
+            Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
+        """)
         page = context.new_page()
 
-        # First load the main page to establish session
-        print(f"📡 Calentando sesión con {SINA_BASE}Presas/")
+        print(f"📡 Cargando {SINA_BASE}Presas/ ...")
         try:
-            page.goto(SINA_BASE + "Presas/", wait_until="networkidle", timeout=45000)
-            time.sleep(2)
+            page.goto(SINA_BASE + "Presas/", wait_until="networkidle", timeout=60000)
         except Exception as e:
-            print(f"⚠️ Warm timeout: {e}")
+            print(f"⚠️ Page load timeout (sigue de todas formas): {e}")
 
-        # Now use page.request for API calls (uses browser context, passes anti-bot)
-        print(f"📡 GET {SINA_FECHA_URL}")
+        # Wait a bit for any SPA to initialize and Akamai cookie to be set
+        time.sleep(4)
+
+        # Verify we got past Akamai by checking the page has actual content
+        title = page.title()
+        body_snippet = page.evaluate("document.body ? document.body.innerText.slice(0,200) : ''")
+        if verbose:
+            print(f"  Title: {title!r}")
+            print(f"  Body preview: {body_snippet[:200]!r}")
+
+        # Now do the fetch from INSIDE the page JS - inherits all browser context
+        print(f"📡 fetch interno → {SINA_FECHA_PATH}")
         try:
-            r = context.request.get(SINA_FECHA_URL, headers={"Accept": "application/json,text/plain,*/*"})
-            print(f"  → {r.status} · {len(r.text())}b")
-            raw_text = r.text()
-            if verbose: print(f"  raw: {raw_text[:200]}")
-            # Parse as JSON
-            try:
-                parsed = r.json()
-            except Exception:
-                fecha = raw_text.strip().strip('"').strip("'")
-                if "T" in fecha: fecha = fecha.split("T")[0]
-                fecha = fecha[:10]
-            else:
-                if isinstance(parsed, str):
-                    fecha = parsed[:10]
-                elif isinstance(parsed, list) and parsed:
-                    first = parsed[0]
-                    if isinstance(first, dict):
-                        for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date', 'dateUltimo']:
-                            if k in first and first[k]:
-                                v = first[k]
-                                fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
-                                break
-                        else:
-                            fecha = None
-                            for v in first.values():
-                                if isinstance(v, str) and re.match(r'^\d{4}-\d{2}-\d{2}', v):
-                                    fecha = v[:10]; break
-                    else:
-                        fecha = str(first)[:10]
-                elif isinstance(parsed, dict):
-                    for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date']:
-                        if k in parsed and parsed[k]:
-                            v = parsed[k]
+            fecha_response = page.evaluate(f"""
+                async () => {{
+                    try {{
+                        const r = await fetch('/{SINA_FECHA_PATH}', {{
+                            credentials: 'include',
+                            headers: {{ 'Accept': 'application/json,text/plain,*/*' }}
+                        }});
+                        const status = r.status;
+                        const text = await r.text();
+                        return {{ status, text }};
+                    }} catch(e) {{
+                        return {{ status: 0, text: 'JS_ERROR: ' + (e.message||e) }};
+                    }}
+                }}
+            """)
+        except Exception as e:
+            print(f"❌ Error evaluando JS fecha: {e}")
+            browser.close()
+            return None
+
+        print(f"  → status {fecha_response.get('status')} · {len(fecha_response.get('text',''))}b")
+        if verbose:
+            print(f"  preview: {fecha_response.get('text','')[:300]!r}")
+
+        if fecha_response.get('status') != 200:
+            print(f"❌ SINA fecha API: status {fecha_response.get('status')}")
+            print(f"   raw: {fecha_response.get('text','')[:400]}")
+            browser.close()
+            return None
+
+        # Parse fecha
+        raw_text = fecha_response.get('text', '')
+        fecha = None
+        try:
+            parsed = json.loads(raw_text)
+            if isinstance(parsed, str):
+                fecha = parsed[:10]
+            elif isinstance(parsed, list) and parsed:
+                first = parsed[0]
+                if isinstance(first, dict):
+                    for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date', 'dateUltimo']:
+                        if k in first and first[k]:
+                            v = first[k]
                             fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
                             break
-                    else:
-                        fecha = None
                 else:
-                    fecha = None
+                    fecha = str(first)[:10]
+            elif isinstance(parsed, dict):
+                for k in ['fecha', 'fechaMonitoreo', 'fecha_monitoreo', 'fechaCorte', 'date']:
+                    if k in parsed and parsed[k]:
+                        v = parsed[k]
+                        fecha = v.split('T')[0] if 'T' in str(v) else str(v)[:10]
+                        break
         except Exception as e:
-            print(f"❌ Error fecha: {e}")
+            print(f"❌ No pude parsear fecha JSON: {e}")
             browser.close()
             return None
 
         if not fecha:
-            print("❌ No pude extraer fecha de la respuesta")
+            print(f"❌ No pude extraer fecha de: {raw_text[:300]}")
             browser.close()
             return None
         print(f"📅 Fecha de monitoreo más reciente: {fecha}")
 
-        url = SINA_PRESAS_URL.format(fecha=fecha)
-        print(f"📡 GET {url}")
+        reporte_path = SINA_REPORTE_PATH.format(fecha=fecha)
+        print(f"📡 fetch interno → {reporte_path}")
         try:
-            r = context.request.get(url, headers={"Accept": "application/json,text/plain,*/*"})
-            print(f"  → {r.status} · {len(r.text())}b")
-            data = r.json()
+            reporte_response = page.evaluate(f"""
+                async () => {{
+                    try {{
+                        const r = await fetch('/{reporte_path}', {{
+                            credentials: 'include',
+                            headers: {{ 'Accept': 'application/json,text/plain,*/*' }}
+                        }});
+                        const status = r.status;
+                        const text = await r.text();
+                        return {{ status, text }};
+                    }} catch(e) {{
+                        return {{ status: 0, text: 'JS_ERROR: ' + (e.message||e) }};
+                    }}
+                }}
+            """)
         except Exception as e:
-            print(f"❌ Error reporte: {e}")
+            print(f"❌ Error evaluando JS reporte: {e}")
+            browser.close()
+            return None
+
+        print(f"  → status {reporte_response.get('status')} · {len(reporte_response.get('text',''))}b")
+        if reporte_response.get('status') != 200:
+            print(f"❌ SINA reporte API: status {reporte_response.get('status')}")
+            print(f"   raw: {reporte_response.get('text','')[:400]}")
+            browser.close()
+            return None
+
+        try:
+            data = json.loads(reporte_response.get('text', ''))
+        except Exception as e:
+            print(f"❌ Reporte no es JSON válido: {e}")
+            print(f"   raw: {reporte_response.get('text','')[:300]}")
             browser.close()
             return None
 
@@ -140,7 +206,6 @@ def fetch_sina_data(headed=False, verbose=False):
 
 def normalize(raw, verbose=False):
     items = raw.get("data") if isinstance(raw, dict) else raw
-    fecha = items.get("fecha") if isinstance(items, dict) else None
 
     arr = None
     if isinstance(items, list):
@@ -157,7 +222,7 @@ def normalize(raw, verbose=False):
                     break
 
     if not arr:
-        print("⚠️ No pude detectar array de presas en JSON. Inspecciona estructura:")
+        print("⚠️ No pude detectar array de presas en JSON.")
         if verbose:
             print(json.dumps(items, indent=2, ensure_ascii=False)[:1500])
         return []
@@ -173,7 +238,7 @@ def _to_float(v):
         return None
     try:
         f = float(v)
-        if f != f:  # NaN
+        if f != f:
             return None
         return f
     except (ValueError, TypeError):
@@ -181,12 +246,10 @@ def _to_float(v):
 
 
 def upload_to_supabase(rows, fecha, verbose=False):
-    """Inserta/update presas a Supabase."""
     if not rows:
         print("⚠️ Nada que subir")
         return 0
 
-    # Map SINA fields to presas_cuencas schema.
     payload = []
     geo_ok = 0
     for r in rows:
@@ -198,10 +261,8 @@ def upload_to_supabase(rows, fecha, verbose=False):
         alm = rk.get("almacenaactual") or rk.get("almactual") or rk.get("almacenamiento")
         pct_raw = rk.get("llenano") or rk.get("llenamn") or rk.get("porcentaje") or rk.get("pct")
 
-        # NEW v6: extract lat/lng
         lat = _to_float(rk.get("latitud") or rk.get("lat") or rk.get("latitude"))
         lng = _to_float(rk.get("longitud") or rk.get("lng") or rk.get("lon") or rk.get("longitude"))
-        # Sanity check: México approx bbox lat [14, 33], lng [-119, -86]
         if lat is not None and lng is not None:
             if not (10 <= lat <= 35 and -120 <= lng <= -85):
                 lat, lng = None, None
@@ -259,8 +320,8 @@ def main():
     p.add_argument("--verbose", action="store_true")
     args = p.parse_args()
 
-    print("🦎 Tequio SINA Scraper v6 · API JSON + geocoord")
-    print("=" * 50)
+    print("🦎 Tequio SINA Scraper v7 · fetch interno (evade Akamai)")
+    print("=" * 60)
 
     raw = fetch_sina_data(headed=args.headed, verbose=args.verbose)
     if not raw:
