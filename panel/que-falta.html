@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🎯 Lo que falta · Tequio</title>
-<meta name="description" content="Mapa de gaps de información cívica en México. Encuentra qué falta en tu municipio o estado y contribuye.">
+<meta name="description" content="Mapa de gaps de información cívica en México. Encuentra qué falta en tu municipio y aporta el documento directamente.">
 <style>
   :root {
     --bg:#0a0f1e; --card:#141b2e; --card2:#1a2340;
@@ -15,14 +15,20 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text1);padding:20px;min-height:100vh;}
   .container{max-width:1100px;margin:0 auto;}
-  
-  .hero{background:linear-gradient(135deg,#3b0764 0%,#581c87 100%);border-radius:20px;padding:32px;margin-bottom:28px;text-align:center;}
+
+  .hero{background:linear-gradient(135deg,#3b0764 0%,#581c87 100%);border-radius:20px;padding:32px;margin-bottom:24px;text-align:center;}
   .hero h1{font-size:34px;margin-bottom:6px;font-weight:800;}
   .hero .lead{color:#e9d5ff;font-size:15px;line-height:1.5;max-width:600px;margin:0 auto;}
   .hero-counter{display:inline-block;background:rgba(0,0,0,0.3);padding:18px 28px;border-radius:14px;margin-top:18px;}
   .hero-counter strong{font-size:42px;font-weight:800;color:#fff;display:block;line-height:1;}
   .hero-counter span{font-size:12px;color:#e9d5ff;text-transform:uppercase;letter-spacing:0.6px;}
-  
+
+  /* How-to */
+  .howto{background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(124,58,237,0.08));border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:16px 18px;margin-bottom:20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .howto-icon{font-size:28px;flex-shrink:0;}
+  .howto-text{flex:1;min-width:240px;font-size:13px;line-height:1.5;color:var(--text2);}
+  .howto-text strong{color:var(--text1);}
+
   .search-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:24px;}
   .search-card h3{font-size:16px;margin-bottom:10px;}
   .search-row{display:flex;gap:8px;}
@@ -32,13 +38,13 @@
   .search-results{margin-top:12px;}
   .search-result{padding:10px 12px;background:rgba(124,58,237,0.06);border-radius:8px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;}
   .search-result:hover{background:rgba(124,58,237,0.12);}
-  
+
   .section-title{font-size:20px;font-weight:800;margin:32px 0 14px;display:flex;align-items:center;gap:10px;}
   .section-title small{font-size:13px;color:var(--text3);font-weight:400;margin-left:auto;}
-  
+
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
   @media(max-width:768px){.grid-2{grid-template-columns:1fr;}}
-  
+
   /* CATEGORÍAS NACIONALES */
   .cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;}
   .cat-row{display:grid;grid-template-columns:30px 1fr auto auto;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);}
@@ -48,7 +54,7 @@
   .cat-bar{width:100px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;}
   .cat-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--accent));transition:width 1s;}
   .cat-pct{font-weight:700;font-size:12px;color:var(--purple);min-width:36px;text-align:right;}
-  
+
   /* ESTADOS */
   .estado-row{display:grid;grid-template-columns:130px 1fr 50px 60px;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;}
   .estado-row:last-child{border-bottom:none;}
@@ -61,66 +67,87 @@
   .estado-fill.high{background:linear-gradient(90deg,#22c55e,#10b981);}
   .estado-pct{font-weight:700;color:var(--orange);}
   .estado-faltan{color:var(--red);font-size:11px;}
-  
+
   /* MUNICIPIOS */
-  .muni-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
-  .muni-row{display:grid;grid-template-columns:1fr 60px 80px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;}
-  .muni-row:last-child{border-bottom:none;}
-  .muni-row:hover{background:rgba(255,255,255,0.02);padding:10px 8px;border-radius:8px;}
+  .muni-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;}
+  .muni-item{border-bottom:1px solid var(--border);}
+  .muni-item:last-child{border-bottom:none;}
+  .muni-row{display:grid;grid-template-columns:1fr 60px 70px 18px;gap:10px;padding:12px 0;align-items:center;cursor:pointer;}
+  .muni-row:hover{background:rgba(255,255,255,0.02);}
   .muni-name{font-weight:600;font-size:14px;}
   .muni-meta{font-size:11px;color:var(--text3);margin-top:2px;}
   .muni-pop{font-size:11px;color:var(--text3);text-align:right;}
   .muni-pct{font-weight:800;color:var(--red);text-align:right;font-size:16px;}
   .muni-pct.mid{color:var(--orange);}
   .muni-pct.high{color:var(--accent);}
-  
-  /* MUNI EXPANSION */
-  .muni-item { background: var(--card); border-bottom: 1px solid var(--border); }
-  .muni-item:last-child { border-bottom: none; }
-  .muni-item .muni-row { display:grid; grid-template-columns:1fr 60px 70px 18px; gap:10px; padding:10px 0; align-items:center; cursor:pointer; }
-  .muni-item .muni-row:hover { background:rgba(255,255,255,0.02); }
-  .muni-arrow { color: var(--text3); font-size: 10px; transition: transform 0.2s; text-align:right; }
-  .muni-item.open .muni-arrow { transform: rotate(180deg); }
-  .muni-expand { padding: 8px 6px 12px; background: rgba(255,255,255,0.015); border-top: 1px solid var(--border); font-size: 12px; display:none; }
-  .muni-item.open .muni-expand { display: block; }
-  .exp-section-title { font-weight: 700; font-size: 10px; text-transform: uppercase; color: var(--text3); margin: 8px 0 6px; letter-spacing: 0.4px; }
-  .exp-section-title:first-child { margin-top: 4px; }
-  .exp-cat { padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; line-height:1.3; }
-  .exp-cat.falta { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
-  .exp-cat.tiene { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
-  .exp-icon { font-size: 14px; flex-shrink: 0; }
-  .exp-name { font-weight: 600; }
-  .exp-desc { color: var(--text3); font-size: 11px; }
-  .exp-link { color: var(--accent); font-size: 11px; text-decoration: none; margin-left: auto; flex-shrink: 0; }
-  .exp-link:hover { text-decoration: underline; }
-  .exp-empty { color: var(--text3); font-size: 11px; padding: 8px; text-align: center; }
-  .exp-cta { margin-top: 10px; padding: 10px 12px; background: rgba(124,58,237,0.08); border: 1px dashed rgba(124,58,237,0.3); border-radius: 8px; font-size: 12px; text-align: center; color: var(--text2); }
-  .exp-cta a { color: var(--purple); text-decoration: none; font-weight: 600; }
-  .exp-cta a:hover { text-decoration: underline; }
-  
+  .muni-arrow{color:var(--text3);font-size:10px;transition:transform 0.2s;text-align:right;}
+  .muni-item.open .muni-arrow{transform:rotate(180deg);}
+  .muni-expand{padding:8px 0 14px;background:rgba(255,255,255,0.015);border-top:1px solid var(--border);display:none;}
+  .muni-item.open .muni-expand{display:block;}
+
+  /* CATEGORY EXPANSION */
+  .exp-section-title{font-weight:700;font-size:10px;text-transform:uppercase;color:var(--text3);margin:10px 4px 6px;letter-spacing:0.4px;}
+  .exp-cat{padding:8px 10px;border-radius:8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;line-height:1.3;flex-wrap:wrap;}
+  .exp-cat.falta{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);}
+  .exp-cat.tiene{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);}
+  .exp-icon{font-size:14px;flex-shrink:0;}
+  .exp-name{font-weight:600;font-size:13px;}
+  .exp-desc{color:var(--text3);font-size:11px;flex:1;min-width:120px;}
+  .exp-badge{font-size:9px;background:rgba(124,58,237,0.15);color:#c4b5fd;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.3px;font-weight:700;}
+  .exp-badge.urgent{background:rgba(239,68,68,0.15);color:#fca5a5;}
+  .exp-link{color:var(--accent);font-size:11px;text-decoration:none;flex-shrink:0;}
+  .exp-link:hover{text-decoration:underline;}
+  .exp-aportar-btn{background:var(--purple);color:#fff;border:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;transition:transform 0.1s;}
+  .exp-aportar-btn:hover{background:#6d28d9;transform:scale(1.05);}
+  .exp-aportar-btn:disabled{background:var(--text3);cursor:not-allowed;}
+  .exp-empty{color:var(--text3);font-size:11px;padding:8px;text-align:center;}
+
+  /* APORTAR FORM */
+  .aporte-form{background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.25);border-radius:8px;padding:12px;margin-top:6px;width:100%;display:none;}
+  .aporte-form.open{display:block;}
+  .aporte-form label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;display:block;margin-bottom:3px;}
+  .aporte-form input,
+  .aporte-form textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text1);font-size:13px;font-family:inherit;margin-bottom:8px;outline:none;}
+  .aporte-form input:focus,
+  .aporte-form textarea:focus{border-color:var(--purple);}
+  .aporte-form textarea{min-height:50px;resize:vertical;}
+  .aporte-row{display:flex;gap:8px;}
+  .aporte-row > div{flex:1;}
+  .aporte-actions{display:flex;gap:8px;align-items:center;}
+  .aporte-actions button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
+  .aporte-submit{background:var(--accent);color:#000;}
+  .aporte-submit:hover{background:#16a34a;color:#fff;}
+  .aporte-submit:disabled{background:var(--text3);cursor:wait;}
+  .aporte-cancel{background:transparent;color:var(--text2);border:1px solid var(--border);}
+  .aporte-hint{font-size:10px;color:var(--text3);margin-left:auto;}
+  .aporte-result{font-size:12px;padding:8px;border-radius:6px;margin-top:6px;}
+  .aporte-result.ok{background:rgba(34,197,94,0.1);color:#86efac;}
+  .aporte-result.err{background:rgba(239,68,68,0.1);color:#fca5a5;}
+
   /* DOCS FALTANTES */
-  .docs-faltantes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;max-height:480px;overflow-y:auto;}
-  .doc-row{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .docs-faltantes{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;max-height:520px;overflow-y:auto;}
+  .doc-row{padding:12px;border-bottom:1px solid var(--border);}
   .doc-row:last-child{border-bottom:none;}
-  .doc-info{flex:1;font-size:13px;line-height:1.4;}
+  .doc-main{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .doc-info{flex:1;font-size:13px;line-height:1.4;min-width:200px;}
   .doc-info strong{display:block;}
   .doc-info span{color:var(--text3);font-size:11px;}
   .doc-tag{background:rgba(251,146,60,0.15);color:#fed7aa;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;text-transform:uppercase;}
   .doc-link{color:var(--purple);font-size:11px;text-decoration:none;border:1px solid rgba(124,58,237,0.3);padding:4px 10px;border-radius:6px;flex-shrink:0;}
   .doc-link:hover{background:rgba(124,58,237,0.1);}
-  
+
   /* FILTERS */
   .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .filter-chip{background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:16px;font-size:11px;cursor:pointer;font-family:inherit;}
   .filter-chip.active{background:var(--purple);border-color:var(--purple);color:#fff;}
-  
+
   /* CTA */
   .cta{background:linear-gradient(135deg,#16a34a,#0f766e);border-radius:18px;padding:32px;margin:32px 0;text-align:center;color:#fff;}
   .cta h2{font-size:24px;margin-bottom:8px;}
   .cta p{opacity:0.92;margin-bottom:18px;}
   .cta a{display:inline-block;background:#fff;color:#10b981;padding:14px 32px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px;}
   .cta a:hover{transform:translateY(-2px);}
-  
+
   .empty{text-align:center;padding:24px;color:var(--text3);font-size:13px;}
   .footer{text-align:center;color:var(--text3);font-size:12px;padding:24px 0;}
   .footer a{color:var(--accent);text-decoration:none;}
@@ -135,6 +162,13 @@
     <div class="hero-counter">
       <strong id="totalFaltantes">…</strong>
       <span>documentos / categorías faltantes</span>
+    </div>
+  </div>
+
+  <div class="howto">
+    <div class="howto-icon">💡</div>
+    <div class="howto-text">
+      <strong>¿Cómo funciona?</strong> Busca tu municipio o explora la lista. Encuentra una categoría faltante (❌) → click en <strong>📤 Aportar</strong> → pega la URL del documento oficial. Tu aporte va a moderación y al aprobarse subes en el <a href="/colaboradores.html" style="color:var(--accent);text-decoration:none">Hall of Fame</a>.
     </div>
   </div>
 
@@ -156,7 +190,7 @@
       <div class="cat-card" id="estadosLegal"><div class="empty">Cargando…</div></div>
     </div>
     <div>
-      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes · click una fila para ver qué le falta</small></div>
+      <div class="section-title">🏘️ Municipios menos completos <small>+30k habitantes · click para ver y aportar</small></div>
       <div class="muni-card" id="municipiosMenos"><div class="empty">Cargando…</div></div>
     </div>
   </div>
@@ -170,9 +204,9 @@
   <div class="docs-faltantes" id="docsList"><div class="empty">Cargando…</div></div>
 
   <div class="cta">
-    <h2>¿Encontraste algo que tienes?</h2>
-    <p>Cada documento oficial que aportes sube la transparencia del país. Tu nombre va al Hall of Fame.</p>
-    <a href="/colaboradores.html">🦎 Ver Tequieros</a>
+    <h2>🦎 Cada aporte cuenta</h2>
+    <p>Aporta documentos oficiales → suben tu nombre al Hall of Fame → la transparencia del país mejora.</p>
+    <a href="/colaboradores.html">Ver Tequieros del Hall of Fame →</a>
   </div>
 
   <div class="footer">
@@ -189,14 +223,13 @@
   var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
   var sb=null;
   var allDocs=[],currentFilter='all';
-  
+
   function $(id){return document.getElementById(id);}
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
   function num(n){if(n==null)return '0';return Number(n).toLocaleString('es-MX');}
-  
   function pctClass(p){if(p<33)return 'low';if(p<66)return 'mid';return 'high';}
   function muniPctClass(p){if(p<33)return '';if(p<66)return 'mid';return 'high';}
-  
+
   async function init(){
     sb = window.supabase.createClient(SB,ANON);
     var cats = await sb.rpc('tc_categorias_nacional');
@@ -210,7 +243,7 @@
     renderDocs();
     calcTotalFaltantes(cats.data||[],estados.data||[],docs.data||[]);
   }
-  
+
   function calcTotalFaltantes(cats,estados,docs){
     var totalDocsLegales = docs.length;
     var totalGapsMuni = 0;
@@ -218,7 +251,7 @@
     var total = totalDocsLegales + totalGapsMuni;
     $('totalFaltantes').textContent = num(total);
   }
-  
+
   function renderCategorias(arr){
     if(!arr.length){$('categoriasNacional').innerHTML='<div class="empty">Sin datos</div>';return;}
     var sorted = arr.slice().sort(function(a,b){return (a.pct||0) - (b.pct||0);});
@@ -228,7 +261,7 @@
     }).join('');
     setTimeout(function(){document.querySelectorAll('#categoriasNacional .cat-bar-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
-  
+
   function renderEstados(arr){
     if(!arr.length){$('estadosLegal').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('estadosLegal').innerHTML = arr.map(function(e){
@@ -237,12 +270,38 @@
     }).join('');
     setTimeout(function(){document.querySelectorAll('#estadosLegal .estado-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});},100);
   }
-  
+
+  // ── EXPANSION + APORTE ─────────────────────────────────
+  function buildAporteForm(clave, catId, catNombre, formId){
+    return '' +
+      '<div class="aporte-form" id="'+formId+'">' +
+        '<label>🔗 URL del documento oficial <span style="color:var(--red)">*</span></label>' +
+        '<input type="url" data-field="url" placeholder="https://... (link al PDF o página oficial)" maxlength="1000">' +
+        '<div class="aporte-row">' +
+          '<div>' +
+            '<label>📄 Nombre del documento <span style="color:var(--text3)">(opcional)</span></label>' +
+            '<input type="text" data-field="nombre" placeholder="ej: Presupuesto 2025" maxlength="200">' +
+          '</div>' +
+          '<div>' +
+            '<label>🦎 Tu nick <span style="color:var(--text3)">(opcional)</span></label>' +
+            '<input type="text" data-field="nick" placeholder="Anónimo" maxlength="40">' +
+          '</div>' +
+        '</div>' +
+        '<label>📝 Notas <span style="color:var(--text3)">(opcional)</span></label>' +
+        '<textarea data-field="notas" placeholder="Algo que el moderador deba saber..." maxlength="500"></textarea>' +
+        '<div class="aporte-actions">' +
+          '<button class="aporte-submit" data-clave="'+clave+'" data-cat="'+catId+'" data-form="'+formId+'">📤 Enviar aporte</button>' +
+          '<button class="aporte-cancel" data-form="'+formId+'">Cancelar</button>' +
+          '<span class="aporte-hint">Va a moderación · sin spam</span>' +
+        '</div>' +
+        '<div class="aporte-result" style="display:none"></div>' +
+      '</div>';
+  }
+
   async function toggleMuni(clave) {
     var item = document.querySelector('.muni-item[data-clave="' + clave + '"]');
     if (!item) return;
     var isOpen = item.classList.contains('open');
-    // close all others
     document.querySelectorAll('#municipiosMenos .muni-item.open').forEach(function(el){ if (el !== item) el.classList.remove('open'); });
     if (isOpen) { item.classList.remove('open'); return; }
     item.classList.add('open');
@@ -258,8 +317,19 @@
       var html = '';
       if (faltan.length) {
         html += '<div class="exp-section-title">❌ Le faltan ' + faltan.length + ' categorías:</div>';
-        html += faltan.map(function(c){
-          return '<div class="exp-cat falta"><span class="exp-icon">' + (c.icono||'📄') + '</span><span class="exp-name">' + esc(c.nombre) + '</span><span class="exp-desc">' + esc(c.descripcion||'') + '</span></div>';
+        html += faltan.map(function(c, idx){
+          var formId = 'aporte-' + clave + '-' + c.categoria_id;
+          var badge = c.obligatoria ? '<span class="exp-badge urgent">obligatoria</span>' : '<span class="exp-badge">opcional</span>';
+          var pesoBadge = c.peso >= 10 ? '<span class="exp-badge urgent">alto impacto</span>' : '';
+          return '' +
+            '<div class="exp-cat falta">' +
+              '<span class="exp-icon">' + (c.icono||'📄') + '</span>' +
+              '<span class="exp-name">' + esc(c.nombre) + '</span>' +
+              '<span class="exp-desc">' + esc(c.descripcion||'') + '</span>' +
+              badge + pesoBadge +
+              '<button class="exp-aportar-btn" data-toggle-form="'+formId+'">📤 Aportar</button>' +
+              buildAporteForm(clave, c.categoria_id, c.nombre, formId) +
+            '</div>';
         }).join('');
       }
       if (tienen.length) {
@@ -274,16 +344,94 @@
       }
       expand.innerHTML = html;
       expand.dataset.loaded = '1';
+      hookAporteButtons(expand);
     } catch(e) {
       expand.innerHTML = '<div class="exp-empty">Error: ' + esc(e.message||e) + '</div>';
     }
   }
   window.toggleMuni = toggleMuni;
+
+  function hookAporteButtons(scope){
+    scope.querySelectorAll('.exp-aportar-btn[data-toggle-form]').forEach(function(btn){
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var formId = btn.dataset.toggleForm;
+        var form = document.getElementById(formId);
+        if (!form) return;
+        // close other open forms
+        document.querySelectorAll('.aporte-form.open').forEach(function(f){ if (f !== form) f.classList.remove('open'); });
+        form.classList.toggle('open');
+        if (form.classList.contains('open')) {
+          form.querySelector('input[data-field="url"]').focus();
+        }
+      });
+    });
+    scope.querySelectorAll('.aporte-cancel').forEach(function(btn){
+      btn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var form = document.getElementById(btn.dataset.form);
+        if (form) form.classList.remove('open');
+      });
+    });
+    scope.querySelectorAll('.aporte-submit').forEach(function(btn){
+      btn.addEventListener('click', async function(ev){
+        ev.stopPropagation();
+        var form = document.getElementById(btn.dataset.form);
+        var url = form.querySelector('input[data-field="url"]').value.trim();
+        var nombre = form.querySelector('input[data-field="nombre"]').value.trim();
+        var nick = form.querySelector('input[data-field="nick"]').value.trim();
+        var notas = form.querySelector('textarea[data-field="notas"]').value.trim();
+        var result = form.querySelector('.aporte-result');
+        if (!url || !/^https?:\/\//i.test(url)) {
+          result.style.display = 'block';
+          result.className = 'aporte-result err';
+          result.textContent = '⚠️ La URL debe empezar con http:// o https://';
+          return;
+        }
+        btn.disabled = true;
+        var originalText = btn.textContent;
+        btn.textContent = '⏳ Enviando…';
+        try {
+          var r = await sb.rpc('tc_aportar_doc', {
+            p_clave_inegi: btn.dataset.clave,
+            p_categoria_id: btn.dataset.cat,
+            p_url: url,
+            p_nombre_doc: nombre || null,
+            p_notas: notas || null,
+            p_nick: nick || null
+          });
+          if (r.error) throw r.error;
+          var resp = r.data;
+          if (resp && resp.ok) {
+            result.style.display = 'block';
+            result.className = 'aporte-result ok';
+            result.textContent = '✅ ' + (resp.mensaje || 'Aporte recibido. Va a moderación. Gracias 🦎');
+            // Clear form
+            form.querySelectorAll('input, textarea').forEach(function(el){ el.value = ''; });
+            btn.style.display = 'none';
+            setTimeout(function(){ form.classList.remove('open'); btn.style.display=''; btn.disabled=false; btn.textContent=originalText; result.style.display='none'; }, 4000);
+          } else {
+            result.style.display = 'block';
+            result.className = 'aporte-result err';
+            result.textContent = '⚠️ ' + ((resp && resp.error) || 'Error al guardar');
+            btn.disabled = false; btn.textContent = originalText;
+          }
+        } catch(e) {
+          result.style.display = 'block';
+          result.className = 'aporte-result err';
+          result.textContent = '⚠️ ' + (e.message || e);
+          btn.disabled = false; btn.textContent = originalText;
+        }
+      });
+    });
+  }
+
   function abrirMuni(clave){
     try { if (window.parent && window.parent.cargarPanel) { window.parent.cargarPanel('municipio', '&clave_inegi=' + clave); return; } } catch(e){}
     window.location.href = '/panel/municipio.html?clave_inegi=' + clave;
   }
   window.abrirMuni = abrirMuni;
+
   function renderMunicipios(arr){
     if(!arr.length){$('municipiosMenos').innerHTML='<div class="empty">Sin datos</div>';return;}
     $('municipiosMenos').innerHTML = arr.map(function(m){
@@ -300,25 +448,26 @@
       '</div>';
     }).join('');
   }
-  
+
   function renderDocs(){
     var arr = allDocs;
     if(currentFilter!=='all') arr = arr.filter(function(d){return d.tipo===currentFilter;});
     $('docsCount').textContent = num(arr.length)+' faltantes';
     if(!arr.length){$('docsList').innerHTML='<div class="empty">Sin docs para mostrar</div>';return;}
     $('docsList').innerHTML = arr.slice(0,100).map(function(d){
-      return '<div class="doc-row"><div class="doc-info"><strong>'+esc(d.nombre)+'</strong><span>'+esc(d.entidad)+' · <span class="doc-tag">'+esc(d.tipo)+'</span></span></div>'+
-        (d.url?'<a class="doc-link" href="'+esc(d.url)+'" target="_blank" rel="noopener">Ir a fuente →</a>':'')+'</div>';
+      return '<div class="doc-row"><div class="doc-main"><div class="doc-info"><strong>'+esc(d.nombre)+'</strong><span>'+esc(d.entidad)+' · <span class="doc-tag">'+esc(d.tipo)+'</span></span></div>'+
+        (d.url?'<a class="doc-link" href="'+esc(d.url)+'" target="_blank" rel="noopener">Ver gap en fuente →</a>':'')+
+        '</div></div>';
     }).join('');
   }
-  
+
   window.filterDocs = function(t,el){
     currentFilter=t;
     document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});
     el.classList.add('active');
     renderDocs();
   };
-  
+
   window.doSearch = async function(){
     var q=$('muniQ').value.trim();
     if(q.length<2){$('searchResults').innerHTML='<div class="empty">Escribe al menos 2 caracteres</div>';return;}
@@ -330,9 +479,9 @@
       return '<div class="search-result" onclick="abrirMuni(\''+esc(m.clave_inegi||m.id)+'\')"><div><strong>'+esc(m.nombre)+'</strong> · <span style="color:var(--text3)">'+esc(m.estado)+'</span></div><div><span style="color:var(--orange);font-weight:700">'+m.pct+'%</span> <span style="color:var(--text3);font-size:11px;margin-left:6px">faltan '+m.faltantes+'</span></div></div>';
     }).join('');
   };
-  
+
   $('muniQ').addEventListener('keypress',function(e){if(e.key==='Enter')doSearch();});
-  
+
   init().catch(function(e){console.error(e);});
 })();
 </script>
