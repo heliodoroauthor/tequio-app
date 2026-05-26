@@ -53,7 +53,7 @@ def headers():
 
 
 def fetch_sina_data(headed=False, verbose=False):
-    """v7: fetch desde dentro del JS de la página (evade WAF)."""
+    """v8: upsert (merge-duplicates) + v7 fetch desde dentro del JS de la página (evade WAF)."""
     print(f"🌐 Lanzando Chromium ({'headed' if headed else 'headless'})...")
     with sync_playwright() as p:
         browser = p.chromium.launch(
@@ -303,8 +303,8 @@ def upload_to_supabase(rows, fecha, verbose=False):
     inserted = 0
     for i in range(0, len(payload), BATCH):
         batch = payload[i:i+BATCH]
-        r = requests.post(f"{SB_URL}/rest/v1/presas_cuencas", json=batch,
-                          headers={**headers(), "Prefer": "return=minimal"}, timeout=60)
+        r = requests.post(f"{SB_URL}/rest/v1/presas_cuencas?on_conflict=presa,fecha_corte", json=batch,
+                          headers={**headers(), "Prefer": "return=minimal,resolution=merge-duplicates"}, timeout=60)
         if r.status_code >= 300:
             print(f"  ✗ batch {i} failed {r.status_code}: {r.text[:200]}")
             return inserted
@@ -320,7 +320,7 @@ def main():
     p.add_argument("--verbose", action="store_true")
     args = p.parse_args()
 
-    print("🦎 Tequio SINA Scraper v7 · fetch interno (evade Akamai)")
+    print("🦎 Tequio SINA Scraper v8 · fetch interno (evade Akamai)")
     print("=" * 60)
 
     raw = fetch_sina_data(headed=args.headed, verbose=args.verbose)
