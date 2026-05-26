@@ -3098,6 +3098,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </select>
         </div>
         <div id="presas-stats" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
+        <div id="leaflet-map-presas" style="height:380px;border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-bottom:10px;background:#0b1220;position:relative;z-index:1"></div>
+        <div id="presas-mapa-leyenda" style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text3);margin-bottom:14px"><span><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:50%;vertical-align:middle;margin-right:4px"></span>&le;30% crítico</span><span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:50%;vertical-align:middle;margin-right:4px"></span>30-70%</span><span><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:50%;vertical-align:middle;margin-right:4px"></span>&gt;70%</span><span style="color:var(--text2)" id="presas-mapa-counter"></span></div>
         <div id="presas-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"></div>
       </div>
     </div>
@@ -3630,12 +3632,68 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         };
         filas.sort(sorters[orden] || sorters.pct_desc);
         presasRenderTabla(filas);
+        presasActualizarMapa(filas);
         const total = window.__presasData.length;
         const promedio = window.__presasData
           .filter(p => p.pct_almacenamiento != null)
           .reduce((s,p,_,a) => s + (+p.pct_almacenamiento)/a.length, 0);
         document.getElementById('presas-stats').textContent =
           `${filas.length} de ${total} presas · promedio nacional: ${promedio ? promedio.toFixed(1) + '%' : 'n/a'}`;
+      }
+      // Mapa Leaflet de presas (SINA geocoord)
+      window.__presasMapa = null;
+      window.__presasMarkers = [];
+      window.__presasMapaFit = false;
+      function presasColorPct(pct) {
+        if (pct == null) return '#94a3b8';
+        if (pct <= 30) return '#ef4444';
+        if (pct <= 70) return '#f59e0b';
+        return '#22c55e';
+      }
+      function presasInitMapa() {
+        if (window.__presasMapa) return;
+        const el = document.getElementById('leaflet-map-presas');
+        if (!el || typeof L === 'undefined') return;
+        window.__presasMapa = L.map(el, { zoomControl: true, attributionControl: true }).setView([23.6, -102.5], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(window.__presasMapa);
+      }
+      function presasActualizarMapa(filas) {
+        if (!window.__presasMapa) return;
+        for (const m of window.__presasMarkers) window.__presasMapa.removeLayer(m);
+        window.__presasMarkers = [];
+        let geocount = 0;
+        for (const p of filas) {
+          if (p.latitud == null || p.longitud == null) continue;
+          const color = presasColorPct(p.pct_almacenamiento);
+          const radius = 5 + Math.min(10, Math.log10((+p.capacidad_total_hm3 || 1) + 1) * 2);
+          const m = L.circleMarker([+p.latitud, +p.longitud], {
+            radius, color: '#0b1220', weight: 1,
+            fillColor: color, fillOpacity: 0.85,
+          });
+          const pct = p.pct_almacenamiento != null ? Number(p.pct_almacenamiento).toFixed(1) + '%' : 'sin dato';
+          const cap = p.capacidad_total_hm3 != null ? Number(p.capacidad_total_hm3).toLocaleString('es-MX') + ' hm³' : 'n/a';
+          const alm = p.almacenamiento_hm3 != null ? Number(p.almacenamiento_hm3).toLocaleString('es-MX') + ' hm³' : 'n/a';
+          const nombre = (p.presa||'').replace(/</g, '&lt;');
+          const estado = (p.estado||'').replace(/</g, '&lt;');
+          m.bindPopup('<strong>'+nombre+'</strong><br><span style="color:#64748b">'+estado+'</span><br>Llenado: <strong style="color:'+color+'">'+pct+'</strong><br>Almac.: '+alm+' / '+cap+'<br><span style="color:#64748b;font-size:11px">'+(p.fuente||'')+' · '+(p.fecha_corte||'')+'</span>');
+          m.addTo(window.__presasMapa);
+          window.__presasMarkers.push(m);
+          geocount++;
+        }
+        const counter = document.getElementById('presas-mapa-counter');
+        if (counter) counter.textContent = geocount ? ' · '+geocount+' con ubicación' : '';
+        if (!window.__presasMapaFit && window.__presasMarkers.length) {
+          try {
+            const group = L.featureGroup(window.__presasMarkers);
+            window.__presasMapa.fitBounds(group.getBounds(), { padding: [30, 30] });
+          } catch(e){}
+          window.__presasMapaFit = true;
+        }
+        // invalidate size in case container was hidden
+        setTimeout(()=>{ try { window.__presasMapa.invalidateSize(); } catch(e){} }, 100);
       }
       async function cargarPresas() {
         if (window.__loadedPages['presas']) return;
@@ -3649,6 +3707,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             cont.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text2)">Aún no hay datos. El scraper corre cada lunes.</div>';
             return;
           }
+          presasInitMapa();
           presasFiltrar();
           window.__loadedPages['presas'] = true;
         } catch (e) {
