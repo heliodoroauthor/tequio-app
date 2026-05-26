@@ -13316,7 +13316,33 @@ function switchTab(el) {
 }
 // ─── Navigation ───
 // ─── Panel iframe loader & Próximamente placeholder ───
+window.__tequioPanelStack = window.__tequioPanelStack || [];
+window.__tequioCurrentPanel = window.__tequioCurrentPanel || null;
+window.tequioBack = function() {
+  // Pop stack and load previous panel; if empty, no-op (we stay in app)
+  if (!window.__tequioPanelStack || window.__tequioPanelStack.length === 0) {
+    // Fallback: try to navigate to home / mostrarSeccion('dashboard') if available
+    if (typeof window.mostrarSeccion === 'function') { try { window.mostrarSeccion('dashboard'); return; } catch(e){} }
+    return;
+  }
+  var prev = window.__tequioPanelStack.pop();
+  // Call cargarPanel without pushing (use internal flag)
+  window.__tequioBackInProgress = true;
+  cargarPanel(prev.slug, prev.extras);
+  window.__tequioBackInProgress = false;
+};
 function cargarPanel(slug, extras) {
+  // Push the CURRENT panel to back-stack before navigating (unless we're navigating back)
+  if (!window.__tequioBackInProgress && window.__tequioCurrentPanel) {
+    // Avoid pushing the same panel twice in a row
+    var last = window.__tequioPanelStack[window.__tequioPanelStack.length - 1];
+    if (!last || last.slug !== window.__tequioCurrentPanel.slug || last.extras !== window.__tequioCurrentPanel.extras) {
+      window.__tequioPanelStack.push(window.__tequioCurrentPanel);
+      // Cap stack at 20 to avoid memory leaks
+      if (window.__tequioPanelStack.length > 20) window.__tequioPanelStack.shift();
+    }
+  }
+  window.__tequioCurrentPanel = { slug: slug, extras: extras || null };
   const PANELS = {
     'municipio': '/panel/municipio.html?embedded=1',
     'colaboradores': '/panel/colaboradores.html?embedded=1',
