@@ -16051,10 +16051,30 @@ function leyesAbrirDetalle(id) {
 // ── Cargar leyes REALES desde Supabase (Cám. Diputados) ──
 async function cargarLeyesDesdeAPI() {
   try {
-    const r = await fetch('/api/data?vista=leyes');
+    // Página 1 trae metadata para saber cuántas páginas restantes
+    const r = await fetch('/api/data?vista=leyes&pagina=1&por_pagina=1000');
     if (!r.ok) throw new Error('http ' + r.status);
     const j = await r.json();
     if (!Array.isArray(j.leyes) || !j.leyes.length) return;
+    // Fetch páginas restantes en paralelo (background)
+    const totalPaginas = j.total_paginas || 1;
+    if (totalPaginas > 1) {
+      const restPromises = [];
+      for (let p = 2; p <= totalPaginas; p++) {
+        restPromises.push(fetch(`/api/data?vista=leyes&pagina=${p}&por_pagina=1000`).then(r=>r.json()).catch(()=>({leyes:[]})));
+      }
+      Promise.all(restPromises).then(pages => {
+        const extras = pages.flatMap(p => p.leyes || []);
+        if (extras.length) {
+          j.leyes.push(...extras);
+          const reales = j.leyes.map(mapLeyAPI);
+          const conservar = leyesData.filter(l => l.ambito === 'reforma' || (l.id && l.id.startsWith && l.id.startsWith('REF-')));
+          leyesData.length = 0;
+          leyesData.push(...conservar, ...reales);
+          leyesFiltrar();
+        }
+      });
+    }
     // Mapear cada ley respetando su ámbito real (federal / estatal / municipal)
     const reales = j.leyes.map(l => {
       const ambitoReal = l.ambito || 'federal';
