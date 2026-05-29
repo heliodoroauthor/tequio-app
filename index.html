@@ -3610,7 +3610,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div style="color:var(--text2)">${p.estado || '—'}</div>
             <div style="text-align:right;color:var(--text2)">${cap}</div>
             <div style="text-align:right;font-family:var(--font-display);font-weight:700">${alm}</div>
-            <div style="text-align:right;font-weight:700;color:${color}">${pct}<div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:4px;overflow:hidden"><div style="width:${pctNum}%;height:100%;background:${color}"></div></div></div>
+            <div style="text-align:right;font-weight:700;color:${color}">${pct}<div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:4px;overflow:hidden" title="${pctNum == null ? 'Sin telemetría reciente' : pctNum + '% llenado'}"><div style="width:${pctNum == null ? 100 : pctNum}%;height:100%;background:${pctNum == null ? 'repeating-linear-gradient(45deg,#475569 0 4px,transparent 4px 8px)' : color}"></div></div></div>
           </div>`;
         });
         cont.innerHTML = html;
