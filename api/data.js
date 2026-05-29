@@ -831,10 +831,14 @@ export default async function handler(req, res) {
         tipo: r.tipo || 'ley',
         estado: 'vigente',
       }));
+      const totalFinal = totalReal || leyes.length;
       return res.status(200).json({
         leyes,
-        total: totalReal || leyes.length,
+        total: totalFinal,
         total_devueltos: leyes.length,
+        pagina,
+        por_pagina: porPagina,
+        total_paginas: Math.ceil(totalFinal / porPagina),
         por_ambito: leyes.reduce((acc, l) => {
           acc[l.ambito] = (acc[l.ambito] || 0) + 1;
           return acc;
