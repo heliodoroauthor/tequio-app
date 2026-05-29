@@ -11,6 +11,10 @@
     if (!k) return;
     var map = {
       'leyes':              function(){ return fmtNum(k.leyes); },
+      'leyes-estatal':      function(){ return fmtNum(k.leyes_estatal); },
+      'leyes-municipal':    function(){ return fmtNum(k.leyes_municipal); },
+      'leyes-federal':      function(){ return fmtNum(k.leyes_federal); },
+      'leyes-calidad':      function(){ return fmtNum(k.leyes_con_contenido_calidad); },
       'contratos':          function(){ return fmtNum(k.contratos_publicos); },
       'inah-zonas':         function(){ return fmtNum(k.inah_zonas); },
       'inah-museos':        function(){ return fmtNum(k.inah_museos); },
