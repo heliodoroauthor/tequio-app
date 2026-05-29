@@ -792,6 +792,9 @@ export default async function handler(req, res) {
       if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
       if (entidad) path += `&entidad=eq.${encodeURIComponent(entidad)}`;
       if (q && q.length > 2) path += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,texto.ilike.*${encodeURIComponent(q)}*)`;
+      // Total real (PostgREST cappea filas; count=exact da el conteo total)
+      const countPath = path.replace(/select=[^&]+/, 'select=id').replace(/&order=[^&]+/, '').replace(/&limit=\d+/, '');
+      const totalReal = await sbCount(countPath);
       const rows = await sb(path);
       // Clasificación por materia (heurística)
       const clasMat = (nombre) => {
