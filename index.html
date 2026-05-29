@@ -25957,7 +25957,13 @@ window.addEventListener('message', function(e) {
       'pef-total': function(){
         if (!k.pef || !k.pef.monto_total_mxn) return '—';
         return '$' + (k.pef.monto_total_mxn / 1e12).toFixed(2) + ' bn';
-      }
+      },
+      // ── claves planas nuevas (audit 2026-05-28) ──
+      'costo_financiero_pib_pct': function(){
+        if (k.costo_financiero_pib_pct == null) return '—';
+        return Number(k.costo_financiero_pib_pct).toFixed(1) + '%';
+      },
+      'total_puntos_servicio': function(){ return fmtNum(k.total_puntos_servicio); }
     };
     Object.keys(map).forEach(function(key){
       var els = document.querySelectorAll('[data-kpi="' + key + '"]');
