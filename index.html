@@ -16096,7 +16096,8 @@ async function cargarLeyesDesdeAPI() {
         entidad: l.entidad,
         db_id: l.id,
       };
-    });
+    }
+    const reales = j.leyes.map(mapLeyAPI);
     // Fusionar: conservar reformas estáticas + agregar todas las reales
     const conservar = leyesData.filter(l => l.ambito === 'reforma' || (l.id && l.id.startsWith && l.id.startsWith('REF-')));
     leyesData.length = 0;
