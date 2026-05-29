@@ -817,7 +817,7 @@ export default async function handler(req, res) {
         fuente: r.fuente || 'Cámara de Diputados',
         url: r.url || `https://www.diputados.gob.mx/LeyesBiblio/index.htm`,
         fecha_publicacion: r.fecha_publicacion,
-        descripcion: (r.texto || '').slice(0, 400),
+        descripcion: '',
         materia: clasMat(r.nombre),
         ambito: r.ambito || 'federal',
         entidad: r.entidad || null,
