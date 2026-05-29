@@ -16075,8 +16075,8 @@ async function cargarLeyesDesdeAPI() {
         }
       });
     }
-    // Mapear cada ley respetando su ámbito real (federal / estatal / municipal)
-    const reales = j.leyes.map(l => {
+    // Mapper extraído (reusado por páginas en background)
+    function mapLeyAPI(l) {
       const ambitoReal = l.ambito || 'federal';
       const etiquetas = [(l.materia || 'general').charAt(0).toUpperCase() + (l.materia || 'general').slice(1)];
       if (l.entidad) etiquetas.push(l.entidad);
