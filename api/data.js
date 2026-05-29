@@ -788,7 +788,11 @@ export default async function handler(req, res) {
       const q = (req.query.q || '').trim();
       const ambito = (req.query.ambito || '').trim();
       const entidad = (req.query.entidad || '').trim();
-      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,ambito,entidad,tipo&order=ambito.asc,nombre.asc&limit=10000';
+      // Paginación: por_pagina máx 1000 (cap PostgREST)
+      const porPagina = Math.min(parseInt(req.query.por_pagina) || 1000, 1000);
+      const pagina = Math.max(parseInt(req.query.pagina) || 1, 1);
+      const offset = (pagina - 1) * porPagina;
+      let path = `leyes?select=id,nombre,fuente,url,fecha_publicacion,ambito,entidad,tipo&order=ambito.asc,nombre.asc&offset=${offset}&limit=${porPagina}`;
       if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
       if (entidad) path += `&entidad=eq.${encodeURIComponent(entidad)}`;
       if (q && q.length > 2) path += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,texto.ilike.*${encodeURIComponent(q)}*)`;
