@@ -788,7 +788,7 @@ export default async function handler(req, res) {
       const q = (req.query.q || '').trim();
       const ambito = (req.query.ambito || '').trim();
       const entidad = (req.query.entidad || '').trim();
-      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,texto,ambito,entidad,tipo&order=ambito.asc,nombre.asc&limit=1000';
+      let path = 'leyes?select=id,nombre,fuente,url,fecha_publicacion,ambito,entidad,tipo&order=ambito.asc,nombre.asc&limit=10000';
       if (ambito) path += `&ambito=eq.${encodeURIComponent(ambito)}`;
       if (entidad) path += `&entidad=eq.${encodeURIComponent(entidad)}`;
       if (q && q.length > 2) path += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,texto.ilike.*${encodeURIComponent(q)}*)`;
