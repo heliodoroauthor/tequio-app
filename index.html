@@ -3604,7 +3604,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           const cap = p.capacidad_total_hm3 != null ? (+p.capacidad_total_hm3).toFixed(0) + ' hm³' : '—';
           const alm = p.almacenamiento_hm3 != null ? (+p.almacenamiento_hm3).toFixed(0) + ' hm³' : '—';
           const pct = p.pct_almacenamiento != null ? (+p.pct_almacenamiento).toFixed(0) + '%' : '—';
-          const pctNum = p.pct_almacenamiento != null ? Math.min(100, Math.max(0, +p.pct_almacenamiento)) : 0;
+          const pctNum = p.pct_almacenamiento != null ? Math.min(100, Math.max(0, +p.pct_almacenamiento)) : null;
           html += `<div style="display:grid;grid-template-columns:3fr 1.6fr 1.3fr 1.3fr 1fr;gap:0;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;align-items:center">
             <div style="display:flex;align-items:center;gap:10px"><span style="display:inline-block;width:8px;height:8px;border-radius:4px;background:${color};flex:none"></span><div>${p.presa}<div style="font-size:10px;color:var(--text3);margin-top:2px">${p.fecha_corte || ''}</div></div></div>
             <div style="color:var(--text2)">${p.estado || '—'}</div>
