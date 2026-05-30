@@ -1,0 +1,72 @@
+name: Mega-sweep municipios (carga incremental)
+ 
+# Para llegar a los 2,478 municipios de México de forma autónoma.
+# Trigger manual o cada noche (1 estado por noche → cobertura total en ~30 días).
+ 
+on:
+  workflow_dispatch:
+    inputs:
+      estado:
+        description: "Clave INEGI del estado (01..32) o 'all' para barrido masivo"
+        required: true
+        default: "all"
+      max_per_municipio:
+        description: "Máx PDFs por municipio (recomendado 5-10)"
+        required: false
+        default: "8"
+  schedule:
+    # Cada noche a las 3:00 UTC (21:00 CDMX). Se procesa 1 estado.
+    - cron: "0 3 * * *"
+ 
+jobs:
+  sweep:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350   # casi el máximo de 6h por job
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - name: Setup Python + tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils tesseract-ocr libtesseract-dev
+          mkdir -p ~/.local/share/tessdata
+          curl -sL -o ~/.local/share/tessdata/spa.traineddata \
+            https://github.com/tesseract-ocr/tessdata_fast/raw/main/spa.traineddata
+          curl -sL -o ~/.local/share/tessdata/eng.traineddata \
+            https://github.com/tesseract-ocr/tessdata_fast/raw/main/eng.traineddata
+          pip install --quiet duckduckgo-search rapidfuzz requests
+ 
+      - name: Resolve target estado
+        id: pick
+        run: |
+          # Si schedule cron: rotar entre estados día por día
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            DAY_OF_MONTH=$(date +%d)
+            STATE_NUM=$(printf "%02d" $((10#$DAY_OF_MONTH % 32 + 1)))
+            echo "estado=$STATE_NUM" >> $GITHUB_OUTPUT
+          else
+            echo "estado=${{ inputs.estado }}" >> $GITHUB_OUTPUT
+          fi
+ 
+      - name: Run mega-sweep
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+          TESSDATA_PREFIX: /home/runner/.local/share/tessdata
+          ESTADO_KEY: ${{ steps.pick.outputs.estado }}
+          MAX_PER_MUNI: ${{ inputs.max_per_municipio }}
+        run: |
+          cd scripts/legales
+          python3 mega_sweep_municipios.py "$ESTADO_KEY" "${MAX_PER_MUNI:-8}"
+ 
+      - name: Refresh KPI cache + log
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/dashboard_kpis_globales" -d '{}' \
+            | python3 -m json.tool
+ 
