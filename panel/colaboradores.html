@@ -149,7 +149,7 @@
   <div class="cta">
     <h2>¿Tu municipio aparece con info incompleta?</h2>
     <p>Eres el indicado para cambiarlo. Comparte una URL oficial. Tu nombre aparece aquí. Tu pueblo gana transparencia.</p>
-    <a href="/" class="cta-btn">🚀 Explorar mi municipio</a>
+    <a href="/" target="_top" class="cta-btn">🚀 Explorar mi municipio</a>
   </div>
 
   <div class="footer">
@@ -273,7 +273,7 @@
   function renderLeaderboard(arr){
     if(!arr.length){
       $('podium').innerHTML = '<div class="empty empty-big" style="grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:16px;"><div style="font-size:64px">🌱</div><strong>Aún no hay Tequieros</strong>Sé el primero en aportar un documento oficial.<br>Tu nombre aparecerá aquí cuando sea aprobado.</div>';
-      $('leaderboard').innerHTML = '<div class="empty">Sin colaboradores aún · Sé el primero · <a href="/" style="color:var(--accent)">Empezar →</a></div>';
+      $('leaderboard').innerHTML = '<div class="empty">Sin colaboradores aún · Sé el primero · <a href="/" target="_top" style="color:var(--accent)">Empezar →</a></div>';
       return;
     }
     var top3 = arr.slice(0,3);
