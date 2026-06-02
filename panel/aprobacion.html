@@ -3,157 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aprobación del Pueblo — Tequio</title>
+<title>Aprobación del Pueblo · Tequio</title>
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0b0f1a;
-    --panel: #131826;
-    --panel2: #1a2030;
-    --border: #2a334a;
-    --text: #e6e9f2;
-    --muted: #8b94a7;
-    --gold: #fbbf24;
-    --green: #34d399;
-    --red: #f87171;
-    --gray: #9ca3af;
-    --accent: #60a5fa;
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --green: #22c55e; --green-soft: #86efac;
+    --red: #ef4444; --red-soft: #fca5a5;
+    --gray: #94a3b8;
+    --accent: #fbbf24;
+    --violet: #a855f7;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  header { padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-  h1 { margin: 0 0 4px; font-size: 22px; color: var(--gold); }
-  .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .tab { padding: 10px 16px; background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; }
-  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .filters { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-  .filter-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .filter-group select { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
-  .stats-bar { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
-  .stats-bar strong { color: var(--gold); }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+  body { padding: 16px; min-height: 100vh; }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34,197,94,0.22) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(239,68,68,0.20) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(239,68,68,0.08) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 20px;
+    padding: 28px 24px 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.40);
+    color: #86efac;
+    padding: 5px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 30px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #fff 0%, #86efac 50%, #fca5a5 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: #cbd5e1; font-size: 14.5px; line-height: 1.6; max-width: 720px; margin: 0; }
+  .hero p strong { color: #fde68a; font-weight: 700; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+  .stat-num { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .stat-num.green { color: var(--green-soft); }
+  .stat-num.red { color: var(--red-soft); }
+  .stat-num.amber { color: var(--accent); }
+  .stat-num.violet { color: #d8b4fe; }
+  .stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  @media (max-width:680px){ .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 24px; } }
+
+  /* CAJA EDUCATIVA */
+  details.edu { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.22); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; }
+  details.edu[open] { background: rgba(34,197,94,0.10); }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: #bbf7d0; font-size: 13.5px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: #4ade80; transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
+  details.edu .edu-body p { margin-bottom: 8px; }
+  details.edu .edu-body strong { color: #bbf7d0; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; padding: 4px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-soft); border-radius: 12px; }
+  .tab { flex: 1; padding: 10px 14px; background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; font-weight: 700; border-radius: 8px; font-family: inherit; transition: all .15s; }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab.active { color: #fff; background: linear-gradient(135deg, var(--green) 0%, #16a34a 100%); }
+
+  /* FILTROS */
+  details.filtros { background: rgba(255,255,255,0.025); border: 1px solid var(--border-soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; cursor: pointer; }
+  details.filtros summary { list-style: none; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text); font-size: 13px; }
+  details.filtros summary::-webkit-details-marker { display: none; }
+  details.filtros summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--text-dim); transition: transform .2s; }
+  details.filtros[open] summary::after { transform: rotate(180deg); }
+  .filtros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+  .filter-group label { display: block; font-size: 11px; color: var(--text-dim); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .filter-group select { width: 100%; background: var(--bg-soft); color: var(--text); border: 1px solid var(--border-soft); padding: 8px 10px; border-radius: 8px; font-size: 13px; font-family: inherit; }
+  .filter-group select:focus { outline: none; border-color: var(--green); }
+
+  /* STATS BAR */
+  .stats-bar { display: flex; gap: 14px; padding: 10px 14px; background: rgba(255,255,255,0.025); border: 1px solid var(--border-soft); border-radius: 10px; margin-bottom: 14px; font-size: 12px; color: var(--text-dim); flex-wrap: wrap; }
+  .stats-bar strong { color: var(--green-soft); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  /* CARDS GRID */
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-  .card-name { font-weight: 600; font-size: 15px; }
-  .card-cargo { color: var(--muted); font-size: 12px; margin-top: 2px; }
-  .card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: var(--panel2); color: var(--muted); border: 1px solid var(--border); }
-  .pill.partido { background: rgba(96,165,250,0.15); color: var(--accent); border-color: rgba(96,165,250,0.3); }
-  .pill.entidad { background: rgba(251,191,36,0.15); color: var(--gold); border-color: rgba(251,191,36,0.3); }
-  .bio { color: var(--muted); font-size: 12px; margin: 6px 0 10px; line-height: 1.45; }
-  .bar-wrap { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; display: flex; margin: 10px 0 6px; }
-  .bar-green { background: var(--green); height: 100%; }
-  .bar-gray { background: var(--gray); height: 100%; }
-  .bar-red { background: var(--red); height: 100%; }
-  .counts-line { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-  .counts-line span.aprueba { color: var(--green); }
-  .counts-line span.desaprueba { color: var(--red); }
-  .vote-row { display: flex; gap: 6px; }
-  .vote-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; }
-  .vote-btn:hover { background: var(--panel2); }
-  .vote-btn.active.aprueba { background: var(--green); color: #000; border-color: var(--green); }
-  .vote-btn.active.desaprueba { background: var(--red); color: #fff; border-color: var(--red); }
-  .vote-btn.active.neutral { background: var(--gray); color: #000; border-color: var(--gray); }
-  .vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .source { font-size: 11px; color: var(--muted); margin-top: 8px; }
-  .source a { color: var(--accent); text-decoration: none; }
+  .card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color .15s; }
+  .card:hover { border-color: rgba(34,197,94,0.30); }
+  .card-head { display: flex; gap: 10px; align-items: flex-start; }
+  .card-name { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.3; }
+  .card-emoji { margin-right: 6px; font-size: 18px; }
+  .card-cargo { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pill { display: inline-block; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: var(--text-dim); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; }
+  .pill.partido { background: rgba(168,85,247,0.10); color: #d8b4fe; border-color: rgba(168,85,247,0.30); }
+  .pill.entidad { background: rgba(251,191,36,0.10); color: var(--accent); border-color: rgba(251,191,36,0.30); }
+  .ley-tipo { background: rgba(34,197,94,0.10); color: var(--green-soft); border: 1px solid rgba(34,197,94,0.25); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+  .ley-cat { background: rgba(168,85,247,0.10); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.25); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; }
+  .bio { font-size: 12.5px; color: var(--text-dim); line-height: 1.5; }
+
+  /* BARS */
+  .bar-wrap { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+  .bar-wrap > div { height: 100%; transition: width .3s; }
+  .bar-green { background: linear-gradient(90deg, var(--green) 0%, #15803d 100%); }
+  .bar-gray { background: linear-gradient(90deg, #64748b 0%, #475569 100%); }
+  .bar-red { background: linear-gradient(90deg, var(--red) 0%, #b91c1c 100%); }
+  .counts-line { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-dim); font-weight: 600; margin-top: 4px; }
+  .counts-line .aprueba { color: var(--green-soft); }
+  .counts-line .desaprueba { color: var(--red-soft); }
+
+  /* VOTE BUTTONS */
+  .vote-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 4px; }
+  .vote-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); color: var(--text); padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .vote-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+  .vote-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .vote-btn.aprueba.active { background: rgba(34,197,94,0.25); border-color: var(--green); color: var(--green-soft); }
+  .vote-btn.neutral.active { background: rgba(148,163,184,0.25); border-color: var(--gray); color: #cbd5e1; }
+  .vote-btn.desaprueba.active { background: rgba(239,68,68,0.25); border-color: var(--red); color: var(--red-soft); }
+
+  .source { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .source a { color: #93c5fd; text-decoration: none; }
   .source a:hover { text-decoration: underline; }
-  .empty { padding: 40px; text-align: center; color: var(--muted); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
-  .ley-card .card-emoji { font-size: 22px; margin-right: 6px; }
-  .ley-card .ley-tipo { background: rgba(96,165,250,0.15); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; }
-  .ley-card .ley-cat { background: rgba(251,191,36,0.15); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 4px; }
-  .disclaimer { font-size: 11px; color: var(--muted); padding: 10px; background: rgba(96,165,250,0.06); border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 16px; }
-  .loading { text-align: center; padding: 40px; color: var(--muted); }
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .toast.err { background: var(--red); color: #fff; }
+
+  .loading, .empty { padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; background: var(--card); border: 1px dashed var(--border-soft); border-radius: 12px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(34,197,94,0.20); color: var(--green-soft); border: 1px solid var(--green); padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 700; z-index: 9999; animation: slideUp .2s; }
+  .toast.err { background: rgba(239,68,68,0.20); color: var(--red-soft); border-color: var(--red); }
+  @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1>🗳️ Aprobación del Pueblo</h1>
-    <p class="subtitle">Califica el desempeño de mandatarios y leyes. Tu voz, tu evaluación ciudadana — datos verificados con fuente oficial.</p>
-  </header>
 
-  <div class="disclaimer">
-    📊 <strong>¿Cómo funciona?</strong> Un voto por dispositivo por mandatario/ley. Aprobar / Desaprobar / Neutral. Los resultados son agregados anónimos. Tequio no comparte datos personales. Cero invención: cada actor está verificado con fuente oficial pública.
+  <!-- HERO NIVEL 3 -->
+  <div class="hero">
+    <div class="hero-badge">🗳️ Voto directo · Sin pollsters</div>
+    <h1>Aprobación del Pueblo</h1>
+    <p>Tequio no es Mitofsky ni Buendía. Los ciudadanos votan directamente sobre <strong>mandatarios y leyes</strong>, los resultados se agregan en tiempo real. <strong>Tu voz es el dato.</strong></p>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num amber" id="hero-actores">103</div><div class="stat-lbl">Actores políticos</div></div>
+      <div class="stat"><div class="stat-num violet" id="hero-leyes">50</div><div class="stat-lbl">Leyes evaluables</div></div>
+      <div class="stat"><div class="stat-num green" id="hero-votos">—</div><div class="stat-lbl">Votos emitidos</div></div>
+      <div class="stat"><div class="stat-num red">1×ID</div><div class="stat-lbl">Por dispositivo</div></div>
+    </div>
   </div>
 
+  <!-- CAJA EDUCATIVA -->
+  <details class="edu">
+    <summary>📖 ¿Cómo funciona la aprobación ciudadana?</summary>
+    <div class="edu-body">
+      <p><strong>Un voto por dispositivo</strong> por cada mandatario o ley. Puedes elegir <strong>Apruebo</strong>, <strong>Neutral</strong> o <strong>Desapruebo</strong>. Los resultados se agregan anónimamente y se actualizan en tiempo real.</p>
+      <p>Cada actor está verificado con <strong>fuente oficial pública</strong> (gob.mx, partido, gobierno estatal). <strong>Cero invención</strong> es nuestro compromiso: no inflamos números, no compramos votos, no hay agenda editorial.</p>
+      <p>Tequio no comparte datos personales — solo se guarda un hash anónimo de tu dispositivo para evitar voto doble.</p>
+    </div>
+  </details>
+
+  <!-- TABS -->
   <div class="tabs">
     <button class="tab active" data-tab="mandatarios">🏛️ Mandatarios</button>
     <button class="tab" data-tab="leyes">📜 Leyes</button>
   </div>
 
+  <!-- PANEL MANDATARIOS -->
   <div id="panel-mandatarios">
-    <div class="filters">
-      <div class="filter-group">
-        <label>Tipo de cargo</label>
-        <select id="f-tipo">
-          <option value="">Todos</option>
-          <option value="gobernador">Gobernadores</option>
-          <option value="ministro_scjn">Ministros SCJN</option>
-          <option value="consejero_ine">Consejeros INE</option>
-          <option value="magistrado_tepjf">Magistrados TEPJF</option>
-          <option value="secretario_federal">Gabinete Federal</option>
-          <option value="lider_partido">Líderes de partido</option>
-          <option value="diputado_presidencia">Mesa Directiva Diputados</option>
-          <option value="fiscal">Fiscal General</option>
-          <option value="politico">Otros políticos</option>
-        </select>
+    <details class="filtros">
+      <summary>🔎 Filtros</summary>
+      <div class="filtros-grid">
+        <div class="filter-group">
+          <label>Tipo de cargo</label>
+          <select id="f-tipo">
+            <option value="">Todos</option>
+            <option value="gobernador">Gobernadores</option>
+            <option value="ministro_scjn">Ministros SCJN</option>
+            <option value="consejero_ine">Consejeros INE</option>
+            <option value="magistrado_tepjf">Magistrados TEPJF</option>
+            <option value="secretario_federal">Gabinete Federal</option>
+            <option value="lider_partido">Líderes de partido</option>
+            <option value="diputado_presidencia">Mesa Directiva Diputados</option>
+            <option value="fiscal">Fiscal General</option>
+            <option value="politico">Otros políticos</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Estado</label>
+          <select id="f-entidad">
+            <option value="">Todos</option>
+            <option value="FEDERAL">Federal</option>
+            <option value="AGS">Aguascalientes</option><option value="BC">Baja California</option><option value="BCS">Baja California Sur</option>
+            <option value="CAM">Campeche</option><option value="CHIS">Chiapas</option><option value="CHIH">Chihuahua</option>
+            <option value="CDMX">CDMX</option><option value="COAH">Coahuila</option><option value="COL">Colima</option>
+            <option value="DGO">Durango</option><option value="EDOMEX">Estado de México</option><option value="GTO">Guanajuato</option>
+            <option value="GRO">Guerrero</option><option value="HGO">Hidalgo</option><option value="JAL">Jalisco</option>
+            <option value="MICH">Michoacán</option><option value="MOR">Morelos</option><option value="NAY">Nayarit</option>
+            <option value="NL">Nuevo León</option><option value="OAX">Oaxaca</option><option value="PUE">Puebla</option>
+            <option value="QRO">Querétaro</option><option value="QROO">Quintana Roo</option><option value="SLP">San Luis Potosí</option>
+            <option value="SIN">Sinaloa</option><option value="SON">Sonora</option><option value="TAB">Tabasco</option>
+            <option value="TAMPS">Tamaulipas</option><option value="TLAX">Tlaxcala</option><option value="VER">Veracruz</option>
+            <option value="YUC">Yucatán</option><option value="ZAC">Zacatecas</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Partido</label>
+          <select id="f-partido">
+            <option value="">Todos</option>
+            <option value="Morena">Morena</option>
+            <option value="PAN">PAN</option>
+            <option value="PRI">PRI</option>
+            <option value="MC">MC</option>
+            <option value="PVEM">PVEM</option>
+            <option value="PT">PT</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-group">
-        <label>Estado</label>
-        <select id="f-entidad">
-          <option value="">Todos</option>
-          <option value="FEDERAL">Federal</option>
-          <option value="AGS">Aguascalientes</option><option value="BC">Baja California</option><option value="BCS">Baja California Sur</option>
-          <option value="CAM">Campeche</option><option value="CHIS">Chiapas</option><option value="CHIH">Chihuahua</option>
-          <option value="CDMX">CDMX</option><option value="COAH">Coahuila</option><option value="COL">Colima</option>
-          <option value="DGO">Durango</option><option value="EDOMEX">Estado de México</option><option value="GTO">Guanajuato</option>
-          <option value="GRO">Guerrero</option><option value="HGO">Hidalgo</option><option value="JAL">Jalisco</option>
-          <option value="MICH">Michoacán</option><option value="MOR">Morelos</option><option value="NAY">Nayarit</option>
-          <option value="NL">Nuevo León</option><option value="OAX">Oaxaca</option><option value="PUE">Puebla</option>
-          <option value="QRO">Querétaro</option><option value="QROO">Quintana Roo</option><option value="SLP">San Luis Potosí</option>
-          <option value="SIN">Sinaloa</option><option value="SON">Sonora</option><option value="TAB">Tabasco</option>
-          <option value="TAMPS">Tamaulipas</option><option value="TLAX">Tlaxcala</option><option value="VER">Veracruz</option>
-          <option value="YUC">Yucatán</option><option value="ZAC">Zacatecas</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Partido</label>
-        <select id="f-partido">
-          <option value="">Todos</option>
-          <option value="Morena">Morena</option>
-          <option value="PAN">PAN</option>
-          <option value="PRI">PRI</option>
-          <option value="MC">MC</option>
-          <option value="PVEM">PVEM</option>
-          <option value="PT">PT</option>
-        </select>
-      </div>
-    </div>
+    </details>
     <div class="stats-bar" id="stats-mandatarios">Cargando…</div>
     <div class="cards" id="cards-mandatarios"><div class="loading">Cargando mandatarios…</div></div>
   </div>
 
+  <!-- PANEL LEYES -->
   <div id="panel-leyes" style="display:none;">
-    <div class="filters">
-      <div class="filter-group">
-        <label>Categoría</label>
-        <select id="f-categoria">
-          <option value="">Todas</option>
-          <option value="derechos">Derechos</option>
-          <option value="economia">Economía</option>
-          <option value="seguridad">Seguridad</option>
-          <option value="salud">Salud</option>
-          <option value="laboral">Laboral</option>
-          <option value="politica">Política</option>
-          <option value="familia">Familia</option>
-          <option value="transparencia">Transparencia</option>
-        </select>
+    <details class="filtros">
+      <summary>🔎 Filtros</summary>
+      <div class="filtros-grid">
+        <div class="filter-group">
+          <label>Categoría</label>
+          <select id="f-categoria">
+            <option value="">Todas</option>
+            <option value="derechos">Derechos</option>
+            <option value="economia">Economía</option>
+            <option value="seguridad">Seguridad</option>
+            <option value="salud">Salud</option>
+            <option value="laboral">Laboral</option>
+            <option value="politica">Política</option>
+            <option value="familia">Familia</option>
+            <option value="transparencia">Transparencia</option>
+          </select>
+        </div>
       </div>
-    </div>
+    </details>
     <div class="stats-bar" id="stats-leyes">Cargando…</div>
     <div class="cards" id="cards-leyes"><div class="loading">Cargando leyes…</div></div>
   </div>
@@ -161,191 +260,92 @@
 
 <script>
 const API = '/api/data';
-
-function getDevice() {
-  let d = localStorage.getItem('tequio_device_hash');
-  if (!d) {
-    const arr = new Uint8Array(16);
-    crypto.getRandomValues(arr);
-    d = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
-    localStorage.setItem('tequio_device_hash', d);
-  }
-  return d;
+function getDevice(){let d=localStorage.getItem('tequio_device_hash');if(!d){const arr=new Uint8Array(16);crypto.getRandomValues(arr);d=Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');localStorage.setItem('tequio_device_hash',d);}return d;}
+const DEVICE=getDevice();
+const ENTIDAD=(localStorage.getItem('tequio_estado')||'').trim();
+function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function pct(n,total){return total>0?Math.round((n/total)*100):0;}
+function renderBar(c){
+  const total=c.total||0;
+  if(total===0) return '<div class="bar-wrap"><div style="background:rgba(255,255,255,0.04);width:100%"></div></div><div class="counts-line"><span>Sin votos aún</span></div>';
+  const a=pct(c.aprueba,total),n=pct(c.neutral,total),d=pct(c.desaprueba,total);
+  return '<div class="bar-wrap"><div class="bar-green" style="width:'+a+'%"></div><div class="bar-gray" style="width:'+n+'%"></div><div class="bar-red" style="width:'+d+'%"></div></div><div class="counts-line"><span class="aprueba">✓ '+a+'% ('+c.aprueba+')</span><span>• '+n+'% ('+c.neutral+')</span><span class="desaprueba">✗ '+d+'% ('+c.desaprueba+')</span></div><div style="font-size:11px;color:var(--text-dim);margin-top:-2px;">'+total+' votos</div>';
 }
-const DEVICE = getDevice();
-const ENTIDAD = (localStorage.getItem('tequio_estado') || '').trim();
-
-function toast(msg, err) {
-  const t = document.createElement('div');
-  t.className = 'toast' + (err ? ' err' : '');
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
+function cardActorHtml(a){
+  const c=a.counts,mi=a.mi_voto;
+  return '<div class="card" data-slug="'+escapeHtml(a.slug)+'"><div class="card-head"><div><div class="card-name">'+escapeHtml(a.nombre)+'</div><div class="card-cargo">'+escapeHtml(a.cargo_actual||'')+'</div></div></div><div class="card-meta">'+(a.partido?'<span class="pill partido">'+escapeHtml(a.partido)+'</span>':'')+(a.entidad&&a.entidad!=='FEDERAL'?'<span class="pill entidad">'+escapeHtml(a.entidad)+'</span>':'')+(a.entidad==='FEDERAL'?'<span class="pill">Federal</span>':'')+'<span class="pill">'+escapeHtml(a.organizacion||'')+'</span></div>'+(a.bio_corta?'<div class="bio">'+escapeHtml(a.bio_corta)+'</div>':'')+renderBar(c)+'<div class="vote-row"><button class="vote-btn aprueba '+(mi==='aprueba'?'active':'')+'" data-voto="aprueba">👍 Apruebo</button><button class="vote-btn neutral '+(mi==='neutral'?'active':'')+'" data-voto="neutral">🤷 Neutral</button><button class="vote-btn desaprueba '+(mi==='desaprueba'?'active':'')+'" data-voto="desaprueba">👎 Desapruebo</button></div>'+(a.fuente_url?'<div class="source">📎 <a href="'+escapeHtml(a.fuente_url)+'" target="_top" rel="noopener">Fuente oficial</a></div>':'')+'</div>';
 }
-
-function escapeHtml(s) {
-  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function cardLeyHtml(l){
+  const c=l.counts,mi=l.mi_voto;
+  return '<div class="card ley-card" data-slug="'+escapeHtml(l.slug)+'"><div class="card-head"><div><div class="card-name"><span class="card-emoji">'+escapeHtml(l.emoji||'📜')+'</span>'+escapeHtml(l.titulo_ciudadano||l.titulo_oficial)+'</div><div class="card-cargo">'+escapeHtml(l.titulo_oficial||'')+'</div></div></div><div class="card-meta"><span class="ley-tipo">'+escapeHtml(l.tipo||'')+'</span><span class="ley-cat">'+escapeHtml(l.categoria||'')+'</span></div><div class="bio">'+escapeHtml(l.resumen_ciudadano||'')+'</div>'+renderBar(c)+'<div class="vote-row"><button class="vote-btn aprueba '+(mi==='aprueba'?'active':'')+'" data-voto="aprueba">👍 Me sirve</button><button class="vote-btn neutral '+(mi==='neutral'?'active':'')+'" data-voto="neutral">🤷 Neutral</button><button class="vote-btn desaprueba '+(mi==='desaprueba'?'active':'')+'" data-voto="desaprueba">👎 Hay que cambiarla</button></div>'+(l.url_oficial?'<div class="source">📎 <a href="'+escapeHtml(l.url_oficial)+'" target="_top" rel="noopener">Texto oficial</a></div>':'')+'</div>';
 }
-
-function pct(n, total) { return total > 0 ? Math.round((n / total) * 100) : 0; }
-
-function renderBar(c) {
-  const total = c.total || 0;
-  if (total === 0) return '<div class="bar-wrap"><div style="background:var(--panel2);width:100%"></div></div><div class="counts-line"><span>Sin votos aún</span></div>';
-  const a = pct(c.aprueba, total);
-  const n = pct(c.neutral, total);
-  const d = pct(c.desaprueba, total);
-  return '<div class="bar-wrap">' +
-    '<div class="bar-green" style="width:' + a + '%"></div>' +
-    '<div class="bar-gray" style="width:' + n + '%"></div>' +
-    '<div class="bar-red" style="width:' + d + '%"></div>' +
-  '</div>' +
-  '<div class="counts-line">' +
-    '<span class="aprueba">✓ ' + a + '% (' + c.aprueba + ')</span>' +
-    '<span>• ' + n + '% (' + c.neutral + ')</span>' +
-    '<span class="desaprueba">✗ ' + d + '% (' + c.desaprueba + ')</span>' +
-  '</div>' +
-  '<div style="font-size:11px;color:var(--muted);margin-top:-4px;">' + total + ' votos</div>';
+async function loadMandatarios(){
+  const t=document.getElementById('f-tipo').value,e=document.getElementById('f-entidad').value,p=document.getElementById('f-partido').value;
+  const params=new URLSearchParams({vista:'aprobacion_actores',device:DEVICE});
+  if(t)params.set('tipo',t);if(e)params.set('entidad',e);if(p)params.set('partido',p);
+  const cont=document.getElementById('cards-mandatarios'),stats=document.getElementById('stats-mandatarios');
+  cont.innerHTML='<div class="loading">Cargando…</div>';
+  try{
+    const r=await fetch(API+'?'+params.toString());const j=await r.json();
+    const arr=j.actores||[];
+    if(!arr.length){cont.innerHTML='<div class="empty">No se encontraron mandatarios con esos filtros.</div>';stats.textContent='0 resultados';return;}
+    const totalVotos=arr.reduce((s,a)=>s+(a.counts?a.counts.total:0),0);
+    stats.innerHTML='<span><strong>'+arr.length+'</strong> mandatarios</span><span><strong>'+totalVotos+'</strong> votos emitidos</span>';
+    cont.innerHTML=arr.map(cardActorHtml).join('');
+    attachVoteHandlers(cont,'actor');
+    updateHeroStat('hero-votos', totalVotos);
+  } catch(err){cont.innerHTML='<div class="empty">Error de carga. Intenta de nuevo.</div>';}
 }
-function cardActorHtml(a) {
-  const c = a.counts;
-  const mi = a.mi_voto;
-  const html = 
-    '<div class="card" data-slug="' + escapeHtml(a.slug) + '">' +
-      '<div class="card-head"><div>' +
-        '<div class="card-name">' + escapeHtml(a.nombre) + '</div>' +
-        '<div class="card-cargo">' + escapeHtml(a.cargo_actual||'') + '</div>' +
-      '</div></div>' +
-      '<div class="card-meta">' +
-        (a.partido ? '<span class="pill partido">' + escapeHtml(a.partido) + '</span>' : '') +
-        (a.entidad && a.entidad !== 'FEDERAL' ? '<span class="pill entidad">' + escapeHtml(a.entidad) + '</span>' : '') +
-        (a.entidad === 'FEDERAL' ? '<span class="pill">Federal</span>' : '') +
-        '<span class="pill">' + escapeHtml(a.organizacion||'') + '</span>' +
-      '</div>' +
-      (a.bio_corta ? '<div class="bio">' + escapeHtml(a.bio_corta) + '</div>' : '') +
-      renderBar(c) +
-      '<div class="vote-row">' +
-        '<button class="vote-btn aprueba ' + (mi==='aprueba'?'active':'') + '" data-voto="aprueba">👍 Apruebo</button>' +
-        '<button class="vote-btn neutral ' + (mi==='neutral'?'active':'') + '" data-voto="neutral">🤷 Neutral</button>' +
-        '<button class="vote-btn desaprueba ' + (mi==='desaprueba'?'active':'') + '" data-voto="desaprueba">👎 Desapruebo</button>' +
-      '</div>' +
-      (a.fuente_url ? '<div class="source">📎 <a href="' + escapeHtml(a.fuente_url) + '" target="_top" rel="noopener">Fuente oficial</a></div>' : '') +
-    '</div>';
-  return html;
+async function loadLeyes(){
+  const c=document.getElementById('f-categoria').value;
+  const params=new URLSearchParams({vista:'aprobacion_leyes',device:DEVICE});
+  if(c)params.set('categoria',c);
+  const cont=document.getElementById('cards-leyes'),stats=document.getElementById('stats-leyes');
+  cont.innerHTML='<div class="loading">Cargando…</div>';
+  try{
+    const r=await fetch(API+'?'+params.toString());const j=await r.json();
+    const arr=j.leyes||[];
+    if(!arr.length){cont.innerHTML='<div class="empty">Sin leyes en esta categoría.</div>';stats.textContent='0 resultados';return;}
+    const totalVotos=arr.reduce((s,a)=>s+(a.counts?a.counts.total:0),0);
+    stats.innerHTML='<span><strong>'+arr.length+'</strong> leyes federales</span><span><strong>'+totalVotos+'</strong> votos emitidos</span>';
+    cont.innerHTML=arr.map(cardLeyHtml).join('');
+    attachVoteHandlers(cont,'ley');
+  } catch(err){cont.innerHTML='<div class="empty">Error de carga. Intenta de nuevo.</div>';}
 }
-
-function cardLeyHtml(l) {
-  const c = l.counts;
-  const mi = l.mi_voto;
-  const html = 
-    '<div class="card ley-card" data-slug="' + escapeHtml(l.slug) + '">' +
-      '<div class="card-head"><div>' +
-        '<div class="card-name"><span class="card-emoji">' + escapeHtml(l.emoji||'📜') + '</span>' + escapeHtml(l.titulo_ciudadano||l.titulo_oficial) + '</div>' +
-        '<div class="card-cargo">' + escapeHtml(l.titulo_oficial||'') + '</div>' +
-      '</div></div>' +
-      '<div class="card-meta">' +
-        '<span class="ley-tipo">' + escapeHtml(l.tipo||'') + '</span>' +
-        '<span class="ley-cat">' + escapeHtml(l.categoria||'') + '</span>' +
-      '</div>' +
-      '<div class="bio">' + escapeHtml(l.resumen_ciudadano||'') + '</div>' +
-      renderBar(c) +
-      '<div class="vote-row">' +
-        '<button class="vote-btn aprueba ' + (mi==='aprueba'?'active':'') + '" data-voto="aprueba">👍 Me sirve</button>' +
-        '<button class="vote-btn neutral ' + (mi==='neutral'?'active':'') + '" data-voto="neutral">🤷 Neutral</button>' +
-        '<button class="vote-btn desaprueba ' + (mi==='desaprueba'?'active':'') + '" data-voto="desaprueba">👎 Hay que cambiarla</button>' +
-      '</div>' +
-      (l.url_oficial ? '<div class="source">📎 <a href="' + escapeHtml(l.url_oficial) + '" target="_top" rel="noopener">Texto oficial</a></div>' : '') +
-    '</div>';
-  return html;
-}
-async function loadMandatarios() {
-  const t = document.getElementById('f-tipo').value;
-  const e = document.getElementById('f-entidad').value;
-  const p = document.getElementById('f-partido').value;
-  const params = new URLSearchParams({ vista: 'aprobacion_actores', device: DEVICE });
-  if (t) params.set('tipo', t);
-  if (e) params.set('entidad', e);
-  if (p) params.set('partido', p);
-  const cont = document.getElementById('cards-mandatarios');
-  const stats = document.getElementById('stats-mandatarios');
-  cont.innerHTML = '<div class="loading">Cargando…</div>';
-  try {
-    const r = await fetch(API + '?' + params.toString());
-    const j = await r.json();
-    const arr = j.actores || [];
-    if (!arr.length) { cont.innerHTML = '<div class="empty">No se encontraron mandatarios con esos filtros.</div>'; stats.textContent = '0 resultados'; return; }
-    const totalVotos = arr.reduce((s,a) => s + (a.counts ? a.counts.total : 0), 0);
-    stats.innerHTML = '<span><strong>' + arr.length + '</strong> mandatarios</span><span><strong>' + totalVotos + '</strong> votos emitidos</span>';
-    cont.innerHTML = arr.map(cardActorHtml).join('');
-    attachVoteHandlers(cont, 'actor');
-  } catch (err) {
-    cont.innerHTML = '<div class="empty">Error de carga. Intenta de nuevo.</div>';
-  }
-}
-
-async function loadLeyes() {
-  const c = document.getElementById('f-categoria').value;
-  const params = new URLSearchParams({ vista: 'aprobacion_leyes', device: DEVICE });
-  if (c) params.set('categoria', c);
-  const cont = document.getElementById('cards-leyes');
-  const stats = document.getElementById('stats-leyes');
-  cont.innerHTML = '<div class="loading">Cargando…</div>';
-  try {
-    const r = await fetch(API + '?' + params.toString());
-    const j = await r.json();
-    const arr = j.leyes || [];
-    if (!arr.length) { cont.innerHTML = '<div class="empty">Sin leyes en esta categoría.</div>'; stats.textContent = '0 resultados'; return; }
-    const totalVotos = arr.reduce((s,a) => s + (a.counts ? a.counts.total : 0), 0);
-    stats.innerHTML = '<span><strong>' + arr.length + '</strong> leyes federales</span><span><strong>' + totalVotos + '</strong> votos emitidos</span>';
-    cont.innerHTML = arr.map(cardLeyHtml).join('');
-    attachVoteHandlers(cont, 'ley');
-  } catch (err) {
-    cont.innerHTML = '<div class="empty">Error de carga. Intenta de nuevo.</div>';
-  }
-}
-
-function attachVoteHandlers(container, kind) {
-  container.querySelectorAll('.vote-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const card = btn.closest('.card');
-      const slug = card.dataset.slug;
-      const voto = btn.dataset.voto;
-      const allBtns = card.querySelectorAll('.vote-btn');
-      allBtns.forEach(b => b.disabled = true);
-      const vista = kind === 'actor' ? 'aprobacion_votar_actor' : 'aprobacion_votar_ley';
-      const params = new URLSearchParams({ vista, voto, device: DEVICE, entidad: ENTIDAD });
-      if (kind === 'actor') params.set('slug', slug);
-      else params.set('ley_id', slug);
-      try {
-        const r = await fetch(API + '?' + params.toString());
-        const j = await r.json();
-        if (!r.ok || j.error) { toast(j.error || 'Error al votar', true); allBtns.forEach(b => b.disabled = false); return; }
+function attachVoteHandlers(container,kind){
+  container.querySelectorAll('.vote-btn').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const card=btn.closest('.card'),slug=card.dataset.slug,voto=btn.dataset.voto;
+      const allBtns=card.querySelectorAll('.vote-btn');
+      allBtns.forEach(b=>b.disabled=true);
+      const vista=kind==='actor'?'aprobacion_votar_actor':'aprobacion_votar_ley';
+      const params=new URLSearchParams({vista,voto,device:DEVICE,entidad:ENTIDAD});
+      if(kind==='actor')params.set('slug',slug);else params.set('ley_id',slug);
+      try{
+        const r=await fetch(API+'?'+params.toString());const j=await r.json();
+        if(!r.ok||j.error){toast(j.error||'Error al votar',true);allBtns.forEach(b=>b.disabled=false);return;}
         toast('✓ Voto registrado');
-        allBtns.forEach(b => { b.classList.remove('active'); b.disabled = false; });
+        allBtns.forEach(b=>{b.classList.remove('active');b.disabled=false;});
         btn.classList.add('active');
-        setTimeout(() => { if (kind==='actor') loadMandatarios(); else loadLeyes(); }, 600);
-      } catch (e) {
-        toast('Error de red', true);
-        allBtns.forEach(b => b.disabled = false);
-      }
+        setTimeout(()=>{if(kind==='actor')loadMandatarios();else loadLeyes();},600);
+      } catch(e){toast('Error de red',true);allBtns.forEach(b=>b.disabled=false);}
     });
   });
 }
-
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+function updateHeroStat(id,n){const el=document.getElementById(id);if(el)el.textContent=n;}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
-    const tab = t.dataset.tab;
-    document.getElementById('panel-mandatarios').style.display = tab === 'mandatarios' ? '' : 'none';
-    document.getElementById('panel-leyes').style.display = tab === 'leyes' ? '' : 'none';
-    if (tab === 'leyes') loadLeyes();
+    const tab=t.dataset.tab;
+    document.getElementById('panel-mandatarios').style.display=tab==='mandatarios'?'':'none';
+    document.getElementById('panel-leyes').style.display=tab==='leyes'?'':'none';
+    if(tab==='leyes')loadLeyes();
   });
 });
-
-['f-tipo','f-entidad','f-partido'].forEach(id => document.getElementById(id).addEventListener('change', loadMandatarios));
-document.getElementById('f-categoria').addEventListener('change', loadLeyes);
-
+['f-tipo','f-entidad','f-partido'].forEach(id=>document.getElementById(id).addEventListener('change',loadMandatarios));
+document.getElementById('f-categoria').addEventListener('change',loadLeyes);
 loadMandatarios();
 </script>
 </body>
