@@ -1,0 +1,45 @@
+name: Periódicos Oficiales MASIVO (15 estados)
+
+# Scrapea Periódicos Oficiales estatales con Playwright
+# Matrix de 15 estados clave (más poblados + más relevantes)
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_pubs:
+        description: "Max publicaciones por estado"
+        required: false
+        default: "30"
+  schedule:
+    # Diario a las 4 AM UTC (10 PM CDMX)
+    - cron: '0 4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        estado: ['09', '15', '14', '19', '30', '21', '11', '22', '26', '07', '13', '16', '31', '28', '20']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + Playwright
+        run: |
+          pip install requests playwright
+          playwright install --with-deps chromium
+      
+      - name: Scrape estado
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ESTADO: ${{ matrix.estado }}
+          MAX_PUBS: ${{ inputs.max_pubs }}
+        run: |
+          python3 scripts/scrape_periodicos_oficiales.py "$ESTADO" "${MAX_PUBS:-30}"
