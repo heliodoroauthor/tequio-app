@@ -6419,25 +6419,55 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
       </div>
     </div>
-    <!-- ───── EN VIVO · YouTube ───── -->
+    <!-- ───── EN VIVO · YouTube Nivel 3 ───── -->
     <div id="page-envivo" class="page">
       <div class="content">
+        <!-- HERO con stats live -->
         <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 50%,#991b1b 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.30)">
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:54px;line-height:1">📺</div>
             <div style="flex:1;min-width:240px">
-              <h1 style="font-size:26px;font-weight:800;margin:0;color:#fff;font-family:var(--font-display)">México en Vivo</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Cámara de Diputados, Senado, Presidencia, SCJN e INE · señal directa de YouTube oficial.</p>
+              <h1 style="font-size:28px;font-weight:800;margin:0;color:#fff;font-family:var(--font-display)">México en Vivo</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Señal directa de 5 canales oficiales · Diputados · Senado · SCJN · INE · Presidencia</p>
             </div>
+          </div>
+          <!-- Stats glassmorphism -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fef08a" id="yt-stat-live">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">🔴 En vivo ahora</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="yt-stat-canales">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Canales activos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="yt-stat-recientes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Videos recientes</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="yt-stat-sync">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último sync</div></div>
           </div>
         </div>
 
+        <!-- Sello fuente -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <div style="font-size:22px">✅</div>
           <div style="flex:1;min-width:220px">
             <div style="font-size:11px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL · YOUTUBE</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:2px">Datos en vivo desde YouTube Data API v3. Refresco cada 5 minutos. Último sync: <span id="yt-last-sync" data-kpi="yt-last-sync">—</span></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">YouTube Data API v3 · refresh cada 5 min · click en cualquier video lo abre en player embebido.</div>
           </div>
+        </div>
+
+        <!-- Búsqueda + filtros canal -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px;position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+            <input id="yt-search" type="text" placeholder="Buscar título…"
+              oninput="ytFiltrarDeb()"
+              style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
+          </div>
+          <button onclick="ytRefresh()" id="yt-refresh-btn" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><span>🔄</span> Actualizar</button>
+        </div>
+
+        <!-- Chips canal -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="yt-canales-chips">
+          <button class="estado-chip active" data-canal="" onclick="ytSetCanal(this,'')">📡 Todos</button>
+          <button class="estado-chip" data-canal="Canal del Congreso" onclick="ytSetCanal(this,'Canal del Congreso')">🏛️ Congreso</button>
+          <button class="estado-chip" data-canal="Senado de México" onclick="ytSetCanal(this,'Senado de México')">⚖️ Senado</button>
+          <button class="estado-chip" data-canal="Suprema Corte (SCJN)" onclick="ytSetCanal(this,'Suprema Corte (SCJN)')">📜 SCJN</button>
+          <button class="estado-chip" data-canal="INE TV" onclick="ytSetCanal(this,'INE TV')">🗳️ INE</button>
+          <button class="estado-chip" data-canal="Gobierno de México" onclick="ytSetCanal(this,'Gobierno de México')">🇲🇽 Gobierno</button>
         </div>
 
         <!-- LIVE NOW -->
@@ -6450,15 +6480,19 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
 
         <!-- ÚLTIMO POR CANAL -->
-        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:12px">📡 ÚLTIMO POR CANAL</div>
-        <div id="yt-canales-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:24px"></div>
+        <div id="yt-canales-section" style="margin-bottom:24px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:12px">📡 ÚLTIMO POR CANAL</div>
+          <div id="yt-canales-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px"></div>
+        </div>
 
         <!-- RECIENTES -->
-        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:12px">🕐 RECIENTES (TODOS LOS CANALES)</div>
-        <div id="yt-recientes-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:24px"></div>
+        <div id="yt-recientes-section">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px;margin-bottom:12px">🕐 RECIENTES (TODOS LOS CANALES)</div>
+          <div id="yt-recientes-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"></div>
+        </div>
 
         <div style="padding:20px 0;color:var(--text3);font-size:11px;text-align:center;line-height:1.6">
-          🦎 Cero Invención · embeds directos de YouTube. Tequio NO retransmite ni edita las señales. Si el video se cae, es problema del canal oficial.
+          🦎 Cero Invención · embeds directos de YouTube. Tequio NO retransmite ni edita las señales.
         </div>
       </div>
     </div>
@@ -26673,11 +26707,19 @@ window.addEventListener('message', function(e) {
 <!-- ════════ /Compartir global ════════ -->
 <!-- /TEQUIO-NAV-LISTENER -->
 <script>
-// ═════ Hidratación YouTube En Vivo · dashboard_youtube_live ═════
-(function hydrateYouTube(){
+// ═════ Hidratación YouTube En Vivo · v2 con filtros + modal player ═════
+(function hydrateYouTubeV2(){
   var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
   var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-
+  
+  var state = {
+    data: null,
+    canal: '',
+    busqueda: '',
+    timer: null,
+    autoRefresh: null
+  };
+  
   function fmtDate(iso){
     if (!iso) return '';
     var d = new Date(iso);
@@ -26690,67 +26732,151 @@ window.addEventListener('message', function(e) {
     if (days < 30) return 'hace ' + days + 'd';
     return d.toLocaleDateString('es-MX', {day:'numeric',month:'short'});
   }
-
-  function escapeHtml(s){
+  function esc(s){
     return String(s||'').replace(/[&<>"']/g, function(c){
       return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
     });
   }
-
-  function renderVideoCard(v, isLive){
+  function fmt(n){return Number(n||0).toLocaleString('es-MX');}
+  
+  // ── MODAL PLAYER ──
+  window.ytAbrirPlayer = function(videoId, titulo, canal, isLive){
+    var existing = document.getElementById('yt-player-modal');
+    if(existing) existing.remove();
+    var html = '<div id="yt-player-modal" onclick="ytCerrarPlayer(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(8px)">' +
+      '<div onclick="event.stopPropagation()" style="max-width:1000px;width:100%;display:flex;flex-direction:column;gap:10px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;color:#fff">' +
+          '<div style="font-size:14px;line-height:1.4">' +
+            '<div style="font-weight:700;margin-bottom:2px">' + esc(titulo) + '</div>' +
+            '<div style="font-size:11px;opacity:0.7">' + esc(canal) + (isLive?' · <span style="color:#fb7185">🔴 EN VIVO</span>':'') + '</div>' +
+          '</div>' +
+          '<button onclick="ytCerrarPlayer()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0">✕</button>' +
+        '</div>' +
+        '<div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden">' +
+          '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+          '<a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.10);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px">📺 Ver en YouTube</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    document.body.style.overflow = 'hidden';
+  };
+  window.ytCerrarPlayer = function(e){
+    if(e && e.target.id !== 'yt-player-modal' && e.type === 'click') return;
+    var m = document.getElementById('yt-player-modal');
+    if(m) m.remove();
+    document.body.style.overflow = '';
+  };
+  
+  function renderCard(v, isLive){
     var thumb = v.thumbnail_url || '';
     var badge = isLive ? '<span class="live-badge">🔴 EN VIVO</span>' : '';
     var meta = isLive 
-      ? (v.viewers ? Number(v.viewers).toLocaleString('es-MX') + ' viendo ahora' : 'En transmisión')
+      ? (v.viewers ? fmt(v.viewers) + ' viendo ahora' : 'En transmisión')
       : fmtDate(v.published_at);
-    return '<div class="yt-card" onclick="window.open(\''+ v.url_video +'\', \'_blank\')">' +
+    var titEsc = esc(v.titulo||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    var canEsc = esc(v.channel_nombre||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return '<div class="yt-card" onclick="ytAbrirPlayer(\'' + v.video_id + '\',\'' + titEsc + '\',\'' + canEsc + '\',' + (isLive?'true':'false') + ')">' +
       '<div class="thumb">' +
-        (thumb ? '<img src="'+escapeHtml(thumb)+'" alt="" loading="lazy">' : '') +
+        (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '') +
         badge +
-        '<span class="channel-chip">'+ (v.channel_emoji||'') +' '+ escapeHtml(v.channel_nombre) +'</span>' +
+        '<span class="channel-chip">' + (v.channel_emoji||'') + ' ' + esc(v.channel_nombre) + '</span>' +
       '</div>' +
       '<div class="body">' +
-        '<div class="title">'+ escapeHtml(v.titulo) +'</div>' +
-        '<div class="meta">'+ meta +'</div>' +
+        '<div class="title">' + esc(v.titulo) + '</div>' +
+        '<div class="meta">' + meta + '</div>' +
       '</div>' +
     '</div>';
   }
-
-  function apply(data){
-    if (!data) return;
-    var live = data.en_vivo || [];
-    var ultimos = data.ultimos_por_canal || [];
-    var recientes = data.recientes || [];
-
-    // Badge en sidebar
-    var navBadge = document.getElementById('nav-live-badge');
-    if (navBadge) navBadge.style.display = live.length ? '' : 'none';
-
-    // LIVE section
+  
+  function filtrar(arr){
+    return arr.filter(function(v){
+      if(state.canal && v.channel_nombre !== state.canal) return false;
+      if(state.busqueda){
+        var q = state.busqueda.toLowerCase();
+        return (v.titulo||'').toLowerCase().indexOf(q) >= 0;
+      }
+      return true;
+    });
+  }
+  
+  function aplicarFiltros(){
+    if(!state.data) return;
+    var live = filtrar(state.data.en_vivo || []);
+    var ult = filtrar(state.data.ultimos_por_canal || []);
+    var rec = filtrar(state.data.recientes || []);
+    
+    // LIVE
     var liveSec = document.getElementById('yt-live-section');
     var liveGrid = document.getElementById('yt-live-grid');
     var liveCount = document.getElementById('yt-live-count');
-    if (liveSec && live.length){
-      liveSec.style.display = '';
-      if (liveGrid) liveGrid.innerHTML = live.map(function(v){ return renderVideoCard(v, true); }).join('');
-      if (liveCount) liveCount.textContent = live.length + ' transmisión' + (live.length !== 1 ? 'es' : '');
-    } else if (liveSec) {
-      liveSec.style.display = 'none';
+    if(live.length){
+      if(liveSec) liveSec.style.display = '';
+      if(liveGrid) liveGrid.innerHTML = live.map(function(v){return renderCard(v, true);}).join('');
+      if(liveCount) liveCount.textContent = live.length + ' transmisión' + (live.length !== 1 ? 'es' : '');
+    } else {
+      if(liveSec) liveSec.style.display = 'none';
     }
-
+    
     // Por canal
+    var canSec = document.getElementById('yt-canales-section');
     var canGrid = document.getElementById('yt-canales-grid');
-    if (canGrid) canGrid.innerHTML = ultimos.map(function(v){ return renderVideoCard(v, false); }).join('');
-
+    if(ult.length){
+      if(canSec) canSec.style.display = '';
+      if(canGrid) canGrid.innerHTML = ult.map(function(v){return renderCard(v, false);}).join('');
+    } else {
+      if(canSec) canSec.style.display = 'none';
+    }
+    
     // Recientes
+    var recSec = document.getElementById('yt-recientes-section');
     var recGrid = document.getElementById('yt-recientes-grid');
-    if (recGrid) recGrid.innerHTML = recientes.map(function(v){ return renderVideoCard(v, false); }).join('');
-
-    // Última sync
-    var lastSync = document.querySelector('[data-kpi="yt-last-sync"]');
-    if (lastSync && data.last_sync) lastSync.textContent = new Date(data.last_sync).toLocaleString('es-MX');
+    if(rec.length){
+      if(recSec) recSec.style.display = '';
+      if(recGrid) recGrid.innerHTML = rec.map(function(v){return renderCard(v, false);}).join('');
+    } else {
+      if(recSec) recSec.style.display = 'none';
+    }
+    
+    // Si todo vacío
+    if(!live.length && !ult.length && !rec.length){
+      if(canSec) canSec.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">📭 Sin resultados con los filtros actuales.</div>';
+      if(canSec) canSec.style.display = '';
+    }
   }
-
+  
+  function setStats(d){
+    var setText = function(id, v){var el=document.getElementById(id); if(el) el.textContent=v;};
+    setText('yt-stat-live', fmt((d.en_vivo||[]).length));
+    setText('yt-stat-canales', fmt((d.ultimos_por_canal||[]).length));
+    setText('yt-stat-recientes', fmt((d.recientes||[]).length));
+    if(d.last_sync){
+      var dt = new Date(d.last_sync);
+      var diff = Math.floor((Date.now() - dt.getTime()) / 60000);
+      setText('yt-stat-sync', diff < 60 ? 'hace ' + diff + ' min' : dt.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
+    }
+    // Badge sidebar
+    var navBadge = document.getElementById('nav-live-badge');
+    if(navBadge) navBadge.style.display = (d.en_vivo||[]).length ? '' : 'none';
+  }
+  
+  window.ytSetCanal = function(el, c){
+    state.canal = c || '';
+    el.parentElement.querySelectorAll('.estado-chip').forEach(function(x){x.classList.remove('active');});
+    el.classList.add('active');
+    aplicarFiltros();
+  };
+  
+  window.ytFiltrarDeb = function(){
+    clearTimeout(state.timer);
+    state.timer = setTimeout(function(){
+      state.busqueda = document.getElementById('yt-search').value.trim();
+      aplicarFiltros();
+    }, 250);
+  };
+  
   function tryFetch(){
     fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_youtube_live', {
       method: 'POST',
@@ -26758,15 +26884,32 @@ window.addEventListener('message', function(e) {
       body: '{}'
     })
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(apply)
-    .catch(function(e){ console.warn('[Tequio YT]', e.message); });
+    .then(function(d){
+      state.data = d;
+      setStats(d);
+      aplicarFiltros();
+    })
+    .catch(function(){});
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryFetch);
-  else setTimeout(tryFetch, 0);
-
-  // Refrescar cada 5 minutos cuando el tab está activo
-  setInterval(function(){ if (!document.hidden) tryFetch(); }, 5 * 60 * 1000);
+  
+  window.ytRefresh = function(){
+    var btn = document.getElementById('yt-refresh-btn');
+    if(btn){ btn.innerHTML = '<span>⏳</span> Cargando...'; btn.disabled = true; }
+    tryFetch();
+    setTimeout(function(){
+      if(btn){ btn.innerHTML = '<span>🔄</span> Actualizar'; btn.disabled = false; }
+    }, 1500);
+  };
+  
+  // Auto-refresh cada 60s
+  function startAutoRefresh(){
+    if(state.autoRefresh) clearInterval(state.autoRefresh);
+    state.autoRefresh = setInterval(tryFetch, 60000);
+  }
+  
+  // Boot
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ tryFetch(); startAutoRefresh(); });
+  else { tryFetch(); startAutoRefresh(); }
 })();
 </script>
 <script>
