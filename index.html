@@ -13569,6 +13569,8 @@ function cargarPanel(slug, extras) {
     'perfil': '/panel/perfil.html?embedded=1',
     'precios': '/precios.html?embedded=1',
     'gasolina': '/gasolina.html?embedded=1',
+    'cambios-recientes': '/panel/cambios-recientes.html?embedded=1',
+    'me-afectan': '/panel/me-afectan.html?embedded=1',
     'representantes': '/mis-representantes.html?embedded=1'
   };
   let url = PANELS[slug];
@@ -13602,7 +13604,9 @@ function cargarPanel(slug, extras) {
       'iniciativa-firmar': 'Firma Iniciativas',
       'sre': 'México en el Mundo',
       'scrapers-admin': 'Scrapers Health',
-      'directorio': '📞 Directorio 32 Estados'
+      'directorio': '📞 Directorio 32 Estados',
+      'cambios-recientes': '📡 Cambios Recientes',
+      'me-afectan': '🎯 Leyes que me afectan'
     };
     titleEl.textContent = TITLES[slug] || 'Panel';
   }
