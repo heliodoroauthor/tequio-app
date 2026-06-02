@@ -3,55 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas Nacional — Tequio</title>
+<title>Atlas Nacional · Tequio</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg:#0b0f1a; --panel:#131826; --panel2:#1a2030; --border:#2a334a;
-    --text:#e6e9f2; --muted:#8b94a7; --gold:#fbbf24;
-    --green:#34d399; --red:#f87171; --accent:#60a5fa;
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d;
+    --green: #22c55e; --green-soft: #86efac;
+    --red: #ef4444; --red-soft: #fca5a5;
+    --blue: #3b82f6; --blue-soft: #93c5fd;
+    --teal: #14b8a6; --emerald: #10b981;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.5; }
-  header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
-  h1 { margin: 0 0 4px; font-size: 20px; color: var(--gold); }
-  .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
-  .layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 70px); }
-  .sidebar { background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; }
-  #map { width: 100%; height: 100%; background: #1a1a1a; }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; height: 100%; }
+  body { overflow: hidden; }
+
+  /* HERO COMPACTO */
+  .hero {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34,197,94,0.20) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(59,130,246,0.18) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(59,130,246,0.08) 50%, rgba(15,23,42,0.95) 100%);
+    border-bottom: 1px solid rgba(34,197,94,0.25);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+  .hero-left { flex: 1; min-width: 280px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.40);
+    color: var(--green-soft);
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 9.5px; font-weight: 800;
+    letter-spacing: 1.4px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .hero h1 {
+    font-size: 21px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 4px;
+    background: linear-gradient(135deg, #fff 0%, var(--green-soft) 50%, var(--blue-soft) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: #cbd5e1; font-size: 12.5px; margin: 0; }
+  .hero p strong { color: var(--accent-soft); font-weight: 700; }
+
+  .hero-stats { display: flex; gap: 10px; }
+  .hstat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 8px 14px; text-align: center; }
+  .hstat-num { font-size: 18px; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+  .hstat-num.green { color: var(--green-soft); }
+  .hstat-num.blue { color: var(--blue-soft); }
+  .hstat-num.amber { color: var(--accent-soft); }
+  .hstat-lbl { font-size: 9.5px; color: var(--text-dim); font-weight: 600; margin-top: 2px; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 340px 1fr; height: calc(100vh - 76px); }
+  .sidebar { background: var(--card); border-right: 1px solid var(--border-soft); overflow-y: auto; padding: 14px; }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 3px; }
+  #map { width: 100%; height: 100%; background: #0a0e1a; }
+
+  .btn-sos {
+    width: 100%; padding: 13px; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+    color: #fff; border: none; border-radius: 12px;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+    font-family: inherit;
+    transition: transform .15s;
+  }
+  .btn-sos:hover { transform: translateY(-1px); }
+
   .filter { margin-bottom: 12px; }
-  .filter label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .filter select { width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 14px; }
-  .btn-sos { width: 100%; padding: 12px; background: var(--red); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
-  .btn-sos:hover { background: #d62b2b; }
-  .stats { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  .stats strong { color: var(--gold); }
+  .filter label { display: block; font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: 700; }
+  .filter select {
+    width: 100%; padding: 9px 11px;
+    background: var(--bg-soft); border: 1px solid var(--border-soft);
+    color: var(--text); border-radius: 9px; font-size: 13px;
+    font-family: inherit;
+  }
+  .filter select:focus { outline: none; border-color: var(--green); }
+
+  .stats {
+    background: rgba(34,197,94,0.05);
+    border: 1px solid rgba(34,197,94,0.20);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px; color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .stats strong { color: var(--green-soft); font-weight: 800; font-size: 14px; }
+
+  details.edu {
+    background: rgba(59,130,246,0.06);
+    border: 1px solid rgba(59,130,246,0.20);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  details.edu summary { list-style: none; font-weight: 700; color: var(--blue-soft); font-size: 11.5px; display: flex; align-items: center; gap: 6px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 8px; color: var(--blue); transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 8px; font-size: 11.5px; color: var(--text-dim); line-height: 1.55; }
+  details.edu .edu-body strong { color: var(--accent-soft); }
+
+  .resultados-title { font-size: 10.5px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin: 10px 0 6px; }
   .resultados { font-size: 12px; }
-  .resultado-item { padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .resultado-item:hover { background: var(--panel2); }
-  .res-nombre { font-weight: 600; }
-  .res-cat { color: var(--muted); font-size: 11px; }
-  .res-dist { color: var(--green); font-size: 11px; }
-  .leaflet-popup-content-wrapper { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
-  .leaflet-popup-tip { background: var(--panel); }
-  .leaflet-popup-content a { color: var(--accent); }
-  .pin-pop { font-size: 13px; }
-  .pin-pop b { color: var(--gold); }
-  .pin-pop .src { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .resultado-item {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: background .15s;
+    border-radius: 6px;
+  }
+  .resultado-item:hover { background: rgba(34,197,94,0.06); }
+  .res-nombre { font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .res-cat { color: var(--text-dim); font-size: 11px; }
+  .res-dist { color: var(--green-soft); font-size: 11px; font-weight: 700; }
+
+  /* LEAFLET DARK */
+  .leaflet-tile-pane { filter: brightness(0.7) saturate(0.85) hue-rotate(8deg); }
+  .leaflet-popup-content-wrapper {
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .leaflet-popup-tip { background: var(--card); border: 1px solid var(--border-soft); }
+  .leaflet-popup-content a { color: var(--blue-soft); font-weight: 600; }
+  .leaflet-popup-close-button { color: var(--text-dim) !important; }
+  .pin-pop { font-size: 13px; line-height: 1.5; }
+  .pin-pop b { color: var(--accent-soft); font-size: 14px; }
+  .pin-pop .src { font-size: 11px; color: var(--text-dim); margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--border-soft); }
+
   @media (max-width: 768px) {
-    .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .layout { grid-template-columns: 1fr; grid-template-rows: 280px 1fr; }
     .sidebar { max-height: 280px; }
+    .hero { padding: 10px 14px; flex-direction: column; align-items: stretch; gap: 10px; }
+    .hero-stats { justify-content: space-between; }
+    .hstat { padding: 6px 10px; }
   }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
-<header>
-  <h1>🗺️ Atlas Nacional</h1>
-  <p class="subtitle"><span data-kpi="total_puntos_servicio" data-kpi-fmt="int">538,873</span> servicios públicos georreferenciados en los 32 estados de México · DENUE INEGI + Atlas estatales</p>
-</header>
+
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">🗺️ DENUE INEGI · Cero invención</div>
+    <h1>Atlas Nacional</h1>
+    <p><strong>538,873</strong> servicios públicos georreferenciados en los 32 estados de México · Encuentra el más cercano con GPS</p>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-num green"><span data-kpi="total_puntos_servicio" data-kpi-fmt="int">538k</span></div><div class="hstat-lbl">Puntos</div></div>
+    <div class="hstat"><div class="hstat-num blue">32/32</div><div class="hstat-lbl">Estados</div></div>
+    <div class="hstat"><div class="hstat-num amber">GPS</div><div class="hstat-lbl">Cerca de mí</div></div>
+  </div>
+</div>
+
 <div class="layout">
   <aside class="sidebar">
     <button class="btn-sos" id="btn-cerca">📍 Cerca de mí (GPS)</button>
+
+    <details class="edu">
+      <summary>📖 ¿De dónde vienen estos 538k puntos?</summary>
+      <div class="edu-body">
+        Datos del <strong>DENUE de INEGI</strong> + atlas estatales oficiales. Cada punto tiene fuente verificable y enlace a la fuente oficial.
+      </div>
+    </details>
+
     <div class="filter">
       <label>Estado</label>
       <select id="f-entidad">
@@ -90,17 +215,23 @@
         <option value="Zacatecas">Zacatecas</option>
       </select>
     </div>
+
     <div class="filter">
       <label>Categoría</label>
       <select id="f-categoria"><option value="">Todas</option></select>
     </div>
+
     <div class="filter">
       <label>Subcategoría</label>
       <select id="f-subcat"><option value="">Todas</option></select>
     </div>
+
     <div class="stats" id="stats">Cargando…</div>
+
+    <div class="resultados-title">📋 Resultados</div>
     <div class="resultados" id="resultados"></div>
   </aside>
+
   <div id="map"></div>
 </div>
 
@@ -137,7 +268,7 @@ async function loadPuntos(){
   const cat = document.getElementById('f-categoria').value;
   const sub = document.getElementById('f-subcat').value;
   if (!cat && !sub){
-    document.getElementById('stats').innerHTML = '<strong>538,873</strong> puntos en 32 estados. Filtra por categoría.';
+    document.getElementById('stats').innerHTML = '<strong>538,873</strong> puntos en 32 estados.<br>Selecciona una categoría para verlos en el mapa.';
     document.getElementById('resultados').innerHTML = '';
     markersLayer.clearLayers();
     return;
@@ -157,16 +288,14 @@ async function loadPuntos(){
     marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + (p.municipio ? '<br>📍 ' + escapeHtml(p.municipio) : '') + '<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
     markersLayer.addLayer(marker);
   }
-  document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos mostrados';
+  document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos mostrados<br>en el mapa';
   if (pts.length){
     const bounds = L.latLngBounds(pts.map(p => [p.lat, p.lng]));
     map.fitBounds(bounds.pad(0.1));
   }
   const res = document.getElementById('resultados');
   res.innerHTML = pts.slice(0, 50).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + (p.municipio ? ' · ' + escapeHtml(p.municipio) : '') + '</div></div>').join('');
-  res.querySelectorAll('.resultado-item').forEach(el => {
-    el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
-  });
+  res.querySelectorAll('.resultado-item').forEach(el => { el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16)); });
 }
 
 async function cercaDeMi(){
@@ -183,18 +312,16 @@ async function cercaDeMi(){
     const j = await r.json();
     const pts = j.puntos || [];
     markersLayer.clearLayers();
-    L.circleMarker([lat, lng], { radius: 10, fillColor: '#60a5fa', color: '#fff', weight: 2, fillOpacity: 0.9 }).bindPopup('Tú estás aquí').addTo(markersLayer);
+    L.circleMarker([lat, lng], { radius: 10, fillColor: '#3b82f6', color: '#fff', weight: 2, fillOpacity: 0.9 }).bindPopup('<div class="pin-pop"><b>📍 Tú estás aquí</b></div>').addTo(markersLayer);
     for (const p of pts){
       const marker = L.circleMarker([p.lat, p.lng], { radius: 6, fillColor: p.color || '#fbbf24', color: '#fff', weight: 1, fillOpacity: 0.85 });
       marker.bindPopup('<div class="pin-pop"><b>' + escapeHtml(p.nombre) + '</b><br>' + escapeHtml(p.subcategoria) + '<br>📏 ' + p.distancia_km.toFixed(2) + ' km<div class="src">📎 <a href="' + escapeHtml(p.fuente_url) + '" target="_top">Fuente oficial</a></div></div>');
       markersLayer.addLayer(marker);
     }
     map.setView([lat, lng], 13);
-    document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos en 10 km';
-    document.getElementById('resultados').innerHTML = pts.slice(0, 30).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div><div class="res-dist">' + p.distancia_km.toFixed(2) + ' km</div></div>').join('');
-    document.getElementById('resultados').querySelectorAll('.resultado-item').forEach(el => {
-      el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16));
-    });
+    document.getElementById('stats').innerHTML = '<strong>' + pts.length + '</strong> puntos en 10 km de tu ubicación';
+    document.getElementById('resultados').innerHTML = pts.slice(0, 30).map(p => '<div class="resultado-item" data-lat="' + p.lat + '" data-lng="' + p.lng + '"><div class="res-nombre">' + escapeHtml(p.nombre) + '</div><div class="res-cat">' + escapeHtml(p.subcategoria) + '</div><div class="res-dist">📏 ' + p.distancia_km.toFixed(2) + ' km</div></div>').join('');
+    document.getElementById('resultados').querySelectorAll('.resultado-item').forEach(el => { el.addEventListener('click', () => map.setView([+el.dataset.lat, +el.dataset.lng], 16)); });
     document.getElementById('btn-cerca').textContent = '📍 Cerca de mí (GPS)';
   }, err => {
     alert('No se pudo obtener tu ubicación: ' + err.message);
