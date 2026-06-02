@@ -125,11 +125,33 @@
 
   .disclaimer { margin-top: 14px; font-size: 11.5px; color: var(--text-dim); text-align: center; line-height: 1.5; padding: 10px 14px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; }
   .disclaimer strong { color: var(--accent); }
+
+  /* PRÓXIMAMENTE BANNER */
+  .pronto-banner {
+    background: linear-gradient(135deg, rgba(251,191,36,0.18) 0%, rgba(168,85,247,0.12) 100%);
+    border: 1px solid rgba(251,191,36,0.40);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  .pronto-emoji { font-size: 28px; flex-shrink: 0; }
+  .pronto-text { flex: 1; min-width: 240px; font-size: 13px; color: #fef3c7; line-height: 1.55; }
+  .pronto-text strong { color: var(--accent); font-weight: 800; }
+
 </style>
 <script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
 <div class="container">
+  <div class="pronto-banner">
+    <div class="pronto-emoji">🚧</div>
+    <div class="pronto-text">
+      <strong>PRÓXIMAMENTE — IA con servidor propio.</strong>
+      Estamos trabajando para montar nuestro propio servidor con modelos open-source y dejar de depender de APIs externas. Por ahora el servicio puede tener interrupciones por límites de créditos. ¿Quieres ayudar a que llegue antes? <a href="/panel/donar.html" target="_top" style="color:var(--accent-soft);font-weight:700;text-decoration:underline">Apoya el proyecto →</a>
+    </div>
+  </div>
 
   <div class="hero">
     <div class="hero-badge">🧠 Powered by RAG · Cero invención</div>
