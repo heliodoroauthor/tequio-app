@@ -3,296 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mi Rep vs Yo | Tequio</title>
+<title>Mi Rep vs Yo · Tequio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0b0f1a;
-    --bg-card: rgba(255,255,255,0.03);
-    --border: #374151;
-    --text: #f3f4f6;
-    --text-dim: #9ca3af;
-    --gold: #fbbf24;
-    --green: #10b981;
-    --red: #dc2626;
-    --gray: #6b7280;
-    --purple: #a78bfa;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
-  body { padding: 1rem 0.9rem 4rem; max-width: 760px; margin: 0 auto; line-height: 1.55; }
-  a { color: var(--gold); text-decoration: none; }
+  :root {
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --bg-card: rgba(255,255,255,0.03);
+    --border: #374151; --border-soft: #374151;
+    --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d; --gold: #fbbf24;
+    --green: #22c55e; --green-soft: #86efac;
+    --red: #ef4444; --red-soft: #fca5a5;
+    --gray: #6b7280;
+    --purple: #a855f7; --purple-soft: #d8b4fe;
+    --blue: #3b82f6; --blue-soft: #93c5fd;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; line-height: 1.55; }
+  body { padding: 16px; max-width: 800px; margin: 0 auto; padding-bottom: 4rem; }
+  a { color: var(--blue-soft); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .back-link { display: inline-block; color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1rem; }
-  .header h1 { font-size: 1.7rem; font-weight: 800; color: var(--gold); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
-  .header .subtitle { color: var(--text-dim); font-size: 0.92rem; margin-bottom: 1.4rem; }
-  .config-banner { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; padding: 1rem 1.1rem; border-radius: 0.6rem; margin-bottom: 1.2rem; }
-  .config-banner a { color: var(--gold); font-weight: 700; }
-  .hero { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(168,85,247,0.06)); border: 1px solid rgba(251,191,36,0.2); border-radius: 0.85rem; padding: 1.1rem 1.2rem; margin-bottom: 1.3rem; }
-  .hero h2 { color: var(--gold); font-size: 1.1rem; margin-bottom: 0.3rem; font-weight: 700; }
-  .hero p { color: var(--text-dim); font-size: 0.88rem; }
-  .loading { color: var(--text-dim); text-align: center; padding: 2rem; font-size: 0.9rem; }
-  .disclaimer { background: rgba(255,255,255,0.02); border-left: 3px solid var(--gray); padding: 0.9rem 1rem; margin-top: 2rem; color: var(--text-dim); font-size: 0.78rem; border-radius: 0.3rem; line-height: 1.6; }
-  button { font-family: inherit; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--blue-soft); font-size: 13px; margin-bottom: 10px; }
   .embedded .back-link { display: none !important; }
+
+  .hero-master {
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(251,191,36,0.20) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(168,85,247,0.18) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(251,191,36,0.10) 0%, rgba(168,85,247,0.08) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(251,191,36,0.28);
+    border-radius: 20px;
+    padding: 24px 22px 20px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(251,191,36,0.18);
+    border: 1px solid rgba(251,191,36,0.45);
+    color: var(--accent-soft);
+    padding: 5px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero-master h1 {
+    font-size: 28px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 8px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-soft) 50%, var(--purple-soft) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-master .subtitle { color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; }
+  .hero-master .subtitle strong { color: var(--accent-soft); }
+
+  .config-banner {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.30);
+    color: var(--accent-soft);
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .config-banner a { color: var(--accent); font-weight: 800; }
+
+  details.edu {
+    background: rgba(251,191,36,0.06);
+    border: 1px solid rgba(251,191,36,0.22);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--accent-soft); font-size: 13px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--accent); transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 10px; color: #cbd5e1; font-size: 12.5px; line-height: 1.65; }
+  details.edu .edu-body strong { color: var(--accent-soft); }
+
+  .hero {
+    background: var(--card);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .hero h2 { color: var(--accent); font-size: 17px; margin-bottom: 4px; font-weight: 800; }
+  .hero p { color: var(--text-dim); font-size: 13px; }
+
+  .loading { color: var(--text-dim); text-align: center; padding: 30px; font-size: 13px; background: var(--card); border: 1px dashed var(--border-soft); border-radius: 12px; }
+
+  .disclaimer {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 3px solid var(--gray);
+    padding: 12px 14px;
+    margin-top: 2rem;
+    color: var(--text-dim);
+    font-size: 11.5px;
+    border-radius: 8px;
+    line-height: 1.6;
+  }
+  button { font-family: inherit; }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
-<a href="/" class="back-link" id="back-link">&larr; Tequio</a>
-<div class="header">
+<a href="/" class="back-link" id="back-link">← Tequio</a>
+
+<div class="hero-master">
+  <div class="hero-badge">🗳️ Datos Cámara Diputados · Cero invención</div>
   <h1>Mi Rep vs Yo</h1>
-  <div class="subtitle">Compara tu voto con como votaron tus diputados federales. Accountability ciudadana real.</div>
+  <div class="subtitle">Vota como tú habrías votado y descubre <strong>cuáles de tus diputados federales coinciden contigo</strong>. Accountability ciudadana real con votaciones del Pleno.</div>
 </div>
+
+<details class="edu">
+  <summary>📖 ¿Cómo funciona Mi Rep vs Yo?</summary>
+  <div class="edu-body">
+    Te mostramos votaciones reales del Congreso. Tú votas a favor / en contra / abstención. Te decimos quiénes de tus diputados coincidieron contigo — y quiénes no. <strong>Tus votos se guardan SOLO en tu dispositivo</strong> (localStorage). Nada va a servidores. Los votos de los diputados son datos oficiales de la Cámara.
+  </div>
+</details>
+
 <div id="config-banner" class="config-banner" style="display:none;">
-  Configura tu estado para ver a tus diputados. <a href="/panel/perfil.html" target="_top">Configurar &rarr;</a>
+  ⚙️ Configura tu estado para ver a tus diputados. <a href="/panel/perfil.html" target="_top">Configurar →</a>
 </div>
+
 <div id="hero-state" style="display:none;"></div>
 <div id="loading" class="loading">Cargando votaciones...</div>
 <div id="votaciones-feed"></div>
 <div id="resumen" style="display:none;"></div>
+
 <div class="disclaimer">
-  Tus votos se guardan SOLO en tu dispositivo (localStorage). Nada se envia a servidores. Los votos de los diputados son datos oficiales de la Camara de Diputados.
+  🔒 <strong style="color:var(--text)">Privacidad:</strong> Tus votos se guardan SOLO en tu dispositivo (localStorage). Nada se envía a servidores. Los votos de los diputados son datos oficiales de la Cámara de Diputados.
 </div>
+
 <script>
-
-const NOMBRES_ESTADO = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de Mexico","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de Mexico","16":"Michoacan","17":"Morelos","18":"Nayarit","19":"Nuevo Leon","20":"Oaxaca","21":"Puebla","22":"Queretaro","23":"Quintana Roo","24":"San Luis Potosi","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatan","32":"Zacatecas"};
-const VOTO_LABELS = { 'a_favor': 'A favor', 'en_contra': 'En contra', 'abstencion': 'Abstencion' };
-const VOTO_EMOJI = { 'a_favor': '\u2705', 'en_contra': '\u274C', 'abstencion': '\u2696\uFE0F' };
+const NOMBRES_ESTADO = {"01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche","05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México","10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco","15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León","20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí","25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala","30":"Veracruz","31":"Yucatán","32":"Zacatecas"};
+const VOTO_LABELS = { 'a_favor': 'A favor', 'en_contra': 'En contra', 'abstencion': 'Abstención' };
+const VOTO_EMOJI = { 'a_favor': '✅', 'en_contra': '❌', 'abstencion': '⚖️' };
 const DIP_VOTO_TO_USER = { 'si': 'a_favor', 'no': 'en_contra', 'abst': 'abstencion' };
-
 let datos = null;
+(function(){ try{ const params=new URLSearchParams(window.location.search); if(params.get('embedded')==='1') document.body.classList.add('embedded'); }catch(e){} })();
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function getVotoUser(id){ return localStorage.getItem('tequio_voto_'+id); }
+function setVotoUser(id,voto){ if(voto===null||voto===undefined) localStorage.removeItem('tequio_voto_'+id); else localStorage.setItem('tequio_voto_'+id,voto); renderVotaciones(); renderResumen(); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+function getVotoDip(votId,dipId){ if(!datos||!datos.votos_individuales) return null; return datos.votos_individuales.find(v=>v.votacion_id===votId&&v.dipt_id===dipId); }
+function calcularCoincidencia(votId,votoUser){ let coinciden=0,total=0; for(const dip of datos.diputados){ const vDip=getVotoDip(votId,dip.dipt_id); if(!vDip||vDip.voto==='ausente') continue; total++; if(DIP_VOTO_TO_USER[vDip.voto]===votoUser) coinciden++; } return {coinciden,total,pct:total>0?Math.round((coinciden/total)*100):0}; }
+function fmtFecha(f){ try{ return new Date(f).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return f||''; } }
 
-(function () {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('embedded') === '1') {
-      document.body.classList.add('embedded');
-    }
-  } catch (e) {}
-})();
-
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function getVotoUser(votacionId) {
-  return localStorage.getItem('tequio_voto_' + votacionId);
-}
-
-function setVotoUser(votacionId, voto) {
-  if (voto === null || voto === undefined) {
-    localStorage.removeItem('tequio_voto_' + votacionId);
-  } else {
-    localStorage.setItem('tequio_voto_' + votacionId, voto);
-  }
-  renderVotaciones();
-  renderResumen();
-  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
-}
-
-function getVotoDip(votacionId, dipId) {
-  if (!datos || !datos.votos_individuales) return null;
-  return datos.votos_individuales.find(v => v.votacion_id === votacionId && v.dipt_id === dipId);
-}
-
-function calcularCoincidencia(votacionId, votoUser) {
-  let coinciden = 0;
-  let total = 0;
-  for (const dip of datos.diputados) {
-    const vDip = getVotoDip(votacionId, dip.dipt_id);
-    if (!vDip || vDip.voto === 'ausente') continue;
-    total++;
-    if (DIP_VOTO_TO_USER[vDip.voto] === votoUser) coinciden++;
-  }
-  return { coinciden, total, pct: total > 0 ? Math.round((coinciden / total) * 100) : 0 };
-}
-
-function fmtFecha(f) {
-  try {
-    return new Date(f).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-  } catch (e) { return f || ''; }
-}
-
-async function init() {
-  const clave = localStorage.getItem('tequio_estado_clave') || '';
-  const banner = document.getElementById('config-banner');
-  const loading = document.getElementById('loading');
-  const heroState = document.getElementById('hero-state');
-
-  if (!clave) {
-    banner.style.display = 'block';
-    loading.style.display = 'none';
-    return;
-  }
-  banner.style.display = 'none';
-  loading.style.display = 'block';
-  loading.textContent = 'Cargando votaciones y diputados...';
-
-  try {
-    const r = await fetch('/api/data?vista=mi_rep_datos&clave_entidad=' + encodeURIComponent(clave) + '&limit=20');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    datos = await r.json();
-  } catch (e) {
-    loading.innerHTML = '<span style="color:#ef4444;">Error cargando datos: ' + escapeHtml(e.message) + '</span>';
-    return;
-  }
-
-  loading.style.display = 'none';
-  const nombreEstado = NOMBRES_ESTADO[clave] || 'tu estado';
-  const nDips = (datos.diputados || []).length;
-  heroState.style.display = 'block';
-  heroState.innerHTML = '<div class="hero"><h2>Tus diputados federales de ' + escapeHtml(nombreEstado) + '</h2><p>' + nDips + ' diputado' + (nDips === 1 ? '' : 's') + ' encontrado' + (nDips === 1 ? '' : 's') + '. ' + (datos.votaciones || []).length + ' votaciones divisivas recientes.</p></div>';
-
+async function init(){
+  const clave=localStorage.getItem('tequio_estado_clave')||'';
+  const banner=document.getElementById('config-banner'), loading=document.getElementById('loading'), heroState=document.getElementById('hero-state');
+  if(!clave){ banner.style.display='flex'; loading.style.display='none'; return; }
+  banner.style.display='none'; loading.style.display='block'; loading.textContent='Cargando votaciones y diputados...';
+  try{
+    const r=await fetch('/api/data?vista=mi_rep_datos&clave_entidad='+encodeURIComponent(clave)+'&limit=20');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    datos=await r.json();
+  }catch(e){ loading.innerHTML='<span style="color:var(--red);">Error cargando datos: '+escapeHtml(e.message)+'</span>'; return; }
+  loading.style.display='none';
+  const nombreEstado=NOMBRES_ESTADO[clave]||'tu estado';
+  const nDips=(datos.diputados||[]).length;
+  heroState.style.display='block';
+  heroState.innerHTML='<div class="hero"><h2>📍 Tus diputados federales de '+escapeHtml(nombreEstado)+'</h2><p>'+nDips+' diputado'+(nDips===1?'':'s')+' encontrado'+(nDips===1?'':'s')+' · '+(datos.votaciones||[]).length+' votaciones divisivas recientes</p></div>';
   renderVotaciones();
   renderResumen();
 }
 
-function renderVotaciones() {
-  const container = document.getElementById('votaciones-feed');
-  if (!datos || !datos.votaciones || !datos.votaciones.length) {
-    container.innerHTML = '<div class="loading">No hay votaciones divisivas disponibles.</div>';
-    return;
-  }
-  container.innerHTML = datos.votaciones.map(v => {
-    const votoUser = getVotoUser(v.votacion_id);
-    return votoUser ? renderVotacionVotada(v, votoUser) : renderVotacionPendiente(v);
-  }).join('');
+function renderVotaciones(){
+  const container=document.getElementById('votaciones-feed');
+  if(!datos||!datos.votaciones||!datos.votaciones.length){ container.innerHTML='<div class="loading">No hay votaciones divisivas disponibles.</div>'; return; }
+  container.innerHTML=datos.votaciones.map(v=>{ const votoUser=getVotoUser(v.votacion_id); return votoUser?renderVotacionVotada(v,votoUser):renderVotacionPendiente(v); }).join('');
 }
 
-function renderVotacionPendiente(v) {
-  const asunto = String(v.asunto || '');
-  const truncated = asunto.length > 280 ? asunto.substring(0, 280) + '...' : asunto;
-  return '<div class="votacion-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:0.75rem;padding:1.2rem;margin-bottom:1rem;">'
-    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.4rem;">' + escapeHtml(fmtFecha(v.fecha)) + '</div>'
-    + '<div style="color:var(--text);line-height:1.5;margin-bottom:1rem;font-size:0.95rem;">' + escapeHtml(truncated) + '</div>'
-    + '<div style="color:var(--text-dim);font-size:0.82rem;margin-bottom:1rem;">Resultado oficial: ' + (v.total_si || 0) + ' si \u00B7 ' + (v.total_no || 0) + ' no \u00B7 ' + (v.total_abst || 0) + ' abst</div>'
-    + '<div style="color:var(--gold);font-size:0.85rem;font-weight:600;margin-bottom:0.7rem;">\u00BFTu como habrias votado?</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">'
-    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'a_favor\')" style="background:var(--green);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u2705 A favor</button>'
-    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'en_contra\')" style="background:var(--red);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u274C En contra</button>'
-    + '<button onclick="setVotoUser(' + v.votacion_id + ',\'abstencion\')" style="background:var(--gray);color:white;border:none;padding:0.7rem 0.3rem;border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.85rem;">\u2696\uFE0F Abst.</button>'
-    + '</div>'
-    + (v.url_oficial ? '<div style="margin-top:0.7rem;font-size:0.75rem;"><a href="' + escapeHtml(v.url_oficial) + '" target="_blank" rel="noopener" style="color:var(--text-dim);">Ver acta oficial \u2197</a></div>' : '')
-    + '</div>';
+function renderVotacionPendiente(v){
+  const asunto=String(v.asunto||'');
+  const truncated=asunto.length>280?asunto.substring(0,280)+'...':asunto;
+  return '<div class="votacion-card" style="background:var(--card);border:1px solid var(--border-soft);border-radius:14px;padding:16px;margin-bottom:12px;">'
+    +'<div style="color:var(--text-dim);font-size:11.5px;margin-bottom:6px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase;">📅 '+escapeHtml(fmtFecha(v.fecha))+'</div>'
+    +'<div style="color:var(--text);line-height:1.5;margin-bottom:12px;font-size:14px;font-weight:600;">'+escapeHtml(truncated)+'</div>'
+    +'<div style="color:var(--text-dim);font-size:12px;margin-bottom:12px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:8px;">Resultado oficial: ✅ '+(v.total_si||0)+' sí · ❌ '+(v.total_no||0)+' no · ⚖️ '+(v.total_abst||0)+' abst</div>'
+    +'<div style="color:var(--accent-soft);font-size:13px;font-weight:700;margin-bottom:10px;">¿Tú cómo habrías votado?</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'
+    +'<button onclick="setVotoUser('+v.votacion_id+',\'a_favor\')" style="background:linear-gradient(135deg,var(--green) 0%,#16a34a 100%);color:white;border:none;padding:10px 4px;border-radius:10px;font-weight:800;cursor:pointer;font-size:12.5px;transition:transform .15s;">✅ A favor</button>'
+    +'<button onclick="setVotoUser('+v.votacion_id+',\'en_contra\')" style="background:linear-gradient(135deg,var(--red) 0%,#dc2626 100%);color:white;border:none;padding:10px 4px;border-radius:10px;font-weight:800;cursor:pointer;font-size:12.5px;transition:transform .15s;">❌ En contra</button>'
+    +'<button onclick="setVotoUser('+v.votacion_id+',\'abstencion\')" style="background:linear-gradient(135deg,#6b7280 0%,#4b5563 100%);color:white;border:none;padding:10px 4px;border-radius:10px;font-weight:800;cursor:pointer;font-size:12.5px;transition:transform .15s;">⚖️ Abst.</button>'
+    +'</div>'
+    +(v.url_oficial?'<div style="margin-top:10px;font-size:11px;"><a href="'+escapeHtml(v.url_oficial)+'" target="_blank" rel="noopener" style="color:var(--text-dim);">📎 Ver acta oficial ↗</a></div>':'')
+    +'</div>';
 }
 
-function renderVotacionVotada(v, votoUser) {
-  const { coinciden, total, pct } = calcularCoincidencia(v.votacion_id, votoUser);
-  const labelUser = (VOTO_EMOJI[votoUser] || '') + ' ' + (VOTO_LABELS[votoUser] || votoUser);
-  const asunto = String(v.asunto || '');
-  const truncated = asunto.length > 280 ? asunto.substring(0, 280) + '...' : asunto;
-
-  const dipsConVoto = (datos.diputados || []).map(d => {
-    const vDip = getVotoDip(v.votacion_id, d.dipt_id);
-    if (!vDip) return null;
-    const dipNorm = DIP_VOTO_TO_USER[vDip.voto];
-    const ausente = vDip.voto === 'ausente';
-    return { dip: d, vDip, coincide: dipNorm === votoUser, ausente };
-  }).filter(Boolean);
-
-  // Sort: coincidencia primero, luego no coincide, luego ausente
-  dipsConVoto.sort((a, b) => {
-    const sa = a.ausente ? 2 : (a.coincide ? 0 : 1);
-    const sb = b.ausente ? 2 : (b.coincide ? 0 : 1);
-    return sa - sb;
-  });
-
-  const dipsHtml = dipsConVoto.map(({ dip, vDip, coincide, ausente }) => {
+function renderVotacionVotada(v,votoUser){
+  const {coinciden,total,pct}=calcularCoincidencia(v.votacion_id,votoUser);
+  const labelUser=(VOTO_EMOJI[votoUser]||'')+' '+(VOTO_LABELS[votoUser]||votoUser);
+  const asunto=String(v.asunto||'');
+  const truncated=asunto.length>280?asunto.substring(0,280)+'...':asunto;
+  const dipsConVoto=(datos.diputados||[]).map(d=>{ const vDip=getVotoDip(v.votacion_id,d.dipt_id); if(!vDip) return null; const dipNorm=DIP_VOTO_TO_USER[vDip.voto]; const ausente=vDip.voto==='ausente'; return {dip:d,vDip,coincide:dipNorm===votoUser,ausente}; }).filter(Boolean);
+  dipsConVoto.sort((a,b)=>{ const sa=a.ausente?2:(a.coincide?0:1); const sb=b.ausente?2:(b.coincide?0:1); return sa-sb; });
+  const dipsHtml=dipsConVoto.map(({dip,vDip,coincide,ausente})=>{
     let badge;
-    if (ausente) badge = '<span style="background:#374151;color:#9ca3af;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;white-space:nowrap;">\u2298 AUSENTE</span>';
-    else if (coincide) badge = '<span style="background:var(--green);color:white;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;white-space:nowrap;">\u2705 COINCIDE</span>';
-    else badge = '<span style="background:var(--red);color:white;padding:0.2rem 0.5rem;border-radius:0.3rem;font-size:0.7rem;font-weight:700;white-space:nowrap;">\u274C NO</span>';
-
-    const foto = dip.foto_url
-      ? '<img src="' + escapeHtml(dip.foto_url) + '" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">'
-      : '<div style="width:34px;height:34px;border-radius:50%;background:#374151;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#9ca3af;">\u{1F464}</div>';
-
-    return '<div style="display:flex;gap:0.6rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
-      + foto
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="color:#e5e7eb;font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(dip.nombre || '') + '</div>'
-      + '<div style="color:var(--text-dim);font-size:0.72rem;">' + escapeHtml(dip.partido_codigo || dip.partido || '') + ' \u00B7 ' + escapeHtml(dip.distrito || dip.principio_eleccion || '-') + '</div>'
-      + '</div>'
-      + badge
-      + '</div>';
+    if(ausente) badge='<span style="background:rgba(107,114,128,0.20);color:var(--text-dim);padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(107,114,128,0.30);">⊘ AUSENTE</span>';
+    else if(coincide) badge='<span style="background:rgba(34,197,94,0.20);color:var(--green-soft);padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap;border:1px solid rgba(34,197,94,0.40);">✅ COINCIDE</span>';
+    else badge='<span style="background:rgba(239,68,68,0.20);color:var(--red-soft);padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap;border:1px solid rgba(239,68,68,0.40);">❌ NO</span>';
+    const foto=dip.foto_url?'<img src="'+escapeHtml(dip.foto_url)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">':'<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(168,85,247,0.10));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-dim);">👤</div>';
+    return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'+foto+'<div style="flex:1;min-width:0;"><div style="color:var(--text);font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(dip.nombre||'')+'</div><div style="color:var(--text-dim);font-size:11px;">'+escapeHtml(dip.partido_codigo||dip.partido||'')+' · '+escapeHtml(dip.distrito||dip.principio_eleccion||'-')+'</div></div>'+badge+'</div>';
   }).join('');
-
-  const colorBarra = pct >= 60 ? 'var(--green)' : (pct >= 40 ? 'var(--gold)' : 'var(--red)');
-
-  return '<div class="votacion-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:0.75rem;padding:1.2rem;margin-bottom:1rem;">'
-    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.4rem;">' + escapeHtml(fmtFecha(v.fecha)) + '</div>'
-    + '<div style="color:var(--text);line-height:1.5;margin-bottom:0.8rem;font-size:0.95rem;">' + escapeHtml(truncated) + '</div>'
-    + '<div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:var(--purple);padding:0.6rem 0.8rem;border-radius:0.4rem;margin-bottom:0.8rem;font-size:0.85rem;font-weight:600;">Tu voto: ' + escapeHtml(labelUser) + '</div>'
-    + '<div style="background:rgba(255,255,255,0.04);padding:0.5rem 0.8rem;border-radius:0.4rem;margin-bottom:0.8rem;font-size:0.8rem;color:var(--text-dim);">Resultado oficial: ' + (v.total_si || 0) + ' si \u00B7 ' + (v.total_no || 0) + ' no \u00B7 ' + (v.total_abst || 0) + ' abst</div>'
-    + (total > 0 ? '<div style="color:' + colorBarra + ';font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">' + coinciden + '/' + total + ' diputados de tu estado coincidieron contigo (' + pct + '%)</div>' : '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:0.5rem;">No hay votos registrados de tus diputados en esta votacion.</div>')
-    + (dipsHtml ? '<div style="max-height:360px;overflow-y:auto;margin-top:0.5rem;border-top:1px solid rgba(255,255,255,0.04);">' + dipsHtml + '</div>' : '')
-    + '<button onclick="setVotoUser(' + v.votacion_id + ',null)" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:0.4rem 0.8rem;border-radius:0.3rem;cursor:pointer;font-size:0.75rem;margin-top:0.8rem;">\u21BA Cambiar mi voto</button>'
-    + (v.url_oficial ? ' <a href="' + escapeHtml(v.url_oficial) + '" target="_blank" rel="noopener" style="color:var(--text-dim);font-size:0.75rem;margin-left:0.5rem;">Acta oficial \u2197</a>' : '')
-    + '</div>';
+  const colorBarra=pct>=60?'var(--green)':(pct>=40?'var(--accent)':'var(--red)');
+  return '<div class="votacion-card" style="background:var(--card);border:1px solid var(--border-soft);border-radius:14px;padding:16px;margin-bottom:12px;">'
+    +'<div style="color:var(--text-dim);font-size:11.5px;margin-bottom:6px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase;">📅 '+escapeHtml(fmtFecha(v.fecha))+'</div>'
+    +'<div style="color:var(--text);line-height:1.5;margin-bottom:10px;font-size:14px;font-weight:600;">'+escapeHtml(truncated)+'</div>'
+    +'<div style="background:rgba(168,85,247,0.10);border:1px solid rgba(168,85,247,0.30);color:var(--purple-soft);padding:8px 12px;border-radius:10px;margin-bottom:10px;font-size:13px;font-weight:700;">🗳️ Tu voto: '+escapeHtml(labelUser)+'</div>'
+    +'<div style="background:rgba(255,255,255,0.03);padding:7px 10px;border-radius:8px;margin-bottom:10px;font-size:12px;color:var(--text-dim);">Resultado oficial: ✅ '+(v.total_si||0)+' sí · ❌ '+(v.total_no||0)+' no · ⚖️ '+(v.total_abst||0)+' abst</div>'
+    +(total>0?'<div style="color:'+colorBarra+';font-weight:800;font-size:14px;margin-bottom:6px;">🎯 '+coinciden+'/'+total+' diputados de tu estado coincidieron contigo ('+pct+'%)</div>':'<div style="color:var(--text-dim);font-size:13px;margin-bottom:6px;">No hay votos registrados de tus diputados en esta votación.</div>')
+    +(dipsHtml?'<div style="max-height:360px;overflow-y:auto;margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);">'+dipsHtml+'</div>':'')
+    +'<button onclick="setVotoUser('+v.votacion_id+',null)" style="background:transparent;border:1px solid var(--border-soft);color:var(--text-dim);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11.5px;margin-top:10px;font-weight:600;">↺ Cambiar mi voto</button>'
+    +(v.url_oficial?' <a href="'+escapeHtml(v.url_oficial)+'" target="_blank" rel="noopener" style="color:var(--text-dim);font-size:11px;margin-left:8px;">📎 Acta oficial ↗</a>':'')
+    +'</div>';
 }
 
-function renderResumen() {
-  const container = document.getElementById('resumen');
-  if (!datos || !datos.votaciones) { container.style.display = 'none'; return; }
-  const votadas = datos.votaciones.filter(v => getVotoUser(v.votacion_id));
-  if (votadas.length < 3) {
-    container.style.display = 'none';
-    return;
-  }
-  const clave = localStorage.getItem('tequio_estado_clave') || '';
-  const nombreEstado = NOMBRES_ESTADO[clave] || 'tu estado';
-
-  const dipScores = datos.diputados.map(d => {
-    let coinciden = 0;
-    let total = 0;
-    for (const v of votadas) {
-      const vDip = getVotoDip(v.votacion_id, d.dipt_id);
-      if (!vDip || vDip.voto === 'ausente') continue;
-      total++;
-      const votoUser = getVotoUser(v.votacion_id);
-      if (DIP_VOTO_TO_USER[vDip.voto] === votoUser) coinciden++;
-    }
-    return { dip: d, coinciden, total, pct: total ? Math.round((coinciden/total)*100) : 0 };
-  }).filter(x => x.total > 0).sort((a,b) => b.pct - a.pct);
-
-  if (!dipScores.length) { container.style.display = 'none'; return; }
-
-  const top3 = dipScores.slice(0, 3);
-  const bottom3 = dipScores.slice(-3).reverse();
-
-  const rowHtml = x => {
-    const foto = x.dip.foto_url
-      ? '<img src="' + escapeHtml(x.dip.foto_url) + '" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">'
-      : '<div style="width:32px;height:32px;border-radius:50%;background:#374151;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#9ca3af;">\u{1F464}</div>';
-    return '<div style="display:flex;gap:0.6rem;align-items:center;padding:0.45rem 0;">'
-      + foto
-      + '<div style="flex:1;min-width:0;">'
-      + '<div style="color:#e5e7eb;font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(x.dip.nombre || '') + '</div>'
-      + '<div style="color:var(--text-dim);font-size:0.72rem;">' + escapeHtml(x.dip.partido_codigo || x.dip.partido || '') + ' \u00B7 ' + x.coinciden + '/' + x.total + ' coincidencias</div>'
-      + '</div>'
-      + '<div style="color:var(--gold);font-weight:800;font-size:1.05rem;flex-shrink:0;">' + x.pct + '%</div>'
-      + '</div>';
+function renderResumen(){
+  const container=document.getElementById('resumen');
+  if(!datos||!datos.votaciones){ container.style.display='none'; return; }
+  const votadas=datos.votaciones.filter(v=>getVotoUser(v.votacion_id));
+  if(votadas.length<3){ container.style.display='none'; return; }
+  const clave=localStorage.getItem('tequio_estado_clave')||'';
+  const nombreEstado=NOMBRES_ESTADO[clave]||'tu estado';
+  const dipScores=datos.diputados.map(d=>{ let coinciden=0,total=0; for(const v of votadas){ const vDip=getVotoDip(v.votacion_id,d.dipt_id); if(!vDip||vDip.voto==='ausente') continue; total++; const votoUser=getVotoUser(v.votacion_id); if(DIP_VOTO_TO_USER[vDip.voto]===votoUser) coinciden++; } return {dip:d,coinciden,total,pct:total?Math.round((coinciden/total)*100):0}; }).filter(x=>x.total>0).sort((a,b)=>b.pct-a.pct);
+  if(!dipScores.length){ container.style.display='none'; return; }
+  const top3=dipScores.slice(0,3), bottom3=dipScores.slice(-3).reverse();
+  const rowHtml=x=>{
+    const foto=x.dip.foto_url?'<img src="'+escapeHtml(x.dip.foto_url)+'" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;" onerror="this.style.display=\'none\'">':'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(168,85,247,0.10));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);">👤</div>';
+    return '<div style="display:flex;gap:10px;align-items:center;padding:7px 0;">'+foto+'<div style="flex:1;min-width:0;"><div style="color:var(--text);font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(x.dip.nombre||'')+'</div><div style="color:var(--text-dim);font-size:11px;">'+escapeHtml(x.dip.partido_codigo||x.dip.partido||'')+' · '+x.coinciden+'/'+x.total+' coincidencias</div></div><div style="color:var(--accent);font-weight:900;font-size:18px;flex-shrink:0;font-variant-numeric:tabular-nums;">'+x.pct+'%</div></div>';
   };
-
-  container.style.display = 'block';
-  container.innerHTML = ''
-    + '<h3 style="color:var(--gold);margin:2rem 0 0.4rem 0;font-size:1.2rem;">Tu ranking de diputados</h3>'
-    + '<div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">Has votado en ' + votadas.length + ' temas. Estos son los diputados de ' + escapeHtml(nombreEstado) + ' que mas (y menos) coinciden contigo:</div>'
-    + '<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.3);border-radius:0.6rem;padding:0.9rem 1rem;margin-bottom:0.9rem;">'
-    + '<div style="color:var(--green);font-size:0.82rem;letter-spacing:0.08em;margin-bottom:0.5rem;font-weight:700;">\u{1F3C6} MAS COINCIDEN CONTIGO</div>'
-    + top3.map(rowHtml).join('')
-    + '</div>'
-    + '<div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.3);border-radius:0.6rem;padding:0.9rem 1rem;">'
-    + '<div style="color:#ef4444;font-size:0.82rem;letter-spacing:0.08em;margin-bottom:0.5rem;font-weight:700;">\u26A0\uFE0F MENOS COINCIDEN CONTIGO</div>'
-    + bottom3.map(rowHtml).join('')
-    + '</div>';
+  container.style.display='block';
+  container.innerHTML=''+
+    '<h3 style="color:var(--accent);margin:24px 0 6px 0;font-size:18px;font-weight:900;">🏆 Tu ranking de diputados</h3>'+
+    '<div style="color:var(--text-dim);font-size:12.5px;margin-bottom:14px;">Has votado en <strong style="color:var(--text)">'+votadas.length+'</strong> temas. Estos son los diputados de '+escapeHtml(nombreEstado)+' que más (y menos) coinciden contigo:</div>'+
+    '<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.30);border-radius:12px;padding:14px 16px;margin-bottom:10px;">'+
+    '<div style="color:var(--green-soft);font-size:11px;letter-spacing:1.2px;margin-bottom:8px;font-weight:800;">🏆 MÁS COINCIDEN CONTIGO</div>'+top3.map(rowHtml).join('')+'</div>'+
+    '<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.30);border-radius:12px;padding:14px 16px;">'+
+    '<div style="color:var(--red-soft);font-size:11px;letter-spacing:1.2px;margin-bottom:8px;font-weight:800;">⚠️ MENOS COINCIDEN CONTIGO</div>'+bottom3.map(rowHtml).join('')+'</div>';
 }
 
-window.setVotoUser = setVotoUser;
-window.init = init;
-document.addEventListener('DOMContentLoaded', init);
+window.setVotoUser=setVotoUser;
+window.init=init;
+document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
