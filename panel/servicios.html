@@ -3,174 +3,179 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Servicios Públicos | Tequio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Servicios Públicos · Tequio</title>
 <style>
-:root{
-  --bg:#0b0f1a;
-  --panel:#121829;
-  --panel-2:#1a2238;
-  --border:#26304a;
-  --text:#e6e9f2;
-  --muted:#8a93ad;
-  --gold:#fbbf24;
-  --gold-2:#f59e0b;
-  --red:#ef4444;
-  --red-2:#b91c1c;
-  --green:#22c55e;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+  --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+  --accent: #fbbf24; --accent-soft: #fcd34d;
+  --red: #ef4444; --red-soft: #fca5a5;
+  --green: #22c55e; --green-soft: #86efac;
+  --blue: #3b82f6; --blue-soft: #93c5fd;
+  --teal: #14b8a6;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:var(--gold);text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-header{display:flex;flex-direction:column;gap:6px;padding:8px 0 12px}
-header .back{font-size:14px;color:var(--muted)}
-header h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
-header p.sub{margin:0;color:var(--muted);font-size:14px}
-.embedded header .back{display:none}
+html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+body { padding: 16px; min-height: 100vh; }
+html.embedded a[href="/"], html.embedded a[href="../"], html.embedded .back, html.embedded .back-link { display: none !important; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+.back { display: inline-flex; align-items: center; gap: 6px; color: var(--blue-soft); text-decoration: none; font-size: 13px; margin-bottom: 10px; }
+.back:hover { color: #bfdbfe; }
 
-/* Emergency 911 hero */
-.hero911{
-  margin:16px 0 24px;
-  padding:22px;
-  border-radius:16px;
-  background:linear-gradient(135deg,#7f1d1d 0%, #1a0606 100%);
-  border:1px solid #b91c1c;
-  box-shadow:0 8px 32px rgba(239,68,68,.25);
-  text-align:center;
+.hero {
+  position: relative;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(59,130,246,0.24) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(20,184,166,0.20) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(20,184,166,0.10) 50%, rgba(15,23,42,0.95) 100%);
+  border: 1px solid rgba(59,130,246,0.28);
+  border-radius: 20px;
+  padding: 28px 24px 22px;
+  margin-bottom: 14px;
+  overflow: hidden;
 }
-.hero911 .label{color:#fecaca;font-size:12px;letter-spacing:.16em;font-weight:700;text-transform:uppercase}
-.hero911 h2{margin:8px 0 4px;font-size:32px;font-weight:800;color:#fff}
-.hero911 .num{font-size:56px;font-weight:800;color:#fbbf24;letter-spacing:-.02em;line-height:1}
-.hero911 .desc{margin-top:8px;color:#fecaca;font-size:14px}
-.hero911 .call{display:inline-block;margin-top:14px;background:#fbbf24;color:#1a0606;padding:12px 28px;border-radius:999px;font-weight:800;font-size:16px}
-.hero911 .call:hover{background:#fcd34d;text-decoration:none}
-
-/* Section titles */
-.section-title{margin:32px 0 12px;font-size:13px;letter-spacing:.18em;color:var(--muted);font-weight:700;text-transform:uppercase}
-
-/* State grid */
-.estados-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:8px;
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(59,130,246,0.18);
+  border: 1px solid rgba(59,130,246,0.40);
+  color: var(--blue-soft);
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 800;
+  letter-spacing: 1.6px; text-transform: uppercase;
+  margin-bottom: 14px;
 }
-@media (min-width:720px){.estados-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}}
-.estado-card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px 6px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-  transition:all .15s ease;
-  color:var(--text);
+.hero h1 {
+  font-size: 30px; font-weight: 900; line-height: 1.15;
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, #fff 0%, var(--blue-soft) 60%, #5eead4 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-.estado-card:hover{background:var(--panel-2);border-color:var(--gold);transform:translateY(-2px)}
-.estado-card .emj{font-size:24px;line-height:1}
-.estado-card .abbr{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.04em}
-.estado-card .nombre{font-size:10px;color:var(--muted);text-align:center;line-height:1.2}
+.hero p, .sub { color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0; }
+.hero p strong { color: var(--accent-soft); font-weight: 700; }
 
-/* State view */
-.state-header{display:flex;align-items:center;gap:14px;margin:8px 0 16px}
-.state-header .emj-big{font-size:48px;line-height:1}
-.state-header h2{margin:0;font-size:28px;font-weight:800}
-.back-btn{display:inline-block;margin-top:16px;padding:10px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-weight:600;font-size:14px;cursor:pointer}
-.back-btn:hover{background:var(--panel-2);text-decoration:none}
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+.stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+.stat-num { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.stat-num.blue { color: var(--blue-soft); }
+.stat-num.green { color: var(--green-soft); }
+.stat-num.amber { color: var(--accent-soft); }
+.stat-num.teal { color: #5eead4; }
+.stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+@media (max-width:680px){ .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 24px; } }
 
-/* Service cards */
-.servicios-list{display:grid;grid-template-columns:1fr;gap:10px}
-@media (min-width:720px){.servicios-list{grid-template-columns:1fr 1fr}}
-.serv-card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+/* HERO 911 */
+.hero911 {
+  background: linear-gradient(135deg, rgba(239,68,68,0.18) 0%, rgba(220,38,38,0.10) 100%);
+  border: 1px solid rgba(239,68,68,0.40);
+  border-radius: 16px;
+  padding: 22px;
+  text-align: center;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
 }
-.serv-card .cat{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.serv-card h3{margin:0;font-size:16px;font-weight:700;line-height:1.3}
-.serv-card .desc{margin:2px 0 4px;color:var(--muted);font-size:13px;line-height:1.4}
-.serv-card .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-.serv-card .tel{
-  display:inline-flex;align-items:center;gap:6px;
-  background:#0f2417;color:#86efac;border:1px solid #14532d;
-  padding:7px 12px;border-radius:999px;font-weight:700;font-size:13px;
-}
-.serv-card .tel:hover{background:#14532d;color:#bbf7d0;text-decoration:none}
-.serv-card .web,.serv-card .tw{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--panel-2);color:var(--gold);border:1px solid var(--border);
-  padding:7px 12px;border-radius:999px;font-weight:600;font-size:13px;
-}
-.serv-card .web:hover,.serv-card .tw:hover{background:#1f2a44;text-decoration:none}
-.serv-card.no-phone{opacity:.7}
-.serv-card.no-phone .tel{background:#2a1a0a;color:#fbbf24;border-color:#7c4a0e}
+.hero911::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(239,68,68,0.10), transparent 70%); pointer-events: none; }
+.hero911 .label { font-size: 11px; font-weight: 800; color: var(--red-soft); text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 8px; }
+.hero911 h2 { font-size: 14px; color: var(--text-dim); font-weight: 700; margin: 0 0 8px; letter-spacing: 1.2px; }
+.hero911 .num { font-size: 64px; font-weight: 900; color: var(--red); line-height: 1; margin-bottom: 8px; font-variant-numeric: tabular-nums; text-shadow: 0 0 30px rgba(239,68,68,0.40); }
+.hero911 .desc { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; }
+.hero911 .call { display: inline-block; background: linear-gradient(135deg, var(--red) 0%, #dc2626 100%); color: #fff; padding: 13px 28px; border-radius: 999px; font-weight: 800; font-size: 15px; text-decoration: none; transition: transform .15s; }
+.hero911 .call:hover { transform: translateY(-1px); }
 
-/* Federal section */
-.fed-group{margin:24px 0}
-.fed-group h3{margin:0 0 10px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
-.fed-group .icon{font-size:22px}
+details.edu { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; cursor: pointer; }
+details.edu[open] { background: rgba(59,130,246,0.10); }
+details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: #bfdbfe; font-size: 13.5px; }
+details.edu summary::-webkit-details-marker { display: none; }
+details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--blue-soft); transition: transform .2s; }
+details.edu[open] summary::after { transform: rotate(180deg); }
+details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
+details.edu .edu-body p { margin-bottom: 8px; }
+details.edu .edu-body strong { color: var(--accent-soft); }
 
-/* Proximamente */
-.proximo{
-  background:var(--panel);
-  border:1px dashed var(--border);
-  border-radius:12px;
-  padding:14px;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.5;
-}
-.proximo strong{color:var(--text);font-weight:700}
+.section-title { font-size: 11.5px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin: 18px 0 10px; }
 
-/* Disclaimer */
-.disclaimer{
-  margin:32px 0 16px;
-  padding:14px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:10px;
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.5;
-}
-.disclaimer strong{color:var(--gold)}
+/* 32 ESTADOS GRID */
+.estados-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.estado-card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 12px; padding: 14px 8px; text-align: center; text-decoration: none; color: var(--text); transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.estado-card:hover { background: rgba(59,130,246,0.08); border-color: var(--blue); transform: translateY(-2px); }
+.estado-card .emj { font-size: 28px; line-height: 1; }
+.estado-card .abbr { font-weight: 800; color: var(--blue-soft); font-size: 12px; letter-spacing: 0.5px; }
+.estado-card .nombre { font-size: 10.5px; color: var(--text-dim); }
 
-.loading{padding:24px;text-align:center;color:var(--muted);font-size:14px}
-.empty{padding:18px;text-align:center;color:var(--muted);font-size:14px;background:var(--panel);border:1px solid var(--border);border-radius:10px}
+/* FED GROUPS */
+.fed-group { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+.fed-group h3 { font-size: 13px; font-weight: 800; color: var(--text); margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 8px; }
+.fed-group h3 .icon { font-size: 18px; }
+
+.servicios-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.serv-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; transition: border-color .15s; }
+.serv-card:hover { border-color: rgba(59,130,246,0.30); }
+.serv-card.no-phone { opacity: .65; }
+.serv-card .cat { font-size: 10px; font-weight: 800; color: var(--blue-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.serv-card h3 { font-size: 14px; font-weight: 800; color: var(--text); margin: 0 0 6px; }
+.serv-card .desc { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.5; }
+.serv-card .row { display: flex; flex-wrap: wrap; gap: 6px; }
+.serv-card a, .serv-card span { font-size: 12px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.serv-card .tel { background: rgba(34,197,94,0.12); color: var(--green-soft); border: 1px solid rgba(34,197,94,0.30); }
+.serv-card .tel:hover { background: rgba(34,197,94,0.22); }
+.serv-card .web { background: rgba(59,130,246,0.10); color: var(--blue-soft); border: 1px solid rgba(59,130,246,0.30); }
+.serv-card .tw { background: rgba(255,255,255,0.04); color: var(--text-dim); border: 1px solid var(--border-soft); }
+
+.state-header { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; }
+.state-header .emj-big { font-size: 44px; line-height: 1; }
+.state-header h2 { font-size: 22px; font-weight: 900; color: var(--text); margin: 0; }
+
+.back-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.10); border: 1px solid rgba(59,130,246,0.30); color: var(--blue-soft); padding: 9px 14px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; margin: 12px 0; }
+.back-btn:hover { background: rgba(59,130,246,0.18); }
+
+.empty, .loading { padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; background: var(--card); border: 1px dashed var(--border-soft); border-radius: 12px; }
+
+.disclaimer { margin-top: 18px; font-size: 12px; color: var(--text-dim); line-height: 1.6; padding: 12px 14px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; }
+.disclaimer strong { color: var(--accent); }
+.disclaimer a { color: var(--blue-soft); text-decoration: none; }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
-<script>(function(){if(new URLSearchParams(location.search).get('embedded')==='1'){document.documentElement.classList.add('embedded');var s=document.createElement('style');s.textContent='.embedded a[href="/"],.embedded a[href="../"],.embedded .back-link,.embedded header>a:first-child{display:none!important;}';document.head.appendChild(s);}})();</script>
+<script>(function(){if(new URLSearchParams(location.search).get('embedded')==='1'){document.documentElement.classList.add('embedded');}})();</script>
 
 <div class="wrap">
-  <header>
-    <a class="back" href="/">&larr; Tequio</a>
+  <a class="back" href="/">← Tequio</a>
+
+  <div class="hero">
+    <div class="hero-badge">📞 Teléfonos verificados · Cero invención</div>
     <h1>Servicios Públicos</h1>
-    <p class="sub">Telefonos verificados de servicios federales y estatales en México</p>
-  </header>
+    <p>Directorio verificado de servicios <strong>federales y estatales</strong> en México. Todos los teléfonos confirmados con la fuente oficial <strong>gob.mx</strong> al 16 de mayo 2026.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num blue">32/32</div><div class="stat-lbl">Estados con datos</div></div>
+      <div class="stat"><div class="stat-num amber">15</div><div class="stat-lbl">Categorías</div></div>
+      <div class="stat"><div class="stat-num green">Verif.</div><div class="stat-lbl">Cada teléfono</div></div>
+      <div class="stat"><div class="stat-num teal">gob.mx</div><div class="stat-lbl">Fuente oficial</div></div>
+    </div>
+  </div>
 
   <section class="hero911">
     <div class="label">Emergencias en todo México</div>
     <h2>LLAMA AL</h2>
     <div class="num">911</div>
-    <div class="desc">Policia &middot; Bomberos &middot; Ambulancias &middot; 24 horas</div>
-    <a class="call" href="tel:911">Llamar 911</a>
+    <div class="desc">Policía · Bomberos · Ambulancias · 24 horas</div>
+    <a class="call" href="tel:911">📞 Llamar 911</a>
   </section>
+
+  <details class="edu">
+    <summary>📖 ¿Cómo verifica Tequio estos teléfonos?</summary>
+    <div class="edu-body">
+      <p>Cada teléfono fue confirmado consultando la página oficial <strong>gob.mx</strong> de cada institución. La fecha de verificación se registra en la base de datos.</p>
+      <p><strong>Cero invención:</strong> si no encontramos un dato oficial, no lo publicamos. Si encuentras un dato incorrecto, repórtalo a <a href="mailto:hola@tequio.app" style="color:var(--blue-soft)">hola@tequio.app</a> — actualizamos en menos de 24 horas.</p>
+    </div>
+  </details>
 
   <div id="app"></div>
 
   <div class="disclaimer">
-    <strong>Telefonos verificados al 16 de mayo 2026.</strong> Si encuentras un dato incorrecto, reportalo en <a href="mailto:hola@tequio.app">hola@tequio.app</a>. Cero datos inventados &mdash; las fuentes oficiales son las paginas .gob.mx de cada institucion.
+    <strong>Teléfonos verificados al 16 de mayo 2026.</strong> Si encuentras un dato incorrecto, repórtalo en <a href="mailto:hola@tequio.app">hola@tequio.app</a>. Cero datos inventados — las fuentes oficiales son las páginas .gob.mx de cada institución.
   </div>
 </div>
 
@@ -209,25 +214,23 @@ const ESTADOS_EMOJI = {
   "31":{nombre:"Yucatán",abbr:"YUC",emoji:"&#129897;"},
   "32":{nombre:"Zacatecas",abbr:"ZAC",emoji:"&#9935;&#65039;"}
 };
-
 const CAT_META = {
-  emergencia:        {icono:'&#128680;', titulo:'Emergencia'},
-  salud:             {icono:'&#127973;', titulo:'Salud'},
-  finanzas:          {icono:'&#128176;', titulo:'Finanzas'},
-  derechos_humanos:  {icono:'&#9878;&#65039;', titulo:'Derechos Humanos'},
-  consumidor:        {icono:'&#9878;&#65039;', titulo:'Consumidor'},
-  laboral:           {icono:'&#128188;', titulo:'Laboral'},
-  mujer:             {icono:'&#128105;', titulo:'Linea Mujer'},
-  identidad:         {icono:'&#128100;', titulo:'Identidad'},
-  energia:           {icono:'&#9889;', titulo:'Energia'},
-  agua:              {icono:'&#128166;', titulo:'Agua'},
-  telefono:          {icono:'&#128241;', titulo:'Telefono'},
-  dif:               {icono:'&#128105;&#8205;&#128102;', titulo:'DIF'},
-  proteccion_civil:  {icono:'&#9888;&#65039;', titulo:'Proteccion Civil'},
-  transparencia:     {icono:'&#128194;', titulo:'Transparencia'},
-  fiscalia:          {icono:'&#9878;&#65039;', titulo:'Fiscalia'},
+  emergencia:        {icono:'🚨', titulo:'Emergencia'},
+  salud:             {icono:'🏥', titulo:'Salud'},
+  finanzas:          {icono:'💰', titulo:'Finanzas'},
+  derechos_humanos:  {icono:'⚖️', titulo:'Derechos Humanos'},
+  consumidor:        {icono:'🛒', titulo:'Consumidor'},
+  laboral:           {icono:'💼', titulo:'Laboral'},
+  mujer:             {icono:'👩', titulo:'Línea Mujer'},
+  identidad:         {icono:'👤', titulo:'Identidad'},
+  energia:           {icono:'⚡', titulo:'Energía'},
+  agua:              {icono:'💧', titulo:'Agua'},
+  telefono:          {icono:'📱', titulo:'Teléfono'},
+  dif:               {icono:'👨‍👦', titulo:'DIF'},
+  proteccion_civil:  {icono:'⚠️', titulo:'Protección Civil'},
+  transparencia:     {icono:'📂', titulo:'Transparencia'},
+  fiscalia:          {icono:'⚖️', titulo:'Fiscalía'},
 };
-
 const CAT_ORDER = ['emergencia','salud','finanzas','derechos_humanos','consumidor','laboral','mujer','identidad','energia','agua','telefono','dif','proteccion_civil','transparencia','fiscalia'];
 
 function preserveEmbedded(qs){
@@ -235,77 +238,38 @@ function preserveEmbedded(qs){
   if(new URLSearchParams(location.search).get('embedded')==='1') params.set('embedded','1');
   return '?'+params.toString();
 }
-
 function escapeHtml(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
-
-function servCard(s, opts){
-  opts=opts||{};
-  const tel = s.telefono ? `<a class="tel" href="tel:${encodeURIComponent(s.telefono.replace(/\s+/g,''))}">&#128222; ${escapeHtml(s.telefono)}</a>` : `<span class="tel">Telefono no disponible</span>`;
-  const web = s.sitio_web ? `<a class="web" href="${escapeHtml(s.sitio_web)}" target="_blank" rel="noopener">&#127760; Sitio oficial</a>` : '';
-  const tw  = s.twitter ? `<a class="tw" href="https://x.com/${encodeURIComponent(s.twitter.replace(/^@/,''))}" target="_blank" rel="noopener">&#119987; @${escapeHtml(s.twitter.replace(/^@/,''))}</a>` : '';
+function servCard(s){
+  const tel = s.telefono ? `<a class="tel" href="tel:${encodeURIComponent(s.telefono.replace(/\s+/g,''))}">📞 ${escapeHtml(s.telefono)}</a>` : `<span class="tel" style="opacity:.6">Sin teléfono</span>`;
+  const web = s.sitio_web ? `<a class="web" href="${escapeHtml(s.sitio_web)}" target="_blank" rel="noopener">🌐 Sitio</a>` : '';
+  const tw  = s.twitter ? `<a class="tw" href="https://x.com/${encodeURIComponent(s.twitter.replace(/^@/,''))}" target="_blank" rel="noopener">𝕏 @${escapeHtml(s.twitter.replace(/^@/,''))}</a>` : '';
   const cat = CAT_META[s.categoria] || {icono:'',titulo:s.categoria||''};
   const klass = s.telefono ? 'serv-card' : 'serv-card no-phone';
-  return `<div class="${klass}">
-    <div class="cat">${cat.icono} ${escapeHtml(cat.titulo)}</div>
-    <h3>${escapeHtml(s.nombre)}</h3>
-    ${s.descripcion?`<div class="desc">${escapeHtml(s.descripcion)}</div>`:''}
-    <div class="row">${tel}${web}${tw}</div>
-  </div>`;
+  return `<div class="${klass}"><div class="cat">${cat.icono} ${escapeHtml(cat.titulo)}</div><h3>${escapeHtml(s.nombre)}</h3>${s.descripcion?`<div class="desc">${escapeHtml(s.descripcion)}</div>`:''}<div class="row">${tel}${web}${tw}</div></div>`;
 }
-
 function renderFederalesAgrupados(federales){
   const groups = {};
   federales.forEach(s=>{(groups[s.categoria]=groups[s.categoria]||[]).push(s);});
-  const cats = Object.keys(groups).sort((a,b)=>{
-    const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
-    return (ia<0?999:ia)-(ib<0?999:ib);
-  });
+  const cats = Object.keys(groups).sort((a,b)=>{ const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b); return (ia<0?999:ia)-(ib<0?999:ib); });
   return cats.map(c=>{
     const meta=CAT_META[c]||{icono:'',titulo:c};
-    return `<div class="fed-group">
-      <h3><span class="icon">${meta.icono}</span> ${escapeHtml(meta.titulo)}</h3>
-      <div class="servicios-list">${groups[c].map(s=>servCard(s)).join('')}</div>
-    </div>`;
+    return `<div class="fed-group"><h3><span class="icon">${meta.icono}</span> ${escapeHtml(meta.titulo)}</h3><div class="servicios-list">${groups[c].map(s=>servCard(s)).join('')}</div></div>`;
   }).join('');
 }
-
 function renderLanding(federales){
   const app=document.getElementById('app');
   const grid = Object.keys(ESTADOS_EMOJI).map(c=>{
     const e=ESTADOS_EMOJI[c];
-    return `<a class="estado-card" href="${preserveEmbedded('clave='+c)}">
-      <span class="emj">${e.emoji}</span>
-      <span class="abbr">${escapeHtml(e.abbr)}</span>
-      <span class="nombre">${escapeHtml(e.nombre)}</span>
-    </a>`;
+    return `<a class="estado-card" href="${preserveEmbedded('clave='+c)}"><span class="emj">${e.emoji}</span><span class="abbr">${escapeHtml(e.abbr)}</span><span class="nombre">${escapeHtml(e.nombre)}</span></a>`;
   }).join('');
-  app.innerHTML = `
-    <div class="section-title">Selecciona tu estado &mdash; Fiscalia General</div>
-    <div class="estados-grid">${grid}</div>
-    <div class="section-title">Servicios federales &mdash; aplican en todo México</div>
-    ${renderFederalesAgrupados(federales)}
-  `;
+  app.innerHTML = `<div class="section-title">🗺️ Selecciona tu estado — Fiscalía General</div><div class="estados-grid">${grid}</div><div class="section-title">🏛️ Servicios federales — aplican en todo México</div>${renderFederalesAgrupados(federales)}`;
 }
-
 function renderEstado(clave, federales, estatales){
   const e = ESTADOS_EMOJI[clave]||{nombre:clave,emoji:'',abbr:clave};
   const app=document.getElementById('app');
-  const lista = estatales.length
-    ? `<div class="servicios-list">${estatales.map(s=>servCard(s)).join('')}</div>`
-    : `<div class="empty">No hay servicios estatales registrados aun para este estado.</div>`;
-  app.innerHTML = `
-    <div class="state-header">
-      <span class="emj-big">${e.emoji}</span>
-      <h2>${escapeHtml(e.nombre)}</h2>
-    </div>
-    <div class="section-title">Servicios estatales</div>
-    ${lista}
-    <a class="back-btn" href="${preserveEmbedded('')}">&larr; Volver a 32 estados</a>
-    <div class="section-title">Servicios federales &mdash; aplican en todo México</div>
-    ${renderFederalesAgrupados(federales)}
-  `;
+  const lista = estatales.length ? `<div class="servicios-list">${estatales.map(s=>servCard(s)).join('')}</div>` : `<div class="empty">No hay servicios estatales registrados aún para este estado.</div>`;
+  app.innerHTML = `<div class="state-header"><span class="emj-big">${e.emoji}</span><h2>${escapeHtml(e.nombre)}</h2></div><div class="section-title">🏢 Servicios estatales</div>${lista}<a class="back-btn" href="${preserveEmbedded('')}">← Volver a 32 estados</a><div class="section-title">🏛️ Servicios federales — aplican en todo México</div>${renderFederalesAgrupados(federales)}`;
 }
-
 async function init(){
   const app=document.getElementById('app');
   app.innerHTML='<div class="loading">Cargando servicios...</div>';
@@ -313,20 +277,13 @@ async function init(){
   const clave=params.get('clave');
   const url='/api/data?vista=servicios'+(clave?('&clave='+encodeURIComponent(clave)):'');
   try{
-    const r=await fetch(url);
-    const j=await r.json();
+    const r=await fetch(url); const j=await r.json();
     const federales=Array.isArray(j.federales)?j.federales:[];
     const estatales=Array.isArray(j.estatales)?j.estatales:[];
-    if(clave && ESTADOS_EMOJI[clave]){
-      renderEstado(clave, federales, estatales);
-    } else {
-      renderLanding(federales);
-    }
-  }catch(err){
-    app.innerHTML='<div class="empty">No fue posible cargar los servicios. Intenta de nuevo.</div>';
-  }
+    if(clave && ESTADOS_EMOJI[clave]) renderEstado(clave, federales, estatales);
+    else renderLanding(federales);
+  }catch(err){ app.innerHTML='<div class="empty">No fue posible cargar los servicios. Intenta de nuevo.</div>'; }
 }
-
 init();
 </script>
 </body>
