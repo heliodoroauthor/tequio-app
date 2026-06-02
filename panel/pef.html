@@ -1,327 +1,297 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PEF 2026 - Presupuesto Federal | Tequio</title>
-<meta name="description" content="Presupuesto de Egresos de la Federación 2026: 8.07 billones MXN. Desglose por ramo y unidad responsable.">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5" />
+<title>PEF 2026 · Tequio</title>
+<link rel="icon" href="/fav32.png">
 <style>
-  :root {
-    --bg: #0b0f1a;
-    --card: #131826;
-    --card2: #1a2032;
-    --border: #232a3d;
-    --text: #e5e7eb;
-    --muted: #94a3b8;
-    --gold: #fbbf24;
-    --gold-dim: #b88a17;
-    --green: #22c55e;
-    --red: #ef4444;
+  :root{
+    --bg:#0b0f1a;--surface:#11172a;--surface2:#1a1f2e;--border:#2a3142;
+    --text:#e5e7eb;--text2:#b1bdd0;--text3:#7a8696;
+    --gold:#fbbf24;--accent:#3b82f6;--accent2:#a855f7;--green:#22c55e;--red:#ef4444;--orange:#f97316;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
-  a { color: var(--gold); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  header { display: flex; align-items: center; gap: 14px; padding: 14px 0 18px; flex-wrap: wrap; }
-  .back-link { color: var(--muted); font-size: 14px; }
-  .back-link:hover { color: var(--gold); }
-  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
-  .hero {
-    background: linear-gradient(135deg, #1a2032 0%, #131826 100%);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px 22px;
-    margin-bottom: 22px;
-    text-align: center;
-  }
-  .hero .total {
-    font-size: clamp(40px, 8vw, 64px);
-    font-weight: 800;
-    color: var(--gold);
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-  }
-  .hero .subtitle {
-    font-size: 16px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-  .hero .description {
-    font-size: 14px;
-    color: var(--text);
-    margin-top: 12px;
-    max-width: 540px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    margin: 28px 0 14px;
-  }
-  .top-bars { display: flex; flex-direction: column; gap: 10px; }
-  .bar-row {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    cursor: pointer;
-    transition: border-color 0.15s, transform 0.15s;
-  }
-  .bar-row:hover { border-color: var(--gold-dim); transform: translateX(2px); }
-  .bar-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
-  .bar-label { font-size: 14px; font-weight: 600; flex: 1; }
-  .bar-label .ramo-num { color: var(--muted); margin-right: 6px; font-weight: 500; }
-  .bar-monto { font-size: 16px; font-weight: 700; color: var(--gold); white-space: nowrap; }
-  .bar-pct { color: var(--muted); font-size: 13px; margin-left: 6px; font-weight: 500; }
-  .bar-track {
-    background: var(--card2);
-    border-radius: 6px;
-    height: 8px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold) 100%);
-    border-radius: 6px;
-    transition: width 0.4s ease-out;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 18px;
-  }
-  th, td {
-    text-align: left;
-    padding: 12px 14px;
-    font-size: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  th {
-    background: var(--card2);
-    font-weight: 600;
-    color: var(--muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  tbody tr { cursor: pointer; transition: background 0.12s; }
-  tbody tr:hover { background: var(--card2); }
-  tbody tr:last-child td { border-bottom: 0; }
-  td.num { text-align: right; font-weight: 600; color: var(--gold); white-space: nowrap; }
-  td.pct { text-align: right; color: var(--muted); width: 80px; }
-  td.ramo-col { color: var(--muted); width: 60px; font-weight: 500; }
-  .drill {
-    background: var(--card2);
-    border-top: 2px solid var(--gold);
-  }
-  .drill-content {
-    padding: 16px;
-  }
-  .drill h4 { font-size: 14px; margin-bottom: 10px; color: var(--gold); }
-  .drill ul { list-style: none; }
-  .drill li {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    gap: 12px;
-  }
-  .drill li:last-child { border-bottom: 0; }
-  .drill .ur-label { flex: 1; color: var(--text); }
-  .drill .ur-monto { color: var(--gold); font-weight: 600; white-space: nowrap; }
-  .loading { text-align: center; padding: 40px; color: var(--muted); }
-  .error { text-align: center; padding: 20px; color: var(--red); background: var(--card); border-radius: 12px; }
-  .disclaimer {
-    margin-top: 36px;
-    padding: 14px 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-  .disclaimer a { color: var(--gold); }
-  @media (max-width: 600px) {
-    .container { padding: 12px; }
-    th, td { padding: 10px 8px; font-size: 13px; }
-    td.ramo-col { width: 40px; }
-    td.pct { width: 50px; font-size: 12px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font:14px/1.5 'Inter',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  body.embedded .back{display:none!important}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;margin:6px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);text-decoration:none;font-size:13px}
+  .back:hover{color:var(--gold)}
+  
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#14532d 0%,#16a34a 50%,#22c55e 100%);border-radius:20px;padding:28px;margin-bottom:18px;color:#fff;box-shadow:0 8px 24px rgba(34,197,94,0.30);position:relative;overflow:hidden}
+  .hero h1{font-size:30px;font-weight:800;margin:0 0 6px;line-height:1.1}
+  .hero p{margin:0;opacity:0.94;font-size:14px;line-height:1.5}
+  .hero-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+  .hero-link{background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)}
+  .hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)}
+  .hero-stat{text-align:center}
+  .hero-stat .num{font-size:22px;font-weight:800;line-height:1.1}
+  .hero-stat .lbl{font-size:10px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px}
+  .hero-mega{font-size:42px;font-weight:800;color:#fef08a;text-align:center;margin:8px 0}
+  
+  /* Sello */
+  .sello{background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .sello .lbl{font-size:11px;font-weight:700;color:#22c55e;letter-spacing:0.5px}
+  
+  /* Educativa */
+  details.educ{background:linear-gradient(135deg,rgba(168,85,247,0.10),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px}
+  details.educ summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a855f7;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  details.educ summary::-webkit-details-marker{display:none}
+  details.educ .body{padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6}
+  details.educ ul{margin:6px 0 6px 20px}
+  
+  /* Section */
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+  .section h2{font-size:15px;margin-bottom:14px;color:var(--text);font-weight:700;display:flex;align-items:center;gap:8px}
+  
+  /* Ramos visual bars */
+  .ramo-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 12px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:transform 0.15s;border-left:3px solid var(--gold)}
+  .ramo-bar:hover{transform:translateX(2px);background:var(--surface)}
+  .ramo-bar .num{min-width:30px;font-size:13px;color:var(--text3);font-weight:700;text-align:center}
+  .ramo-bar .info{flex:1;min-width:120px}
+  .ramo-bar .nombre{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .ramo-bar .bar-track{height:8px;background:#0b0f1a;border-radius:4px;overflow:hidden}
+  .ramo-bar .bar-fill{height:100%;border-radius:4px;transition:width 0.5s}
+  .ramo-bar .monto{min-width:120px;text-align:right;font-size:14px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+  .ramo-bar .pct{font-size:11px;color:var(--text3);font-weight:600}
+  
+  /* Categorías colors */
+  .cat-social{border-left-color:#22c55e!important}
+  .cat-social .bar-fill{background:linear-gradient(90deg,#16a34a,#22c55e)}
+  .cat-fiscal{border-left-color:#3b82f6!important}
+  .cat-fiscal .bar-fill{background:linear-gradient(90deg,#1d4ed8,#3b82f6)}
+  .cat-deuda{border-left-color:#ef4444!important}
+  .cat-deuda .bar-fill{background:linear-gradient(90deg,#dc2626,#ef4444)}
+  .cat-energia{border-left-color:#f59e0b!important}
+  .cat-energia .bar-fill{background:linear-gradient(90deg,#d97706,#f59e0b)}
+  .cat-seguridad{border-left-color:#7c3aed!important}
+  .cat-seguridad .bar-fill{background:linear-gradient(90deg,#6d28d9,#7c3aed)}
+  
+  /* Analisis */
+  .analisis{background:linear-gradient(135deg,rgba(132,204,22,0.10),rgba(132,204,22,0.02));border:1px solid rgba(132,204,22,0.30);border-radius:12px;padding:14px;font-size:13px;color:#d9f99d;line-height:1.6}
+  
+  /* Actions */
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+  .btn-prim{background:var(--gold);color:#0b0f1a}
+  .btn-sec{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-ia{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+  
+  .footer{font-size:11px;color:var(--text3);margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center}
+  .loading{text-align:center;padding:30px;color:var(--text3)}
+  
+  /* Funciones donut */
+  .donut-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .funcion-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .funcion-card .name{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px}
+  .funcion-card .num{font-size:20px;font-weight:800;color:var(--gold)}
+  .funcion-card .pct{font-size:11px;color:var(--text3);margin-top:2px}
+  
+  @media (max-width:600px){
+    .wrap{padding:12px}
+    .hero{padding:20px}
+    .hero h1{font-size:24px}
+    .hero-mega{font-size:32px}
+    .ramo-bar{flex-wrap:wrap}
+    .ramo-bar .monto{flex:1;text-align:right;min-width:100px}
   }
 </style>
 </head>
 <body>
-<script>
-(function(){
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.documentElement.classList.add('embedded');
-    var style = document.createElement('style');
-    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
-    document.head.appendChild(style);
-  }
-})();
-</script>
-
-  <div class="container">
-    <header>
-      <a href="/" class="back-link">&larr; Tequio</a>
-      <h1>PEF 2026 &mdash; Presupuesto Federal</h1>
-    </header>
-
-    <div id="hero" class="hero">
-      <div class="total" id="total-monto">Cargando...</div>
-      <div class="subtitle">Presupuesto de Egresos de la Federación 2026</div>
-      <div class="description">Esto es lo que el gobierno federal mexicano gastará este año.</div>
-    </div>
-
-    <div class="section-title">Top 5 Ramos</div>
-    <div class="top-bars" id="top-bars"><div class="loading">Cargando barras...</div></div>
-
-    <div class="section-title">Todos los Ramos</div>
-    <div id="tabla-wrap"><div class="loading">Cargando tabla...</div></div>
-
-    <div class="disclaimer">
-      Datos del Presupuesto de Egresos de la Federación 2026 aprobado, publicado por SHCP.
-      Fuente: <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener">pef.hacienda.gob.mx</a>.
-      Tequio recopila y normaliza estos datos para hacerlos accesibles a la ciudadania.
-    </div>
-  </div>
+<script>if(new URLSearchParams(location.search).get('embedded')==='1')document.body.classList.add('embedded');</script>
+<div class="wrap">
+  <a href="/" class="back" onclick="window.tequioPefBack(event);return false;">← Tequio</a>
+  <div id="contenido" class="loading">Cargando datos PEF…</div>
+</div>
 
 <script>
-function fmt(n) {
-  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + ' bn';
-  if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + ' mmdp';
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + ' mdp';
-  return new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN', maximumFractionDigits: 0}).format(n);
+window.tequioPefBack = function(e){
+  if(e)e.preventDefault();
+  try { 
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      window.parent.cargarPanel('dashboard'); return;
+    } 
+  } catch(err){}
+  window.location.href = '/';
+};
+
+var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+
+function fmtBn(n){
+  if(!n) return '$0';
+  n = Number(n);
+  if(n>=1e12) return '$' + (n/1e12).toFixed(2) + ' bn';
+  if(n>=1e9) return '$' + (n/1e9).toFixed(1) + ' mmdp';
+  if(n>=1e6) return '$' + (n/1e6).toFixed(1) + ' mdp';
+  return '$' + n.toLocaleString('es-MX');
 }
 
-function pct(n, total) {
-  if (!total) return '0%';
-  return (n / total * 100).toFixed(1) + '%';
+function rpc(name, body){
+  return fetch(SB + '/rest/v1/rpc/' + name, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},
+    body: JSON.stringify(body||{})
+  }).then(function(r){return r.json();});
 }
 
-let DRILL_CACHE = {};
+// Categorías por ramo
+function ramoCategoria(ramo, desc){
+  desc = (desc||'').toLowerCase();
+  if(['19','20','11','12','06'].indexOf(String(ramo))>=0 || /salud|educación|bienestar|seguridad social|cultura/.test(desc)) return 'social';
+  if(['28','33'].indexOf(String(ramo))>=0 || /participaciones|aportaciones federales|entidades federativas/.test(desc)) return 'fiscal';
+  if(String(ramo)==='24' || /deuda/.test(desc)) return 'deuda';
+  if(String(ramo)==='18' || /energía/.test(desc)) return 'energia';
+  if(['7','13','17'].indexOf(String(ramo))>=0 || /defensa|seguridad|marina/.test(desc)) return 'seguridad';
+  return 'otros';
+}
 
-async function loadResumen() {
+function ramoIcon(ramo, desc){
+  var cat = ramoCategoria(ramo, desc);
+  return ({social:'🤝',fiscal:'🏛️',deuda:'💳',energia:'⚡',seguridad:'🛡️',otros:'📊'})[cat] || '📊';
+}
+
+async function cargarPEF(){
   try {
-    const r = await fetch('/api/data?vista=pef_resumen&anio=2026');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const data = await r.json();
-    renderAll(data);
-  } catch (e) {
-    document.getElementById('total-monto').textContent = 'Error';
-    document.getElementById('top-bars').innerHTML = '<div class="error">No se pudo cargar el resumen: ' + e.message + '</div>';
-    document.getElementById('tabla-wrap').innerHTML = '';
+    var ciclo = 2026;
+    var resumen = await rpc('pef_resumen_v2', {p_ciclo: ciclo});
+    if(resumen && resumen[0]) resumen = resumen[0];
+    var stats = resumen.pef_resumen_v2 || resumen;
+    
+    var ramos = await rpc('pef_ramos_v2', {p_ciclo: ciclo});
+    var funciones = await rpc('pef_funciones_v2', {p_ciclo: ciclo});
+    
+    render(stats, ramos || [], funciones || []);
+  } catch(e) {
+    document.getElementById('contenido').innerHTML = 
+      '<div style="background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.30);border-radius:10px;padding:16px;color:#fca5a5;text-align:center">Error: ' + e + '</div>';
   }
 }
 
-function renderAll(data) {
-  const total = data.total || 0;
-  const ramos = data.ramos || [];
-  document.getElementById('total-monto').textContent = fmt(total);
-
-  // Top 5 bars
-  const top5 = ramos.slice(0, 5);
-  const maxMonto = top5.length ? top5[0].monto : 1;
-  const barsHtml = top5.map(function(r) {
-    const widthPct = (r.monto / maxMonto * 100).toFixed(1);
-    const sharePct = pct(r.monto, total);
-    return '<div class="bar-row" data-ramo="' + escapeAttr(r.ramo) + '">' +
-      '<div class="bar-header">' +
-        '<div class="bar-label"><span class="ramo-num">Ramo ' + escapeHtml(r.ramo) + '</span>' + escapeHtml(r.desc_ramo || '') + '</div>' +
-        '<div class="bar-monto">' + fmt(r.monto) + '<span class="bar-pct">' + sharePct + '</span></div>' +
+function render(stats, ramos, funciones){
+  var total = Number(stats.total||0);
+  var ramosArr = Array.isArray(ramos) ? ramos : [];
+  var funcionesArr = Array.isArray(funciones) ? funciones : [];
+  var maxRamo = ramosArr.length ? Number(ramosArr[0].monto_total) : 1;
+  
+  // Top 10 ramos
+  var ramosBars = ramosArr.slice(0,15).map(function(r,i){
+    var monto = Number(r.monto_total);
+    var pct = total ? (monto/total*100).toFixed(1) : 0;
+    var barPct = ((monto/maxRamo)*100).toFixed(1);
+    var cat = ramoCategoria(r.ramo, r.desc_ramo);
+    var icon = ramoIcon(r.ramo, r.desc_ramo);
+    return '<div class="ramo-bar cat-' + cat + '">' +
+      '<div class="num">#' + (i+1) + '</div>' +
+      '<div class="info">' +
+        '<div class="nombre">' + icon + ' Ramo ' + r.ramo + ': ' + (r.desc_ramo||'') + '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + barPct + '%"></div></div>' +
       '</div>' +
-      '<div class="bar-track"><div class="bar-fill" style="width:' + widthPct + '%"></div></div>' +
-      '<div class="drill-slot"></div>' +
+      '<div class="monto">' + fmtBn(monto) + '<div class="pct">' + pct + '% del PEF</div></div>' +
     '</div>';
   }).join('');
-  document.getElementById('top-bars').innerHTML = barsHtml;
-
-  // Full table
-  let rowsHtml = '';
-  ramos.forEach(function(r) {
-    rowsHtml += '<tr data-ramo="' + escapeAttr(r.ramo) + '">' +
-      '<td class="ramo-col">' + escapeHtml(r.ramo) + '</td>' +
-      '<td>' + escapeHtml(r.desc_ramo || '') + '</td>' +
-      '<td class="num">' + fmt(r.monto) + '</td>' +
-      '<td class="pct">' + pct(r.monto, total) + '</td>' +
-    '</tr>' +
-    '<tr class="drill-row" id="drill-row-' + escapeAttr(r.ramo) + '" style="display:none"><td colspan="4" class="drill"><div class="drill-content" id="drill-content-' + escapeAttr(r.ramo) + '"></div></td></tr>';
-  });
-  const tableHtml = '<table><thead><tr><th>Ramo</th><th>Dependencia</th><th style="text-align:right">Monto</th><th style="text-align:right">%</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-  document.getElementById('tabla-wrap').innerHTML = tableHtml;
-
-  // Wire clicks
-  document.querySelectorAll('.bar-row').forEach(function(el) {
-    el.addEventListener('click', function() {
-      const ramo = el.getAttribute('data-ramo');
-      const slot = el.querySelector('.drill-slot');
-      if (slot.innerHTML) { slot.innerHTML = ''; return; }
-      slot.innerHTML = '<div class="drill"><div class="drill-content">Cargando...</div></div>';
-      loadDrill(ramo).then(function(html) { slot.innerHTML = '<div class="drill"><div class="drill-content">' + html + '</div></div>'; });
-    });
-  });
-  document.querySelectorAll('tbody tr[data-ramo]').forEach(function(tr) {
-    tr.addEventListener('click', function() {
-      const ramo = tr.getAttribute('data-ramo');
-      const drillRow = document.getElementById('drill-row-' + ramo);
-      const content = document.getElementById('drill-content-' + ramo);
-      if (drillRow.style.display !== 'none') { drillRow.style.display = 'none'; return; }
-      drillRow.style.display = '';
-      content.innerHTML = 'Cargando...';
-      loadDrill(ramo).then(function(html) { content.innerHTML = html; });
-    });
-  });
+  
+  // Top funciones (sectores)
+  var topFunc = funcionesArr.slice(0,8);
+  var funcCards = topFunc.map(function(f){
+    var monto = Number(f.monto_total);
+    var pct = total ? (monto/total*100).toFixed(1) : 0;
+    return '<div class="funcion-card">' +
+      '<div class="name">' + (f.desc_funcion||'') + '</div>' +
+      '<div class="num">' + fmtBn(monto) + '</div>' +
+      '<div class="pct">' + pct + '% del PEF</div>' +
+    '</div>';
+  }).join('');
+  
+  var html = 
+    // HERO
+    '<div class="hero">' +
+      '<div class="hero-header">' +
+        '<div style="font-size:54px;line-height:1">💰</div>' +
+        '<div style="flex:1;min-width:240px">' +
+          '<h1>PEF ' + stats.ciclo + '</h1>' +
+          '<p>Presupuesto de Egresos de la Federación · Aprobado por la Cámara de Diputados</p>' +
+        '</div>' +
+        '<a href="https://www.transparenciapresupuestaria.gob.mx" target="_blank" rel="noopener" class="hero-link">SHCP Transparencia →</a>' +
+      '</div>' +
+      '<div class="hero-mega">' + fmtBn(total) + ' MXN</div>' +
+      '<div class="hero-grid">' +
+        '<div class="hero-stat"><div class="num">' + Number(stats.ramos||0) + '</div><div class="lbl">Ramos</div></div>' +
+        '<div class="hero-stat"><div class="num">' + Number(stats.programas||0).toLocaleString('es-MX') + '</div><div class="lbl">Programas</div></div>' +
+        '<div class="hero-stat"><div class="num">' + Number(stats.rows||0).toLocaleString('es-MX') + '</div><div class="lbl">Filas presup.</div></div>' +
+        '<div class="hero-stat"><div class="num" style="font-size:16px">📅 anual</div><div class="lbl">Periodo</div></div>' +
+      '</div>' +
+    '</div>' +
+    
+    // Sello
+    '<div class="sello">' +
+      '<div style="font-size:28px">✅</div>' +
+      '<div style="flex:1;min-width:220px">' +
+        '<div class="lbl">FUENTE OFICIAL · SHCP — Transparencia Presupuestaria</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:3px">repodatos.atdt.gob.mx · API oficial de presupuesto · Actualización con cada aprobación PEF</div>' +
+      '</div>' +
+    '</div>' +
+    
+    // Educativa
+    '<details class="educ"><summary><span>🤓 ¿Qué es el PEF? · Educación cívica</span><span style="font-size:11px">▾</span></summary><div class="body">' +
+      '<p style="margin-bottom:8px">El <strong>Presupuesto de Egresos de la Federación (PEF)</strong> es el plan anual de gasto del Gobierno Federal. Determina cuánto se gasta en cada rubro.</p>' +
+      '<ul>' +
+        '<li><strong>Ejecutivo:</strong> Elabora el proyecto (PPEF) y lo manda al Congreso en septiembre.</li>' +
+        '<li><strong>Cámara de Diputados:</strong> Lo discute, modifica y aprueba antes del 15 de noviembre.</li>' +
+        '<li><strong>Ramos:</strong> 36 secciones (Salud, Educación, Defensa, Deuda, etc.) cada una con su presupuesto.</li>' +
+        '<li><strong>Programas Presupuestarios:</strong> Subdivisiones específicas. Tequio indexa todos.</li>' +
+      '</ul>' +
+      '<p style="margin:8px 0 0;color:var(--text3);font-size:11px">📚 Art. 74 fracción IV CPEUM faculta a Diputados a aprobar el PEF en exclusiva. El Senado NO interviene.</p>' +
+    '</div></details>' +
+    
+    // Top 15 ramos
+    '<div class="section">' +
+      '<h2>📊 Distribución por Ramo (Top 15 · ' + ramosArr.length + ' totales)</h2>' +
+      '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;font-size:11px">' +
+        '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#22c55e;border-radius:2px"></span>Social</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#3b82f6;border-radius:2px"></span>Fiscal/Entidades</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#ef4444;border-radius:2px"></span>Deuda</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#f59e0b;border-radius:2px"></span>Energía</span>' +
+        '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#7c3aed;border-radius:2px"></span>Seguridad</span>' +
+      '</div>' +
+      ramosBars +
+    '</div>' +
+    
+    // Funciones
+    '<div class="section">' +
+      '<h2>🎯 Top funciones del Estado</h2>' +
+      '<div class="donut-grid">' + funcCards + '</div>' +
+    '</div>' +
+    
+    // Análisis
+    '<div class="section">' +
+      '<h2>💡 ¿Qué significa en tu vida?</h2>' +
+      '<div class="analisis">El gobierno federal planea gastar <strong style="color:#fbbf24">' + fmtBn(total) + '</strong> en ' + stats.ciclo + '. Eso equivale aproximadamente a <strong>$' + Math.round(total/128e6) + ' por mexicano</strong> al año (128 millones habs).<br><br>Por cada $100 del PEF: aproximadamente <strong>$19 va a seguridad social</strong>, <strong>$18 va a participaciones a estados</strong>, <strong>$16 al pago de deuda</strong>, <strong>$13 a aportaciones federales</strong>, <strong>$8 a Bienestar</strong>, <strong>$6 a Educación</strong>.</div>' +
+      '<div class="actions">' +
+        '<a href="/panel/deuda.html" class="btn btn-prim">💳 Ver Deuda Pública</a>' +
+        '<a href="javascript:void(0)" onclick="navegarConIA()" class="btn btn-ia">🤖 Preguntar IA</a>' +
+        '<a href="/panel/asf.html" class="btn btn-sec">🔍 Ver Auditorías ASF</a>' +
+      '</div>' +
+    '</div>' +
+    
+    '<div class="footer">Fuente: SHCP · Transparencia Presupuestaria · ' + Number(stats.rows||0).toLocaleString('es-MX') + ' filas presupuestales · Datos abiertos gob.mx</div>';
+  
+  document.getElementById('contenido').innerHTML = html;
+  document.getElementById('contenido').className = '';
 }
 
-async function loadDrill(ramo) {
-  if (DRILL_CACHE[ramo]) return DRILL_CACHE[ramo];
+function navegarConIA(){
   try {
-    const r = await fetch('/api/data?vista=pef_ramo&ramo=' + encodeURIComponent(ramo) + '&anio=2026');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const data = await r.json();
-    const items = (data.items || []).slice(0, 10);
-    if (!items.length) {
-      DRILL_CACHE[ramo] = '<em>Sin desglose disponible.</em>';
-      return DRILL_CACHE[ramo];
+    if (window.parent && window.parent !== window && typeof window.parent.navegarCon === 'function') {
+      window.parent.navegarCon({iaPrompt:'Explícame el Presupuesto de Egresos de la Federación PEF 2026: por qué se gasta más en Seguridad Social y Participaciones a Estados, cómo se aprueba, y qué puedo hacer como ciudadano para influir.',toast:'Contexto cargado',page:'asistente'});
+      return;
     }
-    let h = '<h4>Top 10 unidades responsables &mdash; Ramo ' + escapeHtml(ramo) + '</h4><ul>';
-    items.forEach(function(it) {
-      const label = (it.desc_ur || it.unidad_responsable || 'N/D');
-      h += '<li><span class="ur-label">' + escapeHtml(label) + '</span><span class="ur-monto">' + fmt(it.monto) + '</span></li>';
-    });
-    h += '</ul>';
-    DRILL_CACHE[ramo] = h;
-    return h;
-  } catch (e) {
-    return '<em>Error: ' + escapeHtml(e.message) + '</em>';
-  }
+  } catch(e){}
+  window.location.href = '/?page=asistente';
 }
 
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
-    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
-  });
-}
-function escapeAttr(s) { return escapeHtml(s).replace(/\s/g, '_'); }
-
-loadResumen();
+cargarPEF();
 </script>
 </body>
 </html>
