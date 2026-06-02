@@ -1,7 +1,7 @@
-name: Periódicos Oficiales MASIVO (15 estados)
+name: Periódicos Oficiales DIARIO (32 estados)
 
-# Scrapea Periódicos Oficiales estatales con Playwright
-# Matrix de 15 estados clave (más poblados + más relevantes)
+# Scrapea Periódicos Oficiales de los 32 estados
+# Cron diario captura decretos del día → vendible a periodistas
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
       max_pubs:
         description: "Max publicaciones por estado"
         required: false
-        default: "30"
+        default: "40"
   schedule:
     # Diario a las 4 AM UTC (10 PM CDMX)
     - cron: '0 4 * * *'
@@ -20,12 +20,13 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 16
       matrix:
-        estado: ['09', '15', '14', '19', '30', '21', '11', '22', '26', '07', '13', '16', '31', '28', '20']
+        estado: ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16',
+                 '17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32']
     
     steps:
       - uses: actions/checkout@v4
@@ -42,4 +43,21 @@ jobs:
           ESTADO: ${{ matrix.estado }}
           MAX_PUBS: ${{ inputs.max_pubs }}
         run: |
-          python3 scripts/scrape_periodicos_oficiales.py "$ESTADO" "${MAX_PUBS:-30}"
+          python3 scripts/scrape_periodicos_oficiales.py "$ESTADO" "${MAX_PUBS:-40}"
+        continue-on-error: true
+  
+  refresh:
+    needs: scrape
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log resumen
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          echo "Total POE publications:"
+          curl -s -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Prefer: count=exact" -H "Range-Unit: items" -H "Range: 0-0" \
+            -I "$SUPABASE_URL/rest/v1/periodicos_oficiales?select=id" 2>&1 \
+            | grep -i 'content-range'
