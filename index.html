@@ -2637,7 +2637,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">757</div>
+            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,518</div>
             <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
           <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
@@ -5740,7 +5740,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div style="font-size:54px;line-height:1">🧠</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Asistente Legal IA</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes">757</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
             </div>
           </div>
         </div>
@@ -5749,7 +5749,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           <div style="font-size:28px">✅</div>
           <div style="flex:1;min-width:220px">
             <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">RAG SOBRE FUENTES OFICIALES</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong>5,886 artículos completos</strong> de leyes federales (CPEUM 136 · LFT 1,270 · CCF 3,115 · CFF 422 · CPF 555 · LSS 388) extraídos del PDF oficial de Cámara de Diputados, más 20 tesis SCJN. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Powered by <strong>Gemini</strong> + <strong>Supabase</strong> (FTS spanish + pgvector). <strong>No sustituye asesoría legal profesional.</strong></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong><span data-kpi="chunks-embedded">325,751</span> artículos completos</strong> de leyes federales, estatales y municipales (Cámara de Diputados + Congresos estatales + Ayuntamientos) más 20 tesis SCJN. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Powered by <strong>Gemini</strong> + <strong>Supabase</strong> (FTS spanish + pgvector). <strong>No sustituye asesoría legal profesional.</strong></div>
           </div>
         </div>
         <div class="alert alert-warn mb-16">
@@ -5790,7 +5790,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
                   ¡Hola! Soy el <strong>Asistente Legal de Tequio</strong>.<br><br>
                   Antes de responder, busco en una base vectorial de fuentes oficiales:
                   <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
-                    <li><strong><span data-kpi="leyes">757</span> leyes</strong> federales y estatales (Cám. Diputados)</li>
+                    <li><strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes</strong> federales y estatales (Cám. Diputados + Congresos)</li>
                     <li><strong>20 tesis emblemáticas</strong> de la SCJN (Semanario Judicial)</li>
                     <li><strong>Decretos del DOF</strong> y comunicados SCJN (RSS oficial)</li>
                   </ul>
@@ -12370,7 +12370,7 @@ let obIntereses = new Set();
 // ─── FUENTES VERIFICABLES ───
 // ════════════════════════════════════════
 const fuentesDB = {
-  leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'757 leyes en el catálogo de Tequio', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'Leyes federales vigentes (~280) + reglamentos + leyes core de los 32 estados. Scraping diario contra diputados.gob.mx y dof.gob.mx. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
+  leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'5,961 leyes federales+estatales · 2,557 reglamentos municipales · 8,518 total', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'292 leyes federales (diputados.gob.mx) + 5,669 leyes estatales de los 32 congresos + 2,557 reglamentos municipales de 560 ciudades. Scraping continuo + workflow autónomo. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
   contratos_publicos: { titulo:'Contratos Públicos APF', dato:'23,175 contratos cargados', fuente:'ComprasMX / CompraNet (OCDS)', url:'https://comprasmx.buengobierno.gob.mx', fecha:'Actualización semanal vía workflow', metodologia:'Contratos publicados por la Administración Pública Federal en el estándar de datos abiertos OCDS. Incluye contratante, proveedor, monto, fecha, modalidad de contratación.', verificar:'comprasmx.buengobierno.gob.mx → Contrataciones' },
   deuda_publica: { titulo:'Deuda Pública', dato:'$18.20 billones de pesos (52.4% PIB)', fuente:'SHCP — Informe de Finanzas Públicas Q3 2024', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Publicado: 31 octubre 2024', metodologia:'Saldo de deuda del Sector Público Federal: interna ($9.84T) + externa ($3.86T) + PEMEX + CFE. Calculado conforme a la metodología del FMI.', verificar:'finanzaspublicas.hacienda.gob.mx → Deuda Pública → Informes Trimestrales' },
   patrimonio_inah: { titulo:'Patrimonio Cultural · INAH', dato:'195 zonas arqueológicas + 165 museos', fuente:'INAH · Datos Abiertos', url:'https://datos.inah.gob.mx', fecha:'Catálogo INAH vigente', metodologia:'Catálogo oficial de zonas arqueológicas abiertas al público y museos administrados por el INAH. Datos abiertos del Instituto Nacional de Antropología e Historia.', verificar:'datos.inah.gob.mx → Zonas Arqueológicas · Museos' },
