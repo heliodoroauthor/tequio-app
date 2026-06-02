@@ -38,7 +38,16 @@
       'pef-total': function(){
         if (!k.pef || !k.pef.monto_total_mxn) return '—';
         return '$' + (k.pef.monto_total_mxn / 1e12).toFixed(2) + ' bn';
-      }
+      },
+      // Nuevos KPIs post-mega-sweep (jun 2026)
+      'leyes-federal-estatal':       function(){ return fmtNum(k.leyes_federal_estatal); },
+      'leyes-municipal-reglamento':  function(){ return fmtNum(k.leyes_municipal_reglamento); },
+      'leyes-municipal-gaceta':      function(){ return fmtNum(k.leyes_municipal_gaceta); },
+      'chunks-total':                function(){ return fmtNum(k.chunks_total); },
+      'chunks-embedded':             function(){ return fmtNum(k.chunks_embedded); },
+      'chunks-federal':              function(){ return fmtNum(k.chunks_federal); },
+      'chunks-estatal':              function(){ return fmtNum(k.chunks_estatal); },
+      'chunks-municipal':            function(){ return fmtNum(k.chunks_municipal); }
     };
     Object.keys(map).forEach(function(key){
       var els = document.querySelectorAll('[data-kpi="' + key + '"]');
