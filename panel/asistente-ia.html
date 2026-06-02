@@ -7,22 +7,12 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0e1a;
-    --bg-soft: #0f172a;
-    --card: #111827;
-    --border: #1f2937;
-    --border-soft: #374151;
-    --text: #e5e7eb;
-    --text-dim: #9ca3af;
-    --text-dimer: #6b7280;
-    --accent: #fbbf24;
-    --accent-soft: #fcd34d;
-    --violet: #a855f7;
-    --teal: #14b8a6;
-    --emerald: #10b981;
-    --rose: #f43f5e;
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border: #1f2937; --border-soft: #374151;
+    --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d;
+    --violet: #a855f7; --teal: #14b8a6; --emerald: #10b981;
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
-    --font-display: 'Inter', -apple-system, sans-serif;
   }
   html, body { background: var(--bg); color: var(--text); font-family: var(--font); }
   body { padding: 16px; min-height: 100vh; }
@@ -41,13 +31,6 @@
     margin-bottom: 18px;
     overflow: hidden;
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at top right, rgba(168,85,247,0.18), transparent 60%);
-    pointer-events: none;
   }
   .hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
@@ -61,190 +44,71 @@
   }
   .hero h1 {
     font-size: 30px; font-weight: 900; line-height: 1.15;
-    font-family: var(--font-display);
     margin: 0 0 10px;
     background: linear-gradient(135deg, #fff 0%, #d8b4fe 60%, #5eead4 100%);
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .hero p {
-    color: #cbd5e1; font-size: 14.5px; line-height: 1.6;
-    max-width: 720px; margin: 0;
-  }
+  .hero p { color: #cbd5e1; font-size: 14.5px; line-height: 1.6; max-width: 720px; margin: 0; }
   .hero p strong { color: #fde68a; font-weight: 700; }
 
-  .stats {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 10px; margin-top: 20px;
-  }
-  .stat {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 12px 10px;
-    backdrop-filter: blur(8px);
-  }
-  .stat-num {
-    font-size: 22px; font-weight: 900;
-    color: #fff; line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 4px;
-  }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+  .stat-num { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
   .stat-num.violet { color: #d8b4fe; }
   .stat-num.teal { color: #5eead4; }
   .stat-num.amber { color: var(--accent-soft); }
   .stat-num.emerald { color: #6ee7b7; }
-  .stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.3px; }
-  @media (max-width:680px){
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    .hero h1 { font-size: 24px; }
-    .hero { padding: 22px 18px 16px; }
-  }
+  .stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  @media (max-width:680px){ .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 24px; } }
 
-  details.edu {
-    background: rgba(168,85,247,0.06);
-    border: 1px solid rgba(168,85,247,0.25);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    cursor: pointer;
-  }
+  details.edu { background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; cursor: pointer; }
   details.edu[open] { background: rgba(168,85,247,0.10); }
-  details.edu summary {
-    list-style: none;
-    display: flex; align-items: center; gap: 10px;
-    font-weight: 700; color: #e9d5ff; font-size: 13.5px;
-  }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: #e9d5ff; font-size: 13.5px; }
   details.edu summary::-webkit-details-marker { display: none; }
-  details.edu summary::after {
-    content: '▼'; margin-left: auto; font-size: 9px; color: #c084fc;
-    transition: transform .2s;
-  }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: #c084fc; transition: transform .2s; }
   details.edu[open] summary::after { transform: rotate(180deg); }
-  details.edu .edu-body {
-    margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65;
-  }
+  details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
   details.edu .edu-body p { margin-bottom: 8px; }
   details.edu .edu-body strong { color: #f5d0fe; }
-  details.edu .edu-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;
-  }
-  details.edu .edu-cell {
-    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px; padding: 10px;
-    font-size: 12px;
-  }
-  details.edu .edu-cell-num {
-    font-weight: 900; font-size: 18px; color: #d8b4fe; margin-bottom: 2px;
-  }
+  details.edu .edu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  details.edu .edu-cell { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; font-size: 12px; }
+  details.edu .edu-cell-num { font-weight: 900; font-size: 18px; color: #d8b4fe; margin-bottom: 2px; }
   details.edu .edu-cell-lbl { color: var(--text-dim); }
   @media (max-width:680px){ details.edu .edu-grid { grid-template-columns: 1fr; } }
 
-  .sugg-title {
-    font-size: 11.5px; font-weight: 800; color: var(--text-dim);
-    letter-spacing: 1.5px; text-transform: uppercase;
-    margin: 4px 0 10px;
-  }
-  .sugg-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-    margin-bottom: 16px;
-  }
-  .sugg-card {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 14px 12px;
-    cursor: pointer;
-    transition: all .18s ease;
-    text-align: left;
-    color: inherit;
-    font-family: inherit;
-  }
-  .sugg-card:hover {
-    background: rgba(168,85,247,0.10);
-    border-color: rgba(168,85,247,0.40);
-    transform: translateY(-2px);
-  }
+  .sugg-title { font-size: 11.5px; font-weight: 800; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin: 4px 0 10px; }
+  .sugg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .sugg-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 12px; cursor: pointer; transition: all .18s ease; text-align: left; color: inherit; font-family: inherit; }
+  .sugg-card:hover { background: rgba(168,85,247,0.10); border-color: rgba(168,85,247,0.40); transform: translateY(-2px); }
   .sugg-icon { font-size: 22px; margin-bottom: 8px; display: block; }
   .sugg-cat { font-size: 10px; font-weight: 700; color: #c084fc; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; }
   .sugg-q { font-size: 12.5px; color: var(--text); line-height: 1.35; font-weight: 600; }
   @media (max-width:760px){ .sugg-grid { grid-template-columns: repeat(2, 1fr); } }
 
-  .chat {
-    background: var(--card);
-    border: 1px solid var(--border-soft);
-    border-radius: 16px;
-    display: flex; flex-direction: column;
-    min-height: 380px;
-    max-height: calc(100vh - 360px);
-    overflow: hidden;
-  }
+  .chat { background: var(--card); border: 1px solid var(--border-soft); border-radius: 16px; display: flex; flex-direction: column; min-height: 380px; max-height: calc(100vh - 360px); overflow: hidden; }
   body.embedded .chat { max-height: calc(100vh - 320px); }
-  .chat-head {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-soft);
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(168,85,247,0.06);
-  }
-  .chat-head-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--emerald);
-    box-shadow: 0 0 8px rgba(16,185,129,0.6);
-    animation: pulse 2s infinite;
-  }
+  .chat-head { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; background: rgba(168,85,247,0.06); }
+  .chat-head-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px rgba(16,185,129,0.6); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .chat-head-title { font-size: 13px; font-weight: 700; color: var(--text); }
   .chat-head-sub { font-size: 11px; color: var(--text-dim); margin-left: auto; }
 
-  .messages {
-    flex: 1; overflow-y: auto;
-    padding: 18px 16px;
-    display: flex; flex-direction: column; gap: 14px;
-  }
+  .messages { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
   .messages::-webkit-scrollbar { width: 6px; }
   .messages::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 3px; }
 
   .msg { display: flex; gap: 10px; max-width: 92%; }
-  .msg .avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
+  .msg .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.08); }
   .msg.user { margin-left: auto; flex-direction: row-reverse; }
   .msg.user .avatar { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.30); }
   .msg.ai .avatar { background: linear-gradient(135deg, rgba(168,85,247,0.20), rgba(20,184,166,0.15)); border-color: rgba(168,85,247,0.30); }
-
-  .bubble {
-    background: var(--bg-soft);
-    padding: 12px 14px;
-    border-radius: 12px;
-    line-height: 1.55;
-    font-size: 14px;
-    white-space: pre-wrap; word-wrap: break-word;
-    border: 1px solid var(--border-soft);
-  }
+  .bubble { background: var(--bg-soft); padding: 12px 14px; border-radius: 12px; line-height: 1.55; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid var(--border-soft); }
   .msg.user .bubble { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.25); }
 
-  .fuentes {
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px dashed var(--border-soft);
-    font-size: 12.5px;
-  }
-  .fuentes-title {
-    color: #d8b4fe; font-weight: 800;
-    margin-bottom: 8px;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    font-size: 10.5px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .fuente-item {
-    color: var(--text-dim); margin-bottom: 6px;
-    padding: 6px 10px;
-    background: rgba(168,85,247,0.05);
-    border-left: 3px solid rgba(168,85,247,0.4);
-    border-radius: 6px;
-  }
+  .fuentes { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-soft); font-size: 12.5px; }
+  .fuentes-title { color: #d8b4fe; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.2px; font-size: 10.5px; }
+  .fuente-item { color: var(--text-dim); margin-bottom: 6px; padding: 6px 10px; background: rgba(168,85,247,0.05); border-left: 3px solid rgba(168,85,247,0.4); border-radius: 6px; }
   .fuente-item a { color: #93c5fd; text-decoration: none; font-weight: 600; }
   .fuente-item a:hover { text-decoration: underline; color: #bfdbfe; }
 
@@ -252,56 +116,154 @@
   .typing-dots::after { content: '...'; animation: dots 1.4s infinite; }
   @keyframes dots { 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
 
-  .input-bar {
-    padding: 14px 16px;
-    border-top: 1px solid var(--border-soft);
-    display: flex; gap: 10px;
-    background: rgba(15,23,42,0.6);
-    backdrop-filter: blur(8px);
-  }
-  textarea {
-    flex: 1;
-    background: var(--bg-soft);
-    color: var(--text);
-    border: 1px solid var(--border-soft);
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: none;
-    min-height: 48px;
-    max-height: 160px;
-    transition: border-color .15s;
-  }
-  textarea:focus {
-    outline: none;
-    border-color: var(--violet);
-    box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
-  }
-  button.send {
-    background: linear-gradient(135deg, var(--violet) 0%, var(--teal) 100%);
-    color: #fff;
-    font-weight: 800;
-    padding: 0 22px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    white-space: nowrap;
-    transition: transform .15s, opacity .15s;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .input-bar { padding: 14px 16px; border-top: 1px solid var(--border-soft); display: flex; gap: 10px; background: rgba(15,23,42,0.6); }
+  textarea { flex: 1; background: var(--bg-soft); color: var(--text); border: 1px solid var(--border-soft); padding: 12px 14px; border-radius: 10px; font-size: 14px; font-family: inherit; resize: none; min-height: 48px; max-height: 160px; }
+  textarea:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
+  button.send { background: linear-gradient(135deg, var(--violet) 0%, var(--teal) 100%); color: #fff; font-weight: 800; padding: 0 22px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; white-space: nowrap; transition: transform .15s, opacity .15s; }
   button.send:hover:not(:disabled) { transform: translateY(-1px); }
   button.send:disabled { opacity: .5; cursor: not-allowed; background: var(--border-soft); }
 
-  .disclaimer {
-    margin-top: 14px; font-size: 11.5px; color: var(--text-dim);
-    text-align: center; line-height: 1.5;
-    padding: 10px 14px;
-    background: rgba(251,191,36,0.05);
-    border: 1px solid rgba(251,191,36,0.15);
-    border-radius: 10px;
-  }
+  .disclaimer { margin-top: 14px; font-size: 11.5px; color: var(--text-dim); text-align: center; line-height: 1.5; padding: 10px 14px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; }
   .disclaimer strong { color: var(--accent); }
 </style>
-<script src="/js
+<script src="/js/tequio-kpis.js" defer></script>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <div class="hero-badge">🧠 Powered by RAG · Cero invención</div>
+    <h1>Asistente Legal IA</h1>
+    <p>Pregúntale a Tequio sobre cualquier ley mexicana, tu derecho como ciudadano, jurisprudencia de la SCJN o cómo afecta una iniciativa a tu vida cotidiana. <strong>Respuestas con citas verificables.</strong></p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num violet"><span data-kpi="leyes">8,739</span></div><div class="stat-lbl">Leyes indexadas</div></div>
+      <div class="stat"><div class="stat-num teal"><span data-kpi="chunks_ia">651k</span></div><div class="stat-lbl">Fragmentos IA</div></div>
+      <div class="stat"><div class="stat-num amber">32/32</div><div class="stat-lbl">Estados cubiertos</div></div>
+      <div class="stat"><div class="stat-num emerald">100%</div><div class="stat-lbl">Fuentes oficiales</div></div>
+    </div>
+  </div>
+
+  <details class="edu">
+    <summary>📖 ¿Cómo funciona el Asistente Legal IA?</summary>
+    <div class="edu-body">
+      <p>Tequio IA usa una arquitectura <strong>RAG (Retrieval-Augmented Generation)</strong>: antes de responder, busca en la base verificada de leyes mexicanas los fragmentos más relevantes a tu pregunta, y genera la respuesta <strong>solo con base en esas fuentes</strong>.</p>
+      <p>Si no encuentra leyes específicas, lo dice claramente. <strong>Cero invención</strong> es nuestro compromiso fundacional.</p>
+      <div class="edu-grid">
+        <div class="edu-cell"><div class="edu-cell-num">1</div><div class="edu-cell-lbl"><strong>Buscamos</strong> en 651k fragmentos embeddings semánticos de leyes oficiales</div></div>
+        <div class="edu-cell"><div class="edu-cell-num">2</div><div class="edu-cell-lbl"><strong>Ranqueamos</strong> los más relevantes a tu pregunta por similitud vectorial</div></div>
+        <div class="edu-cell"><div class="edu-cell-num">3</div><div class="edu-cell-lbl"><strong>Generamos</strong> respuesta con Claude/Gemini citando ley, artículo y URL oficial</div></div>
+      </div>
+    </div>
+  </details>
+
+  <div class="sugg-title">💡 Empieza con una pregunta</div>
+  <div class="sugg-grid">
+    <button class="sugg-card" data-q="¿Qué dice la Ley Federal del Trabajo sobre vacaciones, aguinaldo y reparto de utilidades?"><span class="sugg-icon">👷</span><div class="sugg-cat">LABORAL</div><div class="sugg-q">Vacaciones, aguinaldo y PTU</div></button>
+    <button class="sugg-card" data-q="¿Cómo funciona el juicio de amparo en México? ¿Cuándo procede y qué pasos seguir?"><span class="sugg-icon">⚖️</span><div class="sugg-cat">AMPARO</div><div class="sugg-q">Cómo defenderme con amparo</div></button>
+    <button class="sugg-card" data-q="¿Cuáles son los derechos del consumidor en México según la Profeco y la Ley Federal de Protección al Consumidor?"><span class="sugg-icon">🛒</span><div class="sugg-cat">CONSUMIDOR</div><div class="sugg-q">Mis derechos ante empresas</div></button>
+    <button class="sugg-card" data-q="Explica la Ley General de Transparencia y cómo presentar una solicitud de acceso a la información"><span class="sugg-icon">🔍</span><div class="sugg-cat">TRANSPARENCIA</div><div class="sugg-q">Acceso a información pública</div></button>
+    <button class="sugg-card" data-q="¿Qué dice el Artículo 33 de la Constitución mexicana sobre extranjeros y derechos políticos?"><span class="sugg-icon">📜</span><div class="sugg-cat">CONSTITUCIÓN</div><div class="sugg-q">Derechos constitucionales</div></button>
+    <button class="sugg-card" data-q="¿Cómo presentar una denuncia ante la ASF, SFP o INAI por corrupción o irregularidades?"><span class="sugg-icon">🚨</span><div class="sugg-cat">ANTI-CORRUPCIÓN</div><div class="sugg-q">Denunciar irregularidades</div></button>
+    <button class="sugg-card" data-q="¿Cuáles son mis derechos si soy arrendatario en México? Ley de arrendamiento y depósito."><span class="sugg-icon">🏠</span><div class="sugg-cat">VIVIENDA</div><div class="sugg-q">Renta, depósito y desalojo</div></button>
+    <button class="sugg-card" data-q="¿Qué obligaciones fiscales tengo como persona física en México? ISR, IVA, RFC."><span class="sugg-icon">💸</span><div class="sugg-cat">FISCAL</div><div class="sugg-q">Impuestos persona física</div></button>
+  </div>
+
+  <div class="chat">
+    <div class="chat-head">
+      <div class="chat-head-dot"></div>
+      <div class="chat-head-title">Asistente activo</div>
+      <div class="chat-head-sub">Claude + RAG semántico</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-bar">
+      <textarea id="input" placeholder="Pregunta sobre cualquier ley o tema legal mexicano..." rows="1"></textarea>
+      <button class="send" id="sendBtn">Enviar ➤</button>
+    </div>
+  </div>
+
+  <div class="disclaimer"><strong>⚠ Aviso legal:</strong> Información orientativa generada por IA con base en leyes mexicanas verificadas. No sustituye asesoría profesional. Para casos específicos consulta a un abogado.</div>
+</div>
+
+<script>
+(function(){
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('input');
+  const sendBtn = document.getElementById('sendBtn');
+  const params = new URLSearchParams(location.search);
+  if (params.get('embedded') === '1') document.body.classList.add('embedded');
+  const history = [];
+  function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function addMessage(role,text,sources){
+    const el=document.createElement('div');
+    el.className='msg '+role;
+    const avatar=role==='user'?'👤':'🤖';
+    let sourcesHtml='';
+    if(sources&&sources.length){
+      sourcesHtml='<div class="fuentes"><div class="fuentes-title">📚 Fuentes citadas</div>'+sources.map(s=>{
+        const url=s.url?escapeHtml(s.url):'';
+        const nombre=escapeHtml(s.nombre||s.rubro||'Fuente');
+        const linkHtml=url?`<a href="${url}" target="_blank" rel="noopener">${nombre}</a>`:nombre;
+        return `<div class="fuente-item">${linkHtml}</div>`;
+      }).join('')+'</div>';
+    }
+    el.innerHTML=`<div class="avatar">${avatar}</div><div class="bubble">${escapeHtml(text)}${sourcesHtml}</div>`;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop=messagesEl.scrollHeight;
+    return el;
+  }
+  function addTyping(){
+    const el=document.createElement('div');
+    el.className='msg ai'; el.id='typing-indicator';
+    el.innerHTML='<div class="avatar">🤖</div><div class="bubble"><span class="typing typing-dots">Buscando en leyes oficiales</span></div>';
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop=messagesEl.scrollHeight;
+  }
+  function removeTyping(){const el=document.getElementById('typing-indicator'); if(el) el.remove();}
+  async function send(question){
+    if(!question.trim()) return;
+    addMessage('user',question);
+    history.push({role:'user',content:question});
+    inputEl.value=''; inputEl.style.height='auto'; sendBtn.disabled=true;
+    addTyping();
+    try {
+      const r=await fetch('/api/ai-proxy',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          messages:history,
+          system:'Eres un asistente legal mexicano. Responde con base en las fuentes proporcionadas. Cita siempre la ley o jurisprudencia. Si no tienes información suficiente, dilo claramente.',
+          max_tokens:1024
+        })
+      });
+      removeTyping();
+      if(!r.ok){const errText=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+(errText?': '+errText.slice(0,200):''));}
+      const data=await r.json();
+      let answer='';
+      if(Array.isArray(data.content)) answer=data.content.map(b=>b&&b.text?b.text:'').join('\n').trim();
+      else if(typeof data.content==='string') answer=data.content;
+      else if(data.text) answer=data.text;
+      else answer='(Respuesta vacía. Revisa /api/ai-proxy.)';
+      const sources=data.fuentes||data.sources||[];
+      addMessage('ai',answer,sources);
+      history.push({role:'assistant',content:answer});
+    } catch(e){
+      removeTyping();
+      addMessage('ai','Error al consultar al asistente: '+e.message);
+    } finally {
+      sendBtn.disabled=false;
+      inputEl.focus();
+    }
+  }
+  sendBtn.addEventListener('click',()=>send(inputEl.value));
+  inputEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault(); send(inputEl.value);}});
+  inputEl.addEventListener('input',()=>{inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,160)+'px';});
+  document.querySelectorAll('.sugg-card').forEach(el=>{el.addEventListener('click',()=>send(el.dataset.q));});
+  try {
+    const urlPrompt=params.get('iaPrompt')||params.get('q');
+    if(urlPrompt) setTimeout(()=>send(urlPrompt),300);
+    else inputEl.focus();
+  } catch(e){inputEl.focus();}
+})();
+</script>
+</body>
+</html>
