@@ -135,25 +135,7 @@ footer a{color:var(--muted)}
 </head>
 <body>
 <div class="wrap">
-<a href="/panel/buscador.html" class="back" onclick="(function(e){
-  e.preventDefault();
-  // 1) Si estamos en SPA (iframe dentro de index.html), volver al buscador via cargarPanel
-  try {
-    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
-      window.parent.cargarPanel('buscador');
-      return;
-    }
-  } catch(err){}
-  // 2) Si tenemos referrer del buscador, history.back funciona
-  try {
-    if (document.referrer && document.referrer.indexOf('buscador') >= 0) {
-      history.back();
-      return;
-    }
-  } catch(err){}
-  // 3) Fallback: navegar directo (siempre funciona)
-  window.location.href = '/panel/buscador.html';
-})(event);return false;">← Atrás</a>
+<a href="/panel/buscador.html" class="back" onclick="window.tequioMuniBack(event);return false;">← Atrás</a>
 
 <div id="content">
 <div class="loading">Cargando datos del municipio…</div>
@@ -763,5 +745,44 @@ setTimeout(function(){
   setTimeout(loadReglamentosMuni, 500);
 }, 1000);
 </script>
+
+<script>
+// 🦎 BACK BUTTON BULLETPROOF — fuerza reset del iframe buscador antes de volver
+window.tequioMuniBack = function(e){
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try {
+    // CASO 1: estamos embebidos en el SPA (index.html)
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      // FORZAR reset del iframe buscador (si existe) para evitar mostrar muni stale
+      try {
+        var existing = window.parent.document.getElementById('page-iframe-buscador');
+        if (existing) {
+          var ifr = existing.querySelector('iframe');
+          if (ifr) ifr.src = '/panel/buscador.html?embedded=1&t=' + Date.now();
+        }
+      } catch(err) {}
+      // Reset back-stack para no terminar en otro panel
+      try {
+        if (Array.isArray(window.parent.__tequioPanelStack)) {
+          window.parent.__tequioPanelStack.length = 0;
+        }
+        if (window.parent.__tequioCurrentPanel) {
+          window.parent.__tequioCurrentPanel = null;
+        }
+      } catch(err) {}
+      window.parent.cargarPanel('buscador');
+      return false;
+    }
+  } catch(err) {}
+  // CASO 2: navegación directa (mobile, PWA, link directo)
+  try {
+    window.location.href = '/panel/buscador.html';
+  } catch(err) {
+    location.assign('/panel/buscador.html');
+  }
+  return false;
+};
+</script>
+
 </body>
 </html>
