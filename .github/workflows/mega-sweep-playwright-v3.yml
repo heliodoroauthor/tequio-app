@@ -1,0 +1,75 @@
+name: Mega-sweep Playwright v3 (paralelo)
+
+# Cobertura masiva de munis usando Playwright + matrix paralela
+# Bypasa WAFs (Cloudflare, Radware) que mataban munis grandes
+
+on:
+  workflow_dispatch:
+    inputs:
+      estados:
+        description: "Estados (comma: 20,30,21,07,14,31,12,08,16,26,15,13) o 'top12'"
+        required: false
+        default: "top12"
+      max_per_muni:
+        description: "Max PDFs por muni"
+        required: false
+        default: "8"
+
+jobs:
+  sweep:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 12  # 12 estados en paralelo
+      matrix:
+        estado: ['20', '30', '21', '07', '14', '31', '12', '08', '16', '26', '15', '13']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils tesseract-ocr libtesseract-dev
+          pip install --quiet playwright requests rapidfuzz ddgs
+      
+      - name: Setup Playwright browsers
+        run: |
+          playwright install --with-deps chromium
+      
+      - name: Run Playwright sweep
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+          PYTHONWARNINGS: ignore
+          ESTADO: ${{ matrix.estado }}
+          MAX_PER_MUNI: ${{ inputs.max_per_muni }}
+        run: |
+          cd scripts/legales
+          python3 playwright_sweep_v3.py "$ESTADO" "${MAX_PER_MUNI:-8}"
+      
+      - name: Log scraper status
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          # Refresh KPI cache después de cada estado
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' > /dev/null
+  
+  refresh_kpis:
+    needs: sweep
+    if: always()
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Final cache refresh
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | head -50
