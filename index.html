@@ -3724,38 +3724,133 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         'Encuentro Solidario':'#a855f7','Independiente':'#94a3b8',
         'Sin Grupo Parlamentario':'#71717a'
       };
+      function polInferTipo(d){
+        // Si tiene entidad y distrito numérico, es MR. Sino, es Pluri (RP)
+        var dist = (d.distrito || '').toString().trim();
+        if (d.entidad && dist && dist !== '' && dist !== '0' && !isNaN(parseInt(dist))) return 'MR';
+        return 'RP';
+      }
+      function polCalcEdad(fecha){
+        if(!fecha) return null;
+        try {
+          var d = new Date(fecha);
+          var hoy = new Date();
+          var edad = hoy.getFullYear() - d.getFullYear();
+          var m = hoy.getMonth() - d.getMonth();
+          if(m < 0 || (m === 0 && hoy.getDate() < d.getDate())) edad--;
+          return edad;
+        } catch(e){ return null; }
+      }
       function polRenderCards(filas) {
         const grid = document.getElementById('pol-grid');
         if (!filas.length) {
           grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Sin diputados que coincidan con tu búsqueda.</div>';
           return;
         }
-        grid.innerHTML = filas.map(d => {
+        grid.innerHTML = filas.map(function(d,i){
           const color = PARTIDO_COLOR[d.partido] || '#64748b';
           const fotoSrc = d.foto_url || '';
-          const fotoTag = fotoSrc ? `<img src="${fotoSrc}" loading="lazy" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid ${color};flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:64px;height:64px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0">${(d.nombre||'?').split(' ').slice(0,2).map(s=>s[0]).join('')}</div>`;
+          const fotoTag = fotoSrc 
+            ? '<img src="' + fotoSrc + '" loading="lazy" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid ' + color + ';flex-shrink:0" onerror="this.style.display=\'none\'">'
+            : '<div style="width:64px;height:64px;border-radius:50%;background:' + color + ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0">' + (d.nombre||'?').split(' ').slice(0,2).map(function(s){return s[0];}).join('') + '</div>';
+          const tipo = polInferTipo(d);
+          const tipoBadge = tipo === 'MR' 
+            ? '<span style="background:rgba(59,130,246,0.15);color:#3b82f6;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">🗺️ MR</span>'
+            : '<span style="background:rgba(168,85,247,0.15);color:#a855f7;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">📋 Pluri</span>';
           const numCom = Array.isArray(d.comisiones) ? d.comisiones.length : 0;
-          return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:transform 0.15s" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='translateY(0)'">
-            <div style="display:flex;gap:10px;align-items:center">
-              ${fotoTag}
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${d.nombre||'—'}</div>
-                <div style="display:inline-block;background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;margin-top:4px">${d.partido||'—'}</div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:var(--text2);line-height:1.4">
-              <div>📍 <strong>${d.entidad||'—'}</strong> · ${d.distrito||'—'}</div>
-              <div>🪑 ${d.principio_eleccion||'—'}${d.curul ? ' · ' + d.curul : ''}</div>
-              ${d.reelecto ? '<div>🔁 Reelecto: <strong>' + d.reelecto + '</strong></div>' : ''}
-              ${numCom ? '<div>🤝 ' + numCom + ' comisión' + (numCom > 1 ? 'es' : '') + '</div>' : ''}
-            </div>
-            <div style="display:flex;gap:6px;margin-top:auto">
-              ${d.email ? `<a href="mailto:${d.email}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);text-decoration:none;padding:7px;border-radius:8px;text-align:center;font-size:11px;font-weight:600">✉ Email</a>` : ''}
-              ${d.curricula_url ? `<a href="${d.curricula_url}" target="_blank" rel="noopener" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);text-decoration:none;padding:7px;border-radius:8px;text-align:center;font-size:11px;font-weight:600">📄 Currícula</a>` : ''}
-            </div>
-          </div>`;
+          const edad = polCalcEdad(d.fecha_nacimiento);
+          const ubicacion = tipo === 'MR' 
+            ? '<div>📍 <strong>' + (d.entidad||'—') + '</strong>' + (d.distrito ? ' · Dto ' + d.distrito : '') + '</div>'
+            : '<div>📋 <strong>Pluri-nominal</strong> · ' + (d.entidad || 'lista nacional') + '</div>';
+          
+          // Card clickable: abre modal con dipt_id como índice
+          window.__diputadosByIdx = window.__diputadosByIdx || {};
+          window.__diputadosByIdx[i] = d;
+          
+          return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:transform 0.15s;cursor:pointer;border-left:3px solid ' + color + '" onmouseenter="this.style.transform=\'translateY(-2px)\';this.style.borderColor=\'' + color + '\'" onmouseleave="this.style.transform=\'translateY(0)\';this.style.borderColor=\'var(--border)\'" onclick="polAbrirModal(' + i + ')">' +
+            '<div style="display:flex;gap:10px;align-items:center">' +
+              fotoTag +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-size:13px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">' + (d.nombre||'—') + '</div>' +
+                '<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:4px">' +
+                  '<span style="background:' + color + ';color:#fff;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">' + (d.partido||'—') + '</span>' +
+                  tipoBadge +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="font-size:11px;color:var(--text2);line-height:1.4">' +
+              ubicacion +
+              (edad ? '<div>🎂 ' + edad + ' años' + (d.curul ? ' · Curul ' + d.curul : '') + '</div>' : (d.curul ? '<div>🪑 Curul ' + d.curul + '</div>' : '')) +
+              (numCom ? '<div>🤝 ' + numCom + ' comisión' + (numCom > 1 ? 'es' : '') + '</div>' : '') +
+              (d.reelecto ? '<div>🔁 Reelecto: <strong>' + d.reelecto + '</strong></div>' : '') +
+            '</div>' +
+            '<div style="font-size:10px;color:var(--accent2);text-align:center;font-weight:700;padding-top:4px">👤 Ver perfil completo</div>' +
+          '</div>';
         }).join('');
       }
+      
+      window.polAbrirModal = function(idx){
+        var d = window.__diputadosByIdx[idx];
+        if(!d) return;
+        var color = PARTIDO_COLOR[d.partido] || '#64748b';
+        var tipo = polInferTipo(d);
+        var edad = polCalcEdad(d.fecha_nacimiento);
+        var fechaNac = d.fecha_nacimiento ? new Date(d.fecha_nacimiento).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'}) : null;
+        var fotoSrc = d.foto_url || '';
+        var fotoTag = fotoSrc 
+          ? '<img src="' + fotoSrc + '" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid ' + color + '" onerror="this.style.display=\'none\'">'
+          : '<div style="width:130px;height:130px;border-radius:50%;background:' + color + ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:42px">' + (d.nombre||'?').split(' ').slice(0,2).map(function(s){return s[0];}).join('') + '</div>';
+        
+        var comisionesHtml = '';
+        if(Array.isArray(d.comisiones) && d.comisiones.length){
+          comisionesHtml = '<div style="margin-top:18px"><div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px">🤝 Comisiones (' + d.comisiones.length + ')</div>' +
+            d.comisiones.map(function(c){
+              var rolBadge = c.rol === 'Presidencia' ? '#22c55e' : (c.rol === 'Secretarí­a' || c.rol === 'Secretaría' ? '#fbbf24' : '#64748b');
+              return '<div style="background:var(--surface2,#1a1f2e);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px">' +
+                '<span style="background:' + rolBadge + '22;color:' + rolBadge + ';padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase">' + (c.rol||'Integrante') + '</span>' +
+                '<div style="font-size:13px;color:var(--text);margin-top:4px;font-weight:600">' + (c.nombre||'—') + '</div>' +
+              '</div>';
+            }).join('') + '</div>';
+        }
+        
+        var modalHtml = '<div id="dip-modal-backdrop" onclick="polCerrarModal(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">' +
+          '<div onclick="event.stopPropagation()" style="background:var(--card,#11172a);border:1px solid var(--border);border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:24px">' +
+            '<div style="display:flex;justify-content:flex-end;margin-bottom:-30px"><button onclick="polCerrarModal()" style="background:rgba(255,255,255,0.10);border:none;border-radius:50%;width:36px;height:36px;color:var(--text);font-size:18px;cursor:pointer">✕</button></div>' +
+            '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:20px">' +
+              fotoTag +
+              '<h2 style="margin:14px 0 6px;font-size:22px;font-weight:800;line-height:1.2">' + (d.nombre||'—') + '</h2>' +
+              '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">' +
+                '<span style="background:' + color + ';color:#fff;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">' + (d.partido||'—') + '</span>' +
+                (tipo === 'MR' 
+                  ? '<span style="background:rgba(59,130,246,0.15);color:#3b82f6;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">🗺️ Mayoría Relativa</span>'
+                  : '<span style="background:rgba(168,85,247,0.15);color:#a855f7;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700">📋 Pluri-nominal</span>') +
+              '</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;font-size:13px">' +
+              (d.entidad ? '<div style="background:var(--surface);padding:10px;border-radius:10px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Entidad</div>📍 ' + d.entidad + '</div>' : '') +
+              (d.distrito ? '<div style="background:var(--surface);padding:10px;border-radius:10px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Distrito</div>🗺️ ' + d.distrito + '</div>' : '') +
+              (d.curul ? '<div style="background:var(--surface);padding:10px;border-radius:10px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Curul</div>🪑 ' + d.curul + '</div>' : '') +
+              (edad ? '<div style="background:var(--surface);padding:10px;border-radius:10px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Edad</div>🎂 ' + edad + ' años' + (fechaNac ? ' (' + fechaNac + ')' : '') + '</div>' : '') +
+              (d.reelecto ? '<div style="background:var(--surface);padding:10px;border-radius:10px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Reelección</div>🔁 ' + d.reelecto + '</div>' : '') +
+              (d.suplente ? '<div style="background:var(--surface);padding:10px;border-radius:10px;grid-column:span 2"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Suplente</div>👥 ' + d.suplente + '</div>' : '') +
+            '</div>' +
+            comisionesHtml +
+            '<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">' +
+              (d.email ? '<a href="mailto:' + d.email + '" style="flex:1;min-width:120px;background:var(--accent);color:#fff;text-decoration:none;padding:11px;border-radius:10px;text-align:center;font-size:12px;font-weight:700">✉️ Escribir email</a>' : '') +
+              (d.telefono ? '<a href="tel:' + d.telefono + '" style="flex:1;min-width:120px;background:var(--green);color:#fff;text-decoration:none;padding:11px;border-radius:10px;text-align:center;font-size:12px;font-weight:700">📞 Llamar</a>' : '') +
+              (d.curricula_url ? '<a href="' + d.curricula_url + '" target="_blank" rel="noopener" style="flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:11px;border-radius:10px;text-align:center;font-size:12px;font-weight:700">📄 Currícula PDF</a>' : '') +
+              '<a href="https://sitl.diputados.gob.mx/LXVI_leg/curricula.php?dipt_id=' + (d.dipt_id||'') + '" target="_blank" rel="noopener" style="flex:1;min-width:120px;background:var(--surface);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:11px;border-radius:10px;text-align:center;font-size:12px;font-weight:700">🏛️ Ver en SITL</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+      };
+      
+      window.polCerrarModal = function(e){
+        if(e && e.target.id !== 'dip-modal-backdrop' && e.type === 'click') return;
+        var m = document.getElementById('dip-modal-backdrop');
+        if(m) m.remove();
+      };
       window.__polFilters = {principio:'', partido:'', entidad:''};
       window.polSetPrincipio = function(el, p){
         window.__polFilters.principio = p || '';
@@ -3783,8 +3878,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         const q = (document.getElementById('pol-search').value || '').toLowerCase().trim();
         const filters = window.__polFilters;
         let filas = window.__diputadosData.filter(d => {
-          if (filters.principio === 'MR' && d.principio_eleccion !== 'MR') return false;
-          if (filters.principio === 'RP' && d.principio_eleccion !== 'RP') return false;
+          if (filters.principio === 'MR' && polInferTipo(d) !== 'MR') return false;
+          if (filters.principio === 'RP' && polInferTipo(d) !== 'RP') return false;
           if (filters.principio === 'reelecto' && !(d.reelecto && d.reelecto.trim())) return false;
           if (filters.entidad && d.entidad !== filters.entidad) return false;
           if (filters.partido && d.partido !== filters.partido) return false;
@@ -3808,8 +3903,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           const total = window.__diputadosData.length;
           const partidos = j.por_partido || {};
           const entidades = Object.keys(j.por_entidad || {}).length;
-          var mr = window.__diputadosData.filter(d => d.principio_eleccion === 'MR').length;
-          var rp = window.__diputadosData.filter(d => d.principio_eleccion === 'RP').length;
+          var mr = window.__diputadosData.filter(d => polInferTipo(d) === 'MR').length;
+          var rp = window.__diputadosData.filter(d => polInferTipo(d) === 'RP').length;
           var reel = window.__diputadosData.filter(d => d.reelecto && d.reelecto.trim()).length;
           
           // Hero stats
@@ -5356,6 +5451,19 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
         </details>
 
+        <!-- Caja educativa MR vs RP -->
+        <details style="background:linear-gradient(135deg,rgba(168,85,247,0.10),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin:12px 0">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a855f7;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Qué es MR vs RP? · Educación cívica</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            <p style="margin:0 0 8px"><strong>Mayoría Relativa (MR):</strong> 300 diputados elegidos directamente por los ciudadanos en su distrito electoral. <em>Si vives en Iztapalapa, votas por un candidato concreto.</em></p>
+            <p style="margin:0 0 8px"><strong>Representación Proporcional (RP / Pluri):</strong> 200 diputados que llegan al Congreso porque su partido obtuvo cierto porcentaje del voto nacional. <em>Se eligen 40 en cada una de 5 circunscripciones.</em></p>
+            <p style="margin:0;color:var(--text3);font-size:11px">📚 Art. 52 Constitucional · Para asegurar que partidos con menos votos también tengan voz.</p>
+          </div>
+        </details>
+        
         <div id="pol-count" style="font-size:12px;color:var(--text3);margin:12px 0 10px"></div>
 
         <!-- Grid -->
