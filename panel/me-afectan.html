@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0b0f1a">
+<title>Leyes que te afectan · Tequio</title>
+<link rel="icon" href="/fav32.png">
+<style>
+:root{
+  --bg:#0b0f1a;--card:#11172a;--card2:#1a1f2e;--border:#2a3142;
+  --text:#e5e7eb;--text2:#b1bdd0;--text3:#7a8696;--muted:#6b7280;
+  --accent:#3b82f6;--accent2:#8b5cf6;--green:#22c55e;--red:#ef4444;
+  --gold:#fbbf24;--orange:#f59e0b;--rose:#ec4899;
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:18px 16px 80px}
+.embedded a[href="/"]{display:none!important}
+
+.back{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;margin:6px 0 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text2);text-decoration:none;font-size:13px}
+.back:hover{color:var(--gold)}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#ec4899 100%);border-radius:18px;padding:28px 22px;margin-bottom:22px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)}
+.hero h1{margin:0 0 6px;font-size:28px;font-weight:800;line-height:1.1}
+.hero p{margin:0;font-size:14px;opacity:0.94;line-height:1.5}
+.hero .premium-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-bottom:10px;backdrop-filter:blur(10px)}
+
+/* Onboarding card (visible cuando no hay perfil) */
+.onboarding{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+.onboarding h2{margin:0 0 6px;font-size:20px}
+.onboarding p{color:var(--text2);font-size:14px;margin:0 0 16px;line-height:1.5}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.field select,.field input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;box-sizing:border-box}
+.field select:focus,.field input:focus{border-color:var(--accent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}
+.chip:hover{border-color:var(--accent2);color:var(--text)}
+.chip.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn-save{background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;border-radius:10px;padding:12px 22px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;margin-top:8px}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(124,58,237,0.4)}
+
+/* Perfil actual (cuando ya existe) */
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.profile-info{font-size:13px;color:var(--text2);flex:1;min-width:200px}
+.profile-info strong{color:var(--text)}
+.btn-edit{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}
+.btn-edit:hover{border-color:var(--accent2);color:var(--text)}
+
+/* Stats summary */
+.summary{background:linear-gradient(90deg,rgba(168,85,247,0.10),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.35);border-radius:14px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.summary .num{font-size:32px;font-weight:800;color:var(--accent2);min-width:40px;text-align:center}
+.summary .txt{flex:1;font-size:13px;color:var(--text2);line-height:1.4}
+
+/* Feed */
+.feed{display:flex;flex-direction:column;gap:10px}
+.law-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;transition:all 0.15s;position:relative}
+.law-card:hover{border-color:var(--accent2);transform:translateX(2px)}
+.law-card.locked{opacity:0.55;cursor:pointer}
+.law-card.locked::after{content:'🔒 PREMIUM';position:absolute;top:14px;right:16px;background:var(--gold);color:#000;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.5px}
+.law-meta{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.law-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.law-badge.federal{background:rgba(59,130,246,0.15);color:#3b82f6}
+.law-badge.estatal{background:rgba(168,85,247,0.15);color:#a855f7}
+.law-badge.municipal{background:rgba(34,197,94,0.15);color:#22c55e}
+.law-time{font-size:11px;color:var(--text3)}
+.law-titulo{font-weight:600;font-size:14px;color:var(--text);line-height:1.3;margin:4px 0 6px}
+.law-entidad{font-size:12px;color:var(--text3);margin-bottom:6px}
+.law-match{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.10);color:var(--green);padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.law-score{font-size:11px;color:var(--accent2);font-weight:700;margin-left:8px}
+
+.loading,.empty{text-align:center;padding:40px 20px;color:var(--text3)}
+
+/* CTA Premium */
+.premium-cta{background:linear-gradient(135deg,rgba(251,191,36,0.10),rgba(251,191,36,0.04));border:1px solid var(--gold);border-radius:14px;padding:18px;text-align:center;margin-top:22px}
+.premium-cta h3{margin:0 0 6px;font-size:16px;color:var(--gold)}
+.premium-cta p{margin:0 0 12px;font-size:13px;color:var(--text2);line-height:1.5}
+.btn-premium{background:var(--gold);border:none;border-radius:8px;padding:11px 22px;color:#000;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;font-family:inherit}
+
+footer{text-align:center;color:var(--text3);font-size:11px;padding:20px;margin-top:20px}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  if (new URLSearchParams(location.search).get('embedded') === '1') {
+    document.documentElement.classList.add('embedded');
+  }
+})();
+</script>
+
+<div class="wrap">
+  <a href="/" class="back" onclick="window.tequioAfectanBack(event);return false;">← Tequio</a>
+  
+  <div class="hero">
+    <div class="premium-badge">✨ HOOK PREMIUM</div>
+    <h1>🎯 Leyes que te afectan</h1>
+    <p>Tequio escanea las últimas leyes, reglamentos y reformas del país para detectar las que pueden cambiar tu día a día. Personalizado a tu estado, ciudad y vida.</p>
+  </div>
+
+  <!-- Onboarding (visible si no hay perfil guardado) -->
+  <div id="onboarding" class="onboarding" style="display:none">
+    <h2>👤 Crea tu perfil ciudadano</h2>
+    <p>Solo se queda en este navegador (sin registro). Lo usamos para filtrar las leyes que SÍ te aplican.</p>
+    
+    <div class="field">
+      <label>¿En qué estado vives?</label>
+      <select id="f-estado">
+        <option value="">Selecciona…</option>
+      </select>
+    </div>
+    
+    <div class="field">
+      <label>Ciudad (opcional)</label>
+      <input id="f-municipio" type="text" placeholder="ej. Guadalajara, Mérida, Toluca">
+    </div>
+    
+    <div class="field">
+      <label>¿Cuál te describe mejor?</label>
+      <select id="f-ocupacion">
+        <option value="">Cualquiera</option>
+        <option value="empleado">💼 Empleado / Asalariado</option>
+        <option value="empresario">📊 Empresario / Dueño PyME</option>
+        <option value="estudiante">🎓 Estudiante</option>
+        <option value="jubilado">👴 Jubilado / Pensionado</option>
+        <option value="padre_familia">👨‍👩‍👧 Padre/Madre de familia</option>
+      </select>
+    </div>
+    
+    <div class="field">
+      <label>Temas que te importan (escoge varios)</label>
+      <div class="chips" id="f-temas">
+        <button class="chip" data-tema="laboral">💼 Laboral</button>
+        <button class="chip" data-tema="fiscal">💰 Fiscal/SAT</button>
+        <button class="chip" data-tema="vivienda">🏠 Vivienda</button>
+        <button class="chip" data-tema="salud">🏥 Salud</button>
+        <button class="chip" data-tema="educacion">📚 Educación</button>
+        <button class="chip" data-tema="vehicular">🚗 Tránsito/Auto</button>
+        <button class="chip" data-tema="familiar">👨‍👩‍👧 Familia</button>
+        <button class="chip" data-tema="seguridad">🛡️ Seguridad</button>
+        <button class="chip" data-tema="consumo">🛒 Consumo</button>
+        <button class="chip" data-tema="empresarial">🏢 Empresa</button>
+        <button class="chip" data-tema="ambiental">🌿 Ambiente</button>
+        <button class="chip" data-tema="digital">💻 Digital</button>
+      </div>
+    </div>
+    
+    <button class="btn-save" onclick="guardarPerfil()">💾 Guardar y ver mis leyes</button>
+  </div>
+
+  <!-- Perfil + Feed (visible cuando ya hay perfil) -->
+  <div id="dashboard" style="display:none">
+    <div class="profile-card">
+      <div class="profile-info" id="profile-summary">…</div>
+      <button class="btn-edit" onclick="editarPerfil()">✏️ Editar</button>
+    </div>
+    
+    <div class="summary" id="summary-card" style="display:none">
+      <div class="num" id="summary-num">0</div>
+      <div class="txt" id="summary-txt"></div>
+    </div>
+    
+    <div id="feed" class="feed">
+      <div class="loading">Buscando leyes que te afectan…</div>
+    </div>
+    
+    <div class="premium-cta">
+      <h3>🔔 Tequio Premium · próximamente</h3>
+      <p>Recibe alertas por email cuando se publique una ley nueva que te afecte. Incluye análisis IA del impacto + acciones recomendadas.</p>
+      <a class="btn-premium" href="mailto:hola@tequio.app?subject=Tequio%20Premium%20%E2%80%94%20interesado">Avísame cuando esté listo →</a>
+    </div>
+  </div>
+
+  <footer>🦎 Cero invención · Powered by data de los 32 estados + DOF + SCJN · <a href="https://tequio.app" style="color:var(--accent2)">Tequio.app</a></footer>
+</div>
+
+<script>
+var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+
+var ESTADOS = {
+  '01':'Aguascalientes','02':'Baja California','03':'Baja California Sur','04':'Campeche',
+  '05':'Coahuila','06':'Colima','07':'Chiapas','08':'Chihuahua','09':'CDMX',
+  '10':'Durango','11':'Guanajuato','12':'Guerrero','13':'Hidalgo','14':'Jalisco',
+  '15':'Estado de México','16':'Michoacán','17':'Morelos','18':'Nayarit','19':'Nuevo León',
+  '20':'Oaxaca','21':'Puebla','22':'Querétaro','23':'Quintana Roo','24':'San Luis Potosí',
+  '25':'Sinaloa','26':'Sonora','27':'Tabasco','28':'Tamaulipas','29':'Tlaxcala',
+  '30':'Veracruz','31':'Yucatán','32':'Zacatecas'
+};
+
+window.tequioAfectanBack = function(e){
+  if (e) e.preventDefault();
+  try { 
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      window.parent.cargarPanel('dashboard'); return;
+    } 
+  } catch(err){}
+  window.location.href = '/';
+};
+
+function getPerfil(){
+  try { return JSON.parse(localStorage.getItem('tequio_perfil') || 'null'); } catch(e) { return null; }
+}
+function setPerfil(p){
+  localStorage.setItem('tequio_perfil', JSON.stringify(p));
+}
+
+function populateEstadoDropdown(){
+  var sel = document.getElementById('f-estado');
+  sel.innerHTML = '<option value="">Selecciona…</option>' +
+    Object.keys(ESTADOS).map(function(k){
+      return '<option value="' + ESTADOS[k] + '">' + ESTADOS[k] + '</option>';
+    }).join('');
+}
+
+function setupTemasChips(){
+  document.querySelectorAll('#f-temas .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      c.classList.toggle('active');
+    });
+  });
+}
+
+function guardarPerfil(){
+  var estado = document.getElementById('f-estado').value;
+  var municipio = document.getElementById('f-municipio').value.trim();
+  var ocupacion = document.getElementById('f-ocupacion').value;
+  var temas = Array.from(document.querySelectorAll('#f-temas .chip.active')).map(function(c){ return c.getAttribute('data-tema'); });
+  
+  if (!estado && !municipio && temas.length === 0) {
+    alert('Selecciona al menos un estado o un tema para personalizar.');
+    return;
+  }
+  
+  var perfil = { estado: estado, municipio: municipio, ocupacion: ocupacion, temas: temas, ts: Date.now() };
+  setPerfil(perfil);
+  mostrarDashboard();
+}
+
+function editarPerfil(){
+  var perfil = getPerfil();
+  if (!perfil) return mostrarOnboarding();
+  // Pre-llenar
+  document.getElementById('f-estado').value = perfil.estado || '';
+  document.getElementById('f-municipio').value = perfil.municipio || '';
+  document.getElementById('f-ocupacion').value = perfil.ocupacion || '';
+  document.querySelectorAll('#f-temas .chip').forEach(function(c){
+    c.classList.toggle('active', (perfil.temas || []).indexOf(c.getAttribute('data-tema')) >= 0);
+  });
+  document.getElementById('onboarding').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+function mostrarOnboarding(){
+  document.getElementById('onboarding').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+function mostrarDashboard(){
+  var perfil = getPerfil();
+  if (!perfil) return mostrarOnboarding();
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  
+  // Profile summary
+  var parts = [];
+  if (perfil.estado) parts.push('📍 <strong>' + perfil.estado + '</strong>');
+  if (perfil.municipio) parts.push('🏙️ <strong>' + perfil.municipio + '</strong>');
+  if (perfil.ocupacion) {
+    var ocs = {empleado:'💼 Empleado',empresario:'📊 Empresario',estudiante:'🎓 Estudiante',jubilado:'👴 Jubilado',padre_familia:'👨‍👩‍👧 Familia'};
+    parts.push(ocs[perfil.ocupacion] || perfil.ocupacion);
+  }
+  if (perfil.temas && perfil.temas.length) parts.push('🏷️ ' + perfil.temas.length + ' temas');
+  document.getElementById('profile-summary').innerHTML = parts.length ? parts.join(' · ') : 'Sin perfil. Click editar.';
+  
+  cargarFeed(perfil);
+}
+
+function cargarFeed(perfil){
+  document.getElementById('feed').innerHTML = '<div class="loading">Buscando leyes que te afectan…</div>';
+  
+  var payload = {
+    p_estado: perfil.estado || null,
+    p_municipio: perfil.municipio || null,
+    p_temas: perfil.temas && perfil.temas.length ? perfil.temas : null,
+    p_ocupacion: perfil.ocupacion || null,
+    p_dias: 60,
+    p_limit: 30
+  };
+  
+  fetch(SB + '/rest/v1/rpc/leyes_para_perfil', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if (!Array.isArray(rows)) throw new Error(JSON.stringify(rows));
+    
+    // Summary
+    var summary = document.getElementById('summary-card');
+    summary.style.display = 'flex';
+    document.getElementById('summary-num').textContent = rows.length;
+    document.getElementById('summary-txt').innerHTML = 
+      rows.length === 0 ? 'No detectamos leyes nuevas que coincidan con tu perfil. Vuelve mañana.' :
+      'leyes detectadas que pueden afectar tu vida en los últimos 60 días. <strong>Las 3 primeras gratis. El resto premium.</strong>';
+    
+    if (rows.length === 0) {
+      document.getElementById('feed').innerHTML = '<div class="empty">😌 Nada urgente. Te avisamos cuando aparezca algo.</div>';
+      return;
+    }
+    
+    var html = rows.map(function(r, idx){
+      var locked = idx >= 3;  // Premium gate después de los 3 primeros
+      var ago = fmtTiempo(r.detectado_en);
+      var ambitoLabel = r.ambito === 'federal' ? 'Federal' : r.ambito === 'estatal' ? 'Estatal' : 'Municipal';
+      
+      return '<div class="law-card' + (locked ? ' locked' : '') + '"' + (locked ? ' onclick="alertaPremium()"' : '') + '>' +
+        '<div class="law-meta">' +
+          '<span class="law-badge ' + r.ambito + '">' + ambitoLabel + '</span>' +
+          '<span class="law-time">' + ago + '</span>' +
+        '</div>' +
+        '<div class="law-titulo">' + (r.titulo || '(Sin título)') + '</div>' +
+        (r.entidad ? '<div class="law-entidad">📍 ' + r.entidad + '</div>' : '') +
+        (r.match_razon ? '<span class="law-match">✓ ' + r.match_razon + '</span>' : '') +
+        '<span class="law-score">+' + r.relevancia_score + ' relevancia</span>' +
+        '</div>';
+    }).join('');
+    
+    document.getElementById('feed').innerHTML = html;
+  })
+  .catch(function(e){
+    document.getElementById('feed').innerHTML = '<div class="empty">Error: ' + e + '</div>';
+  });
+}
+
+function fmtTiempo(iso){
+  var d = new Date(iso);
+  var ago = (Date.now() - d.getTime()) / 1000;
+  if (ago < 60) return 'ahora';
+  if (ago < 3600) return Math.floor(ago/60) + ' min';
+  if (ago < 86400) return Math.floor(ago/3600) + 'h';
+  if (ago < 604800) return Math.floor(ago/86400) + 'd';
+  return d.toLocaleDateString('es-MX');
+}
+
+function alertaPremium(){
+  if (confirm('Esta función forma parte de Tequio Premium próximamente.\\n\\n¿Te aviso cuando esté listo?')) {
+    window.location.href = 'mailto:hola@tequio.app?subject=Tequio%20Premium%20%E2%80%94%20interesado';
+  }
+}
+window.alertaPremium = alertaPremium;
+window.guardarPerfil = guardarPerfil;
+window.editarPerfil = editarPerfil;
+
+// Init
+populateEstadoDropdown();
+setupTemasChips();
+var perfil = getPerfil();
+if (perfil) {
+  mostrarDashboard();
+} else {
+  mostrarOnboarding();
+}
+</script>
+</body>
+</html>
