@@ -2,409 +2,285 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Auditorías ASF · Tequio</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5" />
+<title>ASF Auditorías · Tequio</title>
+<link rel="icon" href="/fav32.png">
 <style>
-  :root {
-    --bg: #0b0f1a;
-    --panel: #131826;
-    --panel-2: #1a2030;
-    --border: #232a3d;
-    --text: #e7ecf3;
-    --muted: #8a94a8;
-    --accent: #fbbf24;
-    --accent-2: #f59e0b;
-    --green: #22c55e;
-    --red: #ef4444;
-    --blue: #3b82f6;
+  :root{
+    --bg:#0b0f1a;--surface:#11172a;--surface2:#1a1f2e;--border:#2a3142;
+    --text:#e5e7eb;--text2:#b1bdd0;--text3:#7a8696;
+    --gold:#fbbf24;--accent:#3b82f6;--accent2:#a855f7;--green:#22c55e;--red:#ef4444;--orange:#f97316;
   }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-    line-height: 1.5;
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font:14px/1.5 'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  body.embedded .back{display:none!important}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;margin:6px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);text-decoration:none;font-size:13px}
+  .back:hover{color:var(--gold)}
+  
+  .hero{background:linear-gradient(135deg,#92400e 0%,#d97706 50%,#f59e0b 100%);border-radius:20px;padding:28px;margin-bottom:18px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.30)}
+  .hero h1{font-size:30px;font-weight:800;margin:0 0 6px;line-height:1.1}
+  .hero p{margin:0;opacity:0.94;font-size:14px;line-height:1.5}
+  .hero-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+  .hero-link{background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)}
+  .hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)}
+  .hero-stat{text-align:center}
+  .hero-stat .num{font-size:22px;font-weight:800;line-height:1.1}
+  .hero-stat .lbl{font-size:10px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px}
+  
+  .sello{background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .sello .lbl{font-size:11px;font-weight:700;color:#22c55e;letter-spacing:0.5px}
+  
+  details.educ{background:linear-gradient(135deg,rgba(168,85,247,0.10),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px}
+  details.educ summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a855f7;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  details.educ summary::-webkit-details-marker{display:none}
+  details.educ .body{padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6}
+  details.educ ul{margin:6px 0 6px 20px}
+  
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+  .section h2{font-size:15px;margin-bottom:14px;color:var(--text);font-weight:700;display:flex;align-items:center;gap:8px}
+  
+  .timeline{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+  .entrega{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:4px solid var(--gold);transition:transform 0.15s}
+  .entrega:hover{transform:translateX(2px)}
+  .entrega.consolidado{border-left-color:var(--red);background:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(239,68,68,0.02))}
+  .entrega-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .entrega-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+  .entrega-fecha{font-size:11px;color:var(--text3);text-align:right}
+  .entrega-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
+  .entrega-stat{background:rgba(0,0,0,0.20);border-radius:8px;padding:8px 12px}
+  .entrega-stat .v{font-size:18px;font-weight:800;color:var(--gold)}
+  .entrega-stat .l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+  .entrega-notas{font-size:12px;color:var(--text2);line-height:1.5;margin-top:10px;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px}
+  
+  /* Distribución mini bars */
+  .breakdown-bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .bd-bar{display:flex;align-items:center;gap:10px}
+  .bd-bar .name{min-width:160px;font-size:12px;color:var(--text2);font-weight:600}
+  .bd-bar .track{flex:1;height:18px;background:rgba(0,0,0,0.25);border-radius:4px;overflow:hidden;position:relative}
+  .bd-bar .fill{height:100%;background:linear-gradient(90deg,#d97706,#f59e0b);transition:width 0.5s}
+  .bd-bar .val{font-size:11px;font-weight:700;color:#fbbf24;min-width:60px;text-align:right}
+  
+  .analisis{background:linear-gradient(135deg,rgba(132,204,22,0.10),rgba(132,204,22,0.02));border:1px solid rgba(132,204,22,0.30);border-radius:12px;padding:14px;font-size:13px;color:#d9f99d;line-height:1.6}
+  
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+  .btn-prim{background:var(--gold);color:#0b0f1a}
+  .btn-sec{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-ia{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+  
+  .footer{font-size:11px;color:var(--text3);margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center}
+  .loading{text-align:center;padding:30px;color:var(--text3)}
+  
+  @media (max-width:600px){
+    .wrap{padding:12px}
+    .hero{padding:20px}
+    .hero h1{font-size:24px}
+    .bd-bar{flex-wrap:wrap}
+    .bd-bar .name{min-width:100%}
   }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-  .nav-back {
-    display: inline-block;
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 24px;
-  }
-  .nav-back:hover { color: var(--accent); }
-  .hero h1 {
-    font-size: 36px;
-    margin: 0 0 8px;
-    letter-spacing: -0.02em;
-  }
-  .hero p {
-    color: var(--muted);
-    font-size: 17px;
-    margin: 0 0 28px;
-    max-width: 720px;
-  }
-  .big-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin-bottom: 40px;
-  }
-  .stat {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px 20px;
-  }
-  .stat .label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
-  }
-  .stat .value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-  }
-  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .section-title {
-    font-size: 20px;
-    margin: 32px 0 16px;
-    font-weight: 600;
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .tab {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: inherit;
-  }
-  .tab.active {
-    background: var(--accent);
-    color: #1a1208;
-    border-color: var(--accent);
-  }
-  .tab:hover:not(.active) { border-color: var(--accent); }
-  .entregas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-  }
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .card h3 {
-    margin: 0 0 4px;
-    font-size: 17px;
-  }
-  .card .fecha {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 14px;
-  }
-  .card .num-big {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
-    margin: 8px 0 4px;
-    letter-spacing: -0.02em;
-  }
-  .card .num-big-label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
-  .desglose {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .desglose-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-  }
-  .desglose-row .k { color: var(--muted); }
-  .desglose-row .v { font-variant-numeric: tabular-nums; }
-  .montos {
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    margin-bottom: 12px;
-  }
-  .montos .monto-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 4px;
-  }
-  .montos .monto-row .v { color: var(--accent); font-weight: 600; }
-  .ver-link {
-    display: inline-block;
-    font-size: 13px;
-    color: var(--accent);
-    margin-top: 8px;
-  }
-  .comparativo {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 22px;
-    margin-top: 32px;
-  }
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 12px 0;
-  }
-  .bar-row .yr {
-    width: 60px;
-    font-weight: 600;
-    font-size: 14px;
-  }
-  .bar-row .bar-bg {
-    flex: 1;
-    height: 28px;
-    background: var(--panel-2);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-  }
-  .bar-row .bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent-2), var(--accent));
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1a1208;
-    transition: width 0.6s ease;
-  }
-  .disclaimer {
-    margin-top: 48px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .loading, .error {
-    padding: 40px;
-    text-align: center;
-    color: var(--muted);
-  }
-  .error { color: var(--red); }
 </style>
 </head>
 <body>
-<script>
-(function(){
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.documentElement.classList.add('embedded');
-    var style = document.createElement('style');
-    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
-    document.head.appendChild(style);
-  }
-})();
-</script>
-
-<div class="container">
-  <a href="/" class="nav-back">&larr; Tequio</a>
-
-  <div class="hero">
-    <h1>Auditoría Superior de la Federación</h1>
-    <p>Qué encontró la ASF revisando las cuentas del gobierno mexicano. Datos de las entregas oficiales de Cuenta Pública 2023 y 2024.</p>
-  </div>
-
-  <div id="bigStats" class="big-stats">
-    <div class="loading">Cargando datos...</div>
-  </div>
-
-  <div class="section-title">Entregas por Cuenta Pública</div>
-  <div class="tabs" id="tabs"></div>
-  <div id="entregas" class="entregas"></div>
-
-  <div class="section-title">Comparativo 2023 vs 2024</div>
-  <div id="comparativo" class="comparativo"></div>
-
-  <div class="disclaimer">
-    Datos de la Auditoría Superior de la Federación, organo tecnico de fiscalizacion de la Camara de Diputados. <a href="https://www.asf.gob.mx" target="_blank" rel="noopener">asf.gob.mx</a>
-  </div>
+<script>if(new URLSearchParams(location.search).get('embedded')==='1')document.body.classList.add('embedded');</script>
+<div class="wrap">
+  <a href="/" class="back" onclick="window.tequioAsfBack(event);return false;">← Tequio</a>
+  <div id="contenido" class="loading">Cargando auditorías ASF…</div>
 </div>
 
 <script>
-  const fmtMXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
-  const fmtInt = new Intl.NumberFormat('es-MX');
-  const fmtMdp = (n) => {
-    if (n == null) return null;
-    const mdp = n / 1e6;
-    if (mdp >= 1000) return '$' + (mdp / 1000).toFixed(1).replace(/\.0$/, '') + ' mil mdp';
-    return '$' + mdp.toFixed(0) + ' mdp';
-  };
-  const fmtFecha = (s) => {
-    if (!s) return '';
-    try {
-      const d = new Date(s + 'T00:00:00');
-      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-    } catch (e) { return s; }
-  };
+window.tequioAsfBack=function(e){
+  if(e)e.preventDefault();
+  try{if(window.parent&&window.parent!==window&&typeof window.parent.cargarPanel==='function'){window.parent.cargarPanel('dashboard');return;}}catch(err){}
+  window.location.href='/';
+};
 
-  let DATA = [];
-  let cuentaActiva = 2024;
+function fmtMdp(n){
+  if(!n) return '—';
+  n = Number(n);
+  if(n >= 1e9) return '$' + (n/1e9).toFixed(2) + ' mil mdp';
+  if(n >= 1e6) return '$' + (n/1e6).toFixed(1) + ' mdp';
+  return '$' + n.toLocaleString('es-MX');
+}
+function fmtFecha(s){
+  if(!s) return '—';
+  return new Date(s).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+}
+function esc(s){return String(s||'').replace(/[<>"']/g,function(c){return ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
 
-  async function load() {
-    try {
-      const r = await fetch('/api/data?vista=asf');
-      const j = await r.json();
-      DATA = (j.items || []).slice();
-      render();
-    } catch (e) {
-      document.getElementById('bigStats').innerHTML = '<div class="error">Error cargando datos: ' + e.message + '</div>';
-    }
-  }
-
-  function render() {
-    renderBigStats();
-    renderTabs();
-    renderEntregas();
-    renderComparativo();
-  }
-
-  function renderBigStats() {
-    const cp2024 = DATA.filter(r => r.cuenta_publica === 2024);
-    const consolidado = cp2024.find(r => /consolidado/i.test(r.entrega)) || cp2024[0];
-    if (!consolidado) {
-      document.getElementById('bigStats').innerHTML = '<div class="error">Sin datos</div>';
-      return;
-    }
-    // P1.4 + P1.5: agregar values across entregas (Consolidado tiene nulls)
-    const sumField = (field) => cp2024.reduce((s, r) => s + (r[field] || 0), 0);
-    const tipos = {
-      'Gasto federalizado': sumField('num_gasto_federalizado'),
-      'Cumplimiento financiero': sumField('num_cumplimiento_financiero'),
-      'Desempeño': sumField('num_desempeno'),
-      'Inversiones físicas': sumField('num_inversiones_fisicas'),
-      'Otros': sumField('num_otros'),
-    };
-    const topTipo = Object.entries(tipos).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
-    const entregasReales = cp2024.filter(r => !/consolidado/i.test(r.entrega));
-    const html = [
-      stat('Auditorías totales', fmtInt.format(consolidado.num_auditorias || 0), 'Cuenta Pública 2024'),
-      stat('Observaciones', fmtMdp(consolidado.monto_observaciones_mxn) || '-', 'Monto fiscalizable observado'),
-      stat(topTipo[0], fmtInt.format(topTipo[1]), 'Tipo más frecuente'),
-      stat('Entregas', fmtInt.format(entregasReales.length), 'Cortes recibidos en 2024')
-    ].join('');
-    document.getElementById('bigStats').innerHTML = html;
-  }
-
-  function stat(label, value, sub) {
-    return '<div class="stat"><div class="label">' + label + '</div><div class="value">' + value + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
-  }
-
-  function renderTabs() {
-    const cuentas = Array.from(new Set(DATA.map(r => r.cuenta_publica))).sort((a, b) => b - a);
-    const html = cuentas.map(c =>
-      '<button class="tab' + (c === cuentaActiva ? ' active' : '') + '" data-cp="' + c + '">CP ' + c + '</button>'
-    ).join('');
-    const wrap = document.getElementById('tabs');
-    wrap.innerHTML = html;
-    wrap.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        cuentaActiva = parseInt(btn.dataset.cp, 10);
-        render();
+async function cargarASF(){
+  try {
+    var r = await fetch('/api/data?vista=asf');
+    var data = r.ok ? await r.json() : null;
+    var items = data && data.items ? data.items : null;
+    
+    // Fallback: query directa
+    if(!items){
+      var sb = await fetch('https://mhsuihwjgtzxflesbnxv.supabase.co/rest/v1/asf_auditorias?order=cuenta_publica.desc,fecha_entrega.desc', {
+        headers: {'apikey':'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz','Authorization':'Bearer sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz'}
       });
+      items = sb.ok ? await sb.json() : [];
+    }
+    if(!items || !items.length) throw new Error('Sin datos');
+    render(items);
+  } catch(e){
+    document.getElementById('contenido').innerHTML = '<div style="background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.30);border-radius:10px;padding:16px;color:#fca5a5;text-align:center">Error: ' + e + '</div>';
+  }
+}
+
+function render(items){
+  // Encontrar consolidado más reciente como hero
+  var consolidados = items.filter(function(it){return it.entrega && it.entrega.toLowerCase().indexOf('consolidado')>=0;});
+  var ultimoConsolidado = consolidados[0] || items[0];
+  var totalAudit = 0;
+  var totalMontos = 0;
+  items.forEach(function(it){
+    if(it.entrega && it.entrega.toLowerCase().indexOf('consolidado')>=0){
+      totalAudit += Number(it.num_auditorias)||0;
+      totalMontos += Number(it.monto_aclaracion_solicitada_mxn)||0;
+    }
+  });
+  
+  // Agrupar por cuenta pública
+  var grupos = {};
+  items.forEach(function(it){
+    var cp = it.cuenta_publica;
+    if(!grupos[cp]) grupos[cp]=[];
+    grupos[cp].push(it);
+  });
+  
+  // Render timeline por cuenta
+  var entregasHtml = '';
+  Object.keys(grupos).sort(function(a,b){return b-a;}).forEach(function(cp){
+    var group = grupos[cp];
+    // Ordenar: Primera, Segunda, Tercera, Consolidado
+    group.sort(function(a,b){
+      var order = {'primera':1,'segunda':2,'tercera':3,'consolidado':4};
+      var oa = order[(a.entrega||'').toLowerCase().split(' ')[0]] || 5;
+      var ob = order[(b.entrega||'').toLowerCase().split(' ')[0]] || 5;
+      return oa-ob;
     });
-  }
+    
+    entregasHtml += '<div class="section">' +
+      '<h2>📁 Cuenta Pública ' + cp + '</h2>' +
+      '<div class="timeline">' +
+      group.map(function(it){
+        var isCons = (it.entrega||'').toLowerCase().indexOf('consolidado')>=0;
+        var icon = isCons ? '📊' : '📋';
+        var statsHtml = '';
+        var statsArr = [];
+        if(it.num_auditorias) statsArr.push({v:Number(it.num_auditorias).toLocaleString('es-MX'),l:'Auditorías'});
+        if(it.monto_aclaracion_solicitada_mxn) statsArr.push({v:fmtMdp(it.monto_aclaracion_solicitada_mxn),l:'Aclaración solicitada'});
+        if(it.num_acciones) statsArr.push({v:Number(it.num_acciones).toLocaleString('es-MX'),l:'Acciones emitidas'});
+        if(it.num_recomendaciones) statsArr.push({v:Number(it.num_recomendaciones).toLocaleString('es-MX'),l:'Recomendaciones'});
+        if(it.num_pliegos_observaciones) statsArr.push({v:Number(it.num_pliegos_observaciones).toLocaleString('es-MX'),l:'Pliegos observaciones'});
+        if(it.num_pras) statsArr.push({v:Number(it.num_pras).toLocaleString('es-MX'),l:'PRAS'});
+        if(statsArr.length){
+          statsHtml = '<div class="entrega-stats">' + statsArr.map(function(s){
+            return '<div class="entrega-stat"><div class="v">' + s.v + '</div><div class="l">' + s.l + '</div></div>';
+          }).join('') + '</div>';
+        }
+        
+        // Breakdown por tipo si tenemos data
+        var bdHtml = '';
+        if(it.num_cumplimiento_financiero || it.num_desempeno || it.num_gasto_federalizado){
+          var max = Math.max(it.num_cumplimiento_financiero||0, it.num_desempeno||0, it.num_gasto_federalizado||0);
+          var bdItems = [];
+          if(it.num_gasto_federalizado) bdItems.push({n:'Gasto Federalizado',v:it.num_gasto_federalizado});
+          if(it.num_cumplimiento_financiero) bdItems.push({n:'Cumplimiento Financiero',v:it.num_cumplimiento_financiero});
+          if(it.num_desempeno) bdItems.push({n:'Desempeño',v:it.num_desempeno});
+          
+          bdHtml = '<div style="font-size:11px;color:var(--text3);margin-top:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Desglose por tipo</div><div class="breakdown-bars">' +
+            bdItems.map(function(b){
+              var pct = ((b.v/max)*100).toFixed(1);
+              return '<div class="bd-bar">' +
+                '<div class="name">' + b.n + '</div>' +
+                '<div class="track"><div class="fill" style="width:' + pct + '%"></div></div>' +
+                '<div class="val">' + Number(b.v).toLocaleString('es-MX') + '</div>' +
+              '</div>';
+            }).join('') + '</div>';
+        }
+        
+        return '<div class="entrega' + (isCons?' consolidado':'') + '">' +
+          '<div class="entrega-header">' +
+            '<div class="entrega-title">' + icon + ' ' + (it.entrega||'?') + (isCons?' <span style="background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-left:4px">FINAL</span>':'') + '</div>' +
+            '<div class="entrega-fecha">' + (it.fecha_entrega ? fmtFecha(it.fecha_entrega) : '—') + '</div>' +
+          '</div>' +
+          statsHtml +
+          bdHtml +
+          (it.notas ? '<div class="entrega-notas">' + esc(it.notas) + '</div>' : '') +
+        '</div>';
+      }).join('') +
+      '</div></div>';
+  });
+  
+  var html = 
+    '<div class="hero">' +
+      '<div class="hero-header">' +
+        '<div style="font-size:54px;line-height:1">🔍</div>' +
+        '<div style="flex:1;min-width:240px">' +
+          '<h1>Auditorías ASF</h1>' +
+          '<p>Auditoría Superior de la Federación · Cuenta Pública ' + (Object.keys(grupos)[0]||'') + ' · Fiscaliza el uso del PEF</p>' +
+        '</div>' +
+        '<a href="https://informe.asf.gob.mx" target="_blank" rel="noopener" class="hero-link">ASF oficial →</a>' +
+      '</div>' +
+      '<div class="hero-grid">' +
+        '<div class="hero-stat"><div class="num">' + Number(ultimoConsolidado.num_auditorias||0).toLocaleString('es-MX') + '</div><div class="lbl">Audit. CP' + ultimoConsolidado.cuenta_publica + '</div></div>' +
+        '<div class="hero-stat"><div class="num">' + fmtMdp(ultimoConsolidado.monto_aclaracion_solicitada_mxn) + '</div><div class="lbl">Aclaración pendiente</div></div>' +
+        '<div class="hero-stat"><div class="num">' + items.length + '</div><div class="lbl">Entregas</div></div>' +
+        '<div class="hero-stat"><div class="num">' + Object.keys(grupos).length + '</div><div class="lbl">Cuentas Públicas</div></div>' +
+      '</div>' +
+    '</div>' +
+    
+    '<div class="sello">' +
+      '<div style="font-size:28px">✅</div>' +
+      '<div style="flex:1;min-width:220px">' +
+        '<div class="lbl">FUENTE OFICIAL · ASF</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:3px">Auditoría Superior de la Federación · informe.asf.gob.mx · Cifras oficiales</div>' +
+      '</div>' +
+    '</div>' +
+    
+    '<details class="educ"><summary><span>🤓 ¿Qué hace la ASF? · Educación cívica</span><span style="font-size:11px">▾</span></summary><div class="body">' +
+      '<p style="margin-bottom:8px">La <strong>Auditoría Superior de la Federación (ASF)</strong> es el órgano técnico de fiscalización de la <strong>Cámara de Diputados</strong>. Revisa que el dinero público se haya gastado conforme a la ley.</p>' +
+      '<ul>' +
+        '<li><strong>Cuenta Pública:</strong> Informe anual del Ejecutivo de cómo se gastó el PEF. La ASF lo audita.</li>' +
+        '<li><strong>Entregas:</strong> ASF entrega 3 informes (junio, octubre, febrero del año siguiente) + Consolidado.</li>' +
+        '<li><strong>Tipos de auditoría:</strong> Cumplimiento Financiero · Desempeño · Gasto Federalizado · Inversión Física.</li>' +
+        '<li><strong>Acciones:</strong> Recomendaciones · Pliegos de Observaciones · Promociones de Responsabilidad Administrativa (PRAS).</li>' +
+        '<li><strong>"Aclaración solicitada":</strong> Dinero que la ASF detectó como irregular y pide que devuelvan o expliquen.</li>' +
+      '</ul>' +
+      '<p style="margin:8px 0 0;color:var(--text3);font-size:11px">📚 Art. 79 CPEUM · Independiente del Ejecutivo · Aunque pertenece a la Cámara de Diputados, su titular es nombrado por 8 años.</p>' +
+    '</div></details>' +
+    
+    entregasHtml +
+    
+    '<div class="section">' +
+      '<h2>💡 ¿Qué significa esto para mí?</h2>' +
+      '<div class="analisis">La ASF detectó irregularidades por <strong style="color:#fbbf24">' + fmtMdp(ultimoConsolidado.monto_aclaracion_solicitada_mxn) + '</strong> en la Cuenta Pública ' + ultimoConsolidado.cuenta_publica + ' (~79% cobertura del PEF). Por cada $100 del PEF auditados, aproximadamente <strong>$0.80 se gastaron de forma irregular</strong>. La ASF emite recomendaciones, pero el seguimiento depende del Congreso.<br><br><strong>Acción ciudadana:</strong> puedes consultar las auditorías específicas a tu municipio o entidad federativa, y exigir transparencia mediante una solicitud INAI.</div>' +
+      '<div class="actions">' +
+        '<a href="https://informe.asf.gob.mx" target="_blank" rel="noopener" class="btn btn-prim">📂 Informes ASF oficiales</a>' +
+        '<a href="javascript:void(0)" onclick="navegarConIA()" class="btn btn-ia">🤖 Preguntar IA</a>' +
+        '<a href="/panel/generador.html?tipo=transparencia" class="btn btn-sec">📝 Solicitud INAI</a>' +
+      '</div>' +
+    '</div>' +
+    
+    '<div class="footer">Fuente: ASF · informe.asf.gob.mx · CP2023 + CP2024 (en revisión) · Actualización post-entregas semestrales</div>';
+  
+  document.getElementById('contenido').innerHTML = html;
+  document.getElementById('contenido').className = '';
+}
 
-  function renderEntregas() {
-    const orden = { 'Primera Entrega': 1, 'Segunda Entrega': 2, 'Tercera Entrega': 3, 'Consolidado': 4 };
-    const rows = DATA
-      .filter(r => r.cuenta_publica === cuentaActiva)
-      .slice()
-      .sort((a, b) => (orden[a.entrega] || 99) - (orden[b.entrega] || 99));
-    document.getElementById('entregas').innerHTML = rows.map(entregaCard).join('');
-  }
-
-  function entregaCard(r) {
-    const tipos = [
-      ['Cumplimiento financiero', r.num_cumplimiento_financiero],
-      ['Desempeño', r.num_desempeño],
-      ['Gasto federalizado', r.num_gasto_federalizado],
-      ['Inversiones fisicas', r.num_inversiones_fisicas],
-      ['Otros', r.num_otros]
-    ].filter(([, v]) => v != null && v > 0);
-    const desglose = tipos.length ? '<div class="desglose">' + tipos.map(([k, v]) =>
-      '<div class="desglose-row"><span class="k">' + k + '</span><span class="v">' + fmtInt.format(v) + '</span></div>'
-    ).join('') + '</div>' : '';
-
-    const montosArr = [];
-    if (r.monto_observaciones_mxn != null) montosArr.push(['Observaciones', fmtMXN.format(r.monto_observaciones_mxn)]);
-    if (r.monto_recuperaciones_probables_mxn != null) montosArr.push(['Recuperaciones probables', fmtMXN.format(r.monto_recuperaciones_probables_mxn)]);
-    if (r.monto_recuperaciones_operadas_mxn != null) montosArr.push(['Recuperaciones operadas', fmtMXN.format(r.monto_recuperaciones_operadas_mxn)]);
-    const montos = montosArr.length ? '<div class="montos">' + montosArr.map(([k, v]) =>
-      '<div class="monto-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'
-    ).join('') + '</div>' : '';
-
-    const link = r.fuente_url ? '<a class="ver-link" href="' + r.fuente_url + '" target="_blank" rel="noopener">Ver informe oficial &nearr;</a>' : '';
-
-    return '<div class="card">' +
-      '<h3>' + (r.entrega || 'Entrega') + '</h3>' +
-      '<div class="fecha">' + fmtFecha(r.fecha_entrega) + '</div>' +
-      '<div class="num-big">' + fmtInt.format(r.num_auditorias || 0) + '</div>' +
-      '<div class="num-big-label">Auditorías</div>' +
-      desglose +
-      montos +
-      link +
-      '</div>';
-  }
-
-  function renderComparativo() {
-    const consol2024 = DATA.find(r => r.cuenta_publica === 2024 && /consolidado/i.test(r.entrega));
-    const consol2023 = DATA.find(r => r.cuenta_publica === 2023 && /consolidado/i.test(r.entrega));
-    const items = [];
-    if (consol2023) items.push({ year: 2023, n: consol2023.num_auditorias || 0 });
-    if (consol2024) items.push({ year: 2024, n: consol2024.num_auditorias || 0 });
-    if (!items.length) {
-      document.getElementById('comparativo').innerHTML = '<div class="loading">Sin datos consolidados</div>';
+function navegarConIA(){
+  try {
+    if (window.parent && window.parent !== window && typeof window.parent.navegarCon === 'function') {
+      window.parent.navegarCon({iaPrompt:'Explícame qué hace la Auditoría Superior de la Federación (ASF), por qué encontraron irregularidades por miles de millones de pesos, y qué puedo hacer como ciudadano para exigir que se sancione.',toast:'Contexto cargado',page:'asistente'});
       return;
     }
-    const max = Math.max(...items.map(x => x.n));
-    const html = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Auditorías totales (Consolidado)</div>' +
-      items.map(x => {
-        const pct = max ? (x.n / max * 100).toFixed(1) : 0;
-        return '<div class="bar-row"><div class="yr">CP ' + x.year + '</div><div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;">' + fmtInt.format(x.n) + '</div></div></div>';
-      }).join('');
-    document.getElementById('comparativo').innerHTML = html;
-  }
+  } catch(e){}
+  window.location.href = '/?page=asistente';
+}
 
-  load();
+cargarASF();
 </script>
 </body>
 </html>
