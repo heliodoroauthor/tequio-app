@@ -1683,10 +1683,88 @@ let _obEstado = null;
 let _obIntereses = new Set();
 function obShow() {
   if (localStorage.getItem('tequio_onboarding_done') === '1') return;
+  // 🦎 Welcome disclaimer ANTES del onboarding (solo primera vez)
+  if (localStorage.getItem('tequio_welcome_accepted') !== '1') {
+    tequioMostrarWelcome();
+    return;
+  }
   document.getElementById('onboarding-overlay').style.display = 'block';
   obRenderEstados();
   obRenderIntereses();
 }
+
+// 🦎 Welcome Disclaimer Modal (primera visita)
+function tequioMostrarWelcome() {
+  if (document.getElementById('tequio-welcome-modal')) return;
+  var html = '<div id="tequio-welcome-modal" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:16px">' +
+    '<div style="background:linear-gradient(180deg,#0b1226 0%,#0a1024 100%);border:1px solid rgba(251,191,36,0.3);border-radius:20px;max-width:560px;width:100%;padding:28px 26px;box-shadow:0 24px 64px rgba(0,0,0,0.5);position:relative">' +
+      '<div style="text-align:center;margin-bottom:20px">' +
+        '<div style="font-size:48px;margin-bottom:8px">🦎</div>' +
+        '<h1 style="font-size:26px;font-weight:800;font-family:var(--font-display,system-ui);color:#fbbf24;margin:0 0 6px">Bienvenido a Tequio</h1>' +
+        '<div style="font-size:13px;color:#9ca3af">Plataforma cívica de México · Cero Invención</div>' +
+      '</div>' +
+      '<div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.20);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#fcd34d;line-height:1.5">' +
+        '<strong style="color:#fbbf24">⚠️ Importante:</strong> Tequio es una plataforma <strong>educativa y cívica</strong>. No sustituye asesoría legal, médica ni financiera profesional. Verifica siempre con fuentes oficiales o un especialista.' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">' +
+        '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
+          '<span style="font-size:18px;flex-shrink:0">🦎</span>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#22c55e">Cero invención.</strong> Toda ley, dato, contrato, ley vienen de fuentes oficiales: DOF, Cámara de Diputados, SCJN, INAI, INEGI, SHCP, 32 estados y 560+ ciudades.</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
+          '<span style="font-size:18px;flex-shrink:0">🔒</span>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#3b82f6">Privacidad real.</strong> Tu perfil se guarda <strong>solo en tu dispositivo</strong> (localStorage). Sin registro, sin email, sin terceros tipo Google/Facebook.</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
+          '<span style="font-size:18px;flex-shrink:0">🇲🇽</span>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#a855f7">Soberanía digital.</strong> Tequio opera bajo leyes mexicanas (LFPDPPP). Servidores en Supabase, no en Discord, Telegram ni compañías del Oeste.</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
+          '<span style="font-size:18px;flex-shrink:0">📚</span>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,518</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px">' +
+        '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">' +
+          '<input type="checkbox" id="tequio-welcome-check" onchange="tequioWelcomeCheckChanged()" style="margin-top:2px;accent-color:#fbbf24;width:16px;height:16px;flex-shrink:0">' +
+          '<span style="font-size:12px;color:#d1d5db;line-height:1.5">He leído y entiendo que Tequio es una plataforma <strong>educativa</strong>, los datos pueden contener errores, y para decisiones legales/financieras/médicas <strong>consultaré a un profesional</strong>.</span>' +
+        '</label>' +
+      '</div>' +
+      '<button id="tequio-welcome-confirm" onclick="tequioWelcomeAceptar()" disabled style="width:100%;padding:14px;background:#fbbf24;border:none;border-radius:12px;color:#0b0f1a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;opacity:0.4;transition:opacity 0.2s">🚀 Acepto y empezar a personalizar</button>' +
+      '<div style="margin-top:10px;font-size:10px;color:#6b7280;text-align:center;line-height:1.5">Tequio opera bajo leyes de México · LFPDPPP · Art. 1 y 16 CPEUM<br>Soporte: <a href="mailto:hola@tequio.app" style="color:#9ca3af">hola@tequio.app</a></div>' +
+    '</div>' +
+  '</div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.body.style.overflow = 'hidden';
+  // Hidrata KPIs del welcome con los stats reales
+  if (window.__tequioKpis) {
+    setTimeout(function(){
+      document.querySelectorAll('#tequio-welcome-modal [data-kpi]').forEach(function(el){
+        var k = el.getAttribute('data-kpi');
+        var map = {'leyes':'leyes','chunks-embedded':'chunks_embedded','leyes-federal-estatal':'leyes_federal_estatal'};
+        var val = window.__tequioKpis[map[k]||k];
+        if(val) el.textContent = Number(val).toLocaleString('es-MX');
+      });
+    }, 100);
+  }
+}
+
+window.tequioWelcomeCheckChanged = function(){
+  var chk = document.getElementById('tequio-welcome-check');
+  var btn = document.getElementById('tequio-welcome-confirm');
+  if(btn){ btn.disabled = !chk.checked; btn.style.opacity = chk.checked ? '1' : '0.4'; }
+};
+
+window.tequioWelcomeAceptar = function(){
+  localStorage.setItem('tequio_welcome_accepted', '1');
+  var m = document.getElementById('tequio-welcome-modal');
+  if(m) m.remove();
+  document.body.style.overflow = '';
+  // Lanzar onboarding
+  document.getElementById('onboarding-overlay').style.display = 'block';
+  if(typeof obRenderEstados === 'function') obRenderEstados();
+  if(typeof obRenderIntereses === 'function') obRenderIntereses();
+};
 function obRenderEstados() {
   const grid = document.getElementById('ob-estados-grid');
   grid.innerHTML = Object.entries(OB_ESTADOS).map(([k,v]) => '<button onclick="obSelectEstado(\''+k+'\')" class="ob-estado-btn" data-clave="'+k+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.15s;">'+v+'</button>').join('');
