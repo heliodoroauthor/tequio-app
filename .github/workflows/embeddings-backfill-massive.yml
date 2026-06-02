@@ -1,0 +1,62 @@
+name: Embeddings Backfill MASIVO (paralelo)
+
+# Llena los ~326k chunks sin embedding con 10 jobs paralelos
+# Modelo: gemini-embedding-001 (768d)
+
+on:
+  workflow_dispatch:
+    inputs:
+      parallel_jobs:
+        description: "Cuántos jobs paralelos (1-15)"
+        required: false
+        default: "10"
+  schedule:
+    # Cada 4 horas
+    - cron: '0 */4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        batch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install deps
+        run: pip install requests
+      
+      - name: Run backfill batch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BATCH_IDX: ${{ matrix.batch }}
+        run: |
+          python3 scripts/backfill_chunks_embeddings_parallel.py "$BATCH_IDX" 10
+  
+  refresh_kpis:
+    needs: backfill
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh KPI cache
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | grep chunks
