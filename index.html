@@ -9266,31 +9266,62 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <button onclick="navegarCon({fromNot:true,page:'asistente'})" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🤖 Preguntar IA</button>
       </div>
 
-      <!-- Tabs por periodo -->
-      <div class="tab-bar mb-16">
-        <div class="tab" data-dias="1" onclick="noticiasV2SetPeriodo(this,1)">📅 Hoy</div>
-        <div class="tab active" data-dias="7" onclick="noticiasV2SetPeriodo(this,7)">📆 7 días</div>
-        <div class="tab" data-dias="30" onclick="noticiasV2SetPeriodo(this,30)">🗓️ 30 días</div>
-        <div class="tab" data-dias="" onclick="noticiasV2SetPeriodo(this,null)">⏳ Todo</div>
+      <!-- Tabs ámbito (Nacional/Estatal/Municipal) -->
+      <div class="tab-bar mb-12">
+        <div class="tab active" data-ambito="" onclick="noticiasV2SetAmbito(this,'')">🌐 Todo <span class="ambito-cnt" id="cnt-todo"></span></div>
+        <div class="tab" data-ambito="nacional" onclick="noticiasV2SetAmbito(this,'nacional')">🏛️ Nacional <span class="ambito-cnt" id="cnt-nacional"></span></div>
+        <div class="tab" data-ambito="estatal" onclick="noticiasV2SetAmbito(this,'estatal')">🗺️ Estatal <span class="ambito-cnt" id="cnt-estatal"></span></div>
+        <div class="tab" data-ambito="municipal" onclick="noticiasV2SetAmbito(this,'municipal')">🏙️ Municipal <span class="ambito-cnt" id="cnt-municipal"></span></div>
+      </div>
+      <style>
+        .ambito-cnt{font-size:10px;background:rgba(255,255,255,0.10);padding:1px 6px;border-radius:5px;margin-left:4px;font-weight:700}
+        .tab.active .ambito-cnt{background:rgba(255,255,255,0.25)}
+        details.not-filter{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;margin-bottom:8px}
+        details.not-filter summary{cursor:pointer;padding:10px 14px;font-size:13px;color:var(--text2);font-weight:600;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+        details.not-filter summary::-webkit-details-marker{display:none}
+        details.not-filter summary::after{content:'▾';font-size:12px;color:var(--text3);transition:transform 0.15s}
+        details.not-filter[open] summary::after{transform:rotate(180deg)}
+        details.not-filter[open] summary{border-bottom:1px solid var(--border)}
+        details.not-filter .filter-body{padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px}
+        .not-filter-active-tag{background:var(--accent);color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;margin-left:auto;margin-right:6px}
+      </style>
+
+      <!-- Período (3 botones compactos en una sola fila) -->
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="estado-chip" data-dias="1" onclick="noticiasV2SetPeriodo(this,1)">📅 Hoy</button>
+        <button class="estado-chip active" data-dias="7" onclick="noticiasV2SetPeriodo(this,7)">📆 7 días</button>
+        <button class="estado-chip" data-dias="30" onclick="noticiasV2SetPeriodo(this,30)">🗓️ 30 días</button>
+        <button class="estado-chip" data-dias="" onclick="noticiasV2SetPeriodo(this,null)">⏳ Todo</button>
       </div>
 
-      <!-- Chips por fuente -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="not-v2-fuentes-chips">
-        <button class="estado-chip active" data-fuente="" onclick="noticiasV2SetFuente(this,'')">Todas</button>
-      </div>
+      <!-- Filtros colapsables -->
+      <details class="not-filter">
+        <summary>
+          <span>📂 Filtrar por fuente</span>
+          <span id="not-filtro-fuente-tag"></span>
+        </summary>
+        <div class="filter-body" id="not-v2-fuentes-chips">
+          <button class="estado-chip active" data-fuente="" onclick="noticiasV2SetFuente(this,'')">Todas</button>
+        </div>
+      </details>
 
-      <!-- Chips por tema -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-        <button class="estado-chip active" data-tema="" onclick="noticiasV2SetTema(this,'')">Cualquier tema</button>
-        <button class="estado-chip" data-tema="politica" onclick="noticiasV2SetTema(this,'politica')">🏛️ Política</button>
-        <button class="estado-chip" data-tema="economia" onclick="noticiasV2SetTema(this,'economia')">💰 Economía</button>
-        <button class="estado-chip" data-tema="seguridad" onclick="noticiasV2SetTema(this,'seguridad')">🛡️ Seguridad</button>
-        <button class="estado-chip" data-tema="salud" onclick="noticiasV2SetTema(this,'salud')">🏥 Salud</button>
-        <button class="estado-chip" data-tema="educacion" onclick="noticiasV2SetTema(this,'educacion')">🎓 Educación</button>
-        <button class="estado-chip" data-tema="medio_ambiente" onclick="noticiasV2SetTema(this,'medio_ambiente')">🌿 Ambiente</button>
-        <button class="estado-chip" data-tema="derechos" onclick="noticiasV2SetTema(this,'derechos')">✊ Derechos</button>
-        <button class="estado-chip" data-tema="corrupcion" onclick="noticiasV2SetTema(this,'corrupcion')">⚠️ Corrupción</button>
-      </div>
+      <details class="not-filter">
+        <summary>
+          <span>🏷️ Filtrar por tema</span>
+          <span id="not-filtro-tema-tag"></span>
+        </summary>
+        <div class="filter-body">
+          <button class="estado-chip active" data-tema="" onclick="noticiasV2SetTema(this,'')">Cualquier tema</button>
+          <button class="estado-chip" data-tema="politica" onclick="noticiasV2SetTema(this,'politica')">🏛️ Política</button>
+          <button class="estado-chip" data-tema="economia" onclick="noticiasV2SetTema(this,'economia')">💰 Economía</button>
+          <button class="estado-chip" data-tema="seguridad" onclick="noticiasV2SetTema(this,'seguridad')">🛡️ Seguridad</button>
+          <button class="estado-chip" data-tema="salud" onclick="noticiasV2SetTema(this,'salud')">🏥 Salud</button>
+          <button class="estado-chip" data-tema="educacion" onclick="noticiasV2SetTema(this,'educacion')">🎓 Educación</button>
+          <button class="estado-chip" data-tema="medio_ambiente" onclick="noticiasV2SetTema(this,'medio_ambiente')">🌿 Ambiente</button>
+          <button class="estado-chip" data-tema="derechos" onclick="noticiasV2SetTema(this,'derechos')">✊ Derechos</button>
+          <button class="estado-chip" data-tema="corrupcion" onclick="noticiasV2SetTema(this,'corrupcion')">⚠️ Corrupción</button>
+        </div>
+      </details>
 
       <!-- Contador -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
@@ -9324,7 +9355,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       (function(){
         var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
         var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-        var state={fuente:null,tema:null,busqueda:null,dias:7,page:0,perPage:30};
+        var state={ambito:null,fuente:null,tema:null,busqueda:null,dias:7,page:0,perPage:30};
         var timer;
         
         function fmt(n){return Number(n||0).toLocaleString('es-MX');}
@@ -9344,9 +9375,16 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           return c[f]||'#94a3b8';
         }
         
+        window.noticiasV2SetAmbito=function(el,a){
+          state.ambito=a||null;state.page=0;
+          el.parentElement.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+          el.classList.add('active');
+          cargar();
+        };
+        
         window.noticiasV2SetPeriodo=function(el,dias){
           state.dias=dias;state.page=0;
-          el.parentElement.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+          el.parentElement.querySelectorAll('.estado-chip').forEach(function(t){t.classList.remove('active');});
           el.classList.add('active');
           cargar();
         };
@@ -9355,6 +9393,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           state.fuente=f||null;state.page=0;
           el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
           el.classList.add('active');
+          var tag=document.getElementById('not-filtro-fuente-tag');
+          if(tag) tag.innerHTML=f?'<span class="not-filter-active-tag">'+f+'</span>':'';
           cargar();
         };
         
@@ -9362,6 +9402,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           state.tema=t||null;state.page=0;
           el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
           el.classList.add('active');
+          var tag=document.getElementById('not-filtro-tema-tag');
+          if(tag) tag.innerHTML=t?'<span class="not-filter-active-tag">'+(el.textContent.trim().substring(0,18))+'</span>':'';
           cargar();
         };
         
@@ -9400,12 +9442,31 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               ch.innerHTML=html;
             }
           }).catch(function(){});
+          
+          // Counts por ámbito
+          ['nacional','estatal','municipal'].forEach(function(amb){
+            rpc('noticias_listar_v2',{p_ambito:amb,p_dias:null,p_limit:1,p_offset:0}).then(function(rows){
+              if(Array.isArray(rows)&&rows.length>0){
+                var el=document.getElementById('cnt-'+amb);
+                if(el) el.textContent=fmt(rows[0].total_count);
+              } else {
+                var el2=document.getElementById('cnt-'+amb);
+                if(el2) el2.textContent='0';
+              }
+            }).catch(function(){});
+          });
+          rpc('noticias_listar_v2',{p_dias:null,p_limit:1,p_offset:0}).then(function(rows){
+            if(Array.isArray(rows)&&rows.length>0){
+              var el=document.getElementById('cnt-todo');
+              if(el) el.textContent=fmt(rows[0].total_count);
+            }
+          }).catch(function(){});
         }
         
         function cargar(){
           document.getElementById('not-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">Cargando…</div>';
           var params={
-            p_fuente:state.fuente,p_tema:state.tema,p_ambito:null,
+            p_fuente:state.fuente,p_tema:state.tema,p_ambito:state.ambito,
             p_busqueda:state.busqueda,p_dias:state.dias,
             p_limit:state.perPage,p_offset:state.page*state.perPage
           };
@@ -9434,10 +9495,16 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               var color=fuenteColor(r.fuente);
               var temaIcon=({politica:'🏛️',economia:'💰',seguridad:'🛡️',salud:'🏥',
                           educacion:'🎓',medio_ambiente:'🌿',derechos:'✊',corrupcion:'⚠️'})[r.tema]||'📰';
+              var ambitoIcon=({nacional:'🏛️',estatal:'🗺️',municipal:'🏙️'})[r.ambito]||'🌐';
+              var ambitoLabel=({nacional:'Nacional',estatal:'Estatal',municipal:'Municipal'})[r.ambito]||'Federal';
+              var ambitoColor=({nacional:'#3b82f6',estatal:'#a855f7',municipal:'#22c55e'})[r.ambito]||'#94a3b8';
               return '<a href="'+(r.url_oficial||'#')+'" target="_blank" rel="noopener" class="card" style="text-decoration:none;color:inherit;border-left:3px solid '+color+';transition:all 0.15s;display:block">'+
-                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'+
-                  '<span style="background:'+color+'22;color:'+color+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">'+r.fuente+'</span>'+
-                  '<span style="font-size:11px;color:var(--text3)">'+fmtTiempo(r.fecha_publicacion)+'</span>'+
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:6px;flex-wrap:wrap">'+
+                  '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+                    '<span style="background:'+color+'22;color:'+color+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">'+r.fuente+'</span>'+
+                    '<span style="background:'+ambitoColor+'22;color:'+ambitoColor+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">'+ambitoIcon+' '+ambitoLabel+'</span>'+
+                  '</div>'+
+                  '<span style="font-size:11px;color:var(--text3);white-space:nowrap">'+fmtTiempo(r.fecha_publicacion)+'</span>'+
                 '</div>'+
                 '<div style="font-weight:600;font-size:14px;color:var(--text);line-height:1.4;margin-bottom:6px">'+(r.titulo||'(Sin título)')+'</div>'+
                 (r.resumen?'<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px">'+r.resumen.substring(0,200)+(r.resumen.length>200?'…':'')+'</div>':'')+
