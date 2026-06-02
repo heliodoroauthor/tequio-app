@@ -3,68 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparador Electoral - Tequio</title>
+<title>Comparador Electoral · Tequio</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0f;color:#e5e7eb;min-height:100vh;line-height:1.5}
-  .container{max-width:1200px;margin:0 auto;padding:16px}
-  .back-link{display:inline-flex;align-items:center;gap:6px;color:#a78bfa;text-decoration:none;font-size:14px;margin-bottom:12px}
-  .back-link:hover{color:#c4b5fd}
-  h1{font-size:24px;margin-bottom:6px;background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .subtitle{color:#9ca3af;font-size:14px;margin-bottom:16px}
-  .disclaimer{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:#fbbf24;margin-bottom:20px}
-  .section{margin-bottom:20px}
-  .section h2{font-size:14px;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:600}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;overflow-x:auto;padding-bottom:4px}
-  .chip{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .15s;color:#e5e7eb}
-  .chip:hover{background:rgba(167,139,250,.1);border-color:#a78bfa}
-  .chip.active{background:linear-gradient(90deg,#a78bfa,#f472b6);border-color:transparent;color:#0a0a0f;font-weight:600}
-  .partido-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-  .partido-check{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:13px;transition:all .15s}
-  .partido-check:hover{background:rgba(255,255,255,.08)}
-  .partido-check input{accent-color:#a78bfa;cursor:pointer}
-  .partido-check.checked{border-color:#a78bfa}
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:8px}
-  .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;border-top:4px solid var(--c)}
-  .card-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .card-emoji{font-size:22px}
-  .card-name{font-size:16px;font-weight:700;color:var(--c)}
-  .card-desc{font-size:11px;color:#9ca3af;margin-bottom:10px}
-  .card-pos{font-size:13px;color:#e5e7eb;margin-bottom:10px}
-  .card-source{font-size:11px;color:#6b7280;font-style:italic;margin-bottom:10px}
-  .btn-voto{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:#a78bfa;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;width:100%}
-  .btn-voto:hover{background:rgba(167,139,250,.2)}
-  .voto-box{background:rgba(255,255,255,.04);border-radius:6px;padding:8px;margin-top:8px;font-size:11px;color:#9ca3af;display:none}
-  .voto-box.show{display:block}
-  .summary-table{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;overflow-x:auto}
-  .summary-table h2{margin-bottom:12px}
-  table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px}
-  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.05)}
-  th{color:#a78bfa;font-weight:600;font-size:11px;text-transform:uppercase}
-  td:first-child,th:first-child{text-align:left;color:#e5e7eb}
-  .score-bar{display:inline-block;width:60px;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;position:relative}
-  .score-fill{position:absolute;top:0;height:100%;background:var(--c)}
-  .share-btn{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#0a0a0f;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:20px;width:100%}
-  .share-btn:hover{opacity:.9}
-  .share-msg{text-align:center;color:#10b981;font-size:12px;margin-top:8px;min-height:16px}
-  @media(max-width:600px){h1{font-size:20px}.cards{grid-template-columns:1fr}}
-  body.embedded .back-link{display:none}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24;
+    --violet: #a78bfa; --pink: #f472b6;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+  body { padding: 16px; min-height: 100vh; }
+  body.embedded .back-link { display: none; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--violet); text-decoration: none; font-size: 13px; margin-bottom: 10px; }
+  .back-link:hover { color: #c4b5fd; }
+
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(167,139,250,0.28) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(244,114,182,0.22) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(167,139,250,0.14) 0%, rgba(244,114,182,0.10) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(167,139,250,0.30);
+    border-radius: 20px;
+    padding: 28px 24px 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(167,139,250,0.18);
+    border: 1px solid rgba(167,139,250,0.45);
+    color: #c4b5fd;
+    padding: 5px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 30px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #fff 0%, var(--violet) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: #cbd5e1; font-size: 14.5px; line-height: 1.6; max-width: 720px; margin: 0; }
+  .hero p strong { color: var(--accent); font-weight: 700; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+  .stat-num { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .stat-num.violet { color: var(--violet); }
+  .stat-num.pink { color: var(--pink); }
+  .stat-num.amber { color: var(--accent); }
+  .stat-num.green { color: #86efac; }
+  .stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  @media (max-width:680px){ .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 24px; } }
+
+  details.edu { background: rgba(167,139,250,0.06); border: 1px solid rgba(167,139,250,0.22); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; }
+  details.edu[open] { background: rgba(167,139,250,0.10); }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: #ddd6fe; font-size: 13.5px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--violet); transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
+  details.edu .edu-body p { margin-bottom: 8px; }
+  details.edu .edu-body strong { color: #f5d0fe; }
+
+  .section { margin-bottom: 18px; }
+  .section h2 { font-size: 11.5px; color: var(--violet); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 800; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 9px 16px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .15s; color: var(--text); font-family: inherit; }
+  .chip:hover { background: rgba(167,139,250,0.10); border-color: var(--violet); transform: translateY(-1px); }
+  .chip.active { background: linear-gradient(135deg, var(--violet) 0%, var(--pink) 100%); border-color: transparent; color: #0a0a0f; font-weight: 800; }
+
+  .partido-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .partido-check { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 9px 12px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+  .partido-check:hover { background: rgba(255,255,255,0.07); transform: translateY(-1px); }
+  .partido-check.checked { border-color: var(--violet); background: rgba(167,139,250,0.10); }
+  .partido-check input { accent-color: var(--violet); cursor: pointer; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; border-top: 4px solid var(--c); transition: transform .15s; }
+  .card:hover { transform: translateY(-2px); }
+  .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .card-emoji { font-size: 22px; }
+  .card-name { font-size: 16px; font-weight: 800; color: var(--c); }
+  .card-desc { font-size: 11px; color: var(--text-dim); margin-bottom: 10px; }
+  .card-pos { font-size: 13px; color: var(--text); margin-bottom: 10px; line-height: 1.55; }
+  .card-source { font-size: 11px; color: #6b7280; font-style: italic; margin-bottom: 10px; }
+  .btn-voto { background: rgba(167,139,250,0.10); border: 1px solid rgba(167,139,250,0.30); color: var(--violet); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; transition: background .15s; }
+  .btn-voto:hover { background: rgba(167,139,250,0.18); }
+  .voto-box { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 11.5px; color: #cbd5e1; display: none; line-height: 1.5; border-left: 3px solid var(--c); }
+  .voto-box.show { display: block; }
+  .voto-box strong { color: var(--accent); }
+
+  .summary-table { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; overflow-x: auto; }
+  .summary-table h2 { margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 500px; }
+  th, td { padding: 9px 6px; text-align: center; border-bottom: 1px solid var(--border-soft); }
+  th { color: var(--violet); font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; }
+  td:first-child, th:first-child { text-align: left; color: var(--text); font-weight: 600; }
+  .score-bar { display: inline-block; width: 60px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative; }
+  .score-fill { position: absolute; top: 0; height: 100%; background: var(--c); }
+
+  .share-btn { background: linear-gradient(135deg, var(--violet) 0%, var(--pink) 100%); color: #fff; border: none; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 20px; width: 100%; font-family: inherit; transition: transform .15s; }
+  .share-btn:hover { transform: translateY(-1px); }
+  .share-msg { text-align: center; color: #86efac; font-size: 12px; margin-top: 8px; min-height: 16px; font-weight: 600; }
+
+  .cta-aprob { margin-top: 18px; padding: 16px 18px; background: linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(167,139,250,0.08) 100%); border: 1px solid rgba(34,197,94,0.25); border-radius: 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .cta-aprob-text { flex: 1; min-width: 240px; }
+  .cta-aprob-text strong { color: #86efac; font-weight: 800; display: block; margin-bottom: 4px; font-size: 14px; }
+  .cta-aprob-text span { font-size: 12.5px; color: var(--text-dim); }
+  .cta-aprob a { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.40); color: #86efac; padding: 10px 18px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; transition: background .15s; }
+  .cta-aprob a:hover { background: rgba(34,197,94,0.25); }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
 <div class="container">
-  <a href="/" class="back-link" id="back-link">&larr; Tequio</a>
-  <h1>&#9878;&#65039; Comparador Electoral</h1>
-  <p class="subtitle">Compara posiciones públicas de partidos en cualquier tema</p>
-  <div class="disclaimer">Posiciones basadas en plataformas públicas (INE), declaraciones oficiales y voto en Congreso. NO somos partidarios &mdash; solo facilitamos la comparacion.</div>
+  <a href="/" class="back-link">← Tequio</a>
+
+  <div class="hero">
+    <div class="hero-badge">🗳️ Plataformas INE 2024 · Cero invención</div>
+    <h1>Comparador Electoral</h1>
+    <p>Compara las posiciones públicas de los <strong>6 partidos políticos nacionales</strong> en <strong>10 temas clave</strong>. Sin opinión, solo plataformas registradas ante el INE y votos reales en el Congreso.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num violet">6</div><div class="stat-lbl">Partidos nacionales</div></div>
+      <div class="stat"><div class="stat-num pink">10</div><div class="stat-lbl">Temas comparables</div></div>
+      <div class="stat"><div class="stat-num amber">-3 a +3</div><div class="stat-lbl">Escala visual</div></div>
+      <div class="stat"><div class="stat-num green">INE</div><div class="stat-lbl">Fuente oficial</div></div>
+    </div>
+  </div>
+
+  <details class="edu">
+    <summary>📖 ¿De dónde vienen estas posiciones?</summary>
+    <div class="edu-body">
+      <p>Las plataformas políticas las registran los partidos ante el <strong>INE</strong> antes de cada proceso electoral federal. Son documentos públicos que definen su agenda legislativa y de gobierno.</p>
+      <p>Para cada tema, Tequio resume las posiciones oficiales <strong>y</strong> muestra cómo votó cada partido en una iniciativa legislativa concreta. La escala <strong>-3 a +3</strong> es visual relativa: <strong>positivo</strong> = pro-mercado / conservador según eje; <strong>negativo</strong> = pro-Estado / progresista.</p>
+      <p><strong>Cero invención:</strong> ni Tequio ni Claude opinan. Solo se reflejan declaraciones públicas y votos del Congreso.</p>
+    </div>
+  </details>
 
   <div class="section">
-    <h2>1. Elige un tema</h2>
+    <h2>1️⃣ Elige un tema</h2>
     <div class="chips" id="temas-chips"></div>
   </div>
 
   <div class="section">
-    <h2>2. Partidos a comparar</h2>
+    <h2>2️⃣ Partidos a comparar</h2>
     <div class="partido-checks" id="partidos-checks"></div>
   </div>
 
@@ -75,151 +165,47 @@
 
   <div class="section">
     <div class="summary-table">
-      <h2>Tabla resumen (escala -3 a +3)</h2>
+      <h2>📊 Tabla resumen (escala -3 a +3)</h2>
       <table id="tabla-resumen"></table>
-      <p style="font-size:11px;color:#6b7280;margin-top:8px">Escala visual relativa. Positivo = pro-mercado/conservador segun eje. Negativo = pro-estado/progresista.</p>
+      <p style="font-size:11px;color:#6b7280;margin-top:10px">Escala visual relativa. Positivo = pro-mercado/conservador según eje. Negativo = pro-Estado/progresista.</p>
     </div>
   </div>
 
-  <button class="share-btn" id="share-btn">&#128279; Compartir resultados</button>
+  <button class="share-btn" id="share-btn">🔗 Compartir resultados</button>
   <div class="share-msg" id="share-msg"></div>
+
+  <div class="cta-aprob">
+    <div class="cta-aprob-text">
+      <strong>¿Quieres votar tú mismo?</strong>
+      <span>En Aprobación del Pueblo puedes calificar a 103 actores políticos y 50 leyes federales con tu voto directo.</span>
+    </div>
+    <a href="/panel/aprobacion.html">Ir a Aprobación →</a>
+  </div>
 </div>
 
 <script>
-if (new URLSearchParams(location.search).get('embedded') === '1') {
-  document.body.classList.add('embedded');
-}
+if (new URLSearchParams(location.search).get('embedded') === '1') document.body.classList.add('embedded');
 
 const PARTIDOS = {
-  MORENA: { nombre:'MORENA', color:'#b91c1c', emoji:'🟥', desc:'Movimiento Regeneracion Nacional' },
-  PAN:    { nombre:'PAN',    color:'#1e40af', emoji:'🟦', desc:'Partido Accion Nacional' },
+  MORENA: { nombre:'MORENA', color:'#b91c1c', emoji:'🟥', desc:'Movimiento Regeneración Nacional' },
+  PAN:    { nombre:'PAN',    color:'#3b82f6', emoji:'🟦', desc:'Partido Acción Nacional' },
   PRI:    { nombre:'PRI',    color:'#16a34a', emoji:'🟩', desc:'Partido Revolucionario Institucional' },
   MC:     { nombre:'MC',     color:'#f97316', emoji:'🟧', desc:'Movimiento Ciudadano' },
   PT:     { nombre:'PT',     color:'#facc15', emoji:'🟨', desc:'Partido del Trabajo' },
-  PVEM:   { nombre:'PVEM',   color:'#15803d', emoji:'🟩', desc:'Partido Verde Ecologista de Mexico' }
+  PVEM:   { nombre:'PVEM',   color:'#15803d', emoji:'🟩', desc:'Partido Verde Ecologista' }
 };
 
 const TEMAS = {
-  economia: {
-    titulo: 'Economia', emoji: '💰',
-    posiciones: {
-      MORENA: 'Modelo estatista. Fortalecer PEMEX, CFE como empresas estrategicas. Soberania energetica. Programas sociales masivos como derechos constitucionales.',
-      PAN:    'Libre mercado. Apertura comercial, IED. Reducir tamano del Estado. Privatizar areas estrategicas. Combatir gasto publico "improductivo".',
-      PRI:    'Modelo mixto pragmatico. Mantener TMEC, atraer inversion, sin desmantelar paraestatales historicas. Continuidad institucional.',
-      MC:     'Liberalismo social. Apertura economica + responsabilidad fiscal. Innovacion, emprendimiento. Critico tanto del estatismo como del privilegio empresarial.',
-      PT:     'Anti-neoliberal radical. Mayor intervencion del Estado, nacionalizaciones, control de precios. Soberania alimentaria.',
-      PVEM:   'Pragmatico. Economia verde, transicion energetica con apoyo empresarial. Aliado de MORENA en gobierno actual.'
-    },
-    voto: 'Presupuesto 2025: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (aumento programas sociales, reduccion organismos autonomos).'
-  },
-  seguridad: {
-    titulo: 'Seguridad', emoji: '🚨',
-    posiciones: {
-      MORENA: 'Guardia Nacional + presencia militar. Estrategia "abrazos no balazos" (atender causas). Reforma judicial para combatir impunidad.',
-      PAN:    'Regreso a Policia Federal civil profesional. Mano dura. Cadena perpetua para crimen organizado. Critico de militarizacion.',
-      PRI:    'Modelo de Coordinacion Nacional con todas las fuerzas. Endurecimiento penal. Continuidad del legado de Calderon/Pena.',
-      MC:     'Desmilitarizacion. Policias de proximidad. Modelo Jalisco. Prevencion social, atencion a victimas.',
-      PT:     'Critico del militarismo. Enfoque social: educacion, empleo, desarrollo. Reformas profundas al sistema penal.',
-      PVEM:   'Apoya estrategia federal. Enfasis en seguridad ambiental (delitos contra recursos naturales).'
-    },
-    voto: 'Guardia Nacional bajo SEDENA (2024): MORENA/PT/PVEM a favor; PAN/MC en contra; PRI dividido.'
-  },
-  salud: {
-    titulo: 'Salud', emoji: '🏥',
-    posiciones: {
-      MORENA: 'IMSS-Bienestar universal gratuito como derecho. Eliminar Seguro Popular fue paso correcto. Medicamentos gratuitos.',
-      PAN:    'Sistema mixto. Recuperar funciones del Seguro Popular. Permitir aseguradoras privadas con regulacion. Combatir desabasto.',
-      PRI:    'IMSS, ISSSTE, Seguro Popular coexistiendo. Cobertura universal con financiamiento mixto.',
-      MC:     'Universal pero con calidad. Incluir prestadores privados regulados. Foco en prevencion.',
-      PT:     'Sistema unico nacional 100% publico. Medicamentos genericos. Salud comunitaria.',
-      PVEM:   'Salud preventiva, alimentacion sana, agua potable. Combatir enfermedades cronicas relacionadas con ambiente.'
-    },
-    voto: 'Creacion IMSS-Bienestar: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra.'
-  },
-  educacion: {
-    titulo: 'Educacion', emoji: '📚',
-    posiciones: {
-      MORENA: 'Publica, gratuita en todos niveles. Nueva Escuela Mexicana (NEM). Becas universales. Eliminar evaluacion punitiva.',
-      PAN:    'Educacion de calidad con evaluacion rigurosa. Permitir escuelas privadas con apoyo estatal (vouchers). Merito docente.',
-      PRI:    'Reforma educativa con evaluacion. Ingles, ciencias, tecnologia. Continuidad de programas tradicionales.',
-      MC:     'Innovacion pedagogica. Pluralidad. Educacion dual con sector productivo. Bilinguismo.',
-      PT:     'Educacion intercultural, lenguas indigenas. Decolonizacion del curriculo. Acceso garantizado.',
-      PVEM:   'Educacion ambiental obligatoria. Conciencia ecologica desde primaria.'
-    },
-    voto: 'Nueva Escuela Mexicana (libros de texto): MORENA/PT/PVEM a favor; PAN/PRI/MC criticos.'
-  },
-  energia: {
-    titulo: 'Energia', emoji: '⚡',
-    posiciones: {
-      MORENA: 'Soberania energetica. Fortalecer PEMEX y CFE. Refinerias. Limitar renovables si afectan a CFE.',
-      PAN:    'Apertura completa al sector privado. Renovables, IED. Mercado electrico mayorista funcional.',
-      PRI:    'Continuidad de reforma energetica 2013. Mixto publico-privado. Sin retroceso en renovables.',
-      MC:     'Transicion energetica rapida. Renovables prioridad. Modernizar PEMEX/CFE sin protegerlas del mercado.',
-      PT:     'Estatizacion total. Eliminar privados del sector. Subsidios a usuarios domesticos.',
-      PVEM:   'Renovables como prioridad nacional. Eliminar combustibles fosiles a 2050. Nuclear como puente.'
-    },
-    voto: 'Reforma electrica 2022: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (no alcanzo mayoria calificada).'
-  },
-  derechos: {
-    titulo: 'Derechos sociales', emoji: '🌈',
-    posiciones: {
-      MORENA: 'Matrimonio igualitario, ley de identidad de genero, adopcion. Voto reciente a favor de mayoria de iniciativas.',
-      PAN:    'Posiciones tradicionales. Critica a "ideologia de genero". Apoyo civil sin llamarlo matrimonio. Vinculo religioso.',
-      PRI:    'Pragmatico. Sigue tendencia legislativa. Sin posiciones fuertes.',
-      MC:     'Pionero progresista en Jalisco. Matrimonio igualitario, identidad de genero, derechos reproductivos.',
-      PT:     'Progresista en alianza con MORENA. Apoya derechos LGBTQ+, sindicatos, derechos colectivos.',
-      PVEM:   'Mixto. Apoya derechos individuales pero con base conservadora rural.'
-    },
-    voto: 'Ley identidad de genero federal: MORENA/MC/PT a favor; PAN en contra; PRI/PVEM divididos.'
-  },
-  justicia: {
-    titulo: 'Justicia y poder judicial', emoji: '⚖️',
-    posiciones: {
-      MORENA: 'Reforma judicial 2024: jueces y ministros electos por voto popular. Reducir SCJN a 9 ministros.',
-      PAN:    'Defensa de SCJN profesional y autonoma. Critica a eleccion popular. Independencia del Ejecutivo.',
-      PRI:    'Mixto. Apoyo parte de la reforma pero critico eliminacion de carrera judicial.',
-      MC:     'Modernizacion judicial sin politizacion. Tribunales electorales independientes. Carrera judicial.',
-      PT:     'A favor de la reforma. Necesidad de democratizar el poder judicial.',
-      PVEM:   'Aliado de la reforma judicial 2024 (votos clave).'
-    },
-    voto: 'Reforma judicial 2024: MORENA/PT/PVEM a favor (mayoria calificada); PAN/PRI/MC en contra.'
-  },
-  democracia: {
-    titulo: 'Democracia', emoji: '✊',
-    posiciones: {
-      MORENA: 'Mayoria de las urnas debe gobernar sin trabas. Reformas amplias. Pluralidad institucional secundaria.',
-      PAN:    'Contrapesos institucionales fuertes. INE autonomo, SCJN independiente. Critica al "populismo".',
-      PRI:    'Institucionalidad historica. Pluralidad de actores. Federalismo.',
-      MC:     'Democracia participativa. Consultas, revocacion. Reducir reeleccion.',
-      PT:     'Democracia participativa radical. Asambleas, plebiscitos.',
-      PVEM:   'Democracia sostenible. Voto verde, derechos de la naturaleza.'
-    },
-    voto: 'Plan B electoral (recorte INE): MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (invalidado por SCJN).'
-  },
-  campo: {
-    titulo: 'Campo y soberania alimentaria', emoji: '🚜',
-    posiciones: {
-      MORENA: 'Produccion para el Bienestar. Apoyo directo a pequenos productores. Soberania alimentaria.',
-      PAN:    'Agroindustria, exportacion, modernizacion. Apertura comercial. TMEC.',
-      PRI:    'Continuar PROCAMPO y subsidios. Modernizacion gradual.',
-      MC:     'Innovacion agroalimentaria. Tecnologia. Conexion con mercado.',
-      PT:     'Defensa del campo tradicional. Prohibir transgenicos, glifosato. Agroecologia.',
-      PVEM:   'Prohibir transgenicos. Agroecologia, organicos. Productores indigenas.'
-    },
-    voto: 'Decreto prohibicion glifosato y maiz transgenico: MORENA/PT/PVEM a favor; PAN/PRI en contra.'
-  },
-  social: {
-    titulo: 'Programas sociales', emoji: '👴',
-    posiciones: {
-      MORENA: 'Pension Adulto Mayor, Sembrando Vida, Becas Benito Juarez. Derechos constitucionales irrevocables.',
-      PAN:    'Programas focalizados a quien mas lo necesita. Auditar resultados. Combatir uso electoral.',
-      PRI:    'Continuidad de programas tradicionales (PROSPERA, etc.). Foco en pobreza extrema.',
-      MC:     'Eficiencia, evaluacion. Renta basica condicionada. Empleo.',
-      PT:     'Expandir programas universales. Renta basica universal.',
-      PVEM:   'Programas verdes (ej. Sembrando Vida). Apoyo rural con enfoque ambiental.'
-    },
-    voto: 'Constitucionalizacion de programas sociales (2024): MORENA/PT/PVEM a favor; PAN/PRI/MC en contra.'
-  }
+  economia: { titulo: 'Economía', emoji: '💰', posiciones: { MORENA:'Modelo estatista. Fortalecer PEMEX, CFE como empresas estratégicas. Soberanía energética. Programas sociales masivos como derechos constitucionales.', PAN:'Libre mercado. Apertura comercial, IED. Reducir tamaño del Estado. Privatizar áreas estratégicas. Combatir gasto público "improductivo".', PRI:'Modelo mixto pragmático. Mantener TMEC, atraer inversión, sin desmantelar paraestatales históricas. Continuidad institucional.', MC:'Liberalismo social. Apertura económica + responsabilidad fiscal. Innovación, emprendimiento. Crítico tanto del estatismo como del privilegio empresarial.', PT:'Anti-neoliberal radical. Mayor intervención del Estado, nacionalizaciones, control de precios. Soberanía alimentaria.', PVEM:'Pragmático. Economía verde, transición energética con apoyo empresarial. Aliado de MORENA en gobierno actual.' }, voto:'Presupuesto 2025: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (aumento programas sociales, reducción organismos autónomos).' },
+  seguridad: { titulo: 'Seguridad', emoji: '🚨', posiciones: { MORENA:'Guardia Nacional + presencia militar. Estrategia "abrazos no balazos" (atender causas). Reforma judicial para combatir impunidad.', PAN:'Regreso a Policía Federal civil profesional. Mano dura. Cadena perpetua para crimen organizado. Crítico de militarización.', PRI:'Modelo de Coordinación Nacional con todas las fuerzas. Endurecimiento penal. Continuidad del legado de Calderón/Peña.', MC:'Desmilitarización. Policías de proximidad. Modelo Jalisco. Prevención social, atención a víctimas.', PT:'Crítico del militarismo. Enfoque social: educación, empleo, desarrollo. Reformas profundas al sistema penal.', PVEM:'Apoya estrategia federal. Énfasis en seguridad ambiental (delitos contra recursos naturales).' }, voto:'Guardia Nacional bajo SEDENA (2024): MORENA/PT/PVEM a favor; PAN/MC en contra; PRI dividido.' },
+  salud: { titulo: 'Salud', emoji: '🏥', posiciones: { MORENA:'IMSS-Bienestar universal gratuito como derecho. Eliminar Seguro Popular fue paso correcto. Medicamentos gratuitos.', PAN:'Sistema mixto. Recuperar funciones del Seguro Popular. Permitir aseguradoras privadas con regulación. Combatir desabasto.', PRI:'IMSS, ISSSTE, Seguro Popular coexistiendo. Cobertura universal con financiamiento mixto.', MC:'Universal pero con calidad. Incluir prestadores privados regulados. Foco en prevención.', PT:'Sistema único nacional 100% público. Medicamentos genéricos. Salud comunitaria.', PVEM:'Salud preventiva, alimentación sana, agua potable. Combatir enfermedades crónicas relacionadas con ambiente.' }, voto:'Creación IMSS-Bienestar: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra.' },
+  educacion: { titulo: 'Educación', emoji: '📚', posiciones: { MORENA:'Pública, gratuita en todos niveles. Nueva Escuela Mexicana (NEM). Becas universales. Eliminar evaluación punitiva.', PAN:'Educación de calidad con evaluación rigurosa. Permitir escuelas privadas con apoyo estatal (vouchers). Mérito docente.', PRI:'Reforma educativa con evaluación. Inglés, ciencias, tecnología. Continuidad de programas tradicionales.', MC:'Innovación pedagógica. Pluralidad. Educación dual con sector productivo. Bilingüismo.', PT:'Educación intercultural, lenguas indígenas. Decolonización del currículo. Acceso garantizado.', PVEM:'Educación ambiental obligatoria. Conciencia ecológica desde primaria.' }, voto:'Nueva Escuela Mexicana (libros de texto): MORENA/PT/PVEM a favor; PAN/PRI/MC críticos.' },
+  energia: { titulo: 'Energía', emoji: '⚡', posiciones: { MORENA:'Soberanía energética. Fortalecer PEMEX y CFE. Refinerías. Limitar renovables si afectan a CFE.', PAN:'Apertura completa al sector privado. Renovables, IED. Mercado eléctrico mayorista funcional.', PRI:'Continuidad de reforma energética 2013. Mixto público-privado. Sin retroceso en renovables.', MC:'Transición energética rápida. Renovables prioridad. Modernizar PEMEX/CFE sin protegerlas del mercado.', PT:'Estatización total. Eliminar privados del sector. Subsidios a usuarios domésticos.', PVEM:'Renovables como prioridad nacional. Eliminar combustibles fósiles a 2050. Nuclear como puente.' }, voto:'Reforma eléctrica 2022: MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (no alcanzó mayoría calificada).' },
+  derechos: { titulo: 'Derechos sociales', emoji: '🌈', posiciones: { MORENA:'Matrimonio igualitario, ley de identidad de género, adopción. Voto reciente a favor de mayoría de iniciativas.', PAN:'Posiciones tradicionales. Crítica a "ideología de género". Apoyo civil sin llamarlo matrimonio. Vínculo religioso.', PRI:'Pragmático. Sigue tendencia legislativa. Sin posiciones fuertes.', MC:'Pionero progresista en Jalisco. Matrimonio igualitario, identidad de género, derechos reproductivos.', PT:'Progresista en alianza con MORENA. Apoya derechos LGBTQ+, sindicatos, derechos colectivos.', PVEM:'Mixto. Apoya derechos individuales pero con base conservadora rural.' }, voto:'Ley identidad de género federal: MORENA/MC/PT a favor; PAN en contra; PRI/PVEM divididos.' },
+  justicia: { titulo: 'Justicia y poder judicial', emoji: '⚖️', posiciones: { MORENA:'Reforma judicial 2024: jueces y ministros electos por voto popular. Reducir SCJN a 9 ministros.', PAN:'Defensa de SCJN profesional y autónoma. Crítica a elección popular. Independencia del Ejecutivo.', PRI:'Mixto. Apoyo parte de la reforma pero crítico eliminación de carrera judicial.', MC:'Modernización judicial sin politización. Tribunales electorales independientes. Carrera judicial.', PT:'A favor de la reforma. Necesidad de democratizar el poder judicial.', PVEM:'Aliado de la reforma judicial 2024 (votos clave).' }, voto:'Reforma judicial 2024: MORENA/PT/PVEM a favor (mayoría calificada); PAN/PRI/MC en contra.' },
+  democracia: { titulo: 'Democracia', emoji: '✊', posiciones: { MORENA:'Mayoría de las urnas debe gobernar sin trabas. Reformas amplias. Pluralidad institucional secundaria.', PAN:'Contrapesos institucionales fuertes. INE autónomo, SCJN independiente. Crítica al "populismo".', PRI:'Institucionalidad histórica. Pluralidad de actores. Federalismo.', MC:'Democracia participativa. Consultas, revocación. Reducir reelección.', PT:'Democracia participativa radical. Asambleas, plebiscitos.', PVEM:'Democracia sostenible. Voto verde, derechos de la naturaleza.' }, voto:'Plan B electoral (recorte INE): MORENA/PT/PVEM a favor; PAN/PRI/MC en contra (invalidado por SCJN).' },
+  campo: { titulo: 'Campo y soberanía alimentaria', emoji: '🚜', posiciones: { MORENA:'Producción para el Bienestar. Apoyo directo a pequeños productores. Soberanía alimentaria.', PAN:'Agroindustria, exportación, modernización. Apertura comercial. TMEC.', PRI:'Continuar PROCAMPO y subsidios. Modernización gradual.', MC:'Innovación agroalimentaria. Tecnología. Conexión con mercado.', PT:'Defensa del campo tradicional. Prohibir transgénicos, glifosato. Agroecología.', PVEM:'Prohibir transgénicos. Agroecología, orgánicos. Productores indígenas.' }, voto:'Decreto prohibición glifosato y maíz transgénico: MORENA/PT/PVEM a favor; PAN/PRI en contra.' },
+  social: { titulo: 'Programas sociales', emoji: '👴', posiciones: { MORENA:'Pensión Adulto Mayor, Sembrando Vida, Becas Benito Juárez. Derechos constitucionales irrevocables.', PAN:'Programas focalizados a quien más lo necesita. Auditar resultados. Combatir uso electoral.', PRI:'Continuidad de programas tradicionales (PROSPERA, etc.). Foco en pobreza extrema.', MC:'Eficiencia, evaluación. Renta básica condicionada. Empleo.', PT:'Expandir programas universales. Renta básica universal.', PVEM:'Programas verdes (ej. Sembrando Vida). Apoyo rural con enfoque ambiental.' }, voto:'Constitucionalización de programas sociales (2024): MORENA/PT/PVEM a favor; PAN/PRI/MC en contra.' }
 };
 
 const SCORES = {
@@ -236,7 +222,7 @@ const SCORES = {
 };
 
 let temaActual = 'economia';
-let partidosSeleccionados = new Set(['MORENA','PAN','PRI','MC','PT','PVEM']);
+const partidosSeleccionados = new Set(['MORENA','PAN','PRI','MC']);
 
 function renderTemas() {
   const c = document.getElementById('temas-chips');
@@ -256,7 +242,6 @@ function renderPartidos() {
   Object.entries(PARTIDOS).forEach(([k,p]) => {
     const label = document.createElement('label');
     label.className = 'partido-check' + (partidosSeleccionados.has(k) ? ' checked' : '');
-    label.style.borderLeft = '4px solid ' + p.color;
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = partidosSeleccionados.has(k);
@@ -284,9 +269,9 @@ function renderCards() {
     card.innerHTML = '<div class="card-head"><span class="card-emoji">' + p.emoji + '</span><div><div class="card-name">' + p.nombre + '</div></div></div>' +
       '<div class="card-desc">' + p.desc + '</div>' +
       '<div class="card-pos">' + t.posiciones[k] + '</div>' +
-      '<div class="card-source">Fuente: Plataforma electoral 2024 (INE)</div>' +
+      '<div class="card-source">📎 Fuente: Plataforma electoral 2024 (INE)</div>' +
       '<button class="btn-voto">Ver voto reciente</button>' +
-      '<div class="voto-box"><strong>Votacion reciente:</strong><br>' + t.voto + '</div>';
+      '<div class="voto-box"><strong>Votación reciente:</strong><br>' + t.voto + '</div>';
     const btn = card.querySelector('.btn-voto');
     const box = card.querySelector('.voto-box');
     btn.onclick = () => {
@@ -311,7 +296,7 @@ function renderTabla() {
       const s = SCORES[k][p];
       const pct = Math.abs(s) / 3 * 50;
       const left = s < 0 ? (50 - pct) : 50;
-      head += '<td><div style="font-size:11px;color:' + PARTIDOS[p].color + ';font-weight:600">' + (s > 0 ? '+' : '') + s + '</div>' +
+      head += '<td><div style="font-size:11px;color:' + PARTIDOS[p].color + ';font-weight:700">' + (s > 0 ? '+' : '') + s + '</div>' +
         '<div class="score-bar" style="--c:' + PARTIDOS[p].color + '"><div class="score-fill" style="left:' + left + '%;width:' + pct + '%"></div></div></td>';
     });
     head += '</tr>';
@@ -323,21 +308,14 @@ function renderTabla() {
 document.getElementById('share-btn').onclick = () => {
   const t = TEMAS[temaActual];
   const partidos = Array.from(partidosSeleccionados);
-  let txt = 'Comparador Electoral Tequio\n';
-  txt += 'Tema: ' + t.titulo + '\n\n';
-  partidos.forEach(p => {
-    txt += PARTIDOS[p].emoji + ' ' + p + ' (score ' + SCORES[temaActual][p] + '): ' + t.posiciones[p] + '\n\n';
-  });
+  let txt = '🗳️ Comparador Electoral Tequio\nTema: ' + t.titulo + '\n\n';
+  partidos.forEach(p => { txt += PARTIDOS[p].emoji + ' ' + p + ' (score ' + SCORES[temaActual][p] + '): ' + t.posiciones[p] + '\n\n'; });
   txt += 'Compara en: https://tequio.app/panel/comparador.html';
   const msg = document.getElementById('share-msg');
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(() => {
-      msg.textContent = 'Resumen copiado al portapapeles';
-      setTimeout(() => msg.textContent = '', 3000);
-    }).catch(() => { msg.textContent = 'Error al copiar'; });
-  } else {
-    msg.textContent = 'Clipboard no disponible';
-  }
+    navigator.clipboard.writeText(txt).then(() => { msg.textContent = '✅ Resumen copiado al portapapeles'; setTimeout(() => msg.textContent = '', 3000); })
+      .catch(() => { msg.textContent = 'Error al copiar'; });
+  } else { msg.textContent = 'Clipboard no disponible'; }
 };
 
 renderTemas();
