@@ -4918,117 +4918,307 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── LEYES ───── -->
     <div id="page-leyes" class="page">
       <div class="content">
-        <!-- Header oficial -->
-        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <!-- ════════════════════════════════════════════ -->
+        <!-- HERO: Leyes y Decretos de México v2 (Nivel 3) -->
+        <!-- ════════════════════════════════════════════ -->
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:54px;line-height:1">📜</div>
             <div style="flex:1;min-width:240px">
-              <h1 style="font-size:28px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Leyes y Decretos Federales</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Catálogo de las leyes vigentes de la <strong>Federación Mexicana</strong>, scrapeadas directamente de Cámara de Diputados.</p>
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Leyes y Decretos de México</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.5">El catálogo más completo de normatividad mexicana: <strong>federal</strong>, de los <strong>32 estados</strong> y de <strong>560 ciudades</strong>. Cero invención.</p>
             </div>
-            <a href="https://www.diputados.gob.mx/LeyesBiblio/index.htm" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">LeyesBiblio →</a>
+          </div>
+          <!-- Stats inline en el hero -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,518</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">32/32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">560+</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Ciudades</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">325,751</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
           </div>
         </div>
-        <!-- Sello de Fuente Oficial Verificada -->
-        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+
+        <!-- ──── 4 stat cards por ámbito ──── -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px">
+          <button onclick="leyesV2SetAmbito('federal')" id="ley-card-federal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="font-size:22px">🏛️</div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Federal</div>
+            </div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-federal">292</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Cámara de Diputados</div>
+          </button>
+          <button onclick="leyesV2SetAmbito('estatal')" id="ley-card-estatal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="font-size:22px">🗺️</div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Estatal</div>
+            </div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-estatal">5,669</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">32 Congresos</div>
+          </button>
+          <button onclick="leyesV2SetAmbito('municipal')" id="ley-card-municipal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="font-size:22px">🏙️</div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Municipal</div>
+            </div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,423</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">2,400+ ayuntamientos</div>
+          </button>
+          <button onclick="leyesV2SetTipo('gaceta-municipal')" id="ley-card-gacetas" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="font-size:22px">📰</div>
+              <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Gacetas</div>
+            </div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-gaceta">134</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">Boletines oficiales</div>
+          </button>
+        </div>
+
+        <!-- ──── Sello fuentes ──── -->
+        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
           <div style="flex:1;min-width:220px">
-            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Leyes federales extraídas del repositorio oficial <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">diputados.gob.mx/LeyesBiblio</code> + decretos del <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">DOF (dof.gob.mx)</code>. Cada texto es rastreable a su fuente. Cero invención.</div>
+            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px;margin-bottom:4px">FUENTES OFICIALES VERIFICADAS</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6">
+              <strong>Federales:</strong> <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">diputados.gob.mx/LeyesBiblio</code> + <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">dof.gob.mx</code><br>
+              <strong>Estatales:</strong> 32 Congresos estatales + Periódicos Oficiales de cada estado<br>
+              <strong>Municipales:</strong> Portales oficiales de 560+ ayuntamientos (scraping autónomo)<br>
+              <span style="opacity:0.7">Última actualización del cache: <span id="ley-updated-at">cargando…</span></span>
+            </div>
           </div>
         </div>
-        <!-- ── BUSCADOR + CONTROLES ── -->
+
+        <!-- ──── BUSCADOR + FILTROS ──── -->
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-          <div style="flex:1;min-width:180px;position:relative">
+          <div style="flex:1;min-width:220px;position:relative">
             <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
-            <input id="leyes-search" type="text" placeholder="Buscar ley, artículo, tema..."
-              oninput="leyesBuscarDebounced()"
-              style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <input id="ley-v2-q" type="text" placeholder="Buscar nombre de la ley…"
+              oninput="leyesV2BuscarDebounced()"
+              style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
           </div>
-          <select id="leyes-sort" onchange="leyesFiltrar()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
-            <option value="reciente">Más recientes</option>
-            <option value="titulo">A → Z</option>
-            <option value="ambito">Por ámbito</option>
+          <button onclick="navegarCon({fromLey:true,page:'asistente'})" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🤖 Preguntar IA</button>
+          <button onclick="navegarCon({accionConfig:{tipo:'reforma',titulo:'📜 Propuesta de Reforma Ciudadana',situacion:'Propongo la siguiente reforma a la legislación mexicana:\n\nNombre de la reforma: [escribe aquí]\n\nProblema que resuelve: [describe el problema actual]\n\nTexto propuesto del artículo: [redacta o describe el cambio]\n\nFundamento constitucional: [artículo de la CPEUM que lo ampara]\n\nBeneficios esperados: [quién se beneficia y cómo]'},toast:'Plantilla de reforma cargada'})" style="background:var(--accent);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+ Proponer</button>
+        </div>
+
+        <!-- ──── TABS AMBITO ──── -->
+        <div class="tab-bar mb-16" id="ley-v2-tabs">
+          <div class="tab active" data-amb="todas" onclick="leyesV2SetAmbito('todas')">Todas</div>
+          <div class="tab" data-amb="federal" onclick="leyesV2SetAmbito('federal')">🏛️ Federales</div>
+          <div class="tab" data-amb="estatal" onclick="leyesV2SetAmbito('estatal')">🗺️ Estatales</div>
+          <div class="tab" data-amb="municipal" onclick="leyesV2SetAmbito('municipal')">🏙️ Municipales</div>
+        </div>
+
+        <!-- ──── DROPDOWNS DE FILTRO (cascade) ──── -->
+        <div id="ley-v2-filtros-cascade" style="display:none;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <select id="ley-v2-estado-dd" onchange="leyesV2SetEstado(this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:180px">
+            <option value="">Todos los estados</option>
           </select>
-          <button onclick="leyesToggleTema()" id="leyes-btn-tema"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">
-            🏷️ Por tema
-          </button>
-          <button onclick="navegarCon('acciones',{accionConfig:{tipo:'reforma',titulo:'📜 Propuesta de Reforma Ciudadana',situacion:'Propongo la siguiente reforma a la legislación mexicana:\n\nNombre de la reforma: [escribe aquí]\n\nProblema que resuelve: [describe el problema actual]\n\nTexto propuesto del artículo: [redacta o describe el cambio]\n\nFundamento constitucional: [artículo de la CPEUM que lo ampara]\n\nBeneficios esperados: [quién se beneficia y cómo]'},toast:'Plantilla de reforma cargada'})"
-            style="background:var(--accent);border:none;border-radius:10px;padding:10px 16px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
-            + Proponer reforma
-          </button>
+          <select id="ley-v2-ciudad-dd" onchange="leyesV2SetCiudad(this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:180px;display:none">
+            <option value="">Todas las ciudades</option>
+          </select>
         </div>
-        <!-- ── FILTRO DE TEMAS (desplegable) ── -->
-        <div id="leyes-tema-panel" style="display:none;margin-bottom:12px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px">
-            <button class="tema-chip active" onclick="leyesSetTema(this,'todos')">Todos</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'constitucional')">⚖️ Constitucional</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'laboral')">💼 Laboral</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'fiscal')">💰 Fiscal</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'digital')">💻 Digital</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'salud')">🏥 Salud</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'ambiente')">🌿 Ambiente</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'seguridad')">🛡️ Seguridad</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'educacion')">📚 Educación</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'derechos')">🛡️ Derechos DDHH</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'transparencia')">🔍 Transparencia</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'agua')">💧 Agua</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'ninez')">👧 Niñez</button>
-            <button class="tema-chip" onclick="leyesSetTema(this,'energia')">⚡ Energía</button>
-          </div>
+
+        <!-- ──── COUNT + INFO ──── -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <span id="ley-v2-info" style="font-size:12px;color:var(--text3)">Cargando…</span>
+          <span style="font-size:11px;color:var(--text3)">🦎 Cero Invención · Fuente oficial</span>
         </div>
-        <!-- ── TABS DE ÁMBITO ── -->
-        <div class="tab-bar mb-16">
-          <div class="tab active" onclick="leyesSetAmbito(this,'todas')">Todas</div>
-          <div class="tab" onclick="leyesSetAmbito(this,'federal')">🏛️ Federales</div>
-          <div class="tab" onclick="leyesSetAmbito(this,'estatal')">🗺️ Estatales</div>
-          <div class="tab" onclick="leyesSetAmbito(this,'municipal')">🏙️ Municipales</div>
-          <div class="tab" onclick="leyesSetAmbito(this,'reforma')">🔄 Reformas Recientes</div>
+
+        <!-- ──── LISTA ──── -->
+        <div id="ley-v2-lista" style="display:flex;flex-direction:column;gap:8px;min-height:200px"></div>
+
+        <!-- ──── PAGINACIÓN ──── -->
+        <div id="ley-v2-paginacion" style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap">
+          <button id="ley-v2-prev" onclick="leyesV2PrevPage()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:13px;cursor:pointer;font-family:inherit">◀ Anterior</button>
+          <span id="ley-v2-page-info" style="font-size:13px;color:var(--text2);min-width:140px;text-align:center">Página 1 / 1</span>
+          <button id="ley-v2-next" onclick="leyesV2NextPage()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:13px;cursor:pointer;font-family:inherit">Siguiente ▶</button>
         </div>
-        <!-- ── STATS ── -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <span id="leyes-count" style="font-size:12px;color:var(--text3)"></span>
-          <div style="display:flex;gap:6px">
-            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px">
-              <span style="width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block"></span>Vigente
-            </span>
-            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px">
-              <span style="width:8px;height:8px;background:var(--yellow);border-radius:50%;display:inline-block"></span>En reforma
-            </span>
-            <span style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px">
-              <span style="width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block"></span>Derogada
-            </span>
-          </div>
-        </div>
-        <!-- ── LISTA ── -->
-        <div id="leyes-lista" style="display:flex;flex-direction:column;gap:10px"></div>
-        <!-- ── VACÍO ── -->
-        <div id="leyes-vacio" style="display:none;text-align:center;padding:40px 20px">
-          <div style="font-size:36px;margin-bottom:12px">📭</div>
-          <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sin resultados en la muestra</div>
-          <div style="font-size:13px;color:var(--text3);margin-bottom:16px">La app incluye una selección representativa de leyes clave. Para buscar en el catálogo completo del DOF, usa el buscador oficial:</div>
-          <button onclick="buscarEnDOF()" style="background:var(--accent);border:none;border-radius:10px;padding:10px 20px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-            🔍 Buscar en el DOF oficial →
-          </button>
-        </div>
-        <!-- ── CTA PROPONER (footer) ── -->
-        <div style="margin-top:20px;background:rgba(99,179,237,0.05);border:1px dashed rgba(99,179,237,0.3);border-radius:14px;padding:16px;text-align:center">
+
+        <!-- ──── CTA Iniciativa ──── -->
+        <div style="margin-top:24px;background:rgba(99,179,237,0.05);border:1px dashed rgba(99,179,237,0.3);border-radius:14px;padding:16px;text-align:center">
           <div style="font-size:13px;font-weight:700;margin-bottom:4px">¿Crees que algo debe cambiar?</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Puedes proponer una iniciativa ciudadana. Con 130,000 firmas el Congreso está obligado a debatirla.</div>
           <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-            <button onclick="showPage('iniciativas')"
-              style="background:var(--accent);border:none;border-radius:10px;padding:10px 18px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
-              ✊ Ver iniciativas ciudadanas
-            </button>
-            <button onclick="showPage('iniciativas');setTimeout(inicAbrirCrear,300)"
-              style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
-              ✏️ Crear mi iniciativa
-            </button>
+            <button onclick="showPage('iniciativas')" style="background:var(--accent);border:none;border-radius:10px;padding:10px 18px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✊ Ver iniciativas ciudadanas</button>
+            <button onclick="showPage('iniciativas');setTimeout(inicAbrirCrear,300)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">✏️ Crear mi iniciativa</button>
           </div>
         </div>
+
+        <!-- ──── ESTILO + JS NIVEL 3 ──── -->
+        <style>
+          .ley-stat-card:hover{transform:translateY(-2px);border-color:var(--accent)!important;box-shadow:0 4px 12px rgba(59,130,246,0.15)}
+          .ley-stat-card.active-card{background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05))!important;border-color:var(--accent)!important}
+          .ley-item-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:all 0.15s}
+          .ley-item-card:hover{border-color:var(--accent);transform:translateX(2px)}
+          .ley-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+          .ley-badge.fed{background:rgba(59,130,246,0.15);color:#3b82f6}
+          .ley-badge.est{background:rgba(168,85,247,0.15);color:#a855f7}
+          .ley-badge.mun{background:rgba(34,197,94,0.15);color:#22c55e}
+          .ley-badge.gac{background:rgba(245,158,11,0.15);color:#f59e0b}
+        </style>
+        <script>
+        (function(){
+          var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+          var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+          var state={ambito:'todas',estado:null,ciudad:null,busqueda:null,tipo:null,page:0,perPage:30};
+          var debouncedTimer;
+          window._leyV2State=state;
+          
+          function fmt(n){return Number(n||0).toLocaleString('es-MX');}
+          function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+          
+          window.leyesV2SetAmbito=function(a){
+            state.ambito=a;state.estado=null;state.ciudad=null;state.tipo=null;state.page=0;
+            // Update tabs visual
+            document.querySelectorAll('#ley-v2-tabs .tab').forEach(function(t){t.classList.toggle('active',t.getAttribute('data-amb')===a);});
+            document.querySelectorAll('.ley-stat-card').forEach(function(c){c.classList.remove('active-card');});
+            var card=document.getElementById('ley-card-'+a);
+            if(card)card.classList.add('active-card');
+            // Cascade dropdown
+            var cas=document.getElementById('ley-v2-filtros-cascade');
+            if(a==='estatal'||a==='municipal'){
+              cas.style.display='flex';
+              cargarEstados(a);
+              document.getElementById('ley-v2-ciudad-dd').style.display=a==='municipal'?'block':'none';
+            }else{
+              cas.style.display='none';
+            }
+            cargarLeyes();
+          };
+          
+          window.leyesV2SetTipo=function(t){
+            state.tipo=t;state.ambito='municipal';state.page=0;
+            leyesV2SetAmbito('municipal');
+            setTimeout(function(){state.tipo=t;cargarLeyes();},10);
+          };
+          
+          window.leyesV2SetEstado=function(e){
+            state.estado=e||null;state.ciudad=null;state.page=0;
+            if(state.ambito==='municipal'&&e)cargarCiudades(e);
+            cargarLeyes();
+          };
+          
+          window.leyesV2SetCiudad=function(c){state.ciudad=c||null;state.page=0;cargarLeyes();};
+          
+          window.leyesV2BuscarDebounced=function(){
+            clearTimeout(debouncedTimer);
+            debouncedTimer=setTimeout(function(){
+              var v=document.getElementById('ley-v2-q').value.trim();
+              state.busqueda=v||null;state.page=0;cargarLeyes();
+            },400);
+          };
+          
+          window.leyesV2PrevPage=function(){if(state.page>0){state.page--;cargarLeyes();}};
+          window.leyesV2NextPage=function(){state.page++;cargarLeyes();};
+          
+          function cargarEstados(ambito){
+            rpc('leyes_estados_count',{p_ambito:ambito}).then(function(rows){
+              if(!Array.isArray(rows))return;
+              var dd=document.getElementById('ley-v2-estado-dd');
+              dd.innerHTML='<option value="">Todos los estados</option>'+
+                rows.map(function(r){return '<option value="'+r.estado+'">'+r.estado+' ('+fmt(r.cnt)+')</option>';}).join('');
+            }).catch(function(){});
+          }
+          
+          function cargarCiudades(estado){
+            rpc('leyes_ciudades_estado',{p_estado:estado}).then(function(rows){
+              if(!Array.isArray(rows))return;
+              var dd=document.getElementById('ley-v2-ciudad-dd');
+              dd.innerHTML='<option value="">Todas las ciudades ('+rows.length+')</option>'+
+                rows.map(function(r){return '<option value="'+r.ciudad+'">'+r.ciudad+' ('+fmt(r.cnt)+')</option>';}).join('');
+            }).catch(function(){});
+          }
+          
+          function cargarLeyes(){
+            document.getElementById('ley-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">Cargando…</div>';
+            var params={
+              p_ambito:state.ambito==='todas'?null:state.ambito,
+              p_estado:state.estado,
+              p_municipio:state.ciudad,
+              p_tipo:state.tipo,
+              p_busqueda:state.busqueda,
+              p_limit:state.perPage,
+              p_offset:state.page*state.perPage
+            };
+            rpc('leyes_listar_v2',params).then(function(rows){
+              if(!Array.isArray(rows)){renderError(rows);return;}
+              renderLista(rows);
+            }).catch(function(e){renderError(e);});
+          }
+          
+          function renderError(e){
+            document.getElementById('ley-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:#ef4444">⚠️ Error: '+(e&&e.message||JSON.stringify(e))+'</div>';
+          }
+          
+          function renderLista(rows){
+            var total=rows.length>0?rows[0].total_count:0;
+            var totalPages=Math.ceil(total/state.perPage);
+            var from=state.page*state.perPage+1;
+            var to=Math.min(from+rows.length-1,total);
+            
+            document.getElementById('ley-v2-info').textContent='Mostrando '+fmt(from)+'–'+fmt(to)+' de '+fmt(total)+' resultados';
+            document.getElementById('ley-v2-page-info').textContent='Página '+(state.page+1)+' / '+(totalPages||1);
+            document.getElementById('ley-v2-prev').disabled=state.page===0;
+            document.getElementById('ley-v2-next').disabled=(state.page+1)>=totalPages;
+            document.getElementById('ley-v2-prev').style.opacity=state.page===0?'0.4':'1';
+            document.getElementById('ley-v2-next').style.opacity=(state.page+1)>=totalPages?'0.4':'1';
+            
+            if(rows.length===0){
+              document.getElementById('ley-v2-lista').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">📭 Sin resultados.<br><small>Prueba con otra búsqueda o cambia el filtro.</small></div>';
+              return;
+            }
+            
+            var html=rows.map(function(r){
+              var badge='';
+              var tipo_label='';
+              if(r.ambito==='federal'){badge='fed';tipo_label='Federal';}
+              else if(r.ambito==='estatal'){badge='est';tipo_label='Estatal';}
+              else if(r.tipo==='gaceta-municipal'){badge='gac';tipo_label='Gaceta';}
+              else {badge='mun';tipo_label='Municipal';}
+              var entidad=r.entidad?'<span style="font-size:11px;color:var(--text3);margin-left:6px">· '+r.entidad+'</span>':'';
+              var url=r.url||'';
+              return '<div class="ley-item-card">'+
+                '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px">'+
+                  '<div style="flex:1;min-width:0"><span class="ley-badge '+badge+'">'+tipo_label+'</span>'+entidad+'</div>'+
+                '</div>'+
+                '<div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:6px;line-height:1.3">'+(r.nombre||'(sin nombre)')+'</div>'+
+                '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--text3)">'+
+                  '<span>📂 '+(r.fuente||'Fuente oficial')+'</span>'+
+                  (url?'<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;margin-left:auto">Ver PDF →</a>':'')+
+                '</div>'+
+              '</div>';
+            }).join('');
+            document.getElementById('ley-v2-lista').innerHTML=html;
+          }
+          
+          // Hidratar fecha de actualización al cargar
+          rpc('dashboard_kpis_globales').then(function(d){
+            if(d&&d.actualizado){
+              var date=new Date(d.actualizado);
+              var span=document.getElementById('ley-updated-at');
+              if(span)span.textContent=date.toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+            }
+          }).catch(function(){});
+          
+          // Auto-cargar cuando la página leyes está visible
+          var observer=new MutationObserver(function(){
+            var page=document.getElementById('page-leyes');
+            if(page&&page.classList.contains('active')&&!page.dataset.v2Loaded){
+              page.dataset.v2Loaded='1';
+              setTimeout(cargarLeyes,100);
+            }
+          });
+          observer.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
+          // Y carga inmediata si está visible al inicio
+          setTimeout(function(){
+            var page=document.getElementById('page-leyes');
+            if(page&&page.classList.contains('active')){
+              page.dataset.v2Loaded='1';
+              cargarLeyes();
+            }
+          },800);
+        })();
+        </script>
       </div>
     </div>
     <!-- ───── POLÍTICOS — 500 DIPUTADOS LXVI REAL ───── -->
