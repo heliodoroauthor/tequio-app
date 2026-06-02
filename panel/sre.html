@@ -3,352 +3,189 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>México en el mundo - Embajadas y Consulados - Tequio</title>
+<title>México en el Mundo · Embajadas y Consulados · Tequio</title>
 <style>
-  :root {
-    --bg: #0b0f1a;
-    --bg-card: #131829;
-    --bg-card-hover: #1a2138;
-    --border: #1f2742;
-    --text: #e5e7eb;
-    --text-dim: #9ca3af;
-    --text-muted: #6b7280;
-    --gold: #fbbf24;
-    --gold-dim: #b45309;
-    --green: #10b981;
-    --blue: #3b82f6;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-    min-height: 100vh;
+  :root {
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d;
+    --green: #22c55e; --green-soft: #86efac;
+    --red: #ef4444; --red-soft: #fca5a5;
+    --blue: #3b82f6; --blue-soft: #93c5fd;
+    --teal: #14b8a6;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bg-card);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  header a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 14px;
-  }
-  header h1 {
-    font-size: 16px;
-    font-weight: 600;
-    flex: 1;
-  }
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 16px;
-  }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+  body { padding: 16px; min-height: 100vh; }
+  html.embedded a[href="/"], html.embedded header > a:first-child { display: none !important; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: 14px; }
+  header a { color: var(--blue-soft); text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
   .hero {
-    background: linear-gradient(135deg, #1a2138 0%, #0f1424 100%);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34,197,94,0.20) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(239,68,68,0.18) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(239,68,68,0.08) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 20px;
+    padding: 28px 24px 22px;
     margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,0.18);
+    border: 1px solid rgba(34,197,94,0.40);
+    color: var(--green-soft);
+    padding: 5px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 14px;
   }
   .hero h2 {
-    font-size: 14px;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    font-size: 30px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #fff 0%, var(--green-soft) 50%, var(--red-soft) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .hero-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 12px;
-  }
-  .stat {
-    text-align: center;
-  }
-  .stat-num {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--gold);
-  }
-  .stat-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-  }
-  .tab {
-    padding: 10px 16px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-  }
-  .tab.active {
-    color: var(--gold);
-    border-bottom-color: var(--gold);
-  }
-  .search-box {
-    margin-bottom: 16px;
-  }
+  .hero > p { color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0; }
+  .hero > p strong { color: var(--accent-soft); font-weight: 700; }
+
+  .hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .hero-grid .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+  .stat-num { font-size: 26px; font-weight: 900; color: var(--green-soft); line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .stat-label { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  @media (max-width:680px){ .hero h2 { font-size: 24px; } }
+
+  details.edu { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.22); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; cursor: pointer; }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--green-soft); font-size: 13.5px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--green); transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
+  details.edu .edu-body strong { color: var(--accent-soft); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; padding: 4px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-soft); border-radius: 12px; }
+  .tab { flex: 1; padding: 10px 14px; background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; font-weight: 700; border-radius: 8px; font-family: inherit; transition: all .15s; }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab.active { color: #fff; background: linear-gradient(135deg, var(--green) 0%, #16a34a 100%); }
+
+  .search-box { margin-bottom: 14px; }
   .search-box input {
-    width: 100%;
-    padding: 12px 16px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
+    width: 100%; padding: 12px 16px;
+    background: var(--card); border: 1px solid var(--border-soft);
+    color: var(--text); border-radius: 12px; font-size: 14px;
     font-family: inherit;
   }
-  .search-box input:focus {
-    outline: none;
-    border-color: var(--gold);
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  @media (min-width: 600px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (min-width: 900px) {
-    .grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .card:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--gold-dim);
-  }
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
+  .search-box input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 14px; transition: border-color .15s; }
+  .card:hover { border-color: rgba(34,197,94,0.30); }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .card-flag { font-size: 20px; }
-  .card-type {
-    font-size: 11px;
-    background: var(--gold-dim);
-    color: var(--bg);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .card-type.consulado {
-    background: var(--blue);
-    color: white;
-  }
-  .card-pais {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .card-ciudad {
-    font-size: 13px;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-  .card-row {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-    word-break: break-word;
-  }
-  .card-row strong {
-    color: var(--text);
-    font-weight: 500;
-  }
-  .card-row a {
-    color: var(--blue);
-    text-decoration: none;
-  }
+  .card-type { font-size: 10px; font-weight: 800; color: var(--green-soft); background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.30); padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .card-type.consulado { color: var(--accent-soft); background: rgba(251,191,36,0.10); border-color: rgba(251,191,36,0.30); }
+  .card-pais { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+  .card-ciudad { font-size: 12.5px; color: var(--text-dim); margin-bottom: 8px; font-style: italic; }
+  .card-row { font-size: 12px; color: var(--text-dim); margin-top: 5px; line-height: 1.5; }
+  .card-row strong { color: var(--text); font-weight: 700; }
+  .card-row a { color: var(--blue-soft); text-decoration: none; font-weight: 600; }
   .card-row a:hover { text-decoration: underline; }
-  .loading {
-    text-align: center;
-    padding: 40px 16px;
-    color: var(--text-dim);
-  }
-  .empty {
-    text-align: center;
-    padding: 40px 16px;
-    color: var(--text-muted);
-  }
-  .disclaimer {
-    margin-top: 24px;
-    padding: 12px 16px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-  .disclaimer a {
-    color: var(--gold);
-    text-decoration: none;
-  }
+
+  .empty, .loading { padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; background: var(--card); border: 1px dashed var(--border-soft); border-radius: 12px; }
+  .disclaimer { margin-top: 16px; font-size: 12px; color: var(--text-dim); line-height: 1.6; padding: 12px 14px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; }
+  .disclaimer a { color: var(--blue-soft); text-decoration: none; }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
-<script>
-(function(){
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.documentElement.classList.add('embedded');
-    var style = document.createElement('style');
-    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
-    document.head.appendChild(style);
-  }
-})();
-</script>
+<script>(function(){if(new URLSearchParams(location.search).get('embedded')==='1'){document.documentElement.classList.add('embedded');}})();</script>
 
-<header>
-  <a href="/">Tequio</a>
-  <h1>México en el mundo</h1>
-</header>
 <div class="container">
+  <header>
+    <a href="/">← Tequio</a>
+  </header>
+
   <div class="hero">
-    <h2>Embajadas y Consulados de México</h2>
-    <p style="color: var(--text-dim); font-size: 13px;">Red diplomática oficial de la Secretaría de Relaciones Exteriores.</p>
+    <div class="hero-badge">🌍 SRE oficial · Cero invención</div>
+    <h2>México en el Mundo</h2>
+    <p>Red diplomática oficial: <strong>embajadas y consulados de México</strong> en el extranjero. Si eres mexicano fuera del país, aquí está tu link de protección consular.</p>
     <div class="hero-grid">
-      <div class="stat">
-        <div class="stat-num" id="stat-emb">-</div>
-        <div class="stat-label">Embajadas</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="stat-con">-</div>
-        <div class="stat-label">Consulados</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="stat-pais">-</div>
-        <div class="stat-label">Paises</div>
-      </div>
+      <div class="stat"><div class="stat-num" id="stat-emb">—</div><div class="stat-label">Embajadas</div></div>
+      <div class="stat"><div class="stat-num" id="stat-con">—</div><div class="stat-label">Consulados</div></div>
+      <div class="stat"><div class="stat-num" id="stat-pais">—</div><div class="stat-label">Países</div></div>
     </div>
   </div>
+
+  <details class="edu">
+    <summary>📖 ¿Qué hace una embajada vs un consulado?</summary>
+    <div class="edu-body">
+      Una <strong>embajada</strong> representa al gobierno mexicano en el país anfitrión (una por país). Un <strong>consulado</strong> atiende directamente a mexicanos en el extranjero — pasaportes, matrículas, asistencia legal, repatriación. <strong>Cero invención:</strong> datos directos de portales.sre.gob.mx.
+    </div>
+  </details>
+
   <div class="tabs">
-    <button class="tab active" data-tab="all">Todo</button>
-    <button class="tab" data-tab="embajadas">Embajadas</button>
-    <button class="tab" data-tab="consulados">Consulados</button>
+    <button class="tab active" data-tab="all">🌐 Todo</button>
+    <button class="tab" data-tab="embajadas">🏛️ Embajadas</button>
+    <button class="tab" data-tab="consulados">📋 Consulados</button>
   </div>
+
   <div class="search-box">
-    <input type="text" id="search" placeholder="Buscar por pais, ciudad o titular...">
+    <input type="text" id="search" placeholder="🔎 Buscar por país, ciudad o titular...">
   </div>
+
   <div id="results" class="grid">
     <div class="loading">Cargando datos de la SRE...</div>
   </div>
+
   <div class="disclaimer">
-    Datos oficiales de la SRE. Fuente: <a href="https://sre.gob.mx" target="_blank" rel="noopener">sre.gob.mx</a>
+    📎 <strong>Datos oficiales de la SRE.</strong> Fuente: <a href="https://sre.gob.mx" target="_blank" rel="noopener">sre.gob.mx</a>
   </div>
 </div>
+
 <script>
-  const state = {
-    embajadas: [],
-    consulados: [],
-    tab: 'all',
-    query: ''
-  };
-  async function load() {
-    try {
-      const r = await fetch('/api/data?vista=sre');
-      const j = await r.json();
-      state.embajadas = j.embajadas || [];
-      state.consulados = j.consulados || [];
-      document.getElementById('stat-emb').textContent = state.embajadas.length;
-      document.getElementById('stat-con').textContent = state.consulados.length;
-      const paises = new Set();
-      state.embajadas.forEach(e => e.pais && paises.add(e.pais));
-      state.consulados.forEach(c => c.pais && paises.add(c.pais));
-      document.getElementById('stat-pais').textContent = paises.size;
-      render();
-    } catch (e) {
-      document.getElementById('results').innerHTML = '<div class="empty">Error al cargar datos.</div>';
-    }
-  }
-  function escapeHTML(s) {
-    if (s == null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function cardHTML(item, tipo) {
-    const isEmb = tipo === 'embajada';
-    const ciudad = isEmb ? '' : (item.ciudad || '');
-    return '<div class="card">' +
-      '<div class="card-header">' +
-        '<span class="card-flag">' + (isEmb ? '🇲🇽' : '🏛️') + '</span>' +
-        '<span class="card-type' + (isEmb ? '' : ' consulado') + '">' + (isEmb ? 'Embajada' : 'Consulado') + '</span>' +
-      '</div>' +
-      '<div class="card-pais">' + escapeHTML(item.pais || 'Sin pais') + '</div>' +
-      (ciudad ? '<div class="card-ciudad">' + escapeHTML(ciudad) + '</div>' : '') +
-      (item.titular ? '<div class="card-row"><strong>Titular:</strong> ' + escapeHTML(item.titular) + '</div>' : '') +
-      (item.direccion ? '<div class="card-row"><strong>Direccion:</strong> ' + escapeHTML(item.direccion) + '</div>' : '') +
-      (item.telefono ? '<div class="card-row"><strong>Tel:</strong> ' + escapeHTML(item.telefono) + '</div>' : '') +
-      (item.email ? '<div class="card-row"><strong>Email:</strong> ' + escapeHTML(item.email) + '</div>' : '') +
-      (item.sitio_web_url ? '<div class="card-row"><a href="' + escapeHTML(item.sitio_web_url) + '" target="_blank" rel="noopener">Sitio web</a></div>' : '') +
-      '</div>';
-  }
-  function matches(item) {
-    if (!state.query) return true;
-    const q = state.query.toLowerCase();
-    return (item.pais || '').toLowerCase().includes(q) ||
-           (item.ciudad || '').toLowerCase().includes(q) ||
-           (item.titular || '').toLowerCase().includes(q);
-  }
-  function render() {
-    const root = document.getElementById('results');
-    let items = [];
-    if (state.tab === 'all' || state.tab === 'embajadas') {
-      state.embajadas.filter(matches).forEach(e => items.push(cardHTML(e, 'embajada')));
-    }
-    if (state.tab === 'all' || state.tab === 'consulados') {
-      state.consulados.filter(matches).forEach(c => items.push(cardHTML(c, 'consulado')));
-    }
-    if (items.length === 0) {
-      root.innerHTML = '<div class="empty">Sin resultados.</div>';
-    } else {
-      root.innerHTML = items.join('');
-    }
-  }
-  document.querySelectorAll('.tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.tab = btn.dataset.tab;
-      render();
-    });
-  });
-  document.getElementById('search').addEventListener('input', e => {
-    state.query = e.target.value.trim();
+const state = { embajadas: [], consulados: [], tab: 'all', query: '' };
+async function load(){
+  try{
+    const r=await fetch('/api/data?vista=sre'); const j=await r.json();
+    state.embajadas=j.embajadas||[]; state.consulados=j.consulados||[];
+    document.getElementById('stat-emb').textContent=state.embajadas.length;
+    document.getElementById('stat-con').textContent=state.consulados.length;
+    const paises=new Set();
+    state.embajadas.forEach(e=>e.pais&&paises.add(e.pais));
+    state.consulados.forEach(c=>c.pais&&paises.add(c.pais));
+    document.getElementById('stat-pais').textContent=paises.size;
     render();
-  });
-  load();
+  }catch(e){ document.getElementById('results').innerHTML='<div class="empty">Error al cargar datos.</div>'; }
+}
+function escapeHTML(s){if(s==null)return ''; return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function cardHTML(item,tipo){
+  const isEmb=tipo==='embajada';
+  const ciudad=isEmb?'':(item.ciudad||'');
+  return '<div class="card"><div class="card-header"><span class="card-flag">'+(isEmb?'🇲🇽':'🏛️')+'</span><span class="card-type'+(isEmb?'':' consulado')+'">'+(isEmb?'Embajada':'Consulado')+'</span></div><div class="card-pais">'+escapeHTML(item.pais||'Sin país')+'</div>'+(ciudad?'<div class="card-ciudad">📍 '+escapeHTML(ciudad)+'</div>':'')+(item.titular?'<div class="card-row"><strong>👤 Titular:</strong> '+escapeHTML(item.titular)+'</div>':'')+(item.direccion?'<div class="card-row"><strong>📮 Dirección:</strong> '+escapeHTML(item.direccion)+'</div>':'')+(item.telefono?'<div class="card-row"><strong>📞 Tel:</strong> '+escapeHTML(item.telefono)+'</div>':'')+(item.email?'<div class="card-row"><strong>✉️ Email:</strong> '+escapeHTML(item.email)+'</div>':'')+(item.sitio_web_url?'<div class="card-row"><a href="'+escapeHTML(item.sitio_web_url)+'" target="_blank" rel="noopener">🌐 Sitio web →</a></div>':'')+'</div>';
+}
+function matches(item){
+  if(!state.query) return true;
+  const q=state.query.toLowerCase();
+  return (item.pais||'').toLowerCase().includes(q)||(item.ciudad||'').toLowerCase().includes(q)||(item.titular||'').toLowerCase().includes(q);
+}
+function render(){
+  const root=document.getElementById('results');
+  let items=[];
+  if(state.tab==='all'||state.tab==='embajadas') state.embajadas.filter(matches).forEach(e=>items.push(cardHTML(e,'embajada')));
+  if(state.tab==='all'||state.tab==='consulados') state.consulados.filter(matches).forEach(c=>items.push(cardHTML(c,'consulado')));
+  root.innerHTML=items.length?items.join(''):'<div class="empty">Sin resultados.</div>';
+}
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); state.tab=btn.dataset.tab; render(); });
+});
+document.getElementById('search').addEventListener('input',e=>{ state.query=e.target.value.trim(); render(); });
+load();
 </script>
 </body>
 </html>
