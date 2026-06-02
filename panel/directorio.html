@@ -149,6 +149,39 @@
   .note { padding: 14px; color: var(--accent-soft); font-size: 13px; background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.20); border-radius: 12px; line-height: 1.55; }
   .note strong { color: var(--accent); }
   .disclaimer { margin-top: 16px; font-size: 12px; color: var(--text-dim); padding: 12px 14px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; }
+
+  /* STICKY TOP BAR + INLINE BACK */
+  .top-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,26,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  .top-bar .back-inline {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.35);
+    color: var(--blue-soft);
+    padding: 7px 13px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 12.5px; font-weight: 700;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .top-bar .back-inline:hover { background: rgba(59,130,246,0.25); }
+  .top-bar .crumb {
+    font-size: 13px; color: var(--text-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .top-bar .crumb b { color: var(--text); font-weight: 800; }
+
 </style>
 <script src="/js/tequio-kpis.js" defer></script>
 </head>
@@ -241,7 +274,7 @@ function renderEstado(data){
   const nSen=(data.senadores||[]).length;
   const senadoresHTML=nSen>0?`<div class="grid-cards">${data.senadores.map(renderSenadorCard).join('')}</div>`:`<div class="note">Los senadores aún no están filtrados por estado en nuestra base de datos. <strong>Issue conocido</strong> del scraper.</div>`;
   const diputadosHTML=nDip>0?`<div class="grid-cards">${data.diputados_federales.map(renderDiputadoCard).join('')}</div>`:`<div class="empty">Sin diputados federales registrados para este estado.</div>`;
-  app.innerHTML=`<div class="hero"><div class="hero-top"><span class="clave-badge">${esc(data.clave)}</span><h2>${esc(data.nombre_estado)}</h2></div><div class="stats"><div class="stat"><div class="n">${data.num_municipios}</div><div class="l">Presidentes municipales</div></div><div class="stat"><div class="n">${nDip}</div><div class="l">Diputados federales</div></div><div class="stat"><div class="n">${nSen||'—'}</div><div class="l">Senadores ${nSen?'':'(pendiente)'}</div></div><div class="stat"><div class="n">${pct}%</div><div class="l">Con teléfono verif.</div></div></div></div><section><h3>🏛️ Senadores <span class="count">${nSen}</span></h3>${senadoresHTML}</section><section><h3>📜 Diputados federales <span class="count">${nDip}</span></h3>${diputadosHTML}</section><section><h3>🏢 Presidentes municipales <span class="count" id="pres-count">${data.num_municipios}</span></h3><div class="table-wrap"><div class="toolbar"><input id="pres-filter" placeholder="🔎 Filtrar por municipio o nombre…" autocomplete="off"><span class="count-info">${conTel}/${data.num_municipios} con teléfono</span></div><div class="tabla"><table><thead><tr><th>Municipio</th><th>Presidente</th><th>Partido</th><th>Periodo</th><th>Teléfono</th><th>Dirección</th><th>Web</th></tr></thead><tbody id="tbl-pres-body"></tbody></table></div></div></section><a class="back-btn" href="${embedded?'?embedded=1':'?'}">← Volver a los 32 estados</a><div class="disclaimer">📎 Datos oficiales de INAFED (datos.gob.mx) y Cámara de Diputados.</div>`;
+  app.innerHTML=`<div class="top-bar"><a class="back-inline" href="${embedded?'?embedded=1':'?'}" ${embedded?'':'target="_top"'}>← 32 estados</a><div class="crumb">📍 <b>${esc(data.nombre_estado)}</b></div></div><div class="hero"><div class="hero-top"><span class="clave-badge">${esc(data.clave)}</span><h2>${esc(data.nombre_estado)}</h2></div><div class="stats"><div class="stat"><div class="n">${data.num_municipios}</div><div class="l">Presidentes municipales</div></div><div class="stat"><div class="n">${nDip}</div><div class="l">Diputados federales</div></div><div class="stat"><div class="n">${nSen||'—'}</div><div class="l">Senadores ${nSen?'':'(pendiente)'}</div></div><div class="stat"><div class="n">${pct}%</div><div class="l">Con teléfono verif.</div></div></div></div><section><h3>🏛️ Senadores <span class="count">${nSen}</span></h3>${senadoresHTML}</section><section><h3>📜 Diputados federales <span class="count">${nDip}</span></h3>${diputadosHTML}</section><section><h3>🏢 Presidentes municipales <span class="count" id="pres-count">${data.num_municipios}</span></h3><div class="table-wrap"><div class="toolbar"><input id="pres-filter" placeholder="🔎 Filtrar por municipio o nombre…" autocomplete="off"><span class="count-info">${conTel}/${data.num_municipios} con teléfono</span></div><div class="tabla"><table><thead><tr><th>Municipio</th><th>Presidente</th><th>Partido</th><th>Periodo</th><th>Teléfono</th><th>Dirección</th><th>Web</th></tr></thead><tbody id="tbl-pres-body"></tbody></table></div></div></section><a class="back-btn" href="${embedded?'?embedded=1':'?'}">← Volver a los 32 estados</a><div class="disclaimer">📎 Datos oficiales de INAFED (datos.gob.mx) y Cámara de Diputados.</div>`;
   renderPresidentesTable('');
   const filterEl=document.getElementById('pres-filter');
   if(filterEl){ let t; filterEl.addEventListener('input',e=>{ clearTimeout(t); t=setTimeout(()=>renderPresidentesTable(e.target.value),120); }); }
