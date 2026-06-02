@@ -1,0 +1,64 @@
+name: Scrape SCJN MASIVO (Playwright paralelo)
+
+# Scrapea sjf2.scjn.gob.mx → tabla jurisprudencia_scjn
+# Empieza con Undécima Época (2021+), luego Décima
+
+on:
+  workflow_dispatch:
+    inputs:
+      epoca:
+        description: "Época: 1=Décima, 2=Undécima"
+        required: false
+        default: "2"
+      max_pages_per_job:
+        description: "Páginas por job"
+        required: false
+        default: "30"
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        # 10 jobs, cada uno toma 30 páginas (300 páginas total = ~30k tesis)
+        offset: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + Playwright
+        run: |
+          pip install requests playwright
+          playwright install --with-deps chromium
+      
+      - name: Run SCJN scrape
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EPOCA: ${{ inputs.epoca }}
+          OFFSET: ${{ matrix.offset }}
+          MAX_PAGES: ${{ inputs.max_pages_per_job }}
+        run: |
+          START=$((OFFSET + 1))
+          END=$((OFFSET + MAX_PAGES))
+          python3 scripts/scrape_scjn_playwright.py "$EPOCA" "$START" "$END"
+  
+  refresh:
+    needs: scrape
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh KPI cache
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | head -50
