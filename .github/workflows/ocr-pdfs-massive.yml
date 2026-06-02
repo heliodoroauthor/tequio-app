@@ -1,0 +1,42 @@
+name: OCR PDFs MASIVO (paralelo)
+
+# Procesa PDFs escaneados con tesseract + pdftotext
+# ~200 leyes con chunks basura
+
+on:
+  workflow_dispatch:
+    inputs:
+      parallel_jobs:
+        description: "Cuántos jobs paralelos (1-10)"
+        required: false
+        default: "5"
+
+permissions:
+  contents: read
+
+jobs:
+  ocr:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        batch: [0, 1, 2, 3, 4]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python + OCR tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils tesseract-ocr tesseract-ocr-spa libtesseract-dev
+          pip install requests
+      
+      - name: Run OCR batch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BATCH_IDX: ${{ matrix.batch }}
+        run: |
+          python3 scripts/ocr_pdfs_parallel.py "$BATCH_IDX" 5
