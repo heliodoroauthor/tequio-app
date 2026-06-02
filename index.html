@@ -2286,6 +2286,15 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       </div>
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
+      <div id="donar-banner" style="background:linear-gradient(135deg,rgba(236,72,153,0.18) 0%,rgba(251,191,36,0.14) 50%,rgba(168,85,247,0.10) 100%);border:1px solid rgba(236,72,153,0.35);border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer" onclick="cargarPanel('donar')">
+      <div style="font-size:32px;flex-shrink:0">❤️</div>
+      <div style="flex:1;min-width:240px">
+        <div style="font-size:14px;font-weight:800;color:#fef3c7;margin-bottom:2px">Apóyanos a mantener Tequio gratis</div>
+        <div style="font-size:12.5px;color:#cbd5e1;line-height:1.5">Sin publicidad, sin venta de datos, sin dueño corporativo. Vivimos del apoyo de la comunidad. <strong style="color:#fcd34d">Cualquier cantidad ayuda</strong> a sostener los servidores, scrapers e IA. <span style="color:#fcd34d;font-weight:700">Donar →</span></div>
+      </div>
+      <button onclick="event.stopPropagation();document.getElementById('donar-banner').style.display='none';localStorage.setItem('donar_dismissed','1')" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);color:#cbd5e1;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Ocultar">✕</button>
+    </div>
+    <script>try{if(localStorage.getItem('donar_dismissed')==='1'){var d=document.getElementById('donar-banner');if(d)d.style.display='none';}}catch(e){}</script>
       <div class="content">
         <!-- ═════ NUEVO: HERO de datos vivos Banxico ═════ -->
         <div style="margin-bottom:20px">
@@ -14454,6 +14463,7 @@ function cargarPanel(slug, extras) {
     'mi-rep': '/panel/mi-rep-vs-yo.html?embedded=1',
     'chat': '/panel/chat.html?embedded=1',
     'asistente-ia': '/panel/asistente-ia.html?embedded=1',
+    'donar': '/panel/donar.html?embedded=1',
     'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
