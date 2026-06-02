@@ -89,7 +89,13 @@
 })();
 </script>
 <div class="wrap">
-  <a href="/" class="back" id="tequio-back">← Tequio</a>
+  <div id="estado-nav" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 18px">
+  <a href="/panel/estado.html" id="tequio-back" class="back" style="margin:0;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--card,#1a1f2e);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--muted)" onclick="window.tequioEstadoBack(event);return false;">← Otro estado</a>
+  <select id="estado-switcher" onchange="window.tequioCambiarEstado(this.value)" style="background:var(--card,#1a1f2e);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;cursor:pointer;flex:1;max-width:280px;min-width:160px">
+    <option value="">— Cambiar de estado —</option>
+  </select>
+  <a href="/" style="margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none;padding:6px 10px">🏠 Inicio</a>
+</div>
   <div id="content">
     <div class="loading"><div class="spin"></div><div style="margin-top:14px">Cargando panel estatal…</div></div>
   </div>
@@ -105,12 +111,67 @@ function navTo(url) {
 }
 
 /* === BACK LINK INTELIGENTE — cuando está embebido, avisa al parent === */
-document.getElementById('tequio-back').addEventListener('click', function(e) {
-  if (window.parent !== window) {
-    e.preventDefault();
-    window.parent.postMessage({type:'tequio-nav', target:'dashboard'}, '*');
+
+// 🦎 Navegación inteligente del Panel Estatal
+window.tequioEstadoBack = function(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try {
+    // SPA: recargar el iframe estado con la landing (sin ?clave=)
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      try {
+        var existing = window.parent.document.getElementById('page-iframe-estado');
+        if (existing) {
+          var ifr = existing.querySelector('iframe');
+          if (ifr) ifr.src = '/panel/estado.html?embedded=1&t=' + Date.now();
+        }
+      } catch(err) {}
+      window.parent.cargarPanel('estado');
+      return false;
+    }
+  } catch(err) {}
+  // Fallback: navegar directo
+  try { window.location.href = '/panel/estado.html'; }
+  catch(err) { location.assign('/panel/estado.html'); }
+  return false;
+};
+
+window.tequioCambiarEstado = function(clave) {
+  if (!clave) return;
+  // Conservar embedded=1 si aplica
+  var embedded = new URLSearchParams(location.search).get('embedded') === '1';
+  var newUrl = '/panel/estado.html?clave=' + encodeURIComponent(clave) + (embedded ? '&embedded=1' : '');
+  window.location.href = newUrl;
+};
+
+// Llenar dropdown de estados (siempre, no solo cuando hay state cargado)
+(function llenarSwitcher(){
+  function fill() {
+    var sel = document.getElementById('estado-switcher');
+    if (!sel) return setTimeout(fill, 100);
+    var ESTADOS_NAV = {
+      "01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche",
+      "05":"Coahuila","06":"Colima","07":"Chiapas","08":"Chihuahua","09":"Ciudad de México",
+      "10":"Durango","11":"Guanajuato","12":"Guerrero","13":"Hidalgo","14":"Jalisco",
+      "15":"Estado de México","16":"Michoacán","17":"Morelos","18":"Nayarit","19":"Nuevo León",
+      "20":"Oaxaca","21":"Puebla","22":"Querétaro","23":"Quintana Roo","24":"San Luis Potosí",
+      "25":"Sinaloa","26":"Sonora","27":"Tabasco","28":"Tamaulipas","29":"Tlaxcala",
+      "30":"Veracruz","31":"Yucatán","32":"Zacatecas"
+    };
+    // Mantener primera opción
+    var current = (new URLSearchParams(location.search).get('clave') || '').padStart(2,'0');
+    sel.innerHTML = '<option value="">— Cambiar de estado —</option>' +
+      Object.keys(ESTADOS_NAV).map(function(k){
+        var sel_attr = k === current ? ' selected' : '';
+        return '<option value="' + k + '"' + sel_attr + '>' + k + ' · ' + ESTADOS_NAV[k] + '</option>';
+      }).join('');
   }
-});
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fill);
+  } else {
+    fill();
+  }
+})();
+
 
 const ESTADOS = {
   "01":"Aguascalientes","02":"Baja California","03":"Baja California Sur","04":"Campeche",
