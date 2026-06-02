@@ -13569,7 +13569,6 @@ function cargarPanel(slug, extras) {
     'perfil': '/panel/perfil.html?embedded=1',
     'precios': '/precios.html?embedded=1',
     'gasolina': '/gasolina.html?embedded=1',
-    'cambios-recientes': '/panel/cambios-recientes.html?embedded=1',
     'representantes': '/mis-representantes.html?embedded=1'
   };
   let url = PANELS[slug];
@@ -13603,8 +13602,7 @@ function cargarPanel(slug, extras) {
       'iniciativa-firmar': 'Firma Iniciativas',
       'sre': 'México en el Mundo',
       'scrapers-admin': 'Scrapers Health',
-      'directorio': '📞 Directorio 32 Estados',
-      'cambios-recientes': '📡 Cambios Recientes'
+      'directorio': '📞 Directorio 32 Estados'
     };
     titleEl.textContent = TITLES[slug] || 'Panel';
   }
@@ -13615,8 +13613,7 @@ function mostrarProximamente(slug) {
     'debates': '🎤 Debates Estructurados',
     'generador': '📄 Generador de Documentos',
     'testigo': '📸 Testigo Cívico',
-    'directorio': '📞 Directorio 32 Estados',
-      'cambios-recientes': '📡 Cambios Recientes'
+    'directorio': '📞 Directorio 32 Estados'
   };
   const DESCRIPCIONES = {
     'deuda': 'Próximamente: Dashboard de la deuda pública mexicana con desglose por entidad federativa, tipo (interna/externa) y comportamiento histórico.',
