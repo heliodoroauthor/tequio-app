@@ -135,7 +135,25 @@ footer a{color:var(--muted)}
 </head>
 <body>
 <div class="wrap">
-<a href="#" class="back" onclick="event.preventDefault();try{if(window.parent&&window.parent!==window&&typeof window.parent.tequioBack==='function'){window.parent.tequioBack();return;}}catch(e){}try{if(window.parent&&window.parent!==window&&window.parent.history&&document.referrer&&document.referrer.indexOf(window.location.host)>=0){window.parent.history.back();return;}}catch(e){}window.location.href='/panel/buscador.html';">← Atrás</a>
+<a href="/panel/buscador.html" class="back" onclick="(function(e){
+  e.preventDefault();
+  // 1) Si estamos en SPA (iframe dentro de index.html), volver al buscador via cargarPanel
+  try {
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      window.parent.cargarPanel('buscador');
+      return;
+    }
+  } catch(err){}
+  // 2) Si tenemos referrer del buscador, history.back funciona
+  try {
+    if (document.referrer && document.referrer.indexOf('buscador') >= 0) {
+      history.back();
+      return;
+    }
+  } catch(err){}
+  // 3) Fallback: navegar directo (siempre funciona)
+  window.location.href = '/panel/buscador.html';
+})(event);return false;">← Atrás</a>
 
 <div id="content">
 <div class="loading">Cargando datos del municipio…</div>
