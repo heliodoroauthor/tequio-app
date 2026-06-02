@@ -3756,13 +3756,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>`;
         }).join('');
       }
+      window.__polFilters = {principio:'', partido:'', entidad:''};
+      window.polSetPrincipio = function(el, p){
+        window.__polFilters.principio = p || '';
+        el.parentElement.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+        el.classList.add('active');
+        polFiltrar();
+      };
+      window.polSetPartido = function(el, p){
+        window.__polFilters.partido = p || '';
+        el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
+        el.classList.add('active');
+        var tag = document.getElementById('dip-tag-partido');
+        if (tag) tag.innerHTML = p ? '<span class="not-filter-active-tag">' + p.substring(0,15) + '</span>' : '';
+        polFiltrar();
+      };
+      window.polSetEntidad = function(el, e){
+        window.__polFilters.entidad = e || '';
+        el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
+        el.classList.add('active');
+        var tag = document.getElementById('dip-tag-entidad');
+        if (tag) tag.innerHTML = e ? '<span class="not-filter-active-tag">' + e.substring(0,15) + '</span>' : '';
+        polFiltrar();
+      };
       function polFiltrar() {
         const q = (document.getElementById('pol-search').value || '').toLowerCase().trim();
-        const entSel = document.getElementById('pol-entidad').value;
-        const partSel = document.getElementById('pol-partido').value;
+        const filters = window.__polFilters;
         let filas = window.__diputadosData.filter(d => {
-          if (entSel && d.entidad !== entSel) return false;
-          if (partSel && d.partido !== partSel) return false;
+          if (filters.principio === 'MR' && d.principio_eleccion !== 'MR') return false;
+          if (filters.principio === 'RP' && d.principio_eleccion !== 'RP') return false;
+          if (filters.principio === 'reelecto' && !(d.reelecto && d.reelecto.trim())) return false;
+          if (filters.entidad && d.entidad !== filters.entidad) return false;
+          if (filters.partido && d.partido !== filters.partido) return false;
           if (!q) return true;
           return (d.nombre||'').toLowerCase().includes(q) ||
                  (d.entidad||'').toLowerCase().includes(q) ||
@@ -3770,7 +3795,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
                  (d.distrito||'').toLowerCase().includes(q);
         });
         polRenderCards(filas);
-        document.getElementById('pol-count').textContent = `Mostrando ${filas.length} de ${window.__diputadosData.length} diputados`;
+        document.getElementById('pol-count').textContent = 'Mostrando ' + filas.length + ' de ' + window.__diputadosData.length + ' diputados';
       }
       async function cargarPoliticos() {
         if (window.__loadedPages['politicos']) return;
@@ -3783,18 +3808,60 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           const total = window.__diputadosData.length;
           const partidos = j.por_partido || {};
           const entidades = Object.keys(j.por_entidad || {}).length;
-          const sumComisiones = window.__diputadosData.reduce((s,d) => s + (Array.isArray(d.comisiones) ? d.comisiones.length : 0), 0);
-          document.getElementById('pol-stats').innerHTML = `
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${total}</div><div style="font-size:11px;color:var(--text2)">Diputados</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:var(--green2)">${Object.keys(partidos).length}</div><div style="font-size:11px;color:var(--text2)">Partidos / GP</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${entidades}</div><div style="font-size:11px;color:var(--text2)">Entidades</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:26px;font-weight:800;font-family:var(--font-display);color:#a78bfa">${sumComisiones}</div><div style="font-size:11px;color:var(--text2)">Asignaciones a comisiones</div></div>`;
-          const entSel = document.getElementById('pol-entidad');
-          const sortedEnt = Object.entries(j.por_entidad || {}).sort((a,b) => a[0].localeCompare(b[0]));
-          entSel.innerHTML = '<option value="">Todas las entidades</option>' + sortedEnt.map(([e,n]) => `<option value="${e}">${e} (${n})</option>`).join('');
-          const partSel = document.getElementById('pol-partido');
-          const sortedPart = Object.entries(partidos).sort((a,b) => b[1]-a[1]);
-          partSel.innerHTML = '<option value="">Todos los partidos</option>' + sortedPart.map(([p,n]) => `<option value="${p}">${p} (${n})</option>`).join('');
+          var mr = window.__diputadosData.filter(d => d.principio_eleccion === 'MR').length;
+          var rp = window.__diputadosData.filter(d => d.principio_eleccion === 'RP').length;
+          var reel = window.__diputadosData.filter(d => d.reelecto && d.reelecto.trim()).length;
+          
+          // Hero stats
+          var fmt = function(n){return Number(n||0).toLocaleString('es-MX');};
+          var setText = function(id,v){var el=document.getElementById(id); if(el) el.textContent=v;};
+          setText('dip-stat-total', fmt(total));
+          setText('dip-stat-partidos', fmt(Object.keys(partidos).length));
+          setText('dip-stat-mr', fmt(mr));
+          setText('dip-stat-rp', fmt(rp));
+          setText('cnt-todos', fmt(total));
+          setText('cnt-mr', fmt(mr));
+          setText('cnt-rp', fmt(rp));
+          setText('cnt-reel', fmt(reel));
+          
+          // Barras de distribución por partido
+          var sortedPart = Object.entries(partidos).sort((a,b) => b[1]-a[1]);
+          var chartHtml = sortedPart.map(([p,n]) => {
+            var color = PARTIDO_COLOR[p] || '#64748b';
+            var pct = ((n / total) * 100).toFixed(1);
+            return '<div onclick="document.querySelector(\'#dip-partidos-chips [data-partido=\\\'\'+(p.replace(/\'/g,\'\\\\\\\'\'))+\'\\\']\')?.click()" style="cursor:pointer;display:flex;align-items:center;gap:10px">' +
+              '<div style="min-width:120px;font-size:11px;color:var(--text2);font-weight:600">' + p + '</div>' +
+              '<div style="flex:1;height:22px;background:var(--surface2,#1a1f2e);border-radius:6px;position:relative;overflow:hidden">' +
+                '<div style="width:' + pct + '%;height:100%;background:' + color + ';border-radius:6px;transition:width 0.5s"></div>' +
+                '<div style="position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5)">' + n + ' (' + pct + '%)</div>' +
+              '</div>' +
+              '</div>';
+          }).join('');
+          var chartEl = document.getElementById('dip-partidos-chart');
+          if (chartEl) chartEl.innerHTML = chartHtml;
+          
+          // Chips de partido
+          var partidosChips = document.getElementById('dip-partidos-chips');
+          if (partidosChips) {
+            partidosChips.innerHTML = '<button class="estado-chip active" data-partido="" onclick="polSetPartido(this,\'\')">Todos</button>' +
+              sortedPart.map(function(arr){
+                var p = arr[0], n = arr[1];
+                var color = PARTIDO_COLOR[p] || '#64748b';
+                return '<button class="estado-chip" data-partido="' + p + '" onclick="polSetPartido(this,\''+p.replace(/'/g,"\\\\\'")+'\')" style="border-left:3px solid ' + color + '">' + p + ' (' + n + ')</button>';
+              }).join('');
+          }
+          
+          // Chips de entidad
+          var entidadesChips = document.getElementById('dip-entidades-chips');
+          if (entidadesChips) {
+            var sortedEnt = Object.entries(j.por_entidad || {}).sort((a,b) => b[1]-a[1]);
+            entidadesChips.innerHTML = '<button class="estado-chip active" data-entidad="" onclick="polSetEntidad(this,\'\')">Todas</button>' +
+              sortedEnt.map(function(arr){
+                var e = arr[0], n = arr[1];
+                return '<button class="estado-chip" data-entidad="' + e + '" onclick="polSetEntidad(this,\''+e.replace(/'/g,"\\\\\'")+'\')">' + e + ' (' + n + ')</button>';
+              }).join('');
+          }
+          
           polFiltrar();
           window.__loadedPages['politicos'] = true;
         } catch (e) {
@@ -5221,40 +5288,80 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </script>
       </div>
     </div>
-    <!-- ───── POLÍTICOS — 500 DIPUTADOS LXVI REAL ───── -->
+    <!-- ───── POLÍTICOS — DIPUTADOS LXVI · Nivel 3 ───── -->
     <div id="page-politicos" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(29,78,216,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-            <div style="font-size:60px;line-height:1">🏛️</div>
+        <!-- HERO -->
+        <div style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(29,78,216,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:54px;line-height:1">🏛️</div>
             <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Cámara de Diputados LXVI</h1>
-              <p style="margin:8px 0 0;opacity:0.92;font-size:15px;line-height:1.4">Los <strong><span data-kpi="diputados">500</span> diputados federales</strong> que te representan. 300 por mayoría relativa, 200 por representación proporcional.</p>
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Cámara de Diputados</h1>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.5">LXVI Legislatura · <strong>500</strong> diputados federales · 300 mayoría relativa + 200 representación proporcional · 32 entidades.</p>
             </div>
-            <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SITL oficial →</a>
+            <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SITL oficial →</a>
+          </div>
+          <!-- 4 stats compact -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="dip-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Diputados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="dip-stat-partidos">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="dip-stat-mr">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">MR distritos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="dip-stat-rp">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">RP plurinom.</div></div>
           </div>
         </div>
-        <!-- Stats globales -->
-        <div id="pol-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px"></div>
-        <!-- Búsqueda y filtros -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-          <div style="flex:1;min-width:200px;position:relative">
+
+        <!-- Distribución por partido (barras horizontales) -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">
+          <div style="font-size:13px;color:var(--text3);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">📊 Distribución por partido</div>
+          <div id="dip-partidos-chart" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+
+        <!-- Búsqueda + IA -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px;position:relative">
             <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
             <input id="pol-search" type="text" placeholder="Buscar diputado, estado, partido..."
               oninput="polFiltrar()"
               style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
           </div>
-          <select id="pol-entidad" onchange="polFiltrar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:160px">
-            <option value="">Todas las entidades</option>
-          </select>
-          <select id="pol-partido" onchange="polFiltrar()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:140px">
-            <option value="">Todos los partidos</option>
-          </select>
+          <button onclick="navegarCon({iaPrompt:'Soy ciudadano mexicano. Explícame quiénes son los diputados federales que me representan, qué hacen, cómo se eligen los 300 de mayoría relativa vs los 200 de representación proporcional, y qué puedo hacer si no me representan bien.',toast:'Contexto cargado',page:'asistente'})" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🤖 Preguntar IA</button>
         </div>
-        <div id="pol-count" style="font-size:11px;color:var(--text3);margin-bottom:10px"></div>
-        <!-- Grid de tarjetas -->
+
+        <!-- Tabs por principio elección -->
+        <div class="tab-bar mb-12" id="dip-tabs-principio">
+          <div class="tab active" data-principio="" onclick="polSetPrincipio(this,'')">🌐 Todos <span id="cnt-todos" class="ambito-cnt"></span></div>
+          <div class="tab" data-principio="MR" onclick="polSetPrincipio(this,'MR')">🗺️ Mayoría Relativa <span id="cnt-mr" class="ambito-cnt"></span></div>
+          <div class="tab" data-principio="RP" onclick="polSetPrincipio(this,'RP')">📋 Representación Proporcional <span id="cnt-rp" class="ambito-cnt"></span></div>
+          <div class="tab" data-principio="reelecto" onclick="polSetPrincipio(this,'reelecto')">🔁 Reelectos <span id="cnt-reel" class="ambito-cnt"></span></div>
+        </div>
+
+        <!-- Filtros colapsables -->
+        <details class="not-filter">
+          <summary>
+            <span>🏷️ Filtrar por partido</span>
+            <span id="dip-tag-partido"></span>
+          </summary>
+          <div class="filter-body" id="dip-partidos-chips">
+            <button class="estado-chip active" data-partido="" onclick="polSetPartido(this,'')">Todos</button>
+          </div>
+        </details>
+
+        <details class="not-filter">
+          <summary>
+            <span>📍 Filtrar por entidad</span>
+            <span id="dip-tag-entidad"></span>
+          </summary>
+          <div class="filter-body" id="dip-entidades-chips">
+            <button class="estado-chip active" data-entidad="" onclick="polSetEntidad(this,'')">Todas</button>
+          </div>
+        </details>
+
+        <div id="pol-count" style="font-size:12px;color:var(--text3);margin:12px 0 10px"></div>
+
+        <!-- Grid -->
         <div id="pol-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
-        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" style="color:var(--accent2)">SITL · Cámara de Diputados LXVI Legislatura</a> · Actualizado semanalmente</div>
+        
+        <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sitl.diputados.gob.mx/LXVI_leg/" target="_blank" rel="noopener" style="color:var(--accent2)">SITL · Cámara de Diputados LXVI Legislatura</a> · Actualización semanal</div>
       </div>
     </div>
     <!-- ───── VOTACIONES — PLENO DIPUTADOS LXVI REAL ───── -->
