@@ -2,174 +2,240 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5" />
 <title>Deuda Pública de México · Tequio</title>
+<link rel="icon" href="/fav32.png">
 <style>
   :root{
-    --bg:#0b0f1a; --surface:#111827; --surface-2:#1f2937;
-    --border:rgba(255,255,255,0.08); --text:#e5e7eb; --muted:#9ca3af;
-    --gold:#fbbf24; --orange:#f97316; --red:#dc2626; --green:#84cc16;
+    --bg:#0b0f1a; --surface:#11172a; --surface2:#1a1f2e;
+    --border:#2a3142; --text:#e5e7eb; --text2:#b1bdd0; --text3:#7a8696;
+    --gold:#fbbf24; --orange:#f97316; --red:#ef4444; --green:#22c55e; --accent:#3b82f6; --accent2:#a855f7;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background:var(--bg);color:var(--text);
-    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-    min-height:100vh;padding:16px;line-height:1.5;
-  }
-  .container{max-width:1100px;margin:0 auto}
-  .back{
-    color:var(--gold);text-decoration:none;font-size:14px;display:inline-block;
-    margin-bottom:16px;font-weight:500;
-  }
-  .back:hover{text-decoration:underline}
-  h1{font-size:clamp(22px,4vw,30px);margin-bottom:6px;line-height:1.2}
-  .subtitle{color:var(--muted);font-size:14px;margin-bottom:18px}
-  .disclaimer{
-    background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);
-    border-radius:10px;padding:12px 14px;font-size:13px;color:#fcd34d;
-    margin-bottom:20px;
-  }
-  .hero{
-    background:linear-gradient(135deg,rgba(251,191,36,0.18) 0%,rgba(220,38,38,0.22) 100%);
-    border:1px solid rgba(251,191,36,0.35);
-    border-radius:16px;padding:24px;margin-bottom:18px;text-align:center;
-  }
-  .hero-title{font-size:14px;color:#fcd34d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-  .hero-amount{font-size:clamp(32px,7vw,52px);font-weight:800;color:var(--gold);margin-bottom:4px;line-height:1}
-  .hero-pib{font-size:clamp(18px,3.5vw,24px);font-weight:600;color:#fca5a5;margin-bottom:10px}
-  .hero-sub{font-size:13px;color:var(--muted);max-width:600px;margin:0 auto}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:22px}
-  .stat{
-    background:var(--surface);border:1px solid var(--border);
-    border-radius:12px;padding:16px;
-  }
-  .stat-icon{font-size:22px;margin-bottom:6px}
-  .stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-  .stat-value{font-size:22px;font-weight:700;color:var(--gold);margin-bottom:2px}
-  .stat-sub{font-size:12px;color:var(--muted)}
-  .section{
-    background:var(--surface);border:1px solid var(--border);
-    border-radius:12px;padding:18px;margin-bottom:18px;
-  }
-  .section h2{font-size:17px;margin-bottom:12px;color:var(--gold)}
-  #grafica{width:100%;overflow-x:auto}
+  html,body{background:var(--bg);color:var(--text);font:14px/1.5 'Inter',system-ui,-apple-system,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  body.embedded .back{display:none!important}
+  .back{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;margin:6px 0 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);text-decoration:none;font-size:13px}
+  .back:hover{color:var(--gold)}
+  
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#7c2d12 0%,#dc2626 50%,#991b1b 100%);border-radius:20px;padding:28px;margin-bottom:18px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.30);position:relative;overflow:hidden}
+  .hero h1{font-size:30px;font-weight:800;margin:0 0 6px;line-height:1.1}
+  .hero p{margin:0;opacity:0.94;font-size:14px;line-height:1.5}
+  .hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px);margin-top:14px}
+  .hero-stat{text-align:center}
+  .hero-stat .num{font-size:22px;font-weight:800;line-height:1.1}
+  .hero-stat .lbl{font-size:10px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px}
+  .hero-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:8px}
+  .hero-link{background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)}
+  
+  /* Sello fuente */
+  .sello{background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .sello-title{font-size:11px;font-weight:700;color:#22c55e;letter-spacing:0.5px}
+  
+  /* Caja educativa */
+  details.educ{background:linear-gradient(135deg,rgba(168,85,247,0.10),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px}
+  details.educ summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a855f7;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  details.educ summary::-webkit-details-marker{display:none}
+  details.educ .body{padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6}
+  details.educ ul{margin:6px 0 6px 20px}
+  
+  /* Sections */
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+  .section h2{font-size:15px;margin-bottom:12px;color:var(--text);font-weight:700;display:flex;align-items:center;gap:8px}
+  
+  /* Gráfico */
+  #grafica-pib{width:100%;overflow-x:auto}
+  
+  /* Stats grid */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;border-left:3px solid var(--gold)}
+  .stat.interna{border-left-color:var(--accent)}
+  .stat.externa{border-left-color:var(--accent2)}
+  .stat.servicio{border-left-color:var(--red)}
+  .stat .icon{font-size:18px;margin-bottom:4px}
+  .stat .lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-weight:600}
+  .stat .val{font-size:22px;font-weight:800;color:var(--text)}
+  .stat .sub{font-size:11px;color:var(--text3);margin-top:3px}
+  
+  /* Tabla */
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
-  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  th,td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--text3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;background:rgba(0,0,0,0.15)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   tr:hover{background:rgba(255,255,255,0.02)}
-  .badge-est{
-    display:inline-block;background:rgba(251,191,36,0.15);color:#fcd34d;
-    font-size:10px;padding:2px 6px;border-radius:4px;margin-left:6px;
-  }
-  .tabla-wrap{overflow-x:auto}
-  .comparativo{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:10px}
-  .pais{background:var(--surface-2);padding:10px;border-radius:8px;text-align:center}
-  .pais-name{font-size:12px;color:var(--muted);margin-bottom:4px}
-  .pais-pib{font-size:18px;font-weight:700}
-  .pais.mx{background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4)}
+  .tabla-wrap{overflow-x:auto;margin:-4px}
+  .badge-est{display:inline-block;background:rgba(251,191,36,0.18);color:#fcd34d;font-size:9px;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:700}
+  
+  /* Comparativo internacional */
+  .comparativo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
+  .pais{background:var(--surface2);padding:12px 10px;border-radius:10px;text-align:center;border:1px solid var(--border);position:relative;cursor:default;transition:transform 0.15s}
+  .pais:hover{transform:translateY(-2px)}
+  .pais-name{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600}
+  .pais-pib{font-size:18px;font-weight:800;color:var(--text)}
+  .pais.mx{background:linear-gradient(135deg,rgba(251,191,36,0.20),rgba(251,191,36,0.08));border:1px solid rgba(251,191,36,0.50)}
   .pais.mx .pais-pib{color:var(--gold)}
-  .analisis{
-    background:rgba(132,204,22,0.06);border:1px solid rgba(132,204,22,0.25);
-    border-radius:10px;padding:14px;font-size:14px;color:#d9f99d;
-  }
-  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-  .btn{
-    display:inline-block;padding:10px 16px;border-radius:8px;
-    text-decoration:none;font-size:13px;font-weight:600;
-  }
-  .btn-prim{background:var(--gold);color:#111}
-  .btn-sec{background:var(--surface-2);color:var(--text);border:1px solid var(--border)}
-  .footer{font-size:11px;color:var(--muted);margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center}
-  .loading{text-align:center;padding:30px;color:var(--muted)}
-  body.embedded .back{display:none}
+  .pais.mx .pais-name{color:var(--gold)}
+  
+  /* Análisis */
+  .analisis{background:linear-gradient(135deg,rgba(132,204,22,0.10),rgba(132,204,22,0.02));border:1px solid rgba(132,204,22,0.30);border-radius:12px;padding:14px;font-size:13px;color:#d9f99d;line-height:1.6}
+  
+  /* Acciones */
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+  .btn-prim{background:var(--gold);color:#0b0f1a}
+  .btn-sec{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-ia{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+  
+  .footer{font-size:11px;color:var(--text3);margin-top:18px;padding-top:14px;border-top:1px solid var(--border);text-align:center}
+  .loading{text-align:center;padding:30px;color:var(--text3)}
+  
   @media (max-width:600px){
-    .hero{padding:18px}
-    .stat-value{font-size:18px}
-    th,td{padding:6px 4px;font-size:12px}
+    .wrap{padding:12px}
+    .hero{padding:20px}
+    .hero h1{font-size:24px}
+    .stat .val{font-size:18px}
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <a href="/" class="back" id="backLink">← Tequio</a>
-  <h1>💳 Deuda Pública de México</h1>
-  <p class="subtitle">SHRFSP histórico oficial SHCP · 2014-2026</p>
-
-  <div class="disclaimer">
-    Cifras oficiales de la Secretaría de Hacienda (SHCP). El SHRFSP (Saldo Histórico de Requerimientos Financieros del Sector Público) es la medida más amplia y comparable internacionalmente.
-  </div>
-
+<script>
+if (new URLSearchParams(location.search).get('embedded') === '1') document.body.classList.add('embedded');
+</script>
+<div class="wrap">
+  <a href="/" class="back" onclick="window.tequioDeudaBack(event);return false;">← Tequio</a>
+  
   <div id="contenido" class="loading">Cargando datos oficiales SHCP…</div>
 </div>
+
 <script>
-if (new URLSearchParams(location.search).get('embedded') === '1') {
-  document.body.classList.add('embedded');
+window.tequioDeudaBack = function(e){
+  if(e) e.preventDefault();
+  try { 
+    if (window.parent && window.parent !== window && typeof window.parent.cargarPanel === 'function') {
+      window.parent.cargarPanel('dashboard'); return;
+    } 
+  } catch(err){}
+  window.location.href = '/';
+};
+
+function fmtMXN(n){
+  if(n==null)return '—';
+  if(n>=1e12) return '$' + (n/1e12).toFixed(2) + ' bn';
+  if(n>=1e9) return '$' + (n/1e9).toFixed(1) + ' mmdp';
+  if(n>=1e6) return '$' + (n/1e6).toFixed(1) + ' mdp';
+  return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
 }
+function fmtPct(n){return n==null?'—':(Number(n).toFixed(1)+'%');}
+function esc(s){return String(s||'').replace(/[<>"']/g,function(c){return ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
 
-function fmtMXN(n) {
-  if (n == null) return '—';
-  if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + ' bn';
-  if (n >= 1e9) return '$' + (n / 1e9).toFixed(1) + ' mmdp';
-  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + ' mdp';
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n);
-}
-
-function fmtPct(n) { return n == null ? '—' : (Number(n).toFixed(1) + '%'); }
-
-async function cargarDeuda() {
+async function cargarDeuda(){
   try {
     const r = await fetch('/api/data?vista=deuda');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
-    if (!data.items || !data.items.length) throw new Error('Sin datos');
+    if(!data.items||!data.items.length) throw new Error('Sin datos');
     render(data);
-  } catch (e) {
+  } catch(e) {
     document.getElementById('contenido').innerHTML =
-      '<div class="disclaimer">Error al cargar datos: ' + e.message + '</div>';
+      '<div style="background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.30);border-radius:10px;padding:16px;color:#fca5a5;text-align:center">Error: ' + e.message + '</div>';
   }
 }
 
-function render(data) {
+function render(data){
   const u = data.ultimo;
   const items = data.items;
   const totalDeuda = Number(u.shrfsp_total_mxn) || 0;
   const interna = Number(u.deuda_interna_mxn) || 0;
   const externa = Number(u.deuda_externa_mxn) || 0;
-  const pctInterna = totalDeuda ? (interna / totalDeuda * 100) : 0;
-  const pctExterna = totalDeuda ? (externa / totalDeuda * 100) : 0;
-
-  const html = '<div class="hero">' +
-      '<div class="hero-title">Deuda pública ' + u.anio + ' ' + (u.es_estimacion ? '(estimada PEF)' : '') + '</div>' +
-      '<div class="hero-amount">' + fmtMXN(totalDeuda) + ' MXN</div>' +
-      '<div class="hero-pib">' + fmtPct(u.shrfsp_porcentaje_pib) + ' del PIB</div>' +
-      '<div class="hero-sub">Aprobado en PEF ' + u.anio + ' · Compromiso de consolidación fiscal del nuevo gobierno</div>' +
+  const pctInterna = totalDeuda ? (interna/totalDeuda*100) : 0;
+  const pctExterna = totalDeuda ? (externa/totalDeuda*100) : 0;
+  const servicio = Number(u.servicio_deuda_mxn) || 0;
+  const costoPib = u.costo_financiero_pib;
+  const pibDeudaPct = Number(u.shrfsp_porcentaje_pib) || 0;
+  
+  // Calc 10 años atrás
+  const items10 = items.length > 10 ? items[items.length-11] : items[0];
+  const variacion10 = items10 ? (pibDeudaPct - Number(items10.shrfsp_porcentaje_pib)).toFixed(1) : 0;
+  const flecha10 = variacion10 > 0 ? '⬆️' : (variacion10 < 0 ? '⬇️' : '➡️');
+  
+  const html = 
+    // HERO
+    '<div class="hero">' +
+      '<div class="hero-header">' +
+        '<div style="font-size:54px;line-height:1">💳</div>' +
+        '<div style="flex:1;min-width:240px">' +
+          '<h1>Deuda Pública de México</h1>' +
+          '<p>SHRFSP histórico SHCP · ' + (items[0].anio) + '-' + u.anio + ' · ' + items.length + ' años de serie</p>' +
+        '</div>' +
+        '<a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" class="hero-link">SHCP oficial →</a>' +
+      '</div>' +
+      '<div class="hero-grid">' +
+        '<div class="hero-stat"><div class="num">' + fmtMXN(totalDeuda).replace('$','') + '</div><div class="lbl">Deuda total</div></div>' +
+        '<div class="hero-stat"><div class="num" style="color:#fde047">' + pibDeudaPct.toFixed(1) + '%</div><div class="lbl">% del PIB</div></div>' +
+        '<div class="hero-stat"><div class="num">' + fmtMXN(servicio).replace('$','') + '</div><div class="lbl">Servicio anual</div></div>' +
+        '<div class="hero-stat"><div class="num" style="font-size:16px">' + flecha10 + ' ' + Math.abs(variacion10) + 'pp</div><div class="lbl">Δ 10 años</div></div>' +
+      '</div>' +
     '</div>' +
+    
+    // Sello
+    '<div class="sello">' +
+      '<div style="font-size:28px">✅</div>' +
+      '<div style="flex:1;min-width:220px">' +
+        '<div class="sello-title">FUENTE OFICIAL · SHCP</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-top:3px">finanzaspublicas.hacienda.gob.mx · Criterios Generales de Política Económica anuales</div>' +
+      '</div>' +
+    '</div>' +
+    
+    // Educativa
+    '<details class="educ"><summary><span>🤓 ¿Qué es la deuda pública? · Educación cívica</span><span style="font-size:11px">▾</span></summary><div class="body">' +
+      '<p style="margin-bottom:8px"><strong>SHRFSP</strong> = Saldo Histórico de los Requerimientos Financieros del Sector Público. Es la medida MÁS amplia y comparable internacionalmente.</p>' +
+      '<ul>' +
+        '<li><strong>Deuda interna:</strong> En pesos mexicanos. Más segura porque el Banco de México puede emitir pesos.</li>' +
+        '<li><strong>Deuda externa:</strong> En dólares/euros. Riesgo cambiario si se devalúa el peso.</li>' +
+        '<li><strong>Servicio de la deuda:</strong> Lo que pagamos al año en INTERESES (no en capital). Ramo 24 del PEF.</li>' +
+        '<li><strong>% del PIB:</strong> El indicador que importa. México &lt; 55% es "manejable", &gt; 70% es alarmante.</li>' +
+      '</ul>' +
+      '<p style="margin:8px 0 0;color:var(--text3);font-size:11px">📚 Art. 73 fracción VIII CPEUM faculta al Congreso para autorizar la contratación de deuda. Art. 117 prohíbe a estados contraer deuda externa.</p>' +
+    '</div></details>' +
+    
+    // Stats breakdown
     '<div class="stats">' +
-      '<div class="stat"><div class="stat-icon">💰</div>' +
-        '<div class="stat-label">Servicio de la deuda ' + u.anio + '</div>' +
-        '<div class="stat-value">' + fmtMXN(Number(u.servicio_deuda_mxn)) + ' MXN</div>' +
-        '<div class="stat-sub">Ramo 24 PEF (intereses anuales)</div></div>' +
-      '<div class="stat"><div class="stat-icon">🏛️</div>' +
-        '<div class="stat-label">Deuda interna</div>' +
-        '<div class="stat-value">' + fmtMXN(interna) + '</div>' +
-        '<div class="stat-sub">' + pctInterna.toFixed(1) + '% del total · pesos mexicanos</div></div>' +
-      '<div class="stat"><div class="stat-icon">🌎</div>' +
-        '<div class="stat-label">Deuda externa</div>' +
-        '<div class="stat-value">' + fmtMXN(externa) + '</div>' +
-        '<div class="stat-sub">' + pctExterna.toFixed(1) + '% del total · moneda extranjera</div></div>' +
-      '<div class="stat"><div class="stat-icon">📈</div>' +
-        '<div class="stat-label">Costo financiero / PIB</div>' +
-        '<div class="stat-value">' + fmtPct(u.costo_financiero_pib) + '</div>' +
-        '<div class="stat-sub">Carga de intereses sobre la economía</div></div>' +
-    '</div>';
-
-  const html2 = '<div class="section"><h2>📊 SHRFSP histórico 2014-' + u.anio + '</h2>' +
-    '<div id="grafica"></div>' +
-    '<p class="stat-sub" style="margin-top:8px">Barras punteadas: cifras estimadas (PPEF/PEF). Color rojo: &gt;55% PIB. Amarillo: 48-55%. Verde: &lt;48%.</p></div>' +
-    '<div class="section"><h2>📋 Detalle año por año</h2><div class="tabla-wrap" id="tabla"></div></div>' +
-    '<div class="section"><h2>🌐 Comparativo internacional (referencia)</h2>' +
-      '<p style="font-size:13px;color:var(--muted);margin-bottom:8px">México: ' + fmtPct(u.shrfsp_porcentaje_pib) + ' PIB en ' + u.anio + '. Comparativo OECD (referencia estática, no actualizada en tiempo real, basada en <a href="https://www.imf.org/external/datamapper/CG_DEBT_GDP@GDD" target="_blank" rel="noopener" style="color:var(--gold)">IMF WEO oct-2024</a>):</p>' +
+      '<div class="stat servicio"><div class="icon">💸</div>' +
+        '<div class="lbl">Servicio de la deuda ' + u.anio + '</div>' +
+        '<div class="val">' + fmtMXN(servicio) + '</div>' +
+        '<div class="sub">Ramo 24 PEF (intereses anuales)</div></div>' +
+      '<div class="stat interna"><div class="icon">🏛️</div>' +
+        '<div class="lbl">Deuda interna</div>' +
+        '<div class="val">' + fmtMXN(interna) + '</div>' +
+        '<div class="sub">' + pctInterna.toFixed(1) + '% del total · pesos MXN</div></div>' +
+      '<div class="stat externa"><div class="icon">🌎</div>' +
+        '<div class="lbl">Deuda externa</div>' +
+        '<div class="val">' + fmtMXN(externa) + '</div>' +
+        '<div class="sub">' + pctExterna.toFixed(1) + '% del total · moneda extranjera</div></div>' +
+      '<div class="stat"><div class="icon">📈</div>' +
+        '<div class="lbl">Costo financiero / PIB</div>' +
+        '<div class="val">' + fmtPct(costoPib) + '</div>' +
+        '<div class="sub">Carga de intereses sobre la economía</div></div>' +
+    '</div>' +
+    
+    // Gráfico % PIB
+    '<div class="section">' +
+      '<h2>📊 Evolución del % PIB ' + items[0].anio + '-' + u.anio + '</h2>' +
+      '<div id="grafica-pib"></div>' +
+      '<p style="font-size:11px;color:var(--text3);margin-top:8px">⚠️ <strong style="color:#f59e0b">Rojo</strong>: &gt;55% PIB · <strong style="color:#fbbf24">Amarillo</strong>: 48-55% · <strong style="color:#22c55e">Verde</strong>: &lt;48% · Punteado: estimación.</p>' +
+    '</div>' +
+    
+    // Tabla
+    '<div class="section">' +
+      '<h2>📋 Detalle año por año</h2>' +
+      '<div class="tabla-wrap" id="tabla"></div>' +
+    '</div>' +
+    
+    // Comparativo internacional
+    '<div class="section">' +
+      '<h2>🌐 Comparativo internacional · 2024 referencia</h2>' +
+      '<p style="font-size:12px;color:var(--text2);margin-bottom:10px">México mantiene una deuda <strong>baja en contexto OECD</strong>, pero el servicio crece año con año. Fuente: <a href="https://www.imf.org/external/datamapper/CG_DEBT_GDP@GDD" target="_blank" rel="noopener" style="color:var(--gold)">IMF WEO oct-2024</a></p>' +
       '<div class="comparativo">' +
         '<div class="pais"><div class="pais-name">Japón 🇯🇵</div><div class="pais-pib">252%</div></div>' +
         '<div class="pais"><div class="pais-name">Italia 🇮🇹</div><div class="pais-pib">137%</div></div>' +
@@ -177,59 +243,82 @@ function render(data) {
         '<div class="pais"><div class="pais-name">Francia 🇫🇷</div><div class="pais-pib">110%</div></div>' +
         '<div class="pais"><div class="pais-name">Brasil 🇧🇷</div><div class="pais-pib">87%</div></div>' +
         '<div class="pais"><div class="pais-name">Alemania 🇩🇪</div><div class="pais-pib">65%</div></div>' +
-        '<div class="pais mx"><div class="pais-name">México 🇲🇽</div><div class="pais-pib">' + fmtPct(u.shrfsp_porcentaje_pib) + '</div></div>' +
+        '<div class="pais mx"><div class="pais-name">México 🇲🇽</div><div class="pais-pib">' + pibDeudaPct.toFixed(1) + '%</div></div>' +
       '</div>' +
-      '<p class="stat-sub" style="margin-top:10px">México mantiene una deuda baja en el contexto OECD, pero el servicio crece año con año.</p>' +
     '</div>' +
-    '<div class="section"><h2>💡 ¿Qué significa?</h2>' +
-      '<div class="analisis">Por cada peso del PIB de México, ' + Math.round(Number(u.shrfsp_porcentaje_pib)) + ' centavos van a pagar deuda histórica acumulada. El servicio anual (intereses) equivale al ' + fmtPct(u.costo_financiero_pib) + ' del PIB — similar a lo que México gasta en salud pública.</div>' +
+    
+    // ¿Qué significa?
+    '<div class="section">' +
+      '<h2>💡 ¿Qué significa en tu vida?</h2>' +
+      '<div class="analisis">Por cada peso del PIB de México, <strong style="color:#fbbf24">' + Math.round(pibDeudaPct) + ' centavos</strong> van a pagar deuda histórica acumulada. El servicio anual (intereses) equivale al <strong style="color:#fbbf24">' + fmtPct(costoPib) + '</strong> del PIB — similar a lo que México gasta en <strong>salud pública</strong>.</div>' +
       '<div class="actions">' +
-        '<a href="/panel/pef.html?ramo=24" class="btn btn-prim">Ver desglose PEF ' + u.anio + ' (Ramo 24 = Deuda)</a>' +
-        '<a href="/panel/generador.html?tipo=transparencia" class="btn btn-sec">Generar solicitud INAI sobre deuda</a>' +
+        '<a href="/panel/pef.html?ramo=24" class="btn btn-prim">📊 Ver Ramo 24 (Deuda) en PEF</a>' +
+        '<a href="javascript:void(0)" onclick="navegarConIA()" class="btn btn-ia">🤖 Preguntar IA</a>' +
+        '<a href="/panel/generador.html?tipo=transparencia" class="btn btn-sec">📝 Solicitud INAI</a>' +
       '</div>' +
     '</div>' +
-    '<div class="footer">Fuente: SHCP · finanzaspublicas.hacienda.gob.mx · Criterios Generales de Política Económica anuales · ' + items.length + ' años de serie histórica</div>';
-  document.getElementById('contenido').innerHTML = html + html2;
+    
+    '<div class="footer">Fuente: SHCP · finanzaspublicas.hacienda.gob.mx · ' + items.length + ' años de serie histórica · Actualización anual con cada CGPE</div>';
+  
+  document.getElementById('contenido').innerHTML = html;
   document.getElementById('contenido').className = '';
   renderGrafica(items);
   renderTabla(items);
 }
 
-function renderGrafica(items) {
-  const svgWidth = 900, svgHeight = 350, padding = 50;
-  const barWidth = (svgWidth - padding * 2) / items.length - 4;
-  let svg = '<svg viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '" style="width:100%;height:auto;max-height:400px;" xmlns="http://www.w3.org/2000/svg">';
-  for (const p of [0, 25, 50, 75]) {
-    const y = svgHeight - padding - (p / 80) * (svgHeight - padding * 2);
-    svg += '<line x1="' + padding + '" y1="' + y + '" x2="' + (svgWidth - padding) + '" y2="' + y + '" stroke="rgba(255,255,255,0.1)"/>';
-    svg += '<text x="' + (padding - 10) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#9ca3af">' + p + '%</text>';
+function renderGrafica(items){
+  const svgW = 900, svgH = 380, padding = 50;
+  const barW = (svgW - padding*2) / items.length - 4;
+  const maxPib = 80;
+  let svg = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" style="width:100%;height:auto;max-height:400px" xmlns="http://www.w3.org/2000/svg">';
+  
+  // Bandas de color de fondo
+  const bandRed = svgH - padding - (55/maxPib)*(svgH-padding*2);
+  const bandYellow = svgH - padding - (48/maxPib)*(svgH-padding*2);
+  svg += '<rect x="' + padding + '" y="' + padding + '" width="' + (svgW-padding*2) + '" height="' + (bandRed-padding) + '" fill="rgba(239,68,68,0.04)"/>';
+  svg += '<rect x="' + padding + '" y="' + bandRed + '" width="' + (svgW-padding*2) + '" height="' + (bandYellow-bandRed) + '" fill="rgba(251,191,36,0.04)"/>';
+  svg += '<rect x="' + padding + '" y="' + bandYellow + '" width="' + (svgW-padding*2) + '" height="' + (svgH-padding-bandYellow) + '" fill="rgba(34,197,94,0.04)"/>';
+  
+  // Grid lines
+  for(const p of [0,20,40,55,75]){
+    const y = svgH - padding - (p/maxPib)*(svgH-padding*2);
+    svg += '<line x1="' + padding + '" y1="' + y + '" x2="' + (svgW-padding) + '" y2="' + y + '" stroke="rgba(255,255,255,0.08)"/>';
+    svg += '<text x="' + (padding-10) + '" y="' + (y+4) + '" text-anchor="end" font-size="10" fill="#7a8696">' + p + '%</text>';
   }
-  items.forEach(function(item, i) {
-    const pib = Number(item.shrfsp_porcentaje_pib) || 0;
-    const x = padding + i * (barWidth + 4);
-    const h = (pib / 80) * (svgHeight - padding * 2);
-    const y = svgHeight - padding - h;
-    const color = pib > 55 ? '#dc2626' : pib > 48 ? '#fbbf24' : '#84cc16';
-    const opacity = item.es_estimacion ? '0.65' : '1';
-    const stroke = item.es_estimacion ? ('stroke="' + color + '" stroke-dasharray="3,2" stroke-width="1.5"') : '';
-    const contexto = item.contexto ? ' — ' + String(item.contexto).replace(/"/g,'') : '';
-    const monto = (Number(item.shrfsp_total_mxn)/1e12).toFixed(2);
-    svg += '<rect x="' + x + '" y="' + y + '" width="' + barWidth + '" height="' + h + '" fill="' + color + '" opacity="' + opacity + '" ' + stroke + '>';
-    svg += '<title>' + item.anio + ': ' + pib + '% PIB / $' + monto + 'bn MXN' + (item.es_estimacion ? ' (estimación)' : '') + contexto + '</title>';
+  
+  // Línea umbral 55% (rojo)
+  const yUmb = svgH - padding - (55/maxPib)*(svgH-padding*2);
+  svg += '<line x1="' + padding + '" y1="' + yUmb + '" x2="' + (svgW-padding) + '" y2="' + yUmb + '" stroke="#ef4444" stroke-dasharray="4,3" stroke-width="1.5" opacity="0.6"/>';
+  svg += '<text x="' + (svgW-padding-4) + '" y="' + (yUmb-4) + '" text-anchor="end" font-size="9" fill="#ef4444" font-weight="700">Umbral 55%</text>';
+  
+  // Barras
+  items.forEach(function(it, i){
+    const pib = Number(it.shrfsp_porcentaje_pib) || 0;
+    const x = padding + i*(barW+4);
+    const h = (pib/maxPib)*(svgH-padding*2);
+    const y = svgH - padding - h;
+    const color = pib > 55 ? '#ef4444' : pib > 48 ? '#fbbf24' : '#22c55e';
+    const opacity = it.es_estimacion ? '0.55' : '1';
+    const stroke = it.es_estimacion ? 'stroke="' + color + '" stroke-dasharray="3,2" stroke-width="1.5"' : '';
+    const monto = (Number(it.shrfsp_total_mxn)/1e12).toFixed(2);
+    
+    svg += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" fill="' + color + '" opacity="' + opacity + '" rx="2" ' + stroke + '>';
+    svg += '<title>' + it.anio + ': ' + pib + '% PIB · $' + monto + 'bn MXN' + (it.es_estimacion?' (estimación)':'') + (it.contexto?' — ' + String(it.contexto).replace(/[<>"]/g,''):'') + '</title>';
     svg += '</rect>';
-    svg += '<text x="' + (x + barWidth/2) + '" y="' + (svgHeight - padding + 14) + '" text-anchor="middle" font-size="9" fill="#9ca3af">' + item.anio + '</text>';
-    if (pib > 48) {
-      svg += '<text x="' + (x + barWidth/2) + '" y="' + (y - 4) + '" text-anchor="middle" font-size="9" fill="#fbbf24" font-weight="700">' + pib + '%</text>';
+    svg += '<text x="' + (x+barW/2) + '" y="' + (svgH-padding+15) + '" text-anchor="middle" font-size="10" fill="#7a8696">' + it.anio + '</text>';
+    if(pib > 48){
+      svg += '<text x="' + (x+barW/2) + '" y="' + (y-5) + '" text-anchor="middle" font-size="9" fill="' + color + '" font-weight="700">' + pib + '%</text>';
     }
   });
+  
   svg += '</svg>';
-  document.getElementById('grafica').innerHTML = svg;
+  document.getElementById('grafica-pib').innerHTML = svg;
 }
 
-function renderTabla(items) {
-  const rows = items.slice().reverse().map(function(it) {
+function renderTabla(items){
+  const rows = items.slice().reverse().map(function(it){
     const est = it.es_estimacion ? '<span class="badge-est">est.</span>' : '';
-    const ctx = it.contexto ? String(it.contexto).substring(0, 80) : '';
+    const ctx = it.contexto ? esc(String(it.contexto).substring(0,80)) : '';
     return '<tr>' +
       '<td><strong>' + it.anio + '</strong>' + est + '</td>' +
       '<td class="num">' + fmtMXN(Number(it.shrfsp_total_mxn)) + '</td>' +
@@ -242,9 +331,19 @@ function renderTabla(items) {
     '<th>Año</th>' +
     '<th style="text-align:right">SHRFSP total</th>' +
     '<th style="text-align:right">% del PIB</th>' +
-    '<th style="text-align:right">Servicio deuda</th>' +
+    '<th style="text-align:right">Servicio</th>' +
     '<th>Contexto</th>' +
   '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function navegarConIA(){
+  try {
+    if (window.parent && window.parent !== window && typeof window.parent.navegarCon === 'function') {
+      window.parent.navegarCon({iaPrompt:'Explícame la deuda pública de México: por qué es importante el % del PIB, cómo afecta mi vida como ciudadano y qué hace el gobierno con esa deuda.',toast:'Contexto cargado',page:'asistente'});
+      return;
+    }
+  } catch(e){}
+  window.location.href = '/?page=asistente';
 }
 
 cargarDeuda();
