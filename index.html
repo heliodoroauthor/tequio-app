@@ -9224,100 +9224,248 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         </div>
       </div>
     </div>
-  <!-- ───── NOTICIAS CÍVICAS ───── -->
+  <!-- ───── NOTICIAS CÍVICAS · Nivel 3 ───── -->
   <div id="page-noticias" class="page">
     <div class="content">
-      <!-- Banner datos en transición (H2.1-04) -->
-      <div style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);border-radius:10px;padding:10px 14px;margin:14px 0 6px;font-size:12px;color:#fcd34d;display:flex;gap:10px;align-items:flex-start"><span>⚠️</span><div><strong>Datos en transición.</strong> El scraper de noticias está caído. Lo que ves puede no incluir lo más reciente. Fuentes oficiales directas: <a href="https://dof.gob.mx" target="_blank" rel="noopener" style="color:#fde68a">dof.gob.mx</a> · <a href="https://www.inai.org.mx" target="_blank" rel="noopener" style="color:#fde68a">inai.org.mx</a></div></div>
-      <!-- Header oficial -->
-      <div style="background:linear-gradient(135deg,#581c87 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)">
-        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <!-- HERO con stats live -->
+      <div style="background:linear-gradient(135deg,#581c87 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.3)">
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
           <div style="font-size:54px;line-height:1">📰</div>
           <div style="flex:1;min-width:240px">
-            <h1 style="font-size:28px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Noticias Cívicas</h1>
-            <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Comunicados oficiales de <strong>INAI</strong> (503), <strong>DOF</strong> (68), <strong>FGR</strong> (40), <strong>Presidencia</strong> (24), <strong>SEGOB</strong> (20), <strong>SCJN</strong> (12), <strong>COFEPRIS</strong> (5) y <strong>SABG</strong> (4). Total: 676.</p>
+            <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Noticias Cívicas</h1>
+            <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.5">Comunicados oficiales de <strong>8 fuentes</strong> del Estado mexicano: DOF, SCJN, INAI, FGR, Presidencia, SEGOB, COFEPRIS, SABG. Cero invención.</p>
           </div>
-          <a href="https://dof.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">DOF oficial →</a>
+          <a href="https://dof.gob.mx" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">DOF oficial →</a>
+        </div>
+        <!-- Stats live -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="not-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Total</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde047" id="not-stat-semana">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Esta semana</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="not-stat-mes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Este mes</div></div>
+          <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="not-stat-ultima">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Última pub</div></div>
         </div>
       </div>
-      <!-- Sello de Fuente Oficial Verificada -->
+
+      <!-- Sello fuente oficial -->
       <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="font-size:28px">✅</div>
         <div style="flex:1;min-width:220px">
           <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:3px">Noticias agregadas desde 8 fuentes oficiales: <strong>INAI</strong> (503 resoluciones), <strong>DOF</strong> (68 publicaciones), <strong>FGR</strong> (40 comunicados), <strong>Presidencia</strong> (24), <strong>SEGOB</strong> (20), <strong>SCJN</strong> (12), <strong>COFEPRIS</strong> (5 alertas) y <strong>SABG</strong> (4). Cada link va directo a la fuente original.</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada noticia tiene link directo a la publicación oficial: dof.gob.mx · scjn.gob.mx · inai.org.mx · fgr.org.mx · presidente.gob.mx · gob.mx/segob · cofepris.gob.mx</div>
         </div>
       </div>
-      <!-- Barra de búsqueda rápida -->
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0 14px">
-          <span style="font-size:16px">🔍</span>
-          <input id="noticias-search" type="text" placeholder="Buscar noticias..."
-            style="flex:1;background:none;border:none;color:var(--text1);font-size:13px;padding:11px 0;font-family:inherit;outline:none"
-            oninput="filtrarNoticias()">
+
+      <!-- Búsqueda + filtros -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px;position:relative">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+          <input id="not-v2-q" type="text" placeholder="Buscar en noticias…"
+            oninput="noticiasV2BuscarDeb()"
+            style="width:100%;padding:10px 12px 10px 36px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;box-sizing:border-box">
         </div>
-        <button class="btn btn-secondary" onclick="document.getElementById('noticias-search').value='';filtrarNoticias()" style="padding:0 14px;font-size:18px;flex-shrink:0">✕</button>
+        <button onclick="navegarCon({fromNot:true,page:'asistente'})" style="background:linear-gradient(135deg,#7c3aed,#9333ea);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🤖 Preguntar IA</button>
       </div>
-      <!-- Selector de ámbito -->
-      <div class="tab-bar mb-16" id="noticias-tab-bar">
-        <div class="tab active" onclick="switchTab(this);switchNoticiasTab('todas')">🌐 Todas</div>
-        <div class="tab" onclick="switchTab(this);switchNoticiasTab('nacional')">🏛️ Nacionales</div>
-        <div class="tab" onclick="switchTab(this);switchNoticiasTab('estatal')">🗺️ Estatales</div>
-        <div class="tab" onclick="switchTab(this);switchNoticiasTab('municipal')">🏙️ Municipales</div>
-        <div class="tab" onclick="switchTab(this);switchNoticiasTab('alerta')">🚨 Alertas</div>
+
+      <!-- Tabs por periodo -->
+      <div class="tab-bar mb-16">
+        <div class="tab" data-dias="1" onclick="noticiasV2SetPeriodo(this,1)">📅 Hoy</div>
+        <div class="tab active" data-dias="7" onclick="noticiasV2SetPeriodo(this,7)">📆 7 días</div>
+        <div class="tab" data-dias="30" onclick="noticiasV2SetPeriodo(this,30)">🗓️ 30 días</div>
+        <div class="tab" data-dias="" onclick="noticiasV2SetPeriodo(this,null)">⏳ Todo</div>
       </div>
-      <!-- Selector de estado (visible en tab estatal y municipal) -->
-      <div id="noticias-estado-selector" style="display:none;margin-bottom:16px">
-        <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">FILTRAR POR ESTADO</div>
-        <div class="noticias-filtros" id="noticias-estados-chips"></div>
+
+      <!-- Chips por fuente -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="not-v2-fuentes-chips">
+        <button class="estado-chip active" data-fuente="" onclick="noticiasV2SetFuente(this,'')">Todas</button>
       </div>
-      <!-- Selector de tema -->
-      <div style="margin-bottom:16px">
-        <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">TEMA</div>
-        <div class="noticias-filtros" id="noticias-temas-chips">
-          <div class="estado-chip active" onclick="selectTemaNoticias(this,'todos')">Todos</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'politica')">🏛️ Política</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'economia')">💰 Economía</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'seguridad')">🛡️ Seguridad</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'salud')">🏥 Salud</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'educacion')">🎓 Educación</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'medio_ambiente')">🌿 Medio Ambiente</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'derechos')">✊ Derechos</div>
-          <div class="estado-chip" onclick="selectTemaNoticias(this,'corrupcion')">⚠️ Corrupción</div>
-        </div>
+
+      <!-- Chips por tema -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="estado-chip active" data-tema="" onclick="noticiasV2SetTema(this,'')">Cualquier tema</button>
+        <button class="estado-chip" data-tema="politica" onclick="noticiasV2SetTema(this,'politica')">🏛️ Política</button>
+        <button class="estado-chip" data-tema="economia" onclick="noticiasV2SetTema(this,'economia')">💰 Economía</button>
+        <button class="estado-chip" data-tema="seguridad" onclick="noticiasV2SetTema(this,'seguridad')">🛡️ Seguridad</button>
+        <button class="estado-chip" data-tema="salud" onclick="noticiasV2SetTema(this,'salud')">🏥 Salud</button>
+        <button class="estado-chip" data-tema="educacion" onclick="noticiasV2SetTema(this,'educacion')">🎓 Educación</button>
+        <button class="estado-chip" data-tema="medio_ambiente" onclick="noticiasV2SetTema(this,'medio_ambiente')">🌿 Ambiente</button>
+        <button class="estado-chip" data-tema="derechos" onclick="noticiasV2SetTema(this,'derechos')">✊ Derechos</button>
+        <button class="estado-chip" data-tema="corrupcion" onclick="noticiasV2SetTema(this,'corrupcion')">⚠️ Corrupción</button>
       </div>
-      <!-- Contador y orden -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span id="noticias-count" style="font-size:12px;color:var(--text3)"></span>
-        <select id="noticias-orden" onchange="filtrarNoticias()"
-          style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text2);font-size:12px;font-family:inherit">
-          <option value="reciente">Más recientes</option>
-          <option value="impacto">Mayor impacto</option>
-          <option value="comentados">Más comentados</option>
-        </select>
+
+      <!-- Contador -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span id="not-v2-info" style="font-size:12px;color:var(--text3)">Cargando…</span>
+        <span style="font-size:11px;color:var(--text3)">🦎 Cero invención · Fuente oficial</span>
       </div>
-      <!-- Lista de noticias -->
-      <div id="noticias-lista" style="display:flex;flex-direction:column;gap:12px"></div>
-      <!-- Estado vacío -->
-      <div id="noticias-vacio" style="display:none;text-align:center;padding:40px 20px">
-        <div style="font-size:36px;margin-bottom:12px">📭</div>
-        <div style="font-weight:600;margin-bottom:6px">Sin resultados</div>
-        <div style="font-size:13px;color:var(--text3)">Prueba con otros filtros o términos de búsqueda</div>
+
+      <!-- Lista -->
+      <div id="not-v2-lista" style="display:flex;flex-direction:column;gap:10px;min-height:200px"></div>
+
+      <!-- Paginación -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <button id="not-v2-prev" onclick="noticiasV2Prev()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:13px;cursor:pointer;font-family:inherit">◀ Anterior</button>
+        <span id="not-v2-page" style="font-size:13px;color:var(--text2);min-width:120px;text-align:center">Página 1 / 1</span>
+        <button id="not-v2-next" onclick="noticiasV2Next()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:13px;cursor:pointer;font-family:inherit">Siguiente ▶</button>
       </div>
+
       <!-- IA contextual -->
-      <div class="card" style="margin-top:20px;border-color:var(--accent)">
-        <div class="card-title mb-4">🧠 Pregúntale a la IA sobre estas noticias</div>
-        <div class="card-subtitle mb-12">¿Qué impacto tiene esto en tu vida? ¿Qué puedes hacer?</div>
+      <div class="card" style="margin-top:24px;border-color:var(--accent2)">
+        <div class="card-title mb-4">🧠 Pregúntale a la IA sobre las noticias</div>
+        <div class="card-subtitle mb-12">Análisis contextual con corpus de leyes mexicanas</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon('ia',{iaPrompt:'Soy un ciudadano mexicano leyendo las noticias del día. Explícame cuáles son los temas políticos más importantes de esta semana en México, cómo me afectan directamente como ciudadano (impuestos, servicios, seguridad, salud) y qué puedo hacer al respecto.',toast:'Contexto de noticias cargado'})">¿Cómo me afecta?</button>
-          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon('ia',{iaPrompt:'Ante las noticias de corrupción en México esta semana: ¿qué mecanismos concretos tiene un ciudadano para denunciar? ¿Cuáles son los organismos (ASF, SFP, INAI, FGR, Contraloría) y cómo funciona cada uno? Dame pasos específicos.',toast:'Guía anti-corrupción cargada'})">¿Qué puedo hacer?</button>
-          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon('ia',{iaPrompt:'Explícame en lenguaje simple y sin jerga política: ¿cuál es la noticia legislativa más importante del Congreso mexicano esta semana? ¿Qué ley se discute o aprobó y cómo afecta la vida cotidiana de los mexicanos?',toast:'Explicación simple cargada'})">Explicar en simple</button>
+          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon({iaPrompt:'Soy un ciudadano mexicano leyendo las noticias del día. Explícame cuáles son los temas políticos más importantes de esta semana en México, cómo me afectan directamente como ciudadano (impuestos, servicios, seguridad, salud) y qué puedo hacer al respecto.',toast:'Contexto de noticias cargado',page:'asistente'})">¿Cómo me afecta?</button>
+          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon({iaPrompt:'Ante las noticias de corrupción en México esta semana: ¿qué mecanismos concretos tiene un ciudadano para denunciar? ¿Cuáles son los organismos (ASF, SFP, INAI, FGR, Contraloría) y cómo funciona cada uno? Dame pasos específicos.',toast:'Guía anti-corrupción cargada',page:'asistente'})">¿Qué puedo hacer?</button>
+          <button class="btn btn-secondary" style="font-size:11px" onclick="navegarCon({iaPrompt:'Explícame en lenguaje simple y sin jerga política: ¿cuál es la noticia legislativa más importante del Congreso mexicano esta semana? ¿Qué ley se discute o aprobó y cómo afecta la vida cotidiana de los mexicanos?',toast:'Explicación simple cargada',page:'asistente'})">Explicar en simple</button>
         </div>
-        <button onclick="abrirAccion({tipo:'solicitud',titulo:'📋 Actuar sobre esta noticia',situacion:'He leído noticias recientes sobre [describe el tema: corrupción / contrato irregular / incumplimiento de funciones] relacionadas con la institución [nombre] y deseo ejercer mi derecho ciudadano de solicitar información pública al respecto.\n\nSolicito los documentos, registros o expedientes que sustenten [describe lo que quieres conocer: contratos, presupuesto, decisiones tomadas] correspondientes al período [fechas].\n\nEsta solicitud se presenta al amparo de la Ley General de Transparencia y Acceso a la Información Pública.'});"
-          style="width:100%;padding:10px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;color:var(--accent2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
-          📋 Redactar acción ciudadana sobre esta noticia
-        </button>
       </div>
+
+      <!-- JS NIVEL 3 NOTICIAS -->
+      <script>
+      (function(){
+        var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+        var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+        var state={fuente:null,tema:null,busqueda:null,dias:7,page:0,perPage:30};
+        var timer;
+        
+        function fmt(n){return Number(n||0).toLocaleString('es-MX');}
+        function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+        function fmtTiempo(iso){
+          if(!iso)return '';
+          var d=new Date(iso);var ago=(Date.now()-d.getTime())/1000;
+          if(ago<60)return 'ahora';
+          if(ago<3600)return Math.floor(ago/60)+' min';
+          if(ago<86400)return Math.floor(ago/3600)+'h';
+          if(ago<604800)return Math.floor(ago/86400)+'d';
+          return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+        }
+        function fuenteColor(f){
+          var c={DOF:'#3b82f6',SCJN:'#fbbf24',INAI:'#22c55e',FGR:'#ef4444',
+                 Presidencia:'#a855f7',SEGOB:'#06b6d4',COFEPRIS:'#f97316',SABG:'#ec4899'};
+          return c[f]||'#94a3b8';
+        }
+        
+        window.noticiasV2SetPeriodo=function(el,dias){
+          state.dias=dias;state.page=0;
+          el.parentElement.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+          el.classList.add('active');
+          cargar();
+        };
+        
+        window.noticiasV2SetFuente=function(el,f){
+          state.fuente=f||null;state.page=0;
+          el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
+          el.classList.add('active');
+          cargar();
+        };
+        
+        window.noticiasV2SetTema=function(el,t){
+          state.tema=t||null;state.page=0;
+          el.parentElement.querySelectorAll('.estado-chip').forEach(function(c){c.classList.remove('active');});
+          el.classList.add('active');
+          cargar();
+        };
+        
+        window.noticiasV2BuscarDeb=function(){
+          clearTimeout(timer);
+          timer=setTimeout(function(){
+            var v=document.getElementById('not-v2-q').value.trim();
+            state.busqueda=v||null;state.page=0;cargar();
+          },400);
+        };
+        
+        window.noticiasV2Prev=function(){if(state.page>0){state.page--;cargar();}};
+        window.noticiasV2Next=function(){state.page++;cargar();};
+        
+        function cargarStats(){
+          rpc('noticias_stats').then(function(d){
+            if(!d||typeof d!=='object'||Array.isArray(d))return;
+            if(d.length)d=d[0];
+            // Handle wrapped result
+            var stats=d.noticias_stats||d;
+            document.getElementById('not-stat-total').textContent=fmt(stats.total);
+            document.getElementById('not-stat-semana').textContent=fmt(stats.semana);
+            document.getElementById('not-stat-mes').textContent=fmt(stats.mes);
+            var ult=stats.ultima_publicacion;
+            if(ult){
+              var dt=new Date(ult);
+              document.getElementById('not-stat-ultima').textContent=dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+            }
+            // Llenar chips fuentes
+            if(stats.fuentes&&Array.isArray(stats.fuentes)){
+              var ch=document.getElementById('not-v2-fuentes-chips');
+              var html='<button class="estado-chip active" data-fuente="" onclick="noticiasV2SetFuente(this,\'\')">Todas ('+fmt(stats.total)+')</button>';
+              stats.fuentes.forEach(function(f){
+                html+='<button class="estado-chip" data-fuente="'+f.fuente+'" onclick="noticiasV2SetFuente(this,\''+f.fuente+'\')" style="border-left:3px solid '+fuenteColor(f.fuente)+'">'+f.fuente+' ('+fmt(f.total)+')</button>';
+              });
+              ch.innerHTML=html;
+            }
+          }).catch(function(){});
+        }
+        
+        function cargar(){
+          document.getElementById('not-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">Cargando…</div>';
+          var params={
+            p_fuente:state.fuente,p_tema:state.tema,p_ambito:null,
+            p_busqueda:state.busqueda,p_dias:state.dias,
+            p_limit:state.perPage,p_offset:state.page*state.perPage
+          };
+          rpc('noticias_listar_v2',params).then(function(rows){
+            if(!Array.isArray(rows)){
+              document.getElementById('not-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:#ef4444">Error</div>';
+              return;
+            }
+            var total=rows.length>0?rows[0].total_count:0;
+            var totalPages=Math.max(1,Math.ceil(total/state.perPage));
+            var from=state.page*state.perPage+1;
+            var to=Math.min(from+rows.length-1,total);
+            
+            document.getElementById('not-v2-info').textContent=
+              rows.length?('Mostrando '+fmt(from)+'–'+fmt(to)+' de '+fmt(total)+' noticias'):'';
+            document.getElementById('not-v2-page').textContent='Página '+(state.page+1)+' / '+totalPages;
+            document.getElementById('not-v2-prev').style.opacity=state.page===0?'0.4':'1';
+            document.getElementById('not-v2-next').style.opacity=(state.page+1)>=totalPages?'0.4':'1';
+            
+            if(rows.length===0){
+              document.getElementById('not-v2-lista').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">📭 Sin resultados.<br><small>Prueba con otro filtro o periodo.</small></div>';
+              return;
+            }
+            
+            var html=rows.map(function(r){
+              var color=fuenteColor(r.fuente);
+              var temaIcon=({politica:'🏛️',economia:'💰',seguridad:'🛡️',salud:'🏥',
+                          educacion:'🎓',medio_ambiente:'🌿',derechos:'✊',corrupcion:'⚠️'})[r.tema]||'📰';
+              return '<a href="'+(r.url_oficial||'#')+'" target="_blank" rel="noopener" class="card" style="text-decoration:none;color:inherit;border-left:3px solid '+color+';transition:all 0.15s;display:block">'+
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'+
+                  '<span style="background:'+color+'22;color:'+color+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">'+r.fuente+'</span>'+
+                  '<span style="font-size:11px;color:var(--text3)">'+fmtTiempo(r.fecha_publicacion)+'</span>'+
+                '</div>'+
+                '<div style="font-weight:600;font-size:14px;color:var(--text);line-height:1.4;margin-bottom:6px">'+(r.titulo||'(Sin título)')+'</div>'+
+                (r.resumen?'<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px">'+r.resumen.substring(0,200)+(r.resumen.length>200?'…':'')+'</div>':'')+
+                '<div style="font-size:11px;color:var(--text3)">'+temaIcon+' '+(r.tema||'general')+' · Ver oficial →</div>'+
+              '</a>';
+            }).join('');
+            document.getElementById('not-v2-lista').innerHTML=html;
+          }).catch(function(e){
+            document.getElementById('not-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:#ef4444">Error: '+e+'</div>';
+          });
+        }
+        
+        // Auto-cargar cuando page-noticias visible
+        var obs=new MutationObserver(function(){
+          var p=document.getElementById('page-noticias');
+          if(p&&p.classList.contains('active')&&!p.dataset.v2Loaded){
+            p.dataset.v2Loaded='1';
+            cargarStats();
+            setTimeout(cargar,150);
+          }
+        });
+        obs.observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
+        setTimeout(function(){
+          var p=document.getElementById('page-noticias');
+          if(p&&p.classList.contains('active')){p.dataset.v2Loaded='1';cargarStats();cargar();}
+        },1000);
+      })();
+      </script>
     </div>
   </div>
     <!-- ───── ORGANÍZATE ───── -->
