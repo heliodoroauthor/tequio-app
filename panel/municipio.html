@@ -384,24 +384,22 @@ ${del.por_mes && del.por_mes.length ? `
 
 <div class="mun-section" data-section="leyes" style="display:none">
 <section>
-<div class="placeholder-card">
-<div class="ic">📜</div>
-<h3>Próximamente: Reglamentos municipales y bandos</h3>
-<p>Cada municipio publica reglamentos locales (vialidad, anuncios, ruido, mercados, comercio, protección civil, etc.). Estamos coordinando con INAFED para integrarlos automáticamente.</p>
-<a class="cta" href="${genTransparenciaUrl}">Solicitar reglamentos vía transparencia →</a>
+<h2>📜 Reglamentos municipales de ${m.nombre}</h2>
+<p style="color:var(--muted);font-size:13px;margin:0 0 12px">Scraping directo del portal oficial del ayuntamiento + congresos estatales. Cero invención.</p>
+<div id="reglamentos-muni" data-muni="${m.nombre}" data-estado="${m.nombre_estado || ''}">
+  <div class="empty" style="padding:20px;text-align:center;color:var(--muted)">Cargando reglamentos...</div>
 </div>
 </section>
 
 <section>
-<h2>¿Qué leyes aplican en tu municipio?</h2>
-<p style="color:var(--muted);font-size:13px;margin:0 0 8px">Mientras integramos los reglamentos locales, puedes consultar:</p>
+<h2>📚 Marco legal general que aplica</h2>
 <ul style="color:var(--muted);font-size:13px;line-height:1.7;margin:0;padding-left:20px">
 <li>Bando de Policía y Buen Gobierno (publicado por cada ayuntamiento)</li>
 <li>Reglamento de Tránsito municipal</li>
 <li>Ley Orgánica Municipal del estado de ${m.nombre_estado || 'tu estado'}</li>
 <li>Constitución Política del estado</li>
 </ul>
-<a class="btn-link" href="${genTransparenciaUrl}">Generar solicitud de información →</a>
+<a class="btn-link" href="${genTransparenciaUrl}">¿Falta algo? Solicítalo vía transparencia →</a>
 </section>
 </div>
 
@@ -687,6 +685,65 @@ load();
   // Refrescar cada 60s
   setInterval(updateBadge,60000);
 })();
+</script>
+<script>
+// 🦎 Auto-cargar reglamentos del muni desde RPC reglamentos_municipio
+async function loadReglamentosMuni() {
+  var cont = document.getElementById('reglamentos-muni');
+  if (!cont) return;
+  var muni = cont.getAttribute('data-muni');
+  var estado = cont.getAttribute('data-estado');
+  if (!muni) return;
+  try {
+    var SB = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+    var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+    var r = await fetch(SB + '/rest/v1/rpc/reglamentos_municipio', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},
+      body: JSON.stringify({p_municipio_nombre: muni, p_estado_nombre: estado, p_limit: 200})
+    });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    var docs = await r.json();
+    if (!docs || !docs.length) {
+      cont.innerHTML = '<div class="empty" style="padding:20px;text-align:center;color:var(--muted)">' +
+        '🔍 Aún no tenemos reglamentos cargados para <strong>'+muni+'</strong>.<br>' +
+        '<small>Estamos en cobertura de 560 ciudades. Este muni está pendiente — el cron lo procesará en los próximos días.</small></div>';
+      return;
+    }
+    var html = '<div style="display:grid;gap:10px">';
+    docs.forEach(function(d){
+      var tipo_label = d.tipo === 'gaceta-municipal' ? '📰 Gaceta' : '📜 Reglamento';
+      var tipo_color = d.tipo === 'gaceta-municipal' ? '#8b5cf6' : '#22c55e';
+      html += '<div style="background:var(--card2,#1a1f2e);border:1px solid var(--border,#2a3142);padding:12px;border-radius:8px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:6px">' +
+          '<div style="font-weight:600;font-size:14px;color:var(--text,#eee);flex:1">'+(d.nombre||'(Sin nombre)')+'</div>' +
+          '<span style="background:'+tipo_color+'22;color:'+tipo_color+';padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap">'+tipo_label+'</span>' +
+        '</div>' +
+        '<div style="font-size:12px;color:var(--muted,#888);margin-bottom:8px">'+(d.fuente||'Fuente oficial')+'</div>' +
+        (d.url ? '<a href="'+d.url+'" target="_blank" rel="noopener" style="color:var(--accent,#3b82f6);font-size:13px;text-decoration:none">Ver PDF oficial →</a>' : '<span style="color:var(--muted);font-size:13px">PDF no disponible</span>') +
+        '</div>';
+    });
+    html += '</div>';
+    html += '<div style="margin-top:12px;padding:10px;background:var(--card2,#1a1f2e);border-radius:6px;font-size:12px;color:var(--muted)">' +
+            'Mostrando <strong>'+docs.length+'</strong> documentos. Datos extraídos directo del portal oficial.</div>';
+    cont.innerHTML = html;
+  } catch(e) {
+    cont.innerHTML = '<div class="empty" style="color:#ef4444">⚠️ Error al cargar reglamentos: '+(e.message||e)+'</div>';
+  }
+}
+// Disparar después de que render() construyó el DOM
+var _origSwitchMunTab = window.switchMunTab;
+window.switchMunTab = function(tab){
+  _origSwitchMunTab(tab);
+  if (tab === 'leyes') loadReglamentosMuni();
+};
+// También cargar de una si estás en la sección "leyes" al abrir
+setTimeout(function(){
+  var active = document.querySelector('.mun-section[data-section="leyes"]:not([style*="none"])');
+  if (active) loadReglamentosMuni();
+  // Cargar siempre en background para que esté listo cuando cambien de tab
+  setTimeout(loadReglamentosMuni, 500);
+}, 1000);
 </script>
 </body>
 </html>
