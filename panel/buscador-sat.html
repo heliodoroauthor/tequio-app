@@ -1,86 +1,213 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
-<meta name="theme-color" content="#0b0f1a">
-<title>Buscador SAT EFOS y deudores · Tequio</title>
-<link rel="icon" href="/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador SAT (EFOS · Deudores) · Tequio</title>
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg:#0b0f1a; --card:#121826; --border:#1f2a3d;
-    --text:#e8eef9; --muted:#8a98b3; --hint:#6b7a96;
-    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#3b82f6;
-    --accent:#a78bfa; --gold:#fbbf24;
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d;
+    --red: #ef4444; --red-soft: #fca5a5;
+    --green: #22c55e; --green-soft: #86efac;
+    --amber: #f59e0b; --blue: #3b82f6; --blue-soft: #93c5fd;
+    --orange: #f97316;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  .wrap{max-width:780px;margin:0 auto;padding:18px 16px 64px}
-  h1{font-size:22px;margin:6px 0 4px;letter-spacing:-.01em}
-  h2{font-size:16px;margin:0 0 8px;letter-spacing:-.01em}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
-  .searchbox{display:flex;gap:8px;margin-bottom:18px}
-  .searchbox input{flex:1;padding:14px 14px;border:1px solid var(--border);background:#0e1422;color:var(--text);border-radius:12px;font-size:16px;outline:none}
-  .searchbox input:focus{border-color:var(--gold)}
-  .searchbox button{padding:0 18px;background:var(--gold);color:#1a1300;border:0;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer}
-  .searchbox button:disabled{opacity:.6;cursor:wait}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 14px;margin-bottom:14px}
-  .card.bad{border-color:#7f1d1d;background:#1a0e12}
-  .card.warn{border-color:#78350f;background:#1a1308}
-  .card.ok{border-color:#14532d;background:#0d1a12}
-  .card.info{border-color:#1e3a5c;background:#0e1626}
-  .badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:600;margin-right:6px;text-transform:uppercase;letter-spacing:.04em}
-  .b-bad{background:#7f1d1d;color:#fecaca}
-  .b-warn{background:#78350f;color:#fed7aa}
-  .b-ok{background:#14532d;color:#bbf7d0}
-  .b-info{background:#1e3a5c;color:#bfdbfe}
-  .row{padding:10px 0;border-top:1px solid var(--border)}
-  .row:first-of-type{border-top:0}
-  .rfc{font-family:ui-monospace,Menlo,monospace;color:var(--gold);font-size:13px}
-  .nom{font-weight:600;margin:2px 0 4px}
-  .meta{color:var(--muted);font-size:12px}
-  .meta b{color:var(--text);font-weight:600}
-  .veredicto{font-size:14px;font-weight:600;margin:4px 0 8px}
-  .veredicto.bad{color:#fca5a5}
-  .veredicto.warn{color:#fcd34d}
-  .veredicto.ok{color:#86efac}
-  .veredicto.info{color:#93c5fd}
-  a.fuente{color:var(--accent);font-size:12px;text-decoration:none}
-  a.fuente:hover{text-decoration:underline}
-  .empty{color:var(--muted);font-size:14px;padding:8px 0}
-  .loading{color:var(--muted);font-size:14px;padding:8px 0}
-  .disclaimer{margin-top:24px;color:var(--hint);font-size:12px;line-height:1.5;border-top:1px solid var(--border);padding-top:14px}
-  .back{display:inline-block;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:10px}
-  .back:hover{color:var(--text)}
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+  body { padding: 16px; min-height: 100vh; }
+  .container { max-width: 980px; margin: 0 auto; }
+  .back { display: inline-flex; align-items: center; gap: 6px; color: var(--text-dim); text-decoration: none; font-size: 13px; margin-bottom: 10px; }
+  .back:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(239,68,68,0.22) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(249,115,22,0.20) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(249,115,22,0.10) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(239,68,68,0.28);
+    border-radius: 20px;
+    padding: 28px 24px 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.18);
+    border: 1px solid rgba(239,68,68,0.40);
+    color: var(--red-soft);
+    padding: 5px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 800;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 30px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #fff 0%, #fca5a5 50%, #fcd34d 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: #cbd5e1; font-size: 14.5px; line-height: 1.6; max-width: 720px; margin: 0; }
+  .hero p strong { color: var(--accent-soft); font-weight: 700; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 10px; }
+  .stat-num { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .stat-num.red { color: var(--red-soft); }
+  .stat-num.amber { color: var(--accent-soft); }
+  .stat-num.green { color: var(--green-soft); }
+  .stat-num.blue { color: var(--blue-soft); }
+  .stat-lbl { font-size: 10.5px; color: var(--text-dim); font-weight: 600; }
+  @media (max-width:680px){ .stats { grid-template-columns: repeat(2, 1fr); } .hero h1 { font-size: 24px; } }
+
+  /* CAJA EDUCATIVA */
+  details.edu { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.22); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; cursor: pointer; }
+  details.edu[open] { background: rgba(239,68,68,0.10); }
+  details.edu summary { list-style: none; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--red-soft); font-size: 13.5px; }
+  details.edu summary::-webkit-details-marker { display: none; }
+  details.edu summary::after { content: '▼'; margin-left: auto; font-size: 9px; color: var(--red); transition: transform .2s; }
+  details.edu[open] summary::after { transform: rotate(180deg); }
+  details.edu .edu-body { margin-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.65; }
+  details.edu .edu-body p { margin-bottom: 8px; }
+  details.edu .edu-body strong { color: var(--accent-soft); }
+  details.edu .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+  details.edu .edu-cell { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; font-size: 12px; }
+  details.edu .edu-cell-tit { font-weight: 800; color: var(--accent-soft); font-size: 13px; margin-bottom: 4px; letter-spacing: .4px; }
+  details.edu .edu-cell-txt { color: var(--text-dim); line-height: 1.55; }
+  @media (max-width:680px){ details.edu .edu-grid { grid-template-columns: 1fr; } }
+
+  /* SEARCH */
+  .searchbox {
+    background: var(--card);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .searchbox input {
+    flex: 1;
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border-soft);
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .searchbox input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251,191,36,0.15); }
+  .searchbox button {
+    background: linear-gradient(135deg, var(--red) 0%, var(--orange) 100%);
+    color: #fff;
+    font-weight: 800;
+    padding: 0 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: transform .15s, opacity .15s;
+  }
+  .searchbox button:hover:not(:disabled) { transform: translateY(-1px); }
+  .searchbox button:disabled { opacity: .5; cursor: wait; }
+
+  /* RESULT CARDS */
+  .card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .card.bad { border-color: rgba(239,68,68,0.40); background: linear-gradient(180deg, rgba(239,68,68,0.06) 0%, var(--card) 50%); }
+  .card.warn { border-color: rgba(245,158,11,0.40); background: linear-gradient(180deg, rgba(245,158,11,0.06) 0%, var(--card) 50%); }
+  .card.ok { border-color: rgba(34,197,94,0.40); background: linear-gradient(180deg, rgba(34,197,94,0.06) 0%, var(--card) 50%); }
+  .card.info { border-color: rgba(59,130,246,0.30); background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, var(--card) 50%); }
+  .card h2 { font-size: 14px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text); margin: 0 0 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft); }
+  .row { padding: 12px 0; border-top: 1px dashed rgba(255,255,255,0.06); }
+  .row:first-of-type { border-top: 0; padding-top: 4px; }
+  .rfc { font-family: var(--mono); color: var(--accent-soft); font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+  .nom { font-weight: 700; font-size: 14px; margin: 2px 0 6px; color: var(--text); }
+  .meta { color: var(--text-dim); font-size: 12px; line-height: 1.55; }
+  .meta b { color: var(--text); font-weight: 700; }
+  .veredicto { font-size: 13px; font-weight: 700; margin: 6px 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .veredicto.bad { color: var(--red-soft); }
+  .veredicto.warn { color: var(--accent-soft); }
+  .veredicto.ok { color: var(--green-soft); }
+  .veredicto.info { color: var(--blue-soft); }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
+  .b-bad { background: rgba(239,68,68,0.20); color: var(--red-soft); border: 1px solid rgba(239,68,68,0.40); }
+  .b-warn { background: rgba(245,158,11,0.20); color: var(--accent-soft); border: 1px solid rgba(245,158,11,0.40); }
+  .b-ok { background: rgba(34,197,94,0.20); color: var(--green-soft); border: 1px solid rgba(34,197,94,0.40); }
+  .b-info { background: rgba(59,130,246,0.18); color: var(--blue-soft); border: 1px solid rgba(59,130,246,0.40); }
+  a.fuente { color: var(--blue-soft); font-size: 12px; text-decoration: none; font-weight: 600; }
+  a.fuente:hover { text-decoration: underline; }
+  .empty { color: var(--text-dim); font-size: 13px; padding: 12px 0; }
+  .loading { padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; background: var(--card); border: 1px dashed var(--border-soft); border-radius: 12px; }
+
+  .disclaimer {
+    margin-top: 16px; font-size: 12px; color: var(--text-dim);
+    line-height: 1.6; padding: 12px 14px;
+    background: rgba(251,191,36,0.05);
+    border: 1px solid rgba(251,191,36,0.15);
+    border-radius: 10px;
+  }
+  .disclaimer strong { color: var(--accent); }
 </style>
+<script src="/js/tequio-kpis.js" defer></script>
 </head>
 <body>
-<script>
-(function(){
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.documentElement.classList.add('embedded');
-    var style = document.createElement('style');
-    style.textContent = '.embedded a[href="/"], .embedded a[href="../"], .embedded .back-link, .embedded header > a:first-child { display:none !important; } .embedded body { padding-top: 0 !important; }';
-    document.head.appendChild(style);
-  }
-})();
-</script>
-
-<div class="wrap">
+<div class="container">
   <a href="/" class="back">← Tequio</a>
-  <h1>Buscador SAT — EFOS y deudores</h1>
-  <p class="sub">Consulta si un RFC o nombre aparece en las listas del SAT bajo los artículos 69 (deudores) y 69-B (empresas factureras / EFOS) del Código Fiscal de la Federación.</p>
 
+  <!-- HERO NIVEL 3 -->
+  <div class="hero">
+    <div class="hero-badge">📊 Datos SAT oficiales · Cero invención</div>
+    <h1>Buscador SAT — EFOS y Deudores</h1>
+    <p>Consulta si un <strong>RFC o nombre</strong> aparece en las listas oficiales del SAT bajo los <strong>Artículos 69 (deudores) y 69-B (empresas factureras)</strong> del Código Fiscal de la Federación. Datos publicados en el DOF.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num red">69-B</div><div class="stat-lbl">EFOS factureras</div></div>
+      <div class="stat"><div class="stat-num amber">69</div><div class="stat-lbl">Deudores</div></div>
+      <div class="stat"><div class="stat-num blue">DOF</div><div class="stat-lbl">Fuente oficial</div></div>
+      <div class="stat"><div class="stat-num green">CFF</div><div class="stat-lbl">Cód. Fiscal</div></div>
+    </div>
+  </div>
+
+  <!-- CAJA EDUCATIVA -->
+  <details class="edu">
+    <summary>📖 ¿Qué son los listados 69 y 69-B del SAT?</summary>
+    <div class="edu-body">
+      <p>El SAT publica dos listados públicos clave para combatir la evasión fiscal y las facturas falsas. Tequio los consulta en tiempo real desde la fuente oficial del SAT.</p>
+      <div class="edu-grid">
+        <div class="edu-cell">
+          <div class="edu-cell-tit">📛 Art. 69-B (EFOS)</div>
+          <div class="edu-cell-txt">Empresas Facturadoras de Operaciones Simuladas. Si una empresa proveedor está en <strong>Definitivo</strong>, las facturas que te emitió pueden ser deducciones inválidas y tú podrías quedar como EDOS.</div>
+        </div>
+        <div class="edu-cell">
+          <div class="edu-cell-tit">💸 Art. 69 (Deudores)</div>
+          <div class="edu-cell-txt">Contribuyentes con créditos fiscales firmes, exigibles, cancelados, o no localizados. Útil para verificar contrapartes en operaciones grandes.</div>
+        </div>
+      </div>
+      <p style="margin-top:10px"><strong>Importante:</strong> La presencia en estos listados <strong>no implica delito hasta determinación firme</strong>. Algunas figuras (cancelado, sentencia favorable, desvirtuado) significan que el caso ya se aclaró.</p>
+    </div>
+  </details>
+
+  <!-- SEARCH -->
   <form class="searchbox" id="form">
-    <input id="q" type="text" placeholder="Pega RFC o nombre" autocomplete="off" autocapitalize="characters" spellcheck="false">
-    <button type="submit" id="go">Buscar</button>
+    <input id="q" type="text" placeholder="Pega RFC o nombre (ej. AAA0803076I4)" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button type="submit" id="go">🔍 Buscar</button>
   </form>
 
   <div id="out"></div>
 
   <div class="disclaimer">
-    Datos del SAT publicados en cumplimiento de los artículos 69 y 69-B del CFF. La presencia en estos listados no implica delito hasta determinación firme.
+    <strong>⚖️ Aviso legal:</strong> Datos del SAT publicados en cumplimiento de los Artículos 69 y 69-B del Código Fiscal de la Federación. La presencia en estos listados no implica delito hasta determinación firme. Tequio no opina, solo refleja la publicación oficial.
   </div>
 </div>
 
@@ -92,7 +219,6 @@ const SIT_MAP = {
   'Desvirtuado':      { kind:'ok',   badge:'DESVIRTUADO',      msg:'Aclarado / Limpia' },
 };
 const SIT_NULL = { kind:'info', badge:'EN LISTAS SAT', msg:'Aparece en listas SAT (estatus indeterminado)' };
-
 const SUP_MAP = {
   'firmes':       { kind:'bad',  badge:'DEUDOR FIRME',     msg:'DEUDOR FIRME — debe al SAT' },
   'exigibles':    { kind:'bad',  badge:'EXIGIBLE',         msg:'Adeudo exigible al SAT' },
@@ -101,7 +227,6 @@ const SUP_MAP = {
   'cancelados':   { kind:'ok',   badge:'CANCELADO',        msg:'Adeudo cancelado' },
   'entes_publicos_omisos':{ kind:'warn', badge:'ENTE PÚBLICO OMISO', msg:'Ente público omiso' },
 };
-
 const fmtMonto = (m) => {
   if (m === null || m === undefined || m === '') return '—';
   const n = Number(m);
@@ -111,89 +236,46 @@ const fmtMonto = (m) => {
 const fmtFecha = (s) => {
   if (!s) return '—';
   if (/^\d+ de [a-záéíóú]+ de \d{4}/i.test(s)) return s;
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-    try { return new Date(s).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); } catch(_) {}
-  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) { try { return new Date(s).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}); } catch(_) {} }
   return s;
 };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
 async function fetchJSON(url) {
-  try {
-    const r = await fetch(url);
-    const j = await r.json().catch(() => ({ items: [] }));
-    return { status: r.status, data: j };
-  } catch (e) {
-    return { status: 0, data: { error: String(e), items: [] } };
-  }
+  try { const r = await fetch(url); const j = await r.json().catch(() => ({ items: [] })); return { status: r.status, data: j }; }
+  catch (e) { return { status: 0, data: { error: String(e), items: [] } }; }
 }
 
 function render69B(items) {
-  if (!items || !items.length) {
-    return '<div class="card info"><h2>SAT 69-B — Empresas factureras (EFOS)</h2><div class="empty">Sin resultados.</div></div>';
-  }
+  if (!items || !items.length) return '<div class="card info"><h2>SAT 69-B — Empresas factureras (EFOS)</h2><div class="empty">Sin resultados.</div></div>';
   const rows = items.map(it => {
     const cfg = it.situacion ? (SIT_MAP[it.situacion] || SIT_NULL) : SIT_NULL;
-    return `
-      <div class="row">
-        <div class="rfc">${esc(it.rfc)}</div>
-        <div class="nom">${esc(it.nombre || '—')}</div>
-        <div class="veredicto ${cfg.kind}"><span class="badge b-${cfg.kind}">${cfg.badge}</span> ${cfg.msg}</div>
-        <div class="meta">
-          ${it.numero_publicacion ? 'Publicación <b>'+esc(it.numero_publicacion)+'</b> · ' : ''}
-          Publicado SAT: <b>${fmtFecha(it.fecha_publicacion_sat)}</b>
-          ${it.fecha_dof ? ' · DOF: <b>'+fmtFecha(it.fecha_dof)+'</b>' : ''}
-          ${it.pagina_dof ? ' · pág. <b>'+esc(it.pagina_dof)+'</b>' : ''}
-        </div>
-        ${it.fuente_url ? '<div style="margin-top:4px"><a class="fuente" href="'+esc(it.fuente_url)+'" target="_blank" rel="noopener">Ver fuente oficial ↗</a></div>' : ''}
-      </div>`;
+    return `<div class="row"><div class="rfc">${esc(it.rfc)}</div><div class="nom">${esc(it.nombre || '—')}</div><div class="veredicto ${cfg.kind}"><span class="badge b-${cfg.kind}">${cfg.badge}</span><span>${cfg.msg}</span></div><div class="meta">${it.numero_publicacion ? 'Publicación <b>'+esc(it.numero_publicacion)+'</b> · ' : ''}Publicado SAT: <b>${fmtFecha(it.fecha_publicacion_sat)}</b>${it.fecha_dof ? ' · DOF: <b>'+fmtFecha(it.fecha_dof)+'</b>' : ''}${it.pagina_dof ? ' · pág. <b>'+esc(it.pagina_dof)+'</b>' : ''}</div>${it.fuente_url ? '<div style="margin-top:4px"><a class="fuente" href="'+esc(it.fuente_url)+'" target="_blank" rel="noopener">📎 Ver fuente oficial ↗</a></div>' : ''}</div>`;
   }).join('');
   const worst = items.find(i => i.situacion === 'Definitivo') ? 'bad' :
                 items.find(i => i.situacion === 'Presunto') ? 'warn' :
                 items.find(i => i.situacion === 'Sentencia favorable' || i.situacion === 'Desvirtuado') ? 'ok' : 'info';
-  return `<div class="card ${worst}">
-    <h2>SAT 69-B — Empresas factureras (EFOS) · ${items.length} resultado${items.length===1?'':'s'}</h2>
-    ${rows}
-  </div>`;
+  return `<div class="card ${worst}"><h2>SAT 69-B — Empresas factureras · ${items.length} resultado${items.length===1?'':'s'}</h2>${rows}</div>`;
 }
 
 function render69(items) {
-  if (!items || !items.length) {
-    return '<div class="card info"><h2>SAT 69 — Deudores del SAT</h2><div class="empty">Sin resultados.</div></div>';
-  }
+  if (!items || !items.length) return '<div class="card info"><h2>SAT 69 — Deudores del SAT</h2><div class="empty">Sin resultados.</div></div>';
   const rows = items.map(it => {
     const cfg = SUP_MAP[it.supuesto] || { kind:'info', badge:esc(it.supuesto||'?'), msg:'Aparece en lista SAT 69' };
     const monto = (it.monto !== null && it.monto !== undefined && Number(it.monto) > 0) ? fmtMonto(it.monto) : null;
     const msgFinal = (cfg.kind === 'bad' && monto) ? `DEUDOR FIRME — debe ${monto} al SAT` : cfg.msg;
-    return `
-      <div class="row">
-        <div class="rfc">${esc(it.rfc)}</div>
-        <div class="nom">${esc(it.nombre || '—')}</div>
-        <div class="veredicto ${cfg.kind}"><span class="badge b-${cfg.kind}">${cfg.badge}</span> ${msgFinal}</div>
-        <div class="meta">
-          ${monto ? 'Monto: <b>'+monto+'</b> · ' : ''}
-          ${it.ejercicio ? 'Ejercicio <b>'+esc(it.ejercicio)+'</b> · ' : ''}
-          ${it.entidad_federativa ? '<b>'+esc(it.entidad_federativa)+'</b> · ' : ''}
-          ${it.tipo_persona ? esc(it.tipo_persona) : ''}
-          ${it.fecha_primera_publicacion ? ' · 1ª pub: <b>'+fmtFecha(it.fecha_primera_publicacion)+'</b>' : ''}
-        </div>
-        ${it.fuente_url ? '<div style="margin-top:4px"><a class="fuente" href="'+esc(it.fuente_url)+'" target="_blank" rel="noopener">Ver fuente oficial ↗</a></div>' : ''}
-      </div>`;
+    return `<div class="row"><div class="rfc">${esc(it.rfc)}</div><div class="nom">${esc(it.nombre || '—')}</div><div class="veredicto ${cfg.kind}"><span class="badge b-${cfg.kind}">${cfg.badge}</span><span>${msgFinal}</span></div><div class="meta">${monto ? 'Monto: <b>'+monto+'</b> · ' : ''}${it.ejercicio ? 'Ejercicio <b>'+esc(it.ejercicio)+'</b> · ' : ''}${it.entidad_federativa ? '<b>'+esc(it.entidad_federativa)+'</b> · ' : ''}${it.tipo_persona ? esc(it.tipo_persona) : ''}${it.fecha_primera_publicacion ? ' · 1ª pub: <b>'+fmtFecha(it.fecha_primera_publicacion)+'</b>' : ''}</div>${it.fuente_url ? '<div style="margin-top:4px"><a class="fuente" href="'+esc(it.fuente_url)+'" target="_blank" rel="noopener">📎 Ver fuente oficial ↗</a></div>' : ''}</div>`;
   }).join('');
   const worst = items.find(i => ['firmes','exigibles','sentencias'].includes(i.supuesto)) ? 'bad' :
                 items.find(i => i.supuesto === 'no_localizados') ? 'warn' :
                 items.find(i => i.supuesto === 'cancelados') ? 'ok' : 'info';
-  return `<div class="card ${worst}">
-    <h2>SAT 69 — Deudores del SAT · ${items.length} resultado${items.length===1?'':'s'}</h2>
-    ${rows}
-  </div>`;
+  return `<div class="card ${worst}"><h2>SAT 69 — Deudores del SAT · ${items.length} resultado${items.length===1?'':'s'}</h2>${rows}</div>`;
 }
 
 async function buscar(q) {
-  const out = document.getElementById('out');
-  const btn = document.getElementById('go');
+  const out = document.getElementById('out'), btn = document.getElementById('go');
   btn.disabled = true;
-  out.innerHTML = '<div class="loading">Buscando en SAT 69 y 69-B…</div>';
+  out.innerHTML = '<div class="loading">🔎 Buscando en SAT 69 y 69-B…</div>';
   const [r69b, r69] = await Promise.all([
     fetchJSON('/api/data?vista=sat_69b&q=' + encodeURIComponent(q)),
     fetchJSON('/api/data?vista=sat_69&q='  + encodeURIComponent(q)),
@@ -202,7 +284,7 @@ async function buscar(q) {
   const items69  = r69.data?.items  || [];
   let html = '';
   if (items69b.length === 0 && items69.length === 0) {
-    html += '<div class="card ok"><div class="veredicto ok">✅ No encontrado en listas SAT 69-B ni 69 — no significa que sea limpio, pero no aparece en estos boletines.</div></div>';
+    html += '<div class="card ok"><div class="veredicto ok"><span class="badge b-ok">SIN COINCIDENCIAS</span>✅ No encontrado en listas SAT 69-B ni 69 — esto no significa que sea limpio, pero no aparece en estos boletines.</div></div>';
   }
   html += render69B(items69b);
   html += render69(items69);
@@ -214,14 +296,13 @@ document.getElementById('form').addEventListener('submit', (e) => {
   e.preventDefault();
   const q = document.getElementById('q').value.trim();
   if (q.length < 3) {
-    document.getElementById('out').innerHTML = '<div class="card warn"><div class="veredicto warn">Pasa un RFC o nombre de al menos 3 caracteres.</div></div>';
+    document.getElementById('out').innerHTML = '<div class="card warn"><div class="veredicto warn"><span class="badge b-warn">MUY CORTO</span>Pasa un RFC o nombre de al menos 3 caracteres.</div></div>';
     return;
   }
   history.replaceState(null, '', '?q=' + encodeURIComponent(q));
   buscar(q);
 });
 
-// Cargar query de URL si existe
 (() => {
   const u = new URL(location.href);
   const q = u.searchParams.get('q');
