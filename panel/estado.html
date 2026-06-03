@@ -279,34 +279,39 @@ function renderPanel(data) {
     ? `<div class="rep-list">${sens.map(s => `<div class="rep-card"><span class="r-name">${esc(s.nombre_completo || s.nombre || '')}<span class="partido-tag">${esc(s.partido || '')}</span></span><span class="r-meta">${esc(s.tipo_eleccion || s.principio || '')}</span></div>`).join('')}</div>`
     : '<div class="empty">Sin senadores asociados directamente en datos.</div>';
   c.innerHTML = `
-    <div class="hero">
-      <span class="clave-badge">${data.clave}</span>
-      <h1>${esc(nombre || 'Estado ' + data.clave)}</h1>
-      <div class="total-historico">${fmt(total)}</div>
-      <div class="sub">Transferencias federales acumuladas (2011-${ultimoAnio || '2026'}) · ${porAnio.length} años con datos</div>
-    </div>
-    <div class="grid-stats">
-      <div class="stat-card">
-        <div class="label">Total ${ultimoAnio || ''}</div>
-        <div class="value">${fmt(totalUltimo)}</div>
-        <div class="sub">Año más reciente con datos</div>
+    <div style="background:linear-gradient(135deg,#3730a3 0%,#7c3aed 50%,#c026d3 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(124,58,237,0.35)">
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="font-size:60px;line-height:1">🗺️</div>
+        <div style="flex:1;min-width:240px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span style="background:rgba(255,255,255,0.20);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:1px">${data.clave}</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:2px;opacity:0.85;text-transform:uppercase">ESTADO</span>
+          </div>
+          <h1 style="font-size:34px;font-weight:900;margin:0;color:#fff;letter-spacing:-0.02em;line-height:1">${esc(nombre || 'Estado ' + data.clave)}</h1>
+          <div style="font-size:28px;font-weight:900;color:#fde68a;margin-top:8px;font-family:var(--font-display,inherit);letter-spacing:-0.01em">${fmt(total)}</div>
+          <div style="margin:4px 0 0;opacity:0.92;font-size:13px">Transferencias acumuladas <strong>2011-${ultimoAnio || '2026'}</strong> · ${porAnio.length} años con data</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 SHCP</div>
       </div>
-      <div class="stat-card">
-        <div class="label">Municipios</div>
-        <div class="value">${data.num_municipios || 0}</div>
-        <div class="sub">En la base de datos</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Diputados federales</div>
-        <div class="value">${data.num_diputados || dips.length}</div>
-        <div class="sub">Del estado</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Senadores</div>
-        <div class="value">${data.num_senadores || sens.length}</div>
-        <div class="sub">Del estado</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800">${fmt(totalUltimo)}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Total ${ultimoAnio || ''}</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">${data.num_municipios || 0}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Municipios</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">${data.num_diputados || dips.length || 0}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Diputados fed.</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9">${data.num_senadores || sens.length || 0}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Senadores</div></div>
       </div>
     </div>
+    <details style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));border:1px solid rgba(124,58,237,0.35);border-radius:12px;margin-bottom:14px">
+      <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Qué son los Ramos 28 y 33? · Transferencias federales</span><span style="font-size:11px">▾</span></summary>
+      <div style="padding:0 16px 14px;font-size:12px;color:var(--muted);line-height:1.6">El dinero federal que llega a tu estado viene de <strong>2 grandes flujos</strong>:
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+          <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Ramo 28 · Participaciones</strong><br><span style="font-size:11px">NO condicionadas. El estado decide en qué gastar.</span></div>
+          <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Ramo 33 · Aportaciones</strong><br><span style="font-size:11px">CONDICIONADAS: educación, salud, infraestructura, seguridad.</span></div>
+          <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">Ley de Coordinación Fiscal</strong><br><span style="font-size:11px">Marco legal: distribución por fórmulas (población, marginación, etc).</span></div>
+          <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">ASF audita</strong><br><span style="font-size:11px">Cuenta Pública anual · 2-3 años de retraso típico.</span></div>
+        </div>
+        <p style="margin-top:10px;font-size:11px;color:var(--hint)">⚠️ Cifras son lo que la Federación TRANSFIRIÓ. El gasto real puede diferir si se subejerce o reasigna.</p>
+      </div>
+    </details>
     <div class="section">
       <h2><span class="icon">📊</span> Transferencias federales por año</h2>
       <div class="bar-chart">${bars}</div>
