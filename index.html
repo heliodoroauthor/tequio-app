@@ -2980,8 +2980,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PIDE AYUDA LEGAL ───── -->
     <div id="page-pide-ayuda" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">🤝</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Pide ayuda legal</h1>
@@ -2989,7 +2989,24 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">⚡ 24/7</div>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Confidencial</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Free</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">1ª consulta</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9">3</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Pasos</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">&lt; 48 hrs</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Respuesta</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(6,182,212,0.02));border:1px solid rgba(6,182,212,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo funciona? · Tus derechos</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Tequio NO es despacho — somos el <strong>puente</strong> entre tu caso y abogados verificados:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(14,124,123,0.10);border-left:3px solid #0e7c7b;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">1. Cuéntanos</strong><br><span style="font-size:11px">En tus palabras, sin jerga.</span></div>
+              <div style="background:rgba(6,182,212,0.10);border-left:3px solid #06b6d4;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">2. Datos</strong><br><span style="font-size:11px">Contacto encriptado.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">3. Match</strong><br><span style="font-size:11px">Despacho te contacta en &lt; 48 hrs.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Art. 8 CPEUM petición · Art. 17 acceso justicia · Art. 20 defensa. <strong>Defensoría Pública Federal: 800 200 3030</strong> (gratis).</p>
+          </div>
+        </details>
         <div style="padding:16px 0 0">
           <div style="display:flex;gap:6px">
             <div id="lead-dot-1" style="flex:1;height:6px;background:var(--accent);border-radius:3px"></div>
@@ -6154,6 +6171,33 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DINERO PÚBLICO ───── -->
     <div id="page-dinero" class="page">
       <div class="content">
+        <div style="background:linear-gradient(135deg,#14532d 0%,#16a34a 50%,#22c55e 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(22,163,74,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💰</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Dinero Público</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Deuda, contratos, indicadores macro · <strong>SHCP, ASF, Banxico, INEGI</strong>. Cada cifra enlaza al PDF oficial.</p>
+            </div>
+            <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SHCP →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="din-stat-dolar">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">USD/MXN</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fed7aa" id="din-stat-infla">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Inflación</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="din-stat-tasa">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tasa Banxico</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="din-stat-deuda">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% PIB deuda</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(22,163,74,0.08),rgba(22,163,74,0.02));border:1px solid rgba(22,163,74,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#86efac;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>Fuentes y frecuencias</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Cero invención. Cada KPI viene de fuentes oficiales:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Banxico</strong><br><span style="font-size:11px">FIX diario + tasa.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">INEGI INPC</strong><br><span style="font-size:11px">Días 10 y 25.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">SHCP</strong><br><span style="font-size:11px">Deuda, PEF mensual.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">ASF</strong><br><span style="font-size:11px">Auditorías anuales.</span></div>
+            </div>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>📊</span>
           <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Cada indicador enlaza al PDF oficial. Verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
@@ -8362,6 +8406,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DERECHOS ───── -->
     <div id="page-derechos" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#0c4a6e 0%,#0284c7 50%,#0ea5e9 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(2,132,199,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🛡️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tus Derechos</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Lo que la <strong>Constitución</strong> y tratados internacionales garantizan · qué hacer si los violan.</p>
+            </div>
+            <a href="https://www.cndh.org.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CNDH →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">29</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Art. CPEUM</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3;color:#fde68a">800 715 2000</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CNDH 24/7</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">911</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Emergencia</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Pacto SJ Costa Rica</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tratado madre</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(2,132,199,0.08),rgba(2,132,199,0.02));border:1px solid rgba(2,132,199,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#7dd3fc;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿A quién acudo si me violan un derecho?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Depende de QUIÉN viola tu derecho:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(2,132,199,0.10);border-left:3px solid #0284c7;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">Autoridad federal</strong><br><span style="font-size:11px">CNDH · 800 715 2000.</span></div>
+              <div style="background:rgba(14,165,233,0.10);border-left:3px solid #0ea5e9;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">Autoridad estatal</strong><br><span style="font-size:11px">CEDH estatal.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Particular/empresa</strong><br><span style="font-size:11px">PROFECO · INAI · CONDUSEF.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Acto judicial</strong><br><span style="font-size:11px">Amparo · 15 días · sin costo.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">📌 Queja CNDH/CEDH es <strong>gratuita y sin abogado</strong>.</p>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>ℹ️</span>
           <span>Información <strong>educativa y orientativa</strong>. Ante situaciones legales reales, consulta un abogado o contacta a la CNDH, Defensoría Pública o PROFECO.</span>
@@ -11150,6 +11222,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── AGENDA / MISSING STUBS ───── -->
     <div id="page-presupuesto" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#4a044e 0%,#86198f 50%,#c026d3 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(134,25,143,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💸</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presupuesto Federal</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · cifras directas SHCP.</p>
+            </div>
+            <a href="https://www.pef.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">PEF SHCP →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="pre-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">PEF 2026</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="pre-stat-pib">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% PIB</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="pre-stat-percap">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Per cápita</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Aprobado Nov</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Última votación</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(134,25,143,0.08),rgba(134,25,143,0.02));border:1px solid rgba(134,25,143,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f0abfc;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo se aprueba el PEF?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El PEF es la <strong>ley anual del gasto</strong>. Solo Cámara de Diputados lo aprueba (Art. 74 IV CPEUM):
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(134,25,143,0.10);border-left:3px solid #86198f;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">8 sept</strong><br><span style="font-size:11px">SHCP envía Paquete.</span></div>
+              <div style="background:rgba(192,38,211,0.10);border-left:3px solid #c026d3;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">Sept-Oct</strong><br><span style="font-size:11px">Comisión dictamina.</span></div>
+              <div style="background:rgba(232,121,249,0.10);border-left:3px solid #e879f9;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">15 nov</strong><br><span style="font-size:11px">Límite constitucional.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">DOF</strong><br><span style="font-size:11px">Vigor 1° enero.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">La ASF revisa el ejercicio al año siguiente.</p>
+          </div>
+        </details>
         <div style="margin-bottom:16px">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💸 Dinero Público</div>
           <div style="font-size:13px;color:var(--text3)">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">PEF oficial SHCP →</a></div>
