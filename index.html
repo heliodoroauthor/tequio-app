@@ -2311,39 +2311,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
       <div class="content">
-        <!-- ═════ HERO Nivel 3 ═════ -->
-        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.35)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🏛️</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tequio</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Tu radar cívico de México · <strong>Cero invención</strong>: solo datos verificados de fuentes oficiales (Banxico, INEGI, SCJN, DOF, Cámaras del Congreso).</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">⚡ DATOS LIVE</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="dash-stat-leyes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes indexadas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="dash-stat-votos">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Votaciones LXVI</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="dash-stat-noticias">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Noticias hoy</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="dash-stat-alertas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Alertas vivas</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));border:1px solid rgba(124,58,237,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Qué es Tequio? · Frecuencia y fuentes de los datos</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Tequio es una <strong>plataforma cívica gratuita</strong> que indexa fuentes oficiales del Estado mexicano y las hace navegables sin necesidad de saber jerga jurídica. Cero invención de cifras.
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">💱 Banxico · USD/MXN</strong><br><span style="font-size:11px">FIX diario, refresh cada día hábil 12:00 CDMX.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📈 INEGI · INPC</strong><br><span style="font-size:11px">Mensual: días 10 y 25 de cada mes.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ SCJN · SJF2</strong><br><span style="font-size:11px">Tesis publicadas viernes; refresh semanal.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🗳️ Cámaras · SITL</strong><br><span style="font-size:11px">Votaciones nominales: refresh diario.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Si una cifra parece rara, <strong>haz click en la fuente</strong> para verificarla. Si encuentras un error, <a href="mailto:hola@tequio.app" style="color:#c4b5fd">avísanos</a>.</p>
-          </div>
-        </details>
         <!-- ═════ NUEVO: HERO de datos vivos Banxico ═════ -->
         <div style="margin-bottom:20px">
           <p style="color:var(--text2);font-size:13px;margin-bottom:10px" id="dash-fecha-hoy">Cargando fecha…</p>
@@ -3013,8 +2980,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PIDE AYUDA LEGAL ───── -->
     <div id="page-pide-ayuda" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">🤝</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Pide ayuda legal</h1>
@@ -3022,28 +2989,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">⚡ 24/7</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Confidencial</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Free</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">1ª consulta</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9">3</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Pasos</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">&lt; 48 hrs</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Respuesta</div></div>
-          </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(6,182,212,0.02));border:1px solid rgba(6,182,212,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Cómo funciona? · Tus derechos y qué esperar</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Tequio NO es un despacho — somos el <strong>puente</strong> entre tu caso y abogados verificados que aceptan los términos de la plataforma:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(14,124,123,0.10);border-left:3px solid #0e7c7b;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">1️⃣ Cuéntanos</strong><br><span style="font-size:11px">Describe en tus palabras. No necesitas vocabulario legal.</span></div>
-              <div style="background:rgba(6,182,212,0.10);border-left:3px solid #06b6d4;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">2️⃣ Datos</strong><br><span style="font-size:11px">Tu nombre y contacto (encriptado, solo el despacho asignado lo ve).</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">3️⃣ Match</strong><br><span style="font-size:11px">Despacho verificado en tu área te contacta en &lt; 48 hrs.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚖️ Art. 8 CPEUM: derecho de petición · Art. 17: acceso efectivo a la justicia · Art. 20: defensa adecuada. Si no puedes pagar, también puedes acudir gratis al <strong>Instituto Federal de Defensoría Pública</strong> o las <strong>Defensorías estatales</strong>.</p>
-          </div>
-        </details>
         <div style="padding:16px 0 0">
           <div style="display:flex;gap:6px">
             <div id="lead-dot-1" style="flex:1;height:6px;background:var(--accent);border-radius:3px"></div>
@@ -3148,8 +3094,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── ALERTAS METEO ───── -->
     <div id="page-alertas" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">⛈️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Alertas Meteorológicas</h1>
@@ -3157,37 +3103,15 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://smn.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SMN →</a>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="alerta-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Avisos vigentes</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="alerta-stat-rojo">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">🔴 Rojo</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fed7aa" id="alerta-stat-naranja">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">🟠 Naranja</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="alerta-stat-update">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último update</div></div>
-          </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02));border:1px solid rgba(220,38,38,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fca5a5;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Cómo se leen los avisos del SMN? · Niveles oficiales</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            El Servicio Meteorológico Nacional usa <strong>4 colores</strong> según severidad y certeza del fenómeno:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#22c55e">🟢 Verde · Mínimo</strong><br><span style="font-size:11px">Información preventiva, sin riesgo inminente.</span></div>
-              <div style="background:rgba(250,204,21,0.08);border-left:3px solid #facc15;padding:8px 10px;border-radius:6px"><strong style="color:#facc15">🟡 Amarillo · Moderado</strong><br><span style="font-size:11px">Atención: condiciones que pueden empeorar.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fb923c">🟠 Naranja · Alto</strong><br><span style="font-size:11px">Peligro real: prepararse y limitar exposición.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔴 Rojo · Extremo</strong><br><span style="font-size:11px">Emergencia: refugiarse y seguir protección civil.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuente: <a href="https://smn.conagua.gob.mx/es/avisos-tiempo" target="_blank" style="color:#fca5a5">smn.conagua.gob.mx/es/avisos-tiempo</a></p>
-          </div>
-        </details>
         <div id="alertas-list"></div>
       </div>
     </div>
     <!-- ───── MONITOR SEQUÍA (DATOS REALES) ───── -->
     <div id="page-sequia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">🏜️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Monitor de Sequía</h1>
@@ -3195,38 +3119,15 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA →</a>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="seq-stat-estados">32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados monitoreados</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="seq-stat-extrema">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Con D3-D4</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="seq-stat-sin">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin sequía</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="seq-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
-          </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(217,119,6,0.08),rgba(217,119,6,0.02));border:1px solid rgba(217,119,6,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Qué significan los niveles D0–D4? · Escala CONAGUA</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            El Monitor de Sequía clasifica cada municipio en una de 5 categorías según humedad de suelo, precipitación e índices satelitales:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(254,249,195,0.10);border-left:3px solid #fde68a;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">D0 · Anormalmente seco</strong><br><span style="font-size:11px">Inicio o recuperación de sequía.</span></div>
-              <div style="background:rgba(250,204,21,0.10);border-left:3px solid #facc15;padding:8px 10px;border-radius:6px"><strong style="color:#facc15">D1 · Moderada</strong><br><span style="font-size:11px">Daño a cultivos, baja en cuerpos de agua.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fb923c">D2 · Severa</strong><br><span style="font-size:11px">Pérdidas agrícolas probables, restricción agua.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">D3 · Extrema</strong><br><span style="font-size:11px">Pérdidas mayores, escasez generalizada.</span></div>
-              <div style="background:rgba(124,45,18,0.20);border-left:3px solid #7c2d12;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">D4 · Excepcional</strong><br><span style="font-size:11px">Emergencia: pérdidas totales y desabasto crítico.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Actualización quincenal (días 15 y último de cada mes). Fuente: Monitor de Sequía de México — CONAGUA SMN.</p>
-          </div>
-        </details>
         <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></div>
       </div>
     </div>
     <!-- ───── JURISPRUDENCIA SCJN (DATOS REALES Semanario Judicial) ───── -->
     <div id="page-jurisprudencia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">⚖️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Jurisprudencia SCJN</h1>
@@ -3234,27 +3135,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SJF2 oficial →</a>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="jur-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tesis indexadas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#d8b4fe" id="jur-stat-undecima">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">11ª época</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#c4b5fd" id="jur-stat-jurisp">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Jurisprudencia</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="jur-stat-sync">SJF2</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
-          </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(168,85,247,0.02));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#d8b4fe;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Tesis vs Jurisprudencia? · Diferencias clave</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            La SCJN publica criterios en dos categorías que se ven iguales pero <strong>no obligan igual</strong>:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;padding:10px;border-radius:6px"><strong style="color:#d8b4fe">📖 Tesis aislada</strong><br><span style="font-size:11px">Un solo precedente. <strong>Orientadora</strong> pero NO obligatoria para jueces inferiores.</span></div>
-              <div style="background:rgba(124,58,237,0.12);border-left:3px solid #7c3aed;padding:10px;border-radius:6px"><strong style="color:#c4b5fd">⚖️ Jurisprudencia</strong><br><span style="font-size:11px">Criterio reiterado 5 veces o por Pleno/Sala con mayoría calificada. <strong>OBLIGATORIA</strong> Art. 217 LA.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Épocas: <strong>11ª</strong> (Reforma Judicial 2021, vigente) · <strong>10ª</strong> (2011-2021) · anteriores ya superadas. Fuente: Semanario Judicial de la Federación, sjf2.scjn.gob.mx</p>
-          </div>
-        </details>
         <!-- Sello de Fuente Oficial Verificada -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
@@ -3291,8 +3172,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PRESAS Y CUENCAS (DATOS REALES CONAGUA SIH) ───── -->
     <div id="page-presas" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
             <div style="font-size:60px;line-height:1">💧</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presas y Cuencas</h1>
@@ -3300,29 +3181,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sih.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA SIH →</a>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="presa-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Presas SINA</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="presa-stat-pct">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% nacional</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="presa-stat-criticas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">&lt;30% (crítico)</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="presa-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
-          </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(8,145,178,0.08),rgba(8,145,178,0.02));border:1px solid rgba(8,145,178,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Qué es el SINA? · Cómo interpretar el % de almacenamiento</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            <strong>SINA</strong> = Sistema Nacional de Información del Agua (CONAGUA). Reporta solo las ~210 presas principales con telemetría; el resto del inventario (~2,368) no tiene reporte público diario.
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">&gt; 75%</strong><br><span style="font-size:11px">Llena: presas operando bien, riesgo nulo de desabasto.</span></div>
-              <div style="background:rgba(132,204,22,0.10);border-left:3px solid #84cc16;padding:8px 10px;border-radius:6px"><strong style="color:#bef264">50-75%</strong><br><span style="font-size:11px">Adecuado: rangos típicos en temporada seca.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">30-50%</strong><br><span style="font-size:11px">Bajo: vigilancia, restricciones probables.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">&lt; 30%</strong><br><span style="font-size:11px">Crítico: desabasto urbano y agrícola probable.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Datos: SINA puede tener 2-4 semanas de retraso vs realidad operativa. Fuente: <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#67e8f9">sinav30.conagua.gob.mx</a></p>
-          </div>
-        </details>
         <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5;color:var(--text2)">✅ <strong>Fuente: SINA (Sistema Nacional de Información del Agua, CONAGUA)</strong> · 210 presas principales con telemetría · datos pueden tener 2-4 semanas de retraso vs realidad operativa. <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#22c55e">Ver SINA →</a></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
           <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" id="presas-solo-telemetria" checked onchange="presasFiltrar()"> Solo con telemetría</label>
@@ -6220,38 +6079,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DINERO PÚBLICO ───── -->
     <div id="page-dinero" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#14532d 0%,#16a34a 50%,#22c55e 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(22,163,74,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">💰</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Dinero Público</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Deuda, contratos, indicadores macro y ASF · <strong>SHCP, ASF, Banxico, INEGI</strong>. Cada cifra enlaza al PDF oficial.</p>
-            </div>
-            <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SHCP →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="din-stat-dolar">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">USD/MXN</div></div>
-            <div style="font-size:14px;text-align:center"><div style="font-size:20px;font-weight:800;color:#fed7aa" id="din-stat-infla">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Inflación anual</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="din-stat-tasa">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tasa Banxico</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="din-stat-deuda">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% PIB deuda</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(22,163,74,0.08),rgba(22,163,74,0.02));border:1px solid rgba(22,163,74,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#86efac;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 Qué fuentes leemos · Frecuencia de actualización</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Cero invención. Cada KPI viene de una fuente del Estado mexicano con refresh propio:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">💱 Banxico</strong><br><span style="font-size:11px">FIX USD/MXN diario, tasa de referencia y dashboards.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📈 INEGI · INPC</strong><br><span style="font-size:11px">Inflación: días 10 y 25 mensuales.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">📑 SHCP · PEF/SHRFSP</strong><br><span style="font-size:11px">Deuda, ingresos, gasto. Refresh mensual.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔍 ASF · CCP</strong><br><span style="font-size:11px">Auditorías Cuenta Pública anual.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Verifica directamente: <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="color:#86efac">finanzaspublicas.hacienda.gob.mx</a> · <a href="https://www.banxico.org.mx" target="_blank" style="color:#86efac">banxico.org.mx</a></p>
-          </div>
-        </details>
         <div class="alert alert-info mb-16">
           <span>📊</span>
           <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Cada indicador enlaza al PDF oficial. Verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
@@ -6945,40 +6772,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMUNIDAD (Chat nativo Supabase Realtime) ───── -->
     <div id="page-comunidad" class="page">
       <div class="content" style="max-width:900px">
-        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#6366f1 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(55,48,163,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">💬</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comunidad Tequio</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Chat cívico en vivo · <strong>5 salas temáticas</strong> · sin terceros · soberanía digital.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🦎 CERO INVENCIÓN</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">5</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Salas activas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Anónimo</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Sin email</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Identidad</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No Discord/Telegram</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Storage MX</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(55,48,163,0.08),rgba(55,48,163,0.02));border:1px solid rgba(55,48,163,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a5b4fc;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 Reglas comunitarias · Cómo nos moderamos</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Sin moderadores top-down. La comunidad se modera entre sí por <strong>reportes y votos</strong>. Reglas mínimas:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🚫 No incitar violencia</strong><br><span style="font-size:11px">Amenazas, doxxing y llamados a violencia se ocultan.</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚠️ Cero spam</strong><br><span style="font-size:11px">Publicidad, scam y enlaces de marketing.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Cita fuentes</strong><br><span style="font-size:11px">Si afirmas un dato, linkéalo. Sin fuente = opinión.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🦎 Discrepar = OK</strong><br><span style="font-size:11px">Debate de buena fe siempre bienvenido. Insulto no.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Storage en Supabase (instancia tequio.app) · NO third-party · sin email · sin recolección de teléfono. El servidor solo guarda el mensaje y un id efímero.</p>
-          </div>
-        </details>
-        <!-- Hero original -->
-        <div style="background:linear-gradient(135deg,#1a1f3a 0%,#0a0f1e 100%);border-radius:14px;padding:20px;margin-bottom:16px;display:none">
+        <!-- Hero -->
+        <div style="background:linear-gradient(135deg,#1a1f3a 0%,#0a0f1e 100%);border-radius:14px;padding:20px;margin-bottom:16px">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💬 Chat Comunitario Tequio</div>
           <div style="font-size:13px;color:var(--text3)">Conversación cívica en vivo · 5 salas · sin terceros</div>
         </div>
@@ -7322,40 +7117,14 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── VERIFICACIÓN CIUDADANA ───── -->
     <div id="page-verificacion" class="page">
-      <!-- HERO Nivel 3 -->
-      <div class="content">
-        <div style="background:linear-gradient(135deg,#022c22 0%,#047857 50%,#10b981 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(16,185,129,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">✅</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Verificación Ciudadana</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿Cumplió lo que prometió? · Reporta, sube evidencia y vota si las denuncias son convincentes · <strong>IA analiza el contexto</strong>.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🗳️ COMUNIDAD</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="ver-stat-promesas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Promesas trackeadas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="ver-stat-pendientes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">⏳ Pendientes</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="ver-stat-cumplidas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">✅ Cumplidas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="ver-stat-rotas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">❌ Rotas</div></div>
-          </div>
+      <!-- HERO -->
+      <div style="background:linear-gradient(160deg,#022c22 0%,#064e3b 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(16,185,129,0.25);position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(16,185,129,0.15),transparent 60%);pointer-events:none"></div>
+        <div style="position:relative">
+          <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:#6ee7b7;margin-bottom:8px">✅ VERIFICACIÓN CIUDADANA · PROMESAS POLÍTICAS</div>
+          <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.2">¿Cumplió lo que prometió?<br>La ciudadanía verifica.</div>
+          <div style="font-size:12px;color:#6ee7b7;line-height:1.6;max-width:520px">Reporta cuando una promesa no se cumple, sube evidencia y vota si la denuncia de otros ciudadanos es convincente. La IA analiza el contexto.</div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#6ee7b7;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Cómo funciona la verificación ciudadana?</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Sistema de moderación distribuida tipo "Wikipedia de promesas". Cada caso pasa por 4 fases:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(16,185,129,0.10);border-left:3px solid #10b981;padding:8px 10px;border-radius:6px"><strong style="color:#6ee7b7">1️⃣ Reporte</strong><br><span style="font-size:11px">Cualquiera puede reportar una promesa rota con evidencia.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">2️⃣ Evidencia</strong><br><span style="font-size:11px">Link a video/declaración + comparación con la realidad.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">3️⃣ IA analiza</strong><br><span style="font-size:11px">Evalúa si la evidencia es coherente con la promesa.</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">4️⃣ Voto comunitario</strong><br><span style="font-size:11px">Si &gt;60% confirma, queda registrado como "promesa rota".</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ Las verificaciones NO son procedimiento legal. Son percepción ciudadana documentada con fuentes. Útil para presión social y prensa.</p>
-          </div>
-        </details>
       </div>
       <div class="content" style="padding-top:18px">
         <!-- Selector de político -->
@@ -7436,42 +7205,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── TESTIGO CÍVICO ───── -->
     <div id="page-testigo" class="page">
-      <!-- HERO Nivel 3 -->
-      <div class="content">
-        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">📸</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Testigo Cívico</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Documenta hechos de <strong>interés público</strong> con foto + ubicación · registro técnico ciudadano (no sustituye NOM-151).</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🔒 PRIVADO</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="tst-stat-reportes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Reportes guardados</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">SHA-256</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hash criptográfico</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">EXIF</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Metadatos</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Solo tú</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(37,99,235,0.08),rgba(37,99,235,0.02));border:1px solid rgba(37,99,235,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#93c5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Tiene valor legal? · Registro técnico vs prueba plena</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Documentación temprana = pre-evidencia útil. Para fuerza probatoria plena se requiere proceso adicional:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">✅ Útil para</strong><br><span style="font-size:11px">Denuncias ante CNDH/PROFECO, presión social, prensa, contexto.</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚠️ Limitación</strong><br><span style="font-size:11px">No es certificación notarial. Juez puede aceptar pero no obliga.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">📜 NOM-151</strong><br><span style="font-size:11px">Estándar oficial de conservación digital. PSC certificado.</span></div>
-              <div style="background:rgba(59,130,246,0.10);border-left:3px solid #3b82f6;padding:8px 10px;border-radius:6px"><strong style="color:#93c5fd">🔐 Privacidad</strong><br><span style="font-size:11px">Tequio NO ve tus fotos. Storage local en tu dispositivo.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Más info: <a href="https://www.gob.mx/se/acciones-y-programas/competitividad-y-normatividad-normalizacion-nom-151-scfi-2002" target="_blank" style="color:#93c5fd">NOM-151-SCFI-2002</a></p>
-          </div>
-        </details>
-      </div>
-      <!-- HERO original -->
+      <!-- HERO -->
       <div style="background:linear-gradient(160deg,#0a0f1e 0%,#1e3a5f 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(59,130,246,0.25);position:relative;overflow:hidden">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 30%,rgba(59,130,246,0.15),transparent 60%);pointer-events:none"></div>
         <div style="position:relative">
@@ -7691,41 +7425,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── OMBLIGO — MEMORIA HISTÓRICA ───── -->
     <div id="page-ombligo" class="page">
-      <!-- HERO Nivel 3 -->
-      <div class="content">
-        <div style="background:linear-gradient(135deg,#451a03 0%,#9a3412 50%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(154,52,18,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🪐</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Ombligo del Mundo</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">México visto desde el centro · <strong>cosmovisión mexica</strong> + raíces vivas · historia profunda como contexto cívico.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 RAÍZ</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">68</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Lenguas vivas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">364</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Variantes</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">~5%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hablantes indígenas MX</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INALI · INPI</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(154,52,18,0.08),rgba(154,52,18,0.02));border:1px solid rgba(154,52,18,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fdba74;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Por qué importa la cosmovisión en una app cívica?</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            La identidad cívica no nace del Estado moderno; nace de raíces más antiguas. Entenderlas ayuda a:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(154,52,18,0.10);border-left:3px solid #9a3412;padding:8px 10px;border-radius:6px"><strong style="color:#fdba74">🌽 Tequio</strong><br><span style="font-size:11px">Faena comunitaria mesoamericana — el ADN de esta app.</span></div>
-              <div style="background:rgba(217,119,6,0.10);border-left:3px solid #d97706;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📅 Calendario</strong><br><span style="font-size:11px">Cuenta del tiempo, fiestas, ciclos agrícolas.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Justicia</strong><br><span style="font-size:11px">Usos y costumbres reconocidos en Art. 2 CPEUM.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🗣️ Idiomas</strong><br><span style="font-size:11px">Náhuatl, maya, mixteco, zapoteco… aún vivas.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuentes: <a href="https://www.inali.gob.mx/" target="_blank" style="color:#fdba74">INALI</a> · <a href="https://www.gob.mx/inpi" target="_blank" style="color:#fdba74">INPI</a> · INAH · UNAM.</p>
-          </div>
-        </details>
-      </div>
       <!-- HERO FULL-BLEED (sin .content wrapper para que tome todo el ancho) -->
       <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#0d0500 0%,#1a0800 40%,#0e0418 100%);padding:36px 32px 28px;border-bottom:1px solid rgba(180,83,9,0.3)">
         <!-- SVG pattern: rueda de calendario estilizada -->
@@ -7879,38 +7578,12 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMPARADOR ───── -->
     <div id="page-comparador" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#3730a3 0%,#6366f1 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🆚</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comparador Electoral</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">IA compara <strong>partidos reales</strong> · Arena de propuestas ciudadanas · Sin sesgo editorial.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🧠 IA</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos vivos</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cmp-stat-temas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Temas comparados</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="cmp-stat-propuestas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Propuestas</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Plataformas oficiales</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
+        <div class="section-header mb-16">
+          <div>
+            <div style="font-size:22px;font-weight:700">⚖️ Comparador Electoral</div>
+            <div class="card-subtitle">IA compara partidos reales · Arena de propuestas ciudadanas</div>
           </div>
         </div>
-        <details style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(99,102,241,0.02));border:1px solid rgba(99,102,241,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿De dónde saca la IA las posiciones de cada partido?</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            La IA solo analiza fuentes oficiales del INE y los partidos. <strong>No inventa posiciones</strong>:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(99,102,241,0.10);border-left:3px solid #6366f1;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">📜 Plataformas electorales</strong><br><span style="font-size:11px">Documentos formales ante INE para cada elección.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">🏛️ Iniciativas legislativas</strong><br><span style="font-size:11px">Votos y propuestas registradas en Cámaras LXVI.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">📰 Declaraciones oficiales</strong><br><span style="font-size:11px">Comunicados, redes verificadas y prensa.</span></div>
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">⚠️ Sesgo conocido</strong><br><span style="font-size:11px">Si hay info contradictoria, la IA cita ambas fuentes.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Las plataformas electorales son públicas: <a href="https://www.ine.mx/" target="_blank" style="color:#c4b5fd">ine.mx</a> · Tu voto debe basarse en hechos, no en spots.</p>
-          </div>
-        </details>
         <!-- COMPARADOR DE PARTIDOS CON IA -->
         <div class="card mb-16" style="border-color:rgba(168,85,247,0.4);background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(99,102,241,0.04))">
           <div style="font-size:13px;font-weight:800;margin-bottom:4px">🧠 Comparar posiciones reales de partidos</div>
@@ -8075,41 +7748,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── SIMULADOR ───── -->
     <!-- ───── SIMULADOR DE VOTO 2027 ───── -->
     <div id="page-votosim" class="page">
-      <!-- HERO Nivel 3 -->
-      <div class="content">
-        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🗳️</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Voto Simulado</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Simula la <strong>boleta real</strong> de tu elección · práctica sin riesgo, descubre tus afinidades por tema.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🎯 PRÁCTICA</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">2027</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Próx. federal</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Privado</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INE oficial</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantilla boleta</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(67,56,202,0.08),rgba(67,56,202,0.02));border:1px solid rgba(67,56,202,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Para qué sirve la simulación?</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            La práctica con boletas reales reduce los <strong>votos nulos por confusión</strong> (la 4ª "fuerza electoral" en MX). Te ayuda a:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(67,56,202,0.10);border-left:3px solid #4338ca;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">📋 Familiarizarte</strong><br><span style="font-size:11px">Con el formato real INE: orden de partidos, posiciones, casillas.</span></div>
-              <div style="background:rgba(124,58,237,0.10);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">🧮 Comparar</strong><br><span style="font-size:11px">Tu intención de voto vs. los temas que más te importan.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Descubrir</strong><br><span style="font-size:11px">Afinidad: a veces votamos contra nuestros propios intereses.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🔐 Sin tracking</strong><br><span style="font-size:11px">Tequio NO ve tu elección. Solo tú.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuente oficial: <a href="https://www.ine.mx/" target="_blank" style="color:#c4b5fd">ine.mx</a> · Plataformas electorales y boleta oficial publicadas en cada proceso.</p>
-          </div>
-        </details>
-      </div>
       <!-- ══ INTRO ══ -->
       <div id="vs-intro">
         <!-- Hero -->
@@ -8649,38 +8287,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DERECHOS ───── -->
     <div id="page-derechos" class="page">
       <div class="content" style="max-width:900px">
-        <div style="background:linear-gradient(135deg,#0c4a6e 0%,#0284c7 50%,#0ea5e9 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(2,132,199,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🛡️</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tus Derechos</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Lo que la <strong>Constitución</strong> y los <strong>tratados internacionales</strong> garantizan · qué hacer cuando los violan.</p>
-            </div>
-            <a href="https://www.cndh.org.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CNDH →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">29</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Art. CPEUM</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">800 715 2000</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CNDH 24/7</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">911</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Emergencia</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Pacto SJ Costa Rica</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tratado madre</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(2,132,199,0.08),rgba(2,132,199,0.02));border:1px solid rgba(2,132,199,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#7dd3fc;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿A quién acudo si me violan un derecho?</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            La ruta correcta depende de QUIÉN viola tu derecho. Aquí los canales gratuitos:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(2,132,199,0.10);border-left:3px solid #0284c7;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">🏛️ Autoridad federal</strong><br><span style="font-size:11px">Queja CNDH · oficinas estatales · 800 715 2000.</span></div>
-              <div style="background:rgba(14,165,233,0.10);border-left:3px solid #0ea5e9;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">🏘️ Autoridad estatal</strong><br><span style="font-size:11px">Comisión Estatal DH (CEDH) — una por entidad.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🏢 Particular/empresa</strong><br><span style="font-size:11px">PROFECO (productos) · INAI (datos) · CONDUSEF (banco).</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Acto judicial</strong><br><span style="font-size:11px">Amparo · 15 días naturales · sin costo.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">📌 La queja ante CNDH/CEDH es <strong>gratuita y no necesita abogado</strong>. Investiga y emite recomendación a la autoridad.</p>
-          </div>
-        </details>
         <div class="alert alert-info mb-16">
           <span>ℹ️</span>
           <span>Información <strong>educativa y orientativa</strong>. Ante situaciones legales reales, consulta un abogado o contacta a la CNDH, Defensoría Pública o PROFECO.</span>
@@ -9123,44 +8729,16 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── GENERADOR DE ACCIONES ───── -->
     <div id="page-acciones" class="page">
       <div class="content" style="max-width:900px">
-        <div style="background:linear-gradient(135deg,#7c2d12 0%,#b45309 50%,#f59e0b 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(180,83,9,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">⚡</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Generador de Acciones</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Convierte tu situación en un <strong>documento legal listo para presentar</strong> · plantillas basadas en ley mexicana vigente.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(8px)">
-              <div style="font-size:18px;font-weight:800;font-family:var(--font-display)" id="accion-contador">—</div>
-              <div style="font-size:9px;opacity:0.85;letter-spacing:1px">DOCS GENERADOS</div>
-            </div>
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:22px;font-weight:800;margin-bottom:4px">⚡ Generador de Acciones</div>
+            <div style="font-size:13px;color:var(--text3)">Convierte tu situación en un documento legal listo para presentar</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">📄</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantillas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Gratis</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin pago</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Privado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">800 200 3030</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Def. pública</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;text-align:center">
+            <div style="font-size:18px;font-weight:800;font-family:var(--font-display);color:var(--accent2)" id="accion-contador">—</div>
+            <div style="font-size:9px;color:var(--text3);letter-spacing:1px">DOCS GENERADOS</div>
           </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(180,83,9,0.08),rgba(180,83,9,0.02));border:1px solid rgba(180,83,9,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Qué puedo generar? · Tipos de documentos cubiertos</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Documentos orientativos basados en ley vigente. <strong>Revisa siempre con un abogado o defensor público antes de presentar.</strong>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📨 Quejas y denuncias</strong><br><span style="font-size:11px">PROFECO, CONDUSEF, CNDH, Contraloría.</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">📋 Demanda laboral</strong><br><span style="font-size:11px">JCA / Tribunales Laborales — despido, salarios.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Amparo</strong><br><span style="font-size:11px">Demanda contra acto de autoridad · Art. 103 CPEUM.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🔐 Datos personales</strong><br><span style="font-size:11px">ARCO ante INAI (acceso, rectificación, cancelación, oposición).</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ NO sustituye asesoría legal. La <strong>Defensoría Pública Federal (800 200 3030)</strong> y las estatales son gratuitas.</p>
-          </div>
-        </details>
-        <!-- Header (mantenido por compat. JS) -->
-        <div style="display:none">
-          <div id="accion-contador-legacy">—</div>
         </div>
         <div class="alert alert-warn mb-16">
           <span>⚖️</span>
@@ -10699,38 +10277,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── ORGANÍZATE ───── -->
     <div id="page-organizacion" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#831843 0%,#be185d 50%,#ec4899 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(190,24,93,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">✊</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Organización Ciudadana</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Protesta, sindicatos, colectivos, fondeo · <strong>Art. 9 CPEUM</strong> protege tu derecho de reunión y asociación pacífica.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 ART. 9</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Categorías</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Art. 9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CPEUM</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Art. 123</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Trabajo</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Convenios OIT 87/98</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Internacional</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(190,24,93,0.08),rgba(190,24,93,0.02));border:1px solid rgba(190,24,93,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f9a8d4;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 Qué te protege la Constitución · Marco legal</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            Organizarte NO requiere permiso — es un derecho. Lo único es respetar 3 reglas:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(190,24,93,0.10);border-left:3px solid #be185d;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">✊ Pacífica</strong><br><span style="font-size:11px">Sin armas. La violencia transforma la protesta en delito.</span></div>
-              <div style="background:rgba(236,72,153,0.10);border-left:3px solid #ec4899;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">📋 Objeto lícito</strong><br><span style="font-size:11px">Causa pública, no contra orden constitucional.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">📣 Aviso (opcional)</strong><br><span style="font-size:11px">Marchas en CDMX se notifican 48 hrs antes (no autorización).</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚖️ Huelga</strong><br><span style="font-size:11px">Art. 123 CPEUM + LFT. Estallar requiere emplazamiento 10 días.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Más detalle: <a href="https://www.cndh.org.mx/" target="_blank" style="color:#f9a8d4">CNDH</a> · <a href="https://www.scjn.gob.mx/" target="_blank" style="color:#f9a8d4">SCJN</a> · Convenios OIT 87 y 98 (libertad sindical).</p>
-          </div>
-        </details>
         <div class="alert alert-info mb-16">
           <span>⚖️</span>
           <span>Toda organización ciudadana pacífica está protegida por el <strong>Art. 9 Constitucional</strong>. El derecho de reunión y asociación es fundamental en México.</span>
@@ -11529,38 +11075,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── AGENDA / MISSING STUBS ───── -->
     <div id="page-presupuesto" class="page">
       <div class="content" style="max-width:900px">
-        <div style="background:linear-gradient(135deg,#4a044e 0%,#86198f 50%,#c026d3 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(134,25,143,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">💸</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presupuesto Federal</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · cifras directas de SHCP.</p>
-            </div>
-            <a href="https://www.pef.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">PEF SHCP →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="pre-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">PEF 2026</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="pre-stat-pib">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% del PIB</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="pre-stat-percap">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Per cápita</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Aprobado Nov</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Última votación</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(134,25,143,0.08),rgba(134,25,143,0.02));border:1px solid rgba(134,25,143,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f0abfc;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Cómo se aprueba el PEF? · Calendario y actores</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            El PEF es la <strong>ley anual del gasto</strong>. Solo la Cámara de Diputados lo aprueba (no el Senado, Art. 74 fracción IV CPEUM):
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(134,25,143,0.10);border-left:3px solid #86198f;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">8 sept</strong><br><span style="font-size:11px">Ejecutivo (SHCP) envía Paquete Económico.</span></div>
-              <div style="background:rgba(192,38,211,0.10);border-left:3px solid #c026d3;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">Sept-Oct</strong><br><span style="font-size:11px">Comisión de Presupuesto y Cuenta Pública dictamina.</span></div>
-              <div style="background:rgba(232,121,249,0.10);border-left:3px solid #e879f9;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">15 nov</strong><br><span style="font-size:11px">Fecha límite constitucional de aprobación.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">DOF</strong><br><span style="font-size:11px">Publicación oficial → entra en vigor 1° enero.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Ramos = grandes categorías (Educación, Salud, Defensa…). Cada ramo tiene programas con su propio presupuesto. La <strong>ASF</strong> revisa cómo se gastó al año siguiente.</p>
-          </div>
-        </details>
         <div style="margin-bottom:16px">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💸 Dinero Público</div>
           <div style="font-size:13px;color:var(--text3)">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">PEF oficial SHCP →</a></div>
@@ -11605,38 +11119,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <div id="page-corrupcion" class="page">
       <div class="content" style="max-width:900px">
-        <div style="background:linear-gradient(135deg,#451a03 0%,#7c2d12 50%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(124,45,18,0.30)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
-            <div style="font-size:60px;line-height:1">🔍</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Radar de Corrupción</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Contratos, funcionarios y dependencias con <strong>señalamientos documentados</strong> · ASF, SFP, FGR, CompraNet.</p>
-            </div>
-            <a href="https://www.asf.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">ASF →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="cor-stat-casos">847</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Casos ASF 20-24</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="cor-stat-monto">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Monto observado</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cor-stat-deps">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Dependencias</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">5 años</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cuentas Públicas</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02));border:1px solid rgba(220,38,38,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fca5a5;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            <span>🤓 ¿Quién audita a quién? · Cadena de control</span>
-            <span style="font-size:11px">▾</span>
-          </summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
-            El sistema federal de auditoría tiene 4 actores con poderes distintos. Sin entender quién hace qué, no entiendes los señalamientos:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔍 ASF</strong><br><span style="font-size:11px">Auditoría Superior Federación · Cámara Diputados · independencia técnica.</span></div>
-              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">🏛️ SFP</strong><br><span style="font-size:11px">Función Pública · sancionadora interna del Ejecutivo.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ FGR</strong><br><span style="font-size:11px">Fiscalía General · investiga delitos por hechos de corrupción.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🏗️ CompraNet</strong><br><span style="font-size:11px">Plataforma de contrataciones · base de datos pública.</span></div>
-            </div>
-            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ "Señalamiento" ≠ sentencia. Una <strong>observación ASF</strong> es un hallazgo administrativo que requiere proceso. Verifica caso por caso en <a href="https://www.asf.gob.mx" target="_blank" style="color:#fca5a5">asf.gob.mx → Informes Anuales</a>.</p>
-          </div>
-        </details>
         <div style="font-size:22px;font-weight:800;margin-bottom:4px">🔍 Radar de Corrupción</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Contratos, funcionarios y dependencias con señalamientos documentados. Fuentes: ASF, SFP, FGR, CompraNet.</div>
         <!-- Stats · cifras agregadas curadas desde informes ASF, verificable en asf.gob.mx -->
@@ -26461,4 +25943,1404 @@ const OMBLIGO_MUSEOS = [
     color:'#1d4ed8',
     ubicacion:'Bosque de Chapultepec, Miguel Hidalgo, CDMX',
     costo:'$95 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–17:00 · Ce
+    horario:'Mar–Dom 9:00–17:00 · Cerrado lunes',
+    destaca:false,
+    descripcion:'Residencia de Maximiliano, sede de los Niños Héroes (1847), residencia presidencial hasta Lázaro Cárdenas. Murales de Siqueiros y O\'Gorman. Vista panorámica de la CDMX.',
+    porQueImporta:'Es el único lugar donde puedes ver en un solo espacio la historia del virreinato, la intervención francesa, el Porfiriato y la Revolución — en el escenario físico donde ocurrió.',
+    salas:['Sala del Virreinato','Sala del Imperio de Maximiliano','Sala de la Reforma y República Restaurada','Sala del Porfiriato','Sala de la Revolución']
+  },
+  {
+    nombre:'Museo Nacional de la Revolución',
+    subtitulo:'Dentro del Monumento a la Revolución — la historia de 1910 en el corazón de la ciudad',
+    emoji:'🌵',
+    color:'#dc2626',
+    ubicacion:'Plaza de la República, Cuauhtémoc, CDMX',
+    costo:'$45 MXN general',
+    horario:'Mar–Dom 9:00–17:00 · Sáb 9:00–20:00 · Cerrado lunes',
+    destaca:false,
+    descripcion:'El Monumento alberga las tumbas de Madero, Plutarco Elías Calles, Lázaro Cárdenas y Francisco Villa. El museo documenta 1910–1940 con fotografías, armas y documentos originales.',
+    porQueImporta:'Para entender cómo la Revolución creó las instituciones que aún rigen al país: PEMEX, ejidos, los derechos laborales del art. 123, la educación pública gratuita.',
+    salas:['Sala de la Revolución 1910','Sala de Madero y el Porfiriato','Sala Constitución 1917','Sala del Cardenismo']
+  },
+  {
+    nombre:'Museo Casa de Hidalgo',
+    subtitulo:'La casa del Padre de la Patria en Dolores Hidalgo, Guanajuato',
+    emoji:'🔔',
+    color:'#059669',
+    ubicacion:'Dolores Hidalgo, Guanajuato',
+    costo:'$55 MXN general',
+    horario:'Mar–Sáb 10:00–17:45 · Dom 10:00–14:45 · Cerrado lunes',
+    destaca:false,
+    descripcion:'La casa donde vivió Miguel Hidalgo y Costilla. Objetos personales, documentos originales. Centro de peregrinación cívica cada 15–16 de septiembre. A pasos de la parroquia donde sonó el Grito.',
+    porQueImporta:'Para entender los orígenes de la Independencia más allá del mito — Hidalgo fue un cura ilustrado y economista que defendía industrias locales contra el monopolio colonial.',
+    salas:['Sala biográfica de Hidalgo','Sala de documentos históricos','Exhibición del Movimiento de Independencia']
+  }
+];
+const OMBLIGO_ZONAS = [
+  {
+    nombre:'Teotihuacán',
+    subtitulo:'La Ciudad de los Dioses · La metrópolis más grande de América en el año 500 d.C.',
+    emoji:'🔺',
+    color:'#d97706',
+    estado:'Estado de México',
+    periodo:'100 a.C. – 650 d.C.',
+    costo:'$90 MXN general · Domingos gratis para mexicanos',
+    horario:'Todos los días 9:00–17:00',
+    distancia:'~50 km al NE de la CDMX · 1 hora en camión desde Terminal del Norte',
+    destacado:'Pirámide del Sol (216m de base) · Pirámide de la Luna · Calzada de los Muertos · Palacio de Quetzalpapálotl',
+    descripcion:'La ciudad planificada más grande de Mesoamérica. En su apogeo tenía 125,000 habitantes — más que Roma en el mismo periodo. Quién la construyó sigue siendo misterio; los aztecas llegaron cuando ya estaba abandonada.',
+    patrimonio:true
+  },
+  {
+    nombre:'Monte Albán',
+    subtitulo:'Capital zapoteca sobre una montaña aplanada · 2,500 años de historia continua',
+    emoji:'⛰️',
+    color:'#16a34a',
+    estado:'Oaxaca',
+    periodo:'500 a.C. – 700 d.C.',
+    costo:'$90 MXN general',
+    horario:'Todos los días 8:00–17:00',
+    distancia:'~10 km al O de Oaxaca city · 20 min en taxi o colectivo',
+    destacado:'Gran Plaza · Plataforma Sur · Observatorio · Galería de los Danzantes · 170+ tumbas exploradas',
+    descripcion:'Los zapotecos aplanaron una montaña entera para construir su capital. La Galería de los Danzantes muestra las primeras representaciones de escritura en Mesoamérica. Ciudad sagrada durante 1,200 años continuos.',
+    patrimonio:true
+  },
+  {
+    nombre:'Palenque',
+    subtitulo:'La joya maya en la selva chiapaneca · Arquitectura y astronomía extraordinarias',
+    emoji:'🌿',
+    color:'#0891b2',
+    estado:'Chiapas',
+    periodo:'200 – 900 d.C.',
+    costo:'$90 MXN general',
+    horario:'Todos los días 8:00–17:00',
+    distancia:'8 km de Palenque ciudad · Taxi o colectivo',
+    destacado:'Templo de las Inscripciones · Tumba de Pakal · Palacio con torre observatorio · Templo de la Cruz',
+    descripcion:'Donde se descubrió la tumba del rey Pakal en 1952 — el mayor hallazgo arqueológico de México del siglo XX. El Templo de las Inscripciones contiene el texto histórico maya más largo conocido. La selva la rodea: ambiente incomparable.',
+    patrimonio:true
+  },
+  {
+    nombre:'Chichén Itzá',
+    subtitulo:'Una de las 7 Maravillas del Mundo Moderno · El calendario maya en piedra',
+    emoji:'🏛️',
+    color:'#7c3aed',
+    estado:'Yucatán',
+    periodo:'600 – 1200 d.C.',
+    costo:'$571 MXN aprox (federal + estatal combinado)',
+    horario:'Todos los días 8:00–17:00',
+    distancia:'~200 km de Mérida · 2.5h en bus desde Mérida o Cancún',
+    destacado:'El Castillo (Pirámide de Kukulcán, 365 escalones) · Templo de los Guerreros · El Caracol observatorio · Cenote Sagrado',
+    descripcion:'El Castillo es un calendario en piedra: 365 escalones, 52 paneles, el fenómeno del equinoccio donde "la serpiente baja" por la escalinata norte. La acústica del Juego de Pelota es un logro de ingeniería sin paralelo en el mundo antiguo.',
+    patrimonio:true
+  },
+  {
+    nombre:'Tula (Tollán)',
+    subtitulo:'Capital tolteca · Los Atlantes y el mito de Quetzalcóatl',
+    emoji:'🗿',
+    color:'#9f1239',
+    estado:'Hidalgo',
+    periodo:'700 – 1150 d.C.',
+    costo:'$75 MXN general',
+    horario:'Mar–Dom 9:00–17:00',
+    distancia:'~80 km al N de la CDMX · 1.5h desde Central del Norte',
+    destacado:'Atlantes (4 figuras guerreras de 4.6m) · Pirámide B · Palacio Quemado · Tzompantli (altar de cráneos)',
+    descripcion:'Capital del Imperio Tolteca que influyó en toda Mesoamérica. Los Atlantes son los guardianes más fotografiados de México después del Ángel de la Independencia. El mito de Quetzalcóatl-Topiltzin nace aquí y viaja hasta los mayas de Yucatán.',
+    patrimonio:false
+  },
+  {
+    nombre:'El Tajín',
+    subtitulo:'La ciudad de los nichos · Centro del ritual del Volador de Papantla',
+    emoji:'🌀',
+    color:'#0369a1',
+    estado:'Veracruz',
+    periodo:'600 – 1200 d.C.',
+    costo:'$80 MXN general',
+    horario:'Todos los días 9:00–17:00',
+    distancia:'~20 km de Papantla · Colectivo desde Papantla',
+    destacado:'Pirámide de los Nichos (365 nichos = año solar) · Juegos de Pelota · Complejo de columnas · Voladores en vivo',
+    descripcion:'La Pirámide de los Nichos es única en Mesoamérica: 365 nichos representan el año solar. El Volador de Papantla, ritual que se practica en el sitio, es Patrimonio Cultural Inmaterial de la Humanidad por la UNESCO.',
+    patrimonio:true
+  }
+];
+let ombligoIniciado = false;
+function initOmbligo() {
+  if (ombligoIniciado) return;
+  ombligoIniciado = true;
+  renderOmbligoTimeline();
+  renderOmbligoMuseos();
+  renderOmbligoZonas();
+  // Cargar zonas y museos INAH desde Supabase (195 zonas + 165 museos)
+  fetch('/api/data?vista=ombligo_zonas').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.zonas)) return;
+    const ya = new Set(OMBLIGO_ZONAS.map(z => (z.nombre || '').toLowerCase()));
+    const reales = j.zonas.filter(z => !ya.has((z.nombre || '').toLowerCase())).map(z => ({
+      nombre: z.nombre, estado: z.estado,
+      subtitulo: z.responsable || 'Zona Arqueológica INAH',
+      emoji: '🏛️', color: '#d97706', periodo: 'Prehispánico',
+      costo: 'Ver inah.gob.mx',
+      horario: z.condicion === 'Cerrada' ? 'Cerrada' : (z.condicion === 'Temporalmente cerrada' ? 'Temp. cerrada' : 'Consultar INAH'),
+      descripcion: 'Sitio bajo resguardo del ' + (z.responsable || 'INAH') + '.',
+      fuenteINAH: true,
+    }));
+    if (reales.length) { OMBLIGO_ZONAS.push(...reales); renderOmbligoZonas(); }
+    const c = document.getElementById('ombligo-zonas-count');
+    if (c) c.textContent = OMBLIGO_ZONAS.length + '+';
+  }).catch(() => {});
+  fetch('/api/data?vista=ombligo_museos').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !Array.isArray(j.museos)) return;
+    const ya = new Set(OMBLIGO_MUSEOS.map(m => (m.nombre || '').toLowerCase()));
+    const reales = j.museos.filter(m => !ya.has((m.nombre || '').toLowerCase())).map(m => ({
+      nombre: m.nombre, ciudad: m.estado,
+      subtitulo: m.responsable || 'Museo del INAH',
+      emoji: '🏛️', color: '#3b82f6',
+      horario: m.condicion === 'Cerrado' ? 'Cerrado' : 'Consultar INAH',
+      costo: 'Ver inah.gob.mx',
+      descripcion: 'Recinto del INAH. ' + (m.ubicacion_fisica || ''),
+      fuenteINAH: true,
+    }));
+    if (reales.length) { OMBLIGO_MUSEOS.push(...reales); renderOmbligoMuseos(); }
+    const c = document.getElementById('ombligo-museos-count');
+    if (c) c.textContent = OMBLIGO_MUSEOS.length + '+';
+  }).catch(() => {});
+}
+function ombligoTab(tab) {
+  ombligoTabActual = tab;
+  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e', unesco:'#22c55e', lenguas:'#a855f7' };
+  ['timeline','museos','zonas','unesco','lenguas'].forEach(t => {
+    const panel = document.getElementById('opanel-' + t);
+    const btn   = document.getElementById('otab-' + t);
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      const isActive = t === tab;
+      btn.style.color = isActive ? 'var(--text)' : 'var(--text2)';
+      btn.style.fontWeight = isActive ? '700' : '600';
+      btn.style.borderBottom = isActive ? `2px solid ${colorMap[t]}` : '2px solid transparent';
+    }
+  });
+  if (tab === 'unesco' && typeof cargarOmbligoUNESCO === 'function') cargarOmbligoUNESCO();
+  if (tab === 'lenguas' && typeof cargarOmbligoLenguas === 'function') cargarOmbligoLenguas();
+}
+let _lenguasData = null;
+let _lenguasFamilia = 'todas';
+async function cargarOmbligoLenguas() {
+  if (_lenguasData) { renderLenguas(); return; }
+  try {
+    const r = await fetch('/api/data?vista=lenguas');
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.lenguas) || !j.lenguas.length) return;
+    _lenguasData = j;
+    // Render filtro de familia
+    const filtro = document.getElementById('lenguas-familia-filtro');
+    if (filtro) {
+      const familias = Object.keys(j.por_familia).sort((a,b) => j.por_familia[b] - j.por_familia[a]);
+      filtro.innerHTML = `<button class="lengua-fchip" onclick="filtrarLenguas('todas')" style="padding:5px 11px;border-radius:14px;border:1px solid #a855f7;background:#a855f7;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Todas (${j.total})</button>` +
+        familias.map(f => `<button class="lengua-fchip" onclick="filtrarLenguas('${f.replace(/'/g, "\\'")}')" style="padding:5px 11px;border-radius:14px;border:1px solid rgba(168,85,247,0.35);background:rgba(168,85,247,0.10);color:#c4b5fd;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">${f} (${j.por_familia[f]})</button>`).join('');
+    }
+    renderLenguas();
+  } catch (e) {
+    console.warn('Ombligo lenguas:', e);
+  }
+}
+window.cargarOmbligoLenguas = cargarOmbligoLenguas;
+function filtrarLenguas(familia) {
+  _lenguasFamilia = familia;
+  // Update filter button styles
+  document.querySelectorAll('.lengua-fchip').forEach(b => {
+    const isActive = b.textContent.startsWith(familia === 'todas' ? 'Todas' : familia);
+    b.style.background = isActive ? '#a855f7' : 'rgba(168,85,247,0.10)';
+    b.style.color = isActive ? '#fff' : '#c4b5fd';
+  });
+  renderLenguas();
+}
+window.filtrarLenguas = filtrarLenguas;
+function renderLenguas() {
+  if (!_lenguasData) return;
+  const el = document.getElementById('ombligo-lenguas');
+  if (!el) return;
+  const filtradas = _lenguasFamilia === 'todas' ? _lenguasData.lenguas : _lenguasData.lenguas.filter(l => l.familia === _lenguasFamilia);
+  const riesgoColor = { 'no riesgo': '#22c55e', 'vulnerable': '#fbbf24', 'en peligro': '#f97316', 'crítico': '#ef4444' };
+  const riesgoLabel = { 'no riesgo': 'No riesgo', 'vulnerable': '⚠️ Vulnerable', 'en peligro': '🔥 En peligro', 'crítico': '🚨 CRÍTICO' };
+  el.innerHTML = filtradas.map(l => {
+    const c = riesgoColor[l.riesgo] || '#a855f7';
+    const hablantes = l.hablantes ? l.hablantes.toLocaleString('es-MX') : 'N/D';
+    return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-size:24px">🪶</span>
+        <span style="font-size:14px;font-weight:800;color:var(--text)">${l.nombre}</span>
+        <span style="background:rgba(168,85,247,0.15);color:#c4b5fd;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${l.familia}</span>
+        <span style="background:${c}22;color:${c};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${riesgoLabel[l.riesgo] || l.riesgo}</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--text3);font-weight:600">${hablantes} hablantes</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:4px">${l.descripcion || ''}</div>
+      <div style="font-size:10px;color:var(--text3)">📍 ${(l.estados || []).join(' · ')} ${l.variantes > 1 ? ' · ' + l.variantes + ' variantes' : ''}</div>
+    </div>`;
+  }).join('');
+}
+// Cargar 36 sitios UNESCO de México y renderizar
+async function cargarOmbligoUNESCO() {
+  const el = document.getElementById('ombligo-unesco');
+  if (!el || el.dataset.loaded === 'yes') return;
+  try {
+    const r = await fetch('/api/data?vista=unesco');
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.sitios) || !j.sitios.length) return;
+    const colorTipo = { cultural: '#3b82f6', natural: '#22c55e', mixto: '#a855f7' };
+    const labelTipo = { cultural: '🏛️ CULTURAL', natural: '🌿 NATURAL', mixto: '🌐 MIXTO' };
+    el.innerHTML = j.sitios.map(s => {
+      const c = colorTipo[s.tipo] || '#d97706';
+      return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="font-size:24px">${s.emoji || '🏛️'}</span>
+          <span style="background:${c}22;color:${c};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${labelTipo[s.tipo] || s.tipo.toUpperCase()}</span>
+          <span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${s.anio_inscripcion}</span>
+          ${s.en_peligro ? '<span style="background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">⚠️ EN PELIGRO</span>' : ''}
+          <span style="margin-left:auto;font-size:11px;color:var(--text3)">${(s.estados || []).join(' · ')}</span>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:5px">${s.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.55">${s.descripcion || ''}</div>
+      </div>`;
+    }).join('');
+    el.dataset.loaded = 'yes';
+    const cont = document.getElementById('ombligo-unesco-count');
+    if (cont) cont.textContent = j.total;
+  } catch (e) {
+    console.warn('Ombligo UNESCO:', e);
+  }
+}
+window.cargarOmbligoUNESCO = cargarOmbligoUNESCO;
+function renderOmbligoTimeline() {
+  const el = document.getElementById('ombligo-timeline');
+  const nav = document.getElementById('ombligo-era-nav');
+  if (!el) return;
+  // Era mini-nav
+  if (nav) {
+    nav.innerHTML = OMBLIGO_TIMELINE.map(era => `
+      <button onclick="ombligoJumpEra('oera-${era.id}')" title="${era.rango}"
+        style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid ${era.color}40;background:${era.color}12;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s"
+        onmouseover="this.style.background='${era.color}28';this.style.color='var(--text)'"
+        onmouseout="this.style.background='${era.color}12';this.style.color='var(--text2)'">
+        <span style="font-size:12px">${era.emoji}</span>
+        <span style="white-space:nowrap">${era.era.split(' ')[0]} ${era.era.split(' ')[1] || ''}</span>
+      </button>`).join('');
+  }
+  el.innerHTML = OMBLIGO_TIMELINE.map((era, i) => `
+    <div style="display:flex;gap:0;position:relative" id="era-wrap-${era.id}">
+      <!-- Columna izq: nodo + línea -->
+      <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0">
+        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
+          style="width:40px;height:40px;border-radius:50%;background:${era.color}18;border:2px solid ${era.color}70;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;z-index:1;transition:all 0.2s;outline:none"
+          onmouseover="this.style.background='${era.color}35';this.style.borderColor='${era.color}'"
+          onmouseout="this.style.background='${era.color}18';this.style.borderColor='${era.color}70'"
+          id="era-btn-${era.id}">${era.emoji}</button>
+        ${i < OMBLIGO_TIMELINE.length - 1
+          ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,${era.color}50,${OMBLIGO_TIMELINE[i+1].color}30);margin:2px 0"></div>`
+          : ''}
+      </div>
+      <!-- Contenido -->
+      <div style="flex:1;padding:2px 0 24px 16px;min-width:0">
+        <!-- Header siempre visible -->
+        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
+          style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${era.era}</span>
+            <span style="font-size:9px;font-weight:700;color:${era.color};background:${era.color}15;border:1px solid ${era.color}30;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap">${era.rango}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">${era.resumen}</div>
+        </button>
+        <!-- Expanded card -->
+        <div id="oera-${era.id}" style="display:none;margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid ${era.color}30">
+          <!-- Color header strip -->
+          <div style="background:linear-gradient(135deg,${era.color}25,${era.color}10);padding:12px 16px;border-bottom:1px solid ${era.color}20">
+            <div style="font-size:10px;font-weight:700;color:${era.color};letter-spacing:2px;text-transform:uppercase">${era.emoji} ${era.era} · ${era.rango}</div>
+          </div>
+          <!-- Body -->
+          <div style="background:var(--surface);padding:16px;font-size:13px;line-height:1.65;color:var(--text)">
+            ${era.cuerpo}
+            <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px">
+              📚 <span>${era.fuente}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function ombligoEraToggle(id, wrapId) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Scroll into view when opening
+  if (!isOpen && wrapId) {
+    setTimeout(() => {
+      const wrap = document.getElementById(wrapId);
+      if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }, 50);
+  }
+}
+function ombligoJumpEra(id) {
+  // Open and scroll to era
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'block';
+  setTimeout(() => {
+    const eraId = id.replace('oera-','era-wrap-');
+    const wrap = document.getElementById(eraId);
+    if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 80);
+}
+function renderOmbligoMuseos(){const el=document.getElementById('ombligo-museos');if(!el)return;el.innerHTML=OMBLIGO_MUSEOS.map(m=>{const c=m.color||'#3b82f6';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${m.emoji||'🏛️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>${m.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad||m.ubicacion||''}</span></div>${m.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>`:''}${m.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${m.horario?`<span>🕐 ${m.horario}</span>`:''}${m.costo?`<span>💰 ${m.costo}</span>`:''}</div></div>`;}).join('');}
+function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?`<span>💰 ${z.costo}</span>`:''}</div></div>`;}).join('');}
+window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
+</script>
+<!-- ════════ SOS FAB ════════ -->
+<div id="sos-fab">
+  <div id="sos-menu">
+    <div class="sos-menu-header">🆘 Ayuda rápida</div>
+    <div class="sos-menu-item" onclick="sosGo('emergencia')"><span class="sos-icon">🚨</span><div><div>Modo Emergencia 24/7</div><div class="sos-desc">Lee tus derechos en voz alta + 911</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('servicios')"><span class="sos-icon">🆘</span><div><div>Servicios Públicos</div><div class="sos-desc">Teléfonos verificados (CFE, IMSS, fiscalías)</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('generador')"><span class="sos-icon">⚖️</span><div><div>Genera denuncia legal</div><div class="sos-desc">Plantillas oficiales (CNDH, INAI, Profeco, OIC)</div></div></div>
+    <div class="sos-menu-item" onclick="sosGo('offline')"><span class="sos-icon">📵</span><div><div>Sin Internet</div><div class="sos-desc">Contenido cacheado offline</div></div></div>
+  </div>
+  <button id="sos-btn" onclick="toggleSosMenu()" aria-label="SOS - Ayuda de emergencia">SOS</button>
+</div>
+<!-- ════════ BOTTOM NAV (móvil) ════════ -->
+<nav class="bottom-nav" role="navigation" aria-label="Navegación rápida">
+  <button class="bottom-nav-item" onclick="if(window.showPage)showPage('dashboard')"><span class="bn-icon">🏠</span><span class="bn-label">Inicio</span></button>
+  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('servicios')"><span class="bn-icon">🆘</span><span class="bn-label">Servicios</span></button>
+  <button class="bottom-nav-item bn-emergencia" onclick="if(window.cargarPanel)cargarPanel('emergencia')"><span class="bn-icon">🚨</span><span class="bn-label">Emergencia</span></button>
+  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('estado')"><span class="bn-icon">🗺️</span><span class="bn-label">Estado</span></button>
+  <button class="bottom-nav-item" onclick="if(window.toggleSidebar)toggleSidebar();else if(window.openSidebar)openSidebar()"><span class="bn-icon">📋</span><span class="bn-label">Más</span></button>
+</nav>
+<!-- ════════ ACCESIBILIDAD MODAL ════════ -->
+<div id="acc-modal" onclick="cerrarAccesibilidad(event)">
+  <div class="acc-box" onclick="event.stopPropagation()">
+    <h3>Accesibilidad</h3>
+    <div class="acc-sub">Ajusta el tamaño del texto y el contraste.</div>
+    <div class="acc-section">
+      <div class="acc-label">Tamaño de texto</div>
+      <div class="acc-row">
+        <button class="acc-btn" id="acc-size-pequeno" onclick="setFontSize('pequeno')">Pequeño</button>
+        <button class="acc-btn" id="acc-size-normal" onclick="setFontSize('normal')">Normal</button>
+        <button class="acc-btn" id="acc-size-grande" onclick="setFontSize('grande')">Grande</button>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-label">Contraste</div>
+      <div class="acc-row">
+        <button class="acc-btn" id="acc-contraste-off" onclick="setContraste(false)">Normal</button>
+        <button class="acc-btn" id="acc-contraste-on" onclick="setContraste(true)">Alto Contraste</button>
+      </div>
+    </div>
+    <div class="acc-actions">
+      <button class="acc-btn" onclick="resetAccesibilidad()">Reset</button>
+      <button class="acc-btn" onclick="document.getElementById('acc-modal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+<!-- ════════ MIGRATED UX JS (FASE 1) ════════ -->
+<script>
+// === SOS FAB ===
+function toggleSosMenu() {
+  document.getElementById('sos-menu').classList.toggle('open');
+}
+function sosGo(slug) {
+  document.getElementById('sos-menu').classList.remove('open');
+  // Map de SOS slugs a paneles reales (ya no hay fallback a 'emergencia')
+  const SOS_MAP = {
+    'emergencia': 'emergencia',
+    'servicios': 'servicios',
+    'generador': 'generador',
+    'offline': 'offline'
+  };
+  const target = SOS_MAP[slug] || slug;
+  if (window.cargarPanel) cargarPanel(target);
+}
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#sos-fab')) {
+    var m = document.getElementById('sos-menu');
+    if (m) m.classList.remove('open');
+  }
+});
+// === ACCESIBILIDAD ===
+function abrirAccesibilidad() {
+  document.getElementById('acc-modal').style.display = 'flex';
+  syncAccButtons();
+}
+function cerrarAccesibilidad(e) {
+  if (e && e.target.id !== 'acc-modal') return;
+  document.getElementById('acc-modal').style.display = 'none';
+}
+function syncAccButtons() {
+  var cls = document.documentElement.classList;
+  var size = cls.contains('font-grande') ? 'grande' : cls.contains('font-pequeno') ? 'pequeno' : 'normal';
+  ['pequeno','normal','grande'].forEach(function(s){
+    var el = document.getElementById('acc-size-'+s);
+    if (el) el.classList.toggle('active', s===size);
+  });
+  var alto = cls.contains('alto-contraste');
+  var on = document.getElementById('acc-contraste-on');
+  var off = document.getElementById('acc-contraste-off');
+  if (on) on.classList.toggle('active', alto);
+  if (off) off.classList.toggle('active', !alto);
+}
+function setFontSize(size) {
+  var cls = document.documentElement.classList;
+  cls.remove('font-pequeno','font-grande');
+  if (size === 'pequeno') cls.add('font-pequeno');
+  if (size === 'grande') cls.add('font-grande');
+  try { localStorage.setItem('tequio_font_size', size); } catch(e){}
+  syncAccButtons();
+}
+function setContraste(alto) {
+  document.documentElement.classList.toggle('alto-contraste', !!alto);
+  try { localStorage.setItem('tequio_alto_contraste', alto ? '1' : '0'); } catch(e){}
+  syncAccButtons();
+}
+function resetAccesibilidad() { setFontSize('normal'); setContraste(false); }
+function loadAccesibilidadSettings() {
+  try {
+    var size = localStorage.getItem('tequio_font_size');
+    if (size && size !== 'normal') setFontSize(size);
+    if (localStorage.getItem('tequio_alto_contraste') === '1') setContraste(true);
+  } catch(e){}
+}
+document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
+// Bug 2 fix: busqueda global con autocomplete
+(function() {
+  function initBusquedaGlobal() {
+    const input = document.querySelector('input[placeholder*="Buscar leyes"]');
+    if (!input) return false;
+    if (input.dataset.bgInit === '1') return true;
+    input.dataset.bgInit = '1';
+    const dropdown = document.createElement('div');
+    dropdown.id = 'busqueda-dropdown';
+    dropdown.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:#1f2937;border:1px solid #374151;border-radius:8px;max-height:400px;overflow-y:auto;display:none;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-top:4px;';
+    input.parentElement.style.position = 'relative';
+    input.parentElement.appendChild(dropdown);
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+    let timer = null;
+    input.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      if (timer) clearTimeout(timer);
+      if (q.length < 2) { dropdown.style.display = 'none'; return; }
+      timer = setTimeout(async () => {
+        try {
+          const r = await fetch('/api/data?vista=buscador_global&q=' + encodeURIComponent(q));
+          const data = await r.json();
+          if (!data.items || !data.items.length) {
+            dropdown.innerHTML = '<div style="padding:12px;color:#9ca3af;font-size:13px;">Sin resultados.</div>';
+          } else {
+            dropdown.innerHTML = data.items.map(it => '<a href="' + escapeHtml(it.link || '#') + '" style="display:block;padding:10px 14px;border-bottom:1px solid #374151;color:#e5e7eb;text-decoration:none;font-size:13px;" onmouseover="this.style.background=\'rgba(251,191,36,0.1)\';" onmouseout="this.style.background=\'transparent\';"><div style="display:flex;align-items:center;gap:8px;"><span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;">' + escapeHtml(it.tipo) + '</span><span style="font-weight:600;">' + escapeHtml(it.titulo) + '</span></div>' + (it.sub ? '<div style="color:#9ca3af;font-size:11px;margin-top:2px;margin-left:50px;">' + escapeHtml(it.sub) + '</div>' : '') + '</a>').join('');
+          }
+          dropdown.style.display = 'block';
+        } catch (err) {}
+      }, 250);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const first = dropdown.querySelector('a');
+        if (first && dropdown.style.display !== 'none') { e.preventDefault(); first.click(); }
+      }
+      if (e.key === 'Escape') dropdown.style.display = 'none';
+    });
+    document.addEventListener('click', (e) => {
+      if (!input.parentElement.contains(e.target)) dropdown.style.display = 'none';
+    });
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initBusquedaGlobal, 200));
+  } else {
+    setTimeout(initBusquedaGlobal, 200);
+  }
+  setTimeout(initBusquedaGlobal, 1500);
+  setTimeout(initBusquedaGlobal, 4000);
+})();
+// Bug 3 fix: reemplazar loading eterno de "Tu Representante" con CTA real
+(function() {
+  function fixTuRepresentante() {
+    const card = document.getElementById('dash-diputado-card');
+    if (!card) return false;
+    if (card.dataset.tuRepFixed === '1') return true;
+    // Check if it has data already loaded (presence of partido name, voting info, etc)
+    const txt = (card.textContent || '').toLowerCase();
+    const isLoading = txt.includes('cargando') || txt.trim().length < 60;
+    if (!isLoading) { card.dataset.tuRepFixed = '1'; return true; }
+    const estadoClave = (function(){
+      try { return localStorage.getItem('tequio_estado_clave') || localStorage.getItem('estado_clave') || localStorage.getItem('user_estado'); }
+      catch(e){ return null; }
+    })();
+    if (!estadoClave) {
+      // No onboarding: show CTA
+      const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
+      const cta = '<div style="text-align:center;padding:0.8rem 0.5rem;">' +
+        '<div style="font-size:1.8rem;margin-bottom:0.4rem;">' + String.fromCodePoint(0x1F3DB) + '</div>' +
+        '<div style="color:#9ca3af;font-size:0.85rem;line-height:1.4;margin-bottom:0.7rem;">Configura tu estado para ver a tu diputado.</div>' +
+        '<button onclick="(window.cargarPanel && cargarPanel(\'perfil\'))||(window.cargarPagina && cargarPagina(\'perfil\'))||(window.irPerfil && irPerfil())" style="background:#fbbf24;color:#111;border:none;padding:0.5rem 1rem;border-radius:0.4rem;font-weight:700;cursor:pointer;font-size:0.85rem;">Configurar ' + String.fromCharCode(8594) + '</button>' +
+        '</div>';
+      if (placeholder) {
+        placeholder.innerHTML = cta;
+      } else {
+        // Find the inner div that holds "Cargando..." and replace
+        const divs = card.querySelectorAll('div');
+        for (const d of divs) {
+          if ((d.textContent || '').includes('Cargando')) {
+            d.innerHTML = cta;
+            break;
+          }
+        }
+      }
+      card.dataset.tuRepFixed = '1';
+      return true;
+    } else {
+      // Has estado: try fetching directorio_estado, replace loading
+      fetch('/api/data?vista=directorio_estado&clave=' + encodeURIComponent(estadoClave))
+        .then(r => r.json())
+        .then(data => {
+          const dip = (data && (data.diputados_federales || data.diputados || []))[0];
+          const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
+          const html = dip
+            ? '<div style="font-weight:700;color:#fbbf24;">' + (dip.nombre || '') + '</div><div style="color:#9ca3af;font-size:0.8rem;margin-top:0.2rem;">' + (dip.partido || '') + ' \u00b7 ' + (dip.entidad || '') + '</div>'
+            : '<div style="color:#9ca3af;font-size:0.85rem;">No se encontr' + String.fromCharCode(243) + ' representante para tu estado.</div>';
+          if (placeholder) placeholder.innerHTML = html;
+          else {
+            const divs = card.querySelectorAll('div');
+            for (const d of divs) {
+              if ((d.textContent || '').includes('Cargando')) { d.innerHTML = html; break; }
+            }
+          }
+          card.dataset.tuRepFixed = '1';
+        })
+        .catch(() => {
+          const divs = card.querySelectorAll('div');
+          for (const d of divs) {
+            if ((d.textContent || '').includes('Cargando')) {
+              d.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;">Error al cargar.</div>';
+              break;
+            }
+          }
+          card.dataset.tuRepFixed = '1';
+        });
+      return true;
+    }
+  }
+  window.renderTuRepresentanteCard = fixTuRepresentante;
+  // Trigger after dashboard mount
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(fixTuRepresentante, 2500));
+  } else {
+    setTimeout(fixTuRepresentante, 2500);
+  }
+  // Retries because existing code may also be trying to populate
+  setTimeout(fixTuRepresentante, 5000);
+  setTimeout(fixTuRepresentante, 9000);
+})();
+</script>
+<script>
+(async function cargarDeudaHome(){
+  try {
+    const r = await fetch('/api/data?vista=deuda', {cache:'no-store'});
+    if (!r.ok) return;
+    const j = await r.json();
+    const u = j && j.ultimo;
+    if (!u) return;
+    const monto = u.shrfsp_total_mxn;
+    const pib = u.shrfsp_porcentaje_pib;
+    if (typeof monto === 'number') {
+      const elMonto = document.querySelector('[data-deuda-monto]');
+      if (elMonto) elMonto.textContent = '$' + (monto/1e12).toFixed(2) + ' bn';
+    }
+    if (typeof pib === 'number') {
+      const elPib = document.querySelector('[data-deuda-pib]');
+      if (elPib) {
+        const yr = u.anio || '';
+        const estTag = u.es_estimacion ? ' (est.)' : '';
+        elPib.textContent = pib.toFixed(1) + '% PIB · SHCP ' + yr + estTag;
+        if (u.es_estimacion) elPib.title = 'Cifra estimada (PEF). Se actualiza con cierre fiscal definitivo.';
+      }
+    }
+  } catch(e){}
+})();
+</script>
+<script>
+// Unifica cifras de Deuda+PEF+Iniciativas a endpoints API (una sola fuente de verdad)
+async function cargarDinerosCifras(){
+  try {
+    const [deudaR, pefR, iniR] = await Promise.all([
+      fetch('/api/data?vista=deuda', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/data?vista=pef_resumen&anio=2026', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/data?vista=iniciativas', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+    // Deuda (interna/externa/total/pib)
+    if (deudaR && deudaR.ultimo) {
+      const u = deudaR.ultimo;
+      const total = u.shrfsp_total_mxn;
+      const interna = u.deuda_interna_mxn;
+      const externa = u.deuda_externa_mxn;
+      const pib = u.shrfsp_porcentaje_pib;
+      const fmt = (v) => '$' + (v/1e12).toFixed(2) + ' bn';
+      const pctOf = (v) => total ? ((v/total)*100).toFixed(1) : null;
+      document.querySelectorAll('[data-cifra="deuda-monto"]').forEach(el => { if (typeof total === 'number') el.textContent = fmt(total); });
+      document.querySelectorAll('[data-cifra="deuda-pib"]').forEach(el => { if (typeof pib === 'number') el.textContent = pib.toFixed(1) + '% PIB · SHCP'; });
+      document.querySelectorAll('[data-cifra="deuda-interna"]').forEach(el => { if (typeof interna === 'number') el.textContent = fmt(interna); });
+      document.querySelectorAll('[data-cifra="deuda-externa"]').forEach(el => { if (typeof externa === 'number') el.textContent = fmt(externa); });
+      document.querySelectorAll('[data-cifra="deuda-interna-pct"]').forEach(el => { const p = pctOf(interna); if (p) el.textContent = p + '% del total · CETES, Bonos M'; });
+      document.querySelectorAll('[data-cifra="deuda-externa-pct"]').forEach(el => { const p = pctOf(externa); if (p) el.textContent = p + '% del total · USD, EUR, JPY'; });
+    }
+    // PEF total
+    if (pefR && typeof pefR.total === 'number') {
+      const v = '$' + (pefR.total/1e12).toFixed(2) + ' bn';
+      document.querySelectorAll('[data-cifra="pef-total"]').forEach(el => { el.textContent = v; });
+    }
+    // Iniciativas count + firmas reales
+    if (iniR && Array.isArray(iniR.items)) {
+      const count = iniR.items.length;
+      let totalFirmas = 0;
+      iniR.items.forEach(it => {
+        if (it.tipo === 'iniciativa_ciudadana' && typeof it.firmas === 'number') totalFirmas += it.firmas;
+      });
+      document.querySelectorAll('[data-cifra="iniciativas-count"]').forEach(el => { el.textContent = String(count); });
+      document.querySelectorAll('[data-cifra="iniciativas-firmas"]').forEach(el => { el.textContent = totalFirmas.toLocaleString('es-MX'); });
+    }
+  } catch(e) {
+    console.warn('cargarDinerosCifras error:', e);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(cargarDinerosCifras, 800));
+setTimeout(cargarDinerosCifras, 2500);
+</script>
+<!-- P2.1: Sidebar colapsable -->
+<style>
+  .nav-label {
+    cursor: pointer; user-select: none;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: color 0.15s; padding: 6px 0;
+  }
+  .nav-label:hover { color: var(--gold, #fbbf24); }
+  .nav-label::after {
+    content: '▾'; font-size: 10px; margin-left: 8px;
+    transition: transform 0.2s ease; color: var(--muted, #8b94a7);
+  }
+  .nav-section.collapsed .nav-label::after { transform: rotate(-90deg); }
+  .nav-section .nav-item {
+    max-height: 60px; overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.15s, padding 0.2s, margin 0.2s;
+  }
+  .nav-section.collapsed .nav-item {
+    max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin: 0;
+  }
+</style>
+<script>
+/* Collapse/expand nav-sections, persist in localStorage. Init: only first section open. */
+(function() {
+  function initCollapsibleSidebar() {
+    const sections = document.querySelectorAll('.nav-section');
+    if (!sections.length) return;
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem('tequio_sidebar') || '{}'); } catch(e) {}
+    sections.forEach(function(sec, i) {
+      const label = sec.querySelector('.nav-label');
+      if (!label) return;
+      const key = 'sec_' + i;
+      // Default: first section (Monitoreo) open, rest closed
+      const defaultCollapsed = i > 0;
+      const collapsed = state[key] !== undefined ? state[key] : defaultCollapsed;
+      if (collapsed) sec.classList.add('collapsed');
+      label.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sec.classList.toggle('collapsed');
+        state[key] = sec.classList.contains('collapsed');
+        try { localStorage.setItem('tequio_sidebar', JSON.stringify(state)); } catch(e) {}
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCollapsibleSidebar);
+  } else {
+    initCollapsibleSidebar();
+  }
+})();
+</script>
+<!-- /P2.1 -->
+<!-- DASH-LOAD-FIX -->
+<script>
+(function() {
+  function patchNoticia(n) {
+    if (!n || typeof noticiasDB === 'undefined' || noticiasDB.length === 0) return false;
+    if (n.dataset.patched === '1') return true;
+    var nat = noticiasDB.find(function(x){ return x.ambito === 'nacional' && x.titulo; }) || noticiasDB[0];
+    if (!nat) return false;
+    n.textContent = nat.titulo;
+    n.dataset.patched = '1';
+    var res = document.getElementById('dash-noticia-resumen');
+    if (res && nat.resumen) res.textContent = nat.resumen.substring(0, 200);
+    var meta = document.getElementById('dash-noticia-meta');
+    if (meta && nat.fuente) meta.textContent = '📰 ' + nat.fuente + ' · click para ver fuente';
+    var parent = document.getElementById('dash-noticia-estado');
+    if (parent && nat.url_oficial) {
+      parent.style.cursor = 'pointer';
+      parent.onclick = function(){ window.open(nat.url_oficial, '_blank', 'noopener'); };
+    }
+    return true;
+  }
+  function patchDiputado(d) {
+    if (!d || d.dataset.patched === '1') return;
+    d.textContent = 'Sin información disponible';
+    d.dataset.patched = '1';
+    var info = document.getElementById('dash-diputado-info');
+    if (info && (/^\s*$/.test(info.textContent || '') || /Cargando/i.test(info.textContent || ''))) {
+      info.textContent = 'Configura tu estado en Mi Perfil para ver tu representante';
+    }
+  }
+  function loadAndPatch() {
+    if (typeof cargarNoticiasDesdeAPI === 'function' &&
+        typeof noticiasDB !== 'undefined' && noticiasDB.length === 0) {
+      Promise.resolve(cargarNoticiasDesdeAPI()).then(function(){
+        var n = document.getElementById('dash-noticia-titulo');
+        if (n && /Cargando/i.test(n.textContent || '')) patchNoticia(n);
+      }).catch(function(){});
+    } else {
+      var n = document.getElementById('dash-noticia-titulo');
+      if (n && /Cargando/i.test(n.textContent || '')) patchNoticia(n);
+    }
+    var d = document.getElementById('dash-diputado-nombre');
+    if (d && /Cargando/i.test(d.textContent || '')) patchDiputado(d);
+  }
+  function startObserver() {
+    // MutationObserver: si "Cargando" reaparece, re-patchear
+    var targets = ['dash-noticia-titulo', 'dash-diputado-nombre'];
+    targets.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var obs = new MutationObserver(function() {
+        if (/Cargando/i.test(el.textContent || '')) {
+          el.dataset.patched = '';
+          if (id === 'dash-noticia-titulo') patchNoticia(el);
+          else patchDiputado(el);
+        }
+      });
+      obs.observe(el, { childList: true, characterData: true, subtree: true });
+    });
+  }
+  function init() {
+    loadAndPatch();
+    startObserver();
+    // Backup: retries cada 1s por 20s
+    var n = 0;
+    var t = setInterval(function() {
+      loadAndPatch();
+      n++;
+      if (n >= 20) clearInterval(t);
+    }, 1000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 500); });
+  } else {
+    setTimeout(init, 500);
+  }
+})();
+</script>
+<!-- /DASH-LOAD-FIX -->
+<!-- FUENTE-CHIPS-FIX -->
+<script>
+(function() {
+  var FUENTES = [
+    { key: 'todas',       label: 'Todas',           emoji: '🌐', count: 676 },
+    { key: 'INAI',        label: 'INAI',            emoji: '📂', count: 503 },
+    { key: 'DOF',         label: 'DOF',             emoji: '📜', count: 68 },
+    { key: 'FGR',         label: 'FGR',             emoji: '⚖️', count: 40 },
+    { key: 'Presidencia', label: 'Presidencia',     emoji: '🏛️', count: 24 },
+    { key: 'SEGOB',       label: 'SEGOB',           emoji: '🛡️', count: 20 },
+    { key: 'SCJN',        label: 'SCJN',            emoji: '⚖️', count: 12 },
+    { key: 'COFEPRIS',    label: 'COFEPRIS',        emoji: '🏥', count: 5 },
+    { key: 'SABG',        label: 'SABG',            emoji: '🏛️', count: 4 }
+  ];
+  window.noticiasFuenteActiva = 'todas';
+  window.selectFuenteNoticias = function(el, fuente) {
+    document.querySelectorAll('#noticias-fuentes-chips .estado-chip').forEach(function(c) {
+      c.classList.remove('active');
+    });
+    el.classList.add('active');
+    window.noticiasFuenteActiva = fuente;
+    if (typeof filtrarNoticias === 'function') filtrarNoticias();
+  };
+  function buildChip(f) {
+    var active = f.key === window.noticiasFuenteActiva ? ' active' : '';
+    return '<div class="estado-chip' + active +
+           '" onclick="selectFuenteNoticias(this, \'' + f.key + '\')"' +
+           ' style="cursor:pointer">' +
+           f.emoji + ' ' + f.label +
+           ' <span style="opacity:0.55;font-size:0.85em">(' + f.count + ')</span>' +
+           '</div>';
+  }
+  function inyectarChips() {
+    var temasChips = document.getElementById('noticias-temas-chips');
+    if (!temasChips) return false;
+    if (document.getElementById('noticias-fuentes-chips')) return true; // ya inyectado
+    var wrap = document.createElement('div');
+    wrap.style.marginTop = '14px';
+    wrap.innerHTML =
+      '<div style="color:#9ca3af;font-size:12px;letter-spacing:1px;font-weight:700;margin-bottom:6px;">FUENTE</div>' +
+      '<div id="noticias-fuentes-chips" style="display:flex;flex-wrap:wrap;gap:8px;">' +
+      FUENTES.map(buildChip).join('') +
+      '</div>';
+    temasChips.parentNode.insertBefore(wrap, temasChips.nextSibling);
+    return true;
+  }
+  // Monkey-patch filtrarNoticias para considerar fuente
+  function aplicarParcheFiltrado() {
+    if (typeof window.filtrarNoticias !== 'function') return false;
+    if (window._filtrarNoticiasOrig) return true; // ya parcheado
+    window._filtrarNoticiasOrig = window.filtrarNoticias;
+    window.filtrarNoticias = function() {
+      var fuenteAct = window.noticiasFuenteActiva;
+      if (!fuenteAct || fuenteAct === 'todas') {
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      }
+      // Filtrar noticiasDB temporalmente
+      var dbOrig = window.noticiasDB;
+      if (!Array.isArray(dbOrig)) {
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      }
+      try {
+        window.noticiasDB = dbOrig.filter(function(n) { return n && n.fuente === fuenteAct; });
+        return window._filtrarNoticiasOrig.apply(this, arguments);
+      } finally {
+        window.noticiasDB = dbOrig;
+      }
+    };
+    return true;
+  }
+  function init() {
+    aplicarParcheFiltrado();
+    inyectarChips();
+  }
+  // Retry: la sección de noticias puede renderizar después
+  var tries = 0;
+  var iv = setInterval(function() {
+    init();
+    tries++;
+    var done = document.getElementById('noticias-fuentes-chips') && window._filtrarNoticiasOrig;
+    if (done || tries >= 30) clearInterval(iv);
+  }, 500);
+  // Re-inyectar si el usuario navega entre secciones
+  document.addEventListener('click', function(e) {
+    // Si el click cambia de sección, re-intentar inyección 500ms después
+    setTimeout(function() {
+      if (!document.getElementById('noticias-fuentes-chips')) inyectarChips();
+    }, 500);
+  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<!-- /FUENTE-CHIPS-FIX -->
+<!-- ABRIR-FUENTE-NOTICIA -->
+<script>
+window.abrirFuenteNoticia = function(id) {
+  if (typeof noticiasDB === 'undefined') return;
+  var n = noticiasDB.find(function(x) { return String(x.id) === String(id); });
+  if (!n) return;
+  // Si tiene url_oficial válida y no es la fuente_url genérica, abrir directo
+  if (n.url_oficial && /^https?:\/\//i.test(n.url_oficial) &&
+      n.url_oficial !== n.fuente_url) {
+    window.open(n.url_oficial, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  // Fallback: si solo tiene fuente_url (página general), abrirla también
+  if (n.fuente_url && /^https?:\/\//i.test(n.fuente_url)) {
+    window.open(n.fuente_url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  // Último fallback: modal interno
+  if (typeof abrirNoticia === 'function') abrirNoticia(id);
+};
+</script>
+<!-- /ABRIR-FUENTE-NOTICIA -->
+<!-- HIDE-INIC-MOCK -->
+<script>
+(function() {
+  // 1) Esconder el card "Iniciativas Ciudadanas / Las más votadas" del dashboard
+  // 2) Esconder botones "Ver iniciativas ciudadanas" del menú flotante / dropdowns
+  // Sistema de firmas ciudadanas: tabla `firmas_iniciativas` está vacía en Supabase.
+  // Hasta que exista un sistema real, no mostrar widgets fake.
+  function hideInicMock() {
+    // Card del dashboard
+    document.querySelectorAll('.card-title').forEach(function(t) {
+      var txt = (t.textContent || '').trim();
+      if (txt === 'Iniciativas Ciudadanas') {
+        var sub = t.nextElementSibling;
+        var subTxt = sub ? (sub.textContent || '').trim() : '';
+        if (subTxt === 'Las más votadas') {
+          var card = t.closest ? t.closest('.card') : null;
+          if (card) card.style.display = 'none';
+        }
+      }
+    });
+    // Botones flotantes con texto que contiene "iniciativas ciudadanas"
+    document.querySelectorAll('button').forEach(function(btn) {
+      var text = (btn.textContent || '').trim().toLowerCase();
+      if (text.indexOf('iniciativas ciudadanas') !== -1) {
+        btn.style.display = 'none';
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideInicMock);
+  } else {
+    hideInicMock();
+  }
+  setTimeout(hideInicMock, 500);
+  setTimeout(hideInicMock, 2000);
+})();
+</script>
+<!-- /HIDE-INIC-MOCK -->
+<!-- TEQUIO-NAV-LISTENER: back-link de paneles embebidos -->
+<script>
+/* Listener para back-link de paneles embebidos (estado, deuda, emergencia, etc.) */
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'tequio-nav' && e.data.target === 'dashboard') {
+    if (typeof showPage === 'function') showPage('dashboard');
+  }
+});
+</script>
+
+<!-- ════════ TEQUIO · Compartir global (Web Share API + modal fallback) ════════ -->
+<style>
+  #tequio-share-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 99000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #tequio-share-overlay.active { display: flex; }
+  #tequio-share-modal {
+    background: var(--surface, #1a243d);
+    border: 1px solid var(--border, #2a3a5c);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    width: 100%; max-width: 420px;
+    color: var(--text, #e8edf5);
+    font-family: var(--font-body, system-ui, sans-serif);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  #tequio-share-modal h3 { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
+  #tequio-share-modal .ts-sub {
+    font-size: 12px; color: var(--text2, #94a3b8); margin-bottom: 16px;
+    line-height: 1.4; max-height: 60px; overflow: hidden;
+    text-overflow: ellipsis; display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  }
+  #tequio-share-modal .ts-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+  }
+  #tequio-share-modal .ts-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    text-decoration: none; cursor: pointer; border: none; color: #fff;
+    transition: filter .12s;
+  }
+  #tequio-share-modal .ts-btn:hover { filter: brightness(1.1); }
+  #tequio-share-modal .ts-wa { background: #25D366; }
+  #tequio-share-modal .ts-tw { background: #1DA1F2; }
+  #tequio-share-modal .ts-tg { background: #0088cc; }
+  #tequio-share-modal .ts-copy {
+    background: var(--bg2, #0e1525);
+    border: 1px solid var(--border, #2a3a5c);
+    color: var(--text, #e8edf5);
+  }
+  #tequio-share-modal .ts-close {
+    width: 100%; background: none;
+    border: 1px solid var(--border, #2a3a5c);
+    color: var(--text2, #94a3b8);
+    padding: 9px; border-radius: 10px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  #tequio-share-modal .ts-close:hover { color: var(--text, #e8edf5); }
+</style>
+<div id="tequio-share-overlay" onclick="if(event.target===this) tequioShareClose()">
+  <div id="tequio-share-modal" role="dialog" aria-label="Compartir">
+    <h3>📤 Compartir</h3>
+    <div class="ts-sub" id="ts-sub-text"></div>
+    <div class="ts-grid">
+      <a class="ts-btn ts-wa" id="ts-link-wa" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a class="ts-btn ts-tw" id="ts-link-tw" target="_blank" rel="noopener">𝕏 Twitter</a>
+      <a class="ts-btn ts-tg" id="ts-link-tg" target="_blank" rel="noopener">✈️ Telegram</a>
+      <button class="ts-btn ts-copy" id="ts-btn-copy" type="button">📋 Copiar</button>
+    </div>
+    <button class="ts-close" type="button" onclick="tequioShareClose()">Cerrar</button>
+  </div>
+</div>
+<script>
+(function () {
+  function ovl() { return document.getElementById('tequio-share-overlay'); }
+  window.tequioShareClose = function () {
+    var o = ovl(); if (o) o.classList.remove('active');
+  };
+  window.tequioShare = function (opts) {
+    opts = opts || {};
+    var titulo = (opts.titulo || 'Tequio').toString();
+    var texto  = (opts.texto  || '').toString();
+    var url    = (opts.url    || 'https://tequio.app/').toString();
+    var full   = (texto ? texto + '\n\n' : '') + url;
+    if (navigator.share) {
+      navigator.share({ title: titulo, text: texto, url: url }).catch(function () {});
+      return;
+    }
+    var encoded = encodeURIComponent(full);
+    var encodedShort = encodeURIComponent(titulo + ' ' + url);
+    document.getElementById('ts-sub-text').textContent = titulo;
+    document.getElementById('ts-link-wa').href = 'https://wa.me/?text=' + encoded;
+    document.getElementById('ts-link-tw').href = 'https://twitter.com/intent/tweet?text=' + encodedShort;
+    document.getElementById('ts-link-tg').href = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(titulo);
+    var copyBtn = document.getElementById('ts-btn-copy');
+    copyBtn.onclick = function () {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(full).then(function () {
+          var prev = copyBtn.textContent;
+          copyBtn.textContent = '✓ Copiado';
+          setTimeout(function () { copyBtn.textContent = prev; }, 1500);
+        });
+      }
+    };
+    ovl().classList.add('active');
+  };
+  window.tequioShareNoticia = function (id) {
+    if (typeof noticiasDB === 'undefined') return;
+    var n = noticiasDB.find(function (x) { return x.id === id; });
+    if (!n) return;
+    tequioShare({
+      titulo: '📰 ' + n.titulo,
+      texto:  (n.resumen || '') + (n.fuente ? '\n— ' + n.fuente : ''),
+      url:    n.url_oficial || ('https://tequio.app/?noticia=' + encodeURIComponent(n.id))
+    });
+  };
+  window.tequioShareLey = function (id) {
+    // Buscar en leyesData (el array real); fallback a leyesDB/window.LEYES por compatibilidad
+    var src = (typeof leyesData !== 'undefined') ? leyesData :
+              (typeof leyesDB   !== 'undefined') ? leyesDB :
+              (window.LEYES || []);
+    var l = src.find ? src.find(function (x) { return x.id === id; }) : null;
+    if (!l) {
+      console.warn('[tequioShareLey] no encontrada:', id);
+      // Fallback: compartir solo el ID + URL de Tequio
+      tequioShare({
+        titulo: '⚖️ Ley ' + id + ' · Tequio',
+        texto:  'Mira esta ley en Tequio.',
+        url:    'https://tequio.app/?ley=' + encodeURIComponent(id)
+      });
+      return;
+    }
+    tequioShare({
+      titulo: '⚖️ ' + l.titulo,
+      texto:  (l.desc || '') + (l.fuente ? '\n— ' + l.fuente : ''),
+      url:    l.url || ('https://tequio.app/?ley=' + encodeURIComponent(l.id))
+    });
+  };
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') tequioShareClose();
+  });
+})();
+</script>
+<!-- ════════ /Compartir global ════════ -->
+<!-- /TEQUIO-NAV-LISTENER -->
+<script>
+// ═════ Hidratación YouTube En Vivo · v2 con filtros + modal player ═════
+(function hydrateYouTubeV2(){
+  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  
+  var state = {
+    data: null,
+    canal: '',
+    busqueda: '',
+    timer: null,
+    autoRefresh: null
+  };
+  
+  function fmtDate(iso){
+    if (!iso) return '';
+    var d = new Date(iso);
+    var diff = Date.now() - d.getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 60) return 'hace ' + mins + ' min';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return 'hace ' + hrs + 'h';
+    var days = Math.floor(hrs / 24);
+    if (days < 30) return 'hace ' + days + 'd';
+    return d.toLocaleDateString('es-MX', {day:'numeric',month:'short'});
+  }
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function fmt(n){return Number(n||0).toLocaleString('es-MX');}
+  
+  // ── MODAL PLAYER ──
+  window.ytAbrirPlayer = function(videoId, titulo, canal, isLive){
+    var existing = document.getElementById('yt-player-modal');
+    if(existing) existing.remove();
+    var html = '<div id="yt-player-modal" onclick="ytCerrarPlayer(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(8px)">' +
+      '<div onclick="event.stopPropagation()" style="max-width:1000px;width:100%;display:flex;flex-direction:column;gap:10px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;color:#fff">' +
+          '<div style="font-size:14px;line-height:1.4">' +
+            '<div style="font-weight:700;margin-bottom:2px">' + esc(titulo) + '</div>' +
+            '<div style="font-size:11px;opacity:0.7">' + esc(canal) + (isLive?' · <span style="color:#fb7185">🔴 EN VIVO</span>':'') + '</div>' +
+          '</div>' +
+          '<button onclick="ytCerrarPlayer()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0">✕</button>' +
+        '</div>' +
+        '<div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden">' +
+          '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+          '<a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.10);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px">📺 Ver en YouTube</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    document.body.style.overflow = 'hidden';
+  };
+  window.ytCerrarPlayer = function(e){
+    if(e && e.target.id !== 'yt-player-modal' && e.type === 'click') return;
+    var m = document.getElementById('yt-player-modal');
+    if(m) m.remove();
+    document.body.style.overflow = '';
+  };
+  
+  function renderCard(v, isLive){
+    var thumb = v.thumbnail_url || '';
+    var badge = isLive ? '<span class="live-badge">🔴 EN VIVO</span>' : '';
+    var meta = isLive 
+      ? (v.viewers ? fmt(v.viewers) + ' viendo ahora' : 'En transmisión')
+      : fmtDate(v.published_at);
+    var titEsc = esc(v.titulo||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    var canEsc = esc(v.channel_nombre||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return '<div class="yt-card" onclick="ytAbrirPlayer(\'' + v.video_id + '\',\'' + titEsc + '\',\'' + canEsc + '\',' + (isLive?'true':'false') + ')">' +
+      '<div class="thumb">' +
+        (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '') +
+        badge +
+        '<span class="channel-chip">' + (v.channel_emoji||'') + ' ' + esc(v.channel_nombre) + '</span>' +
+      '</div>' +
+      '<div class="body">' +
+        '<div class="title">' + esc(v.titulo) + '</div>' +
+        '<div class="meta">' + meta + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  
+  function filtrar(arr){
+    return arr.filter(function(v){
+      if(state.canal && v.channel_nombre !== state.canal) return false;
+      if(state.busqueda){
+        var q = state.busqueda.toLowerCase();
+        return (v.titulo||'').toLowerCase().indexOf(q) >= 0;
+      }
+      return true;
+    });
+  }
+  
+  function aplicarFiltros(){
+    if(!state.data) return;
+    var live = filtrar(state.data.en_vivo || []);
+    var ult = filtrar(state.data.ultimos_por_canal || []);
+    var rec = filtrar(state.data.recientes || []);
+    
+    // LIVE
+    var liveSec = document.getElementById('yt-live-section');
+    var liveGrid = document.getElementById('yt-live-grid');
+    var liveCount = document.getElementById('yt-live-count');
+    if(live.length){
+      if(liveSec) liveSec.style.display = '';
+      if(liveGrid) liveGrid.innerHTML = live.map(function(v){return renderCard(v, true);}).join('');
+      if(liveCount) liveCount.textContent = live.length + ' transmisión' + (live.length !== 1 ? 'es' : '');
+    } else {
+      if(liveSec) liveSec.style.display = 'none';
+    }
+    
+    // Por canal
+    var canSec = document.getElementById('yt-canales-section');
+    var canGrid = document.getElementById('yt-canales-grid');
+    if(ult.length){
+      if(canSec) canSec.style.display = '';
+      if(canGrid) canGrid.innerHTML = ult.map(function(v){return renderCard(v, false);}).join('');
+    } else {
+      if(canSec) canSec.style.display = 'none';
+    }
+    
+    // Recientes
+    var recSec = document.getElementById('yt-recientes-section');
+    var recGrid = document.getElementById('yt-recientes-grid');
+    if(rec.length){
+      if(recSec) recSec.style.display = '';
+      if(recGrid) recGrid.innerHTML = rec.map(function(v){return renderCard(v, false);}).join('');
+    } else {
+      if(recSec) recSec.style.display = 'none';
+    }
+    
+    // Si todo vacío
+    if(!live.length && !ult.length && !rec.length){
+      if(canSec) canSec.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">📭 Sin resultados con los filtros actuales.</div>';
+      if(canSec) canSec.style.display = '';
+    }
+  }
+  
+  function setStats(d){
+    var setText = function(id, v){var el=document.getElementById(id); if(el) el.textContent=v;};
+    setText('yt-stat-live', fmt((d.en_vivo||[]).length));
+    setText('yt-stat-canales', fmt((d.ultimos_por_canal||[]).length));
+    setText('yt-stat-recientes', fmt((d.recientes||[]).length));
+    if(d.last_sync){
+      var dt = new Date(d.last_sync);
+      var diff = Math.floor((Date.now() - dt.getTime()) / 60000);
+      setText('yt-stat-sync', diff < 60 ? 'hace ' + diff + ' min' : dt.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
+    }
+    // Badge sidebar
+    var navBadge = document.getElementById('nav-live-badge');
+    if(navBadge) navBadge.style.display = (d.en_vivo||[]).length ? '' : 'none';
+  }
+  
+  window.ytSetCanal = function(el, c){
+    state.canal = c || '';
+    el.parentElement.querySelectorAll('.estado-chip').forEach(function(x){x.classList.remove('active');});
+    el.classList.add('active');
+    aplicarFiltros();
+  };
+  
+  window.ytFiltrarDeb = function(){
+    clearTimeout(state.timer);
+    state.timer = setTimeout(function(){
+      state.busqueda = document.getElementById('yt-search').value.trim();
+      aplicarFiltros();
+    }, 250);
+  };
+  
+  function tryFetch(){
+    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_youtube_live', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON},
+      body: '{}'
+    })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(d){
+      state.data = d;
+      setStats(d);
+      aplicarFiltros();
+    })
+    .catch(function(){});
+  }
+  
+  window.ytRefresh = function(){
+    var btn = document.getElementById('yt-refresh-btn');
+    if(btn){ btn.innerHTML = '<span>⏳</span> Cargando...'; btn.disabled = true; }
+    tryFetch();
+    setTimeout(function(){
+      if(btn){ btn.innerHTML = '<span>🔄</span> Actualizar'; btn.disabled = false; }
+    }, 1500);
+  };
+  
+  // Auto-refresh cada 60s
+  function startAutoRefresh(){
+    if(state.autoRefresh) clearInterval(state.autoRefresh);
+    state.autoRefresh = setInterval(tryFetch, 60000);
+  }
+  
+  // Boot
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ tryFetch(); startAutoRefresh(); });
+  else { tryFetch(); startAutoRefresh(); }
+})();
+</script>
+<script>
+// ═════ Hydratación KPIs globales · dashboard_kpis_globales ═════
+(function hydrateKpisGlobales(){
+  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  function fmtNum(n){ if (n == null) return '—'; return Number(n).toLocaleString('es-MX'); }
+  function applyKpis(k){
+    if (!k) return;
+    var map = {
+      'leyes':              function(){ return fmtNum(k.leyes); },
+      'leyes-estatal':      function(){ return fmtNum(k.leyes_estatal); },
+      'leyes-municipal':    function(){ return fmtNum(k.leyes_municipal); },
+      'leyes-federal':      function(){ return fmtNum(k.leyes_federal); },
+      'leyes-calidad':      function(){ return fmtNum(k.leyes_con_contenido_calidad); },
+      'contratos':          function(){ return fmtNum(k.contratos_publicos); },
+      'inah-zonas':         function(){ return fmtNum(k.inah_zonas); },
+      'inah-museos':        function(){ return fmtNum(k.inah_museos); },
+      'inah-patrimonio':    function(){ return (k.inah_zonas||0) + '+' + (k.inah_museos||0); },
+      'sre-embajadas':      function(){ return fmtNum(k.sre_embajadas); },
+      'sre-consulados':     function(){ return fmtNum(k.sre_consulados); },
+      'inali-lenguas':      function(){ return fmtNum(k.inali_lenguas); },
+      'unesco-patrimonio':  function(){ return fmtNum(k.unesco_patrimonio); },
+      'diputados':          function(){ return fmtNum(k.politicos_diputados); },
+      'senadores':          function(){ return fmtNum(k.politicos_senadores); },
+      'actores-poder':      function(){ return fmtNum(k.actores_poder); },
+      'vinculos-poder':     function(){ return fmtNum(k.vinculos_poder); },
+      'sat-69':             function(){ return fmtNum(k.sat_69); },
+      'sat-69b':            function(){ return fmtNum(k.sat_69b); },
+      'gasolina':           function(){ return fmtNum(k.gasolina_estaciones); },
+      'profeco-precios':    function(){ return fmtNum(k.profeco_precios); },
+      'municipios':         function(){ return fmtNum(k.municipios); },
+      'votos-individuales': function(){ return fmtNum(k.votos_individuales); },
+      'contratos-ultimo-corte': function(){ return k.contratos_ultimo_corte || '—'; },
+      'pef-total': function(){
+        if (!k.pef || !k.pef.monto_total_mxn) return '—';
+        return '$' + (k.pef.monto_total_mxn / 1e12).toFixed(2) + ' bn';
+      },
+      // ── claves planas nuevas (audit 2026-05-28) ──
+      'costo_financiero_pib_pct': function(){
+        if (k.costo_financiero_pib_pct == null) return '—';
+        return Number(k.costo_financiero_pib_pct).toFixed(1) + '%';
+      },
+      'total_puntos_servicio': function(){ return fmtNum(k.total_puntos_servicio); }
+    };
+    Object.keys(map).forEach(function(key){
+      var els = document.querySelectorAll('[data-kpi="' + key + '"]');
+      if (!els.length) return;
+      var v = map[key]();
+      els.forEach(function(el){ if (v && v !== '—') el.textContent = v; });
+    });
+    document.querySelectorAll('[data-kpi]').forEach(function(el){
+      if (!el.title || el.title.indexOf('Tequio') < 0) {
+        el.title = '🦎 Cero Invención · count en vivo · ' + new Date(k.actualizado).toLocaleString('es-MX');
+      }
+    });
+  }
+  function tryFetch(){
+    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_kpis_globales', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON },
+      body: '{}'
+    })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(k){
+      applyKpis(k);
+      window.__tequioKpis = k;
+      console.log('[Tequio] KPIs globales hydratados:', Object.keys(k).length, 'campos');
+    })
+    .catch(function(){ /* silencioso */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryFetch);
+  else setTimeout(tryFetch, 0);
+  var origShowPage = window.showPage;
+  if (typeof origShowPage === 'function') {
+    window.showPage = function(){
+      var r = origShowPage.apply(this, arguments);
+      if (window.__tequioKpis) setTimeout(function(){ applyKpis(window.__tequioKpis); }, 50);
+      return r;
+    };
+  }
+})();
+// ═════ /KPIs ═════
+</script>
+</body>
+</html>
