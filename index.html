@@ -1771,6 +1771,13 @@ function obRenderEstados() {
 }
 function obSelectEstado(clave) {
   _obEstado = clave;
+  // Expose to global scope para que buildOBPreview pueda leerlo
+  try {
+    window.__obEstadoClave = clave;
+    window.__obEstadoNombre = OB_ESTADOS[clave];
+    localStorage.setItem('tequio_estado_clave_pending', clave);
+    localStorage.setItem('tequio_estado_nombre_pending', OB_ESTADOS[clave]);
+  } catch(e){}
   document.querySelectorAll('.ob-estado-btn').forEach(b => {
     b.style.background = b.dataset.clave === clave ? '#fbbf24' : '#1f2937';
     b.style.color = b.dataset.clave === clave ? '#111827' : '#e5e7eb';
@@ -1798,6 +1805,11 @@ function obToggleInteres(id) {
     btn.style.background = 'rgba(251,191,36,0.15)';
     btn.style.borderColor = '#fbbf24';
   }
+  // Expose to global scope
+  try {
+    window.__obIntereses = Array.from(_obIntereses);
+    localStorage.setItem('tequio_intereses_pending', JSON.stringify(window.__obIntereses));
+  } catch(e){}
   const next = document.getElementById('ob-step2-next');
   next.disabled = _obIntereses.size === 0;
   next.style.opacity = _obIntereses.size === 0 ? '0.5' : '1';
