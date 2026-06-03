@@ -2209,6 +2209,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🌐</span> México en el Mundo
       </div>
+      <div class="nav-item" onclick="cargarPanel('donar')" style="background:linear-gradient(135deg,rgba(236,72,153,0.10),rgba(251,191,36,0.08));border-left:3px solid #ec4899">
+        <span class="icon">❤️</span> Apoya Tequio
+      </div>
       <div class="nav-item" onclick="cargarPanel('poder')">
         <span class="icon">🕸️</span> Mapa de Poder <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:8px;font-weight:700;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">DEMO</span>
       </div>
@@ -2287,15 +2290,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
       <div class="content">
-        <div id="donar-banner" style="background:linear-gradient(135deg,rgba(236,72,153,0.18) 0%,rgba(251,191,36,0.14) 50%,rgba(168,85,247,0.10) 100%);border:1px solid rgba(236,72,153,0.35);border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;cursor:pointer" onclick="cargarPanel('donar')">
-      <div style="font-size:32px;flex-shrink:0">❤️</div>
-      <div style="flex:1;min-width:240px">
-        <div style="font-size:14px;font-weight:800;color:#fef3c7;margin-bottom:2px">Apóyanos a mantener Tequio gratis</div>
-        <div style="font-size:12.5px;color:#cbd5e1;line-height:1.5">Sin publicidad, sin venta de datos, sin dueño corporativo. Vivimos del apoyo de la comunidad. <strong style="color:#fcd34d">Cualquier cantidad ayuda</strong> a sostener los servidores, scrapers e IA. <span style="color:#fcd34d;font-weight:700">Donar →</span></div>
-      </div>
-      <button onclick="event.stopPropagation();document.getElementById('donar-banner').style.display='none';localStorage.setItem('donar_dismissed','1')" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.15);color:#cbd5e1;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Ocultar">✕</button>
-    </div>
-    <script>try{if(localStorage.getItem('donar_dismissed')==='1'){var d=document.getElementById('donar-banner');if(d)d.style.display='none';}}catch(e){}</script>
         <!-- ═════ NUEVO: HERO de datos vivos Banxico ═════ -->
         <div style="margin-bottom:20px">
           <p style="color:var(--text2);font-size:13px;margin-bottom:10px" id="dash-fecha-hoy">Cargando fecha…</p>
@@ -16483,54 +16477,6 @@ function exportarDocumentoAccion() {
       <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
       <div class="footer">Generado por Tequio — Plataforma Cívica Digital · ${new Date().toLocaleDateString('es-MX')} · Solo con fines informativos</div>
       
-<script>
-// Live USD/MXN ticker for México en el Mundo
-(function() {
-  async function loadGeoLiveUSD() {
-    try {
-      const r = await fetch('/api/data?vista=banxico_historico&serie=SF43718');
-      const j = await r.json();
-      const pts = j.puntos || [];
-      if (pts.length) {
-        const last = pts[pts.length - 1];
-        const prev = pts.length > 1 ? pts[pts.length - 2] : null;
-        const el = document.getElementById('geo-hero-usd');
-        if (el) {
-          const v = Number(last.valor).toFixed(2);
-          let arrow = '';
-          if (prev) {
-            const diff = last.valor - prev.valor;
-            if (diff > 0.01) arrow = ' <span style="color:#fca5a5;font-size:14px">▲</span>';
-            else if (diff < -0.01) arrow = ' <span style="color:#86efac;font-size:14px">▼</span>';
-          }
-          el.innerHTML = '$' + v + arrow;
-        }
-      }
-    } catch(e) { /* silent */ }
-  }
-  // Run when geopolitica page becomes visible
-  let geoUSDInit = false;
-  const obs = new MutationObserver(() => {
-    const pg = document.getElementById('page-geopolitica');
-    if (pg && pg.classList.contains('active') && !geoUSDInit) {
-      geoUSDInit = true;
-      loadGeoLiveUSD();
-      // Refresh every 5 minutes
-      setInterval(loadGeoLiveUSD, 5 * 60 * 1000);
-    }
-  });
-  obs.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
-  // Also try on initial load
-  document.addEventListener('DOMContentLoaded', () => {
-    const pg = document.getElementById('page-geopolitica');
-    if (pg && pg.classList.contains('active')) {
-      geoUSDInit = true;
-      loadGeoLiveUSD();
-      setInterval(loadGeoLiveUSD, 5 * 60 * 1000);
-    }
-  });
-})();
-</script>
 
 </body></html>`);
     win.document.close();
