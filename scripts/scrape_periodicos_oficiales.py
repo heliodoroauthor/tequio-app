@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-scrape_periodicos_oficiales.py
-================================
-Scrapea Periódicos Oficiales de los 32 estados.
-Cada estado tiene su propio portal — handlers state-specific.
-
-Uso: python3 scrape_periodicos_oficiales.py <estado_clave> [max_pubs]
-Ejemplo: python3 scrape_periodicos_oficiales.py 14 50
+scrape_periodicos_oficiales.py · v2
+====================================
+v2 cambios:
+  - URLs actualizadas (CDMX, NL, EdoMex usaban URLs muertas/viejas)
+  - Handlers custom para CDMX, NL, EdoMex, Jalisco (top-4 estados)
+  - Timeout 45s (gov.mx es LENTO)
+  - wait_until='networkidle' para SPAs
+  - Date parsing en el título del PDF
 """
 import os, sys, re, time, json, requests, urllib.parse
 from datetime import datetime
@@ -15,7 +16,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
 SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 if not all([SUPABASE_URL, SERVICE_KEY]):
-    print('ERROR: SUPABASE_URL/SERVICE_KEY missing')
+    print('ERROR: SUPABASE_URL/SERVICE_KEY missing', flush=True)
     sys.exit(1)
 
 HEADERS = {
@@ -25,6 +26,7 @@ HEADERS = {
     'Prefer': 'resolution=ignore-duplicates'
 }
 
+# Catálogo URLs (v2)
 ESTADOS = {
     '01': ('Aguascalientes', 'https://eservicios2.aguascalientes.gob.mx/PeriodicoOficial'),
     '02': ('Baja California', 'https://www.bajacalifornia.gob.mx/portal/gobierno/poebc/poebc.jsp'),
@@ -34,17 +36,21 @@ ESTADOS = {
     '06': ('Colima', 'https://periodicooficial.col.gob.mx'),
     '07': ('Chiapas', 'https://www.sgg.chiapas.gob.mx/po'),
     '08': ('Chihuahua', 'https://www.chihuahua.gob.mx/poegoe'),
-    '09': ('CDMX', 'https://data.consejeria.cdmx.gob.mx/portal_old/'),
+    # CDMX: URL nueva (data.consejeria + index.php/gaceta)
+    '09': ('CDMX', 'https://data.consejeria.cdmx.gob.mx/index.php/gaceta'),
     '10': ('Durango', 'https://www.gob.mx/durango/articulos/periodico-oficial'),
     '11': ('Guanajuato', 'https://periodico.guanajuato.gob.mx'),
     '12': ('Guerrero', 'https://periodicooficial.guerrero.gob.mx'),
     '13': ('Hidalgo', 'http://periodico.hidalgo.gob.mx'),
+    # Jalisco: handler custom (secciones dinámicas)
     '14': ('Jalisco', 'https://periodicooficial.jalisco.gob.mx'),
-    '15': ('Estado de México', 'https://legislacion.edomex.gob.mx/periodicooficial'),
+    # EdoMex: agregar /ve_periodico_oficial (path correcto v2026)
+    '15': ('Estado de México', 'https://legislacion.edomex.gob.mx/ve_periodico_oficial'),
     '16': ('Michoacán de Ocampo', 'http://www.periodicooficial.michoacan.gob.mx'),
     '17': ('Morelos', 'http://periodico.morelos.gob.mx'),
     '18': ('Nayarit', 'http://periodicooficial.nayarit.gob.mx'),
-    '19': ('Nuevo León', 'http://www.po.nl.gob.mx'),
+    # NL: po.nl.gob.mx MUERTO → usar HCNL
+    '19': ('Nuevo León', 'https://www.hcnl.gob.mx/archivo/periodico-oficial/'),
     '20': ('Oaxaca', 'http://www.periodicooficial.oaxaca.gob.mx'),
     '21': ('Puebla', 'http://periodicooficial.puebla.gob.mx'),
     '22': ('Querétaro', 'https://lasombradearteaga.queretaro.gob.mx'),
@@ -60,47 +66,73 @@ ESTADOS = {
     '32': ('Zacatecas', 'https://periodicooficial.zacatecas.gob.mx'),
 }
 
-
 ESTADO_CLAVE = sys.argv[1].zfill(2) if len(sys.argv) > 1 else '14'
 MAX_PUBS = int(sys.argv[2]) if len(sys.argv) > 2 else 30
 
 estado_data = ESTADOS.get(ESTADO_CLAVE)
 if not estado_data:
-    print(f'Estado {ESTADO_CLAVE} no soportado. Disponibles: {list(ESTADOS.keys())}')
+    print(f'Estado {ESTADO_CLAVE} no soportado.', flush=True)
     sys.exit(1)
 
 ESTADO_NOMBRE, BASE_URL = estado_data
 print(f'🦎 Periódico Oficial · {ESTADO_NOMBRE} · max {MAX_PUBS} publicaciones', flush=True)
+print(f'   URL: {BASE_URL}', flush=True)
 
 
+# ──────────────────────────────────────────────────────────────
+# Helpers
+# ──────────────────────────────────────────────────────────────
 def fmt_date(s):
-    """Convierte fechas variables → YYYY-MM-DD"""
     if not s:
         return None
     months = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
               'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12,
               'ene':1,'feb':2,'mar':3,'abr':4,'may':5,'jun':6,'jul':7,'ago':8,'sep':9,'oct':10,'nov':11,'dic':12}
     s = s.lower().strip()
-    # Patrón "15 de marzo de 2024"
     m = re.match(r'(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})', s)
     if m:
         d, mn, y = m.groups()
         if mn in months:
             return f'{y}-{months[mn]:02d}-{int(d):02d}'
-    # Patrón "15/03/2024" or "15-03-2024"
     m = re.match(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', s)
     if m:
         d, mn, y = m.groups()
         return f'{y}-{int(mn):02d}-{int(d):02d}'
-    # YYYY-MM-DD
     m = re.match(r'(\d{4})-(\d{2})-(\d{2})', s)
     if m:
         return m.group(0)
     return None
 
 
+def extract_date_from_text(text):
+    """Busca fecha en cualquier parte del texto/URL"""
+    if not text:
+        return None
+    # "15 de marzo de 2026"
+    m = re.search(r'(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})', text, re.IGNORECASE)
+    if m:
+        return fmt_date(m.group(1))
+    # "2026-06-03"
+    m = re.search(r'(\d{4}-\d{2}-\d{2})', text)
+    if m:
+        return m.group(1)
+    # "03/06/2026"
+    m = re.search(r'(\d{1,2}[/\-]\d{1,2}[/\-]\d{4})', text)
+    if m:
+        return fmt_date(m.group(1))
+    # En URL: gct/2026/junio/jun030/
+    m = re.search(r'/(\d{4})/(\w+)/(\w+)(\d{1,2})', text)
+    if m:
+        y, mn, _, d = m.groups()
+        months = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
+                  'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12,
+                  'ene':1,'feb':2,'mar':3,'abr':4,'may':5,'jun':6,'jul':7,'ago':8,'sep':9,'oct':10,'nov':11,'dic':12}
+        if mn.lower() in months:
+            return f'{y}-{months[mn.lower()]:02d}-{int(d):02d}'
+    return None
+
+
 def insert_pubs(pubs):
-    """Bulk insert"""
     if not pubs:
         return 0
     try:
@@ -116,92 +148,236 @@ def insert_pubs(pubs):
     return 0
 
 
-def scrape_jalisco(page):
-    """Periódico Oficial Jalisco — buscar PDFs en /index.php o equivalente"""
+def safe_goto(page, url, timeout=45000, wait='domcontentloaded'):
+    """goto con retry, timeout largo, fallback de wait_until"""
+    try:
+        page.goto(url, timeout=timeout, wait_until=wait)
+        time.sleep(1.5)
+        return True
+    except Exception as e:
+        print(f'  goto fail ({wait}) {url}: {str(e)[:100]}', flush=True)
+        # Reintento con load (más permisivo)
+        try:
+            page.goto(url, timeout=timeout, wait_until='load')
+            time.sleep(2)
+            return True
+        except Exception as e2:
+            print(f'  goto fail (load) {url}: {str(e2)[:100]}', flush=True)
+            return False
+
+
+# ──────────────────────────────────────────────────────────────
+# Handlers
+# ──────────────────────────────────────────────────────────────
+def scrape_cdmx(page):
+    """CDMX · data.consejeria.cdmx.gob.mx · index.php/gaceta"""
+    pubs = []
+    if not safe_goto(page, BASE_URL, timeout=45000, wait='networkidle'):
+        return pubs
+
+    links = page.evaluate("""
+        () => Array.from(document.querySelectorAll('a[href]'))
+            .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0,300)}))
+            .filter(l => l.href.toLowerCase().includes('.pdf') || l.href.includes('uploads/gacetas/'))
+    """)
+    print(f'  CDMX: {len(links)} links candidatos', flush=True)
+
+    for l in links[:MAX_PUBS]:
+        titulo = l['text']
+        if not titulo or len(titulo) < 5:
+            titulo = urllib.parse.unquote(l['href'].split('/')[-1]).replace('.pdf','')
+        fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+        pubs.append({
+            'estado_clave': ESTADO_CLAVE,
+            'estado_nombre': ESTADO_NOMBRE,
+            'titulo': titulo[:500],
+            'pdf_url': l['href'][:2000],
+            'url_oficial': BASE_URL,
+            'fuente': f'Gaceta Oficial CDMX',
+            'fecha_publicacion': fecha,
+            'tipo_doc': 'gaceta',
+        })
+    return pubs
+
+
+def scrape_nl(page):
+    """NL · HCNL Congreso Estatal Archive"""
+    pubs = []
+    if not safe_goto(page, BASE_URL, timeout=45000, wait='networkidle'):
+        return pubs
+
+    # Buscar TODO link que sea PDF o tenga año/fecha
+    links = page.evaluate("""
+        () => Array.from(document.querySelectorAll('a[href]'))
+            .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0,300)}))
+            .filter(l =>
+                l.href.toLowerCase().includes('.pdf') ||
+                (l.text && /\\d{4}/.test(l.text) && (l.href.includes('periodico') || l.href.includes('archivo')))
+            )
+    """)
+    print(f'  NL: {len(links)} links candidatos', flush=True)
+
+    for l in links[:MAX_PUBS]:
+        titulo = l['text'] or urllib.parse.unquote(l['href'].split('/')[-1])
+        fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+        pubs.append({
+            'estado_clave': ESTADO_CLAVE,
+            'estado_nombre': ESTADO_NOMBRE,
+            'titulo': titulo[:500],
+            'pdf_url': l['href'][:2000],
+            'url_oficial': BASE_URL,
+            'fuente': f'Periódico Oficial Nuevo León (HCNL)',
+            'fecha_publicacion': fecha,
+            'tipo_doc': 'edicion',
+        })
+    return pubs
+
+
+def scrape_edomex(page):
+    """EdoMex · legislacion.edomex.gob.mx/ve_periodico_oficial"""
     pubs = []
     urls = [
-        f'{BASE_URL}/',
-        f'{BASE_URL}/index.php',
-        f'{BASE_URL}/historico',
+        BASE_URL,                                     # /ve_periodico_oficial
+        'https://legislacion.edomex.gob.mx/',         # root LEGISTEL
     ]
     for url in urls:
-        try:
-            page.goto(url, timeout=20000, wait_until='domcontentloaded')
-            time.sleep(1)
-            links = page.evaluate("""
-                () => Array.from(document.querySelectorAll('a[href*=".pdf"]'))
-                    .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0, 200)}))
-                    .filter(l => l.href.endsWith('.pdf'))
-            """)
-            for l in links[:MAX_PUBS]:
-                titulo = l['text'] or l['href'].split('/')[-1].replace('.pdf','').replace('_',' ')
-                pubs.append({
-                    'estado_clave': ESTADO_CLAVE,
-                    'estado_nombre': ESTADO_NOMBRE,
-                    'titulo': titulo[:500],
-                    'pdf_url': l['href'][:2000],
-                    'url_oficial': BASE_URL,
-                    'fuente': f'Periódico Oficial {ESTADO_NOMBRE}',
-                    'tipo_doc': 'edicion',
-                })
-            if pubs:
-                break
-        except Exception as e:
-            print(f'  {url} error: {e}', flush=True)
+        if not safe_goto(page, url, timeout=45000, wait='networkidle'):
+            continue
+        links = page.evaluate("""
+            () => Array.from(document.querySelectorAll('a[href]'))
+                .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0,300)}))
+                .filter(l => l.href.toLowerCase().includes('.pdf') || l.href.includes('/gct/'))
+        """)
+        print(f'  EdoMex {url}: {len(links)} links candidatos', flush=True)
+        if not links:
+            continue
+        for l in links[:MAX_PUBS]:
+            titulo = l['text']
+            if not titulo or len(titulo) < 5:
+                titulo = urllib.parse.unquote(l['href'].split('/')[-1]).replace('.pdf','')
+            fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+            pubs.append({
+                'estado_clave': ESTADO_CLAVE,
+                'estado_nombre': ESTADO_NOMBRE,
+                'titulo': titulo[:500],
+                'pdf_url': l['href'][:2000],
+                'url_oficial': BASE_URL,
+                'fuente': f'Gaceta del Gobierno EdoMex',
+                'fecha_publicacion': fecha,
+                'tipo_doc': 'gaceta',
+            })
+        if pubs:
+            break
+    return pubs
+
+
+def scrape_jalisco(page):
+    """Jalisco · seccion/periodico/N + apiperiodico"""
+    pubs = []
+    # Estrategia 1: root tiene últimas ediciones linkadas
+    if not safe_goto(page, BASE_URL, timeout=45000, wait='networkidle'):
+        return pubs
+
+    # Buscar links a /seccion/periodico/N
+    nav_links = page.evaluate("""
+        () => Array.from(document.querySelectorAll('a[href]'))
+            .map(a => ({href: a.href, text: (a.innerText||'').trim().substring(0,300)}))
+            .filter(l => /seccion\\/periodico\\/\\d+/.test(l.href) || l.href.toLowerCase().includes('.pdf'))
+    """)
+    print(f'  Jalisco root: {len(nav_links)} links candidatos', flush=True)
+
+    # Si hay PDFs directos en root, usarlos
+    pdf_links = [l for l in nav_links if l['href'].lower().endswith('.pdf')]
+    if pdf_links:
+        for l in pdf_links[:MAX_PUBS]:
+            titulo = l['text'] or urllib.parse.unquote(l['href'].split('/')[-1])
+            fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+            pubs.append({
+                'estado_clave': ESTADO_CLAVE,
+                'estado_nombre': ESTADO_NOMBRE,
+                'titulo': titulo[:500],
+                'pdf_url': l['href'][:2000],
+                'url_oficial': BASE_URL,
+                'fuente': 'Periódico Oficial Jalisco',
+                'fecha_publicacion': fecha,
+                'tipo_doc': 'edicion',
+            })
+        return pubs
+
+    # Si no, navegar a /seccion/periodico links y extraer PDFs ahí
+    seccion_links = [l for l in nav_links if 'seccion/periodico' in l['href']][:5]
+    for sl in seccion_links:
+        if not safe_goto(page, sl['href'], timeout=40000, wait='networkidle'):
+            continue
+        sub_pdfs = page.evaluate("""
+            () => Array.from(document.querySelectorAll('a[href]'))
+                .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0,300)}))
+                .filter(l => l.href.toLowerCase().includes('.pdf'))
+        """)
+        for l in sub_pdfs[:MAX_PUBS]:
+            titulo = l['text'] or sl['text'] or urllib.parse.unquote(l['href'].split('/')[-1])
+            fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+            pubs.append({
+                'estado_clave': ESTADO_CLAVE,
+                'estado_nombre': ESTADO_NOMBRE,
+                'titulo': titulo[:500],
+                'pdf_url': l['href'][:2000],
+                'url_oficial': BASE_URL,
+                'fuente': 'Periódico Oficial Jalisco',
+                'fecha_publicacion': fecha,
+                'tipo_doc': 'edicion',
+            })
+            if len(pubs) >= MAX_PUBS:
+                return pubs
     return pubs
 
 
 def scrape_generic(page):
-    """Generic scraper — busca PDFs en el portal raíz"""
+    """Default · busca PDFs en root + 4 paths comunes"""
     pubs = []
-    urls = [BASE_URL]
-    # Probar también /historico, /publicaciones
-    for sub in ['/', '/historico', '/publicaciones', '/ediciones', '/recientes']:
-        try:
-            target = BASE_URL.rstrip('/') + sub
-            page.goto(target, timeout=25000, wait_until='domcontentloaded')
-            time.sleep(1)
-            links = page.evaluate("""
-                () => Array.from(document.querySelectorAll('a[href]'))
-                    .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0, 300)}))
-                    .filter(l => l.href.toLowerCase().includes('.pdf'))
-            """)
-            for l in links[:MAX_PUBS]:
-                titulo = l['text']
-                if not titulo or len(titulo) < 5:
-                    titulo = urllib.parse.unquote(l['href'].split('/')[-1]).replace('.pdf','').replace('_',' ').replace('+',' ')
-                # Buscar fecha en el texto
-                fecha = None
-                m = re.search(r'(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})', titulo)
-                if m:
-                    fecha = fmt_date(m.group(1))
-                pubs.append({
-                    'estado_clave': ESTADO_CLAVE,
-                    'estado_nombre': ESTADO_NOMBRE,
-                    'titulo': titulo[:500],
-                    'pdf_url': l['href'][:2000],
-                    'url_oficial': BASE_URL,
-                    'fuente': f'Periódico Oficial {ESTADO_NOMBRE}',
-                    'fecha_publicacion': fecha,
-                    'tipo_doc': 'edicion',
-                })
-            if pubs:
-                break
-        except Exception as e:
-            print(f'  {target} error: {e}', flush=True)
+    paths = ['/', '/historico', '/publicaciones', '/ediciones', '/recientes']
+    for sub in paths:
+        target = BASE_URL.rstrip('/') + sub
+        if not safe_goto(page, target, timeout=45000, wait='domcontentloaded'):
+            continue
+        links = page.evaluate("""
+            () => Array.from(document.querySelectorAll('a[href]'))
+                .map(a => ({href: a.href, text: (a.innerText||a.title||'').trim().substring(0,300)}))
+                .filter(l => l.href.toLowerCase().includes('.pdf'))
+        """)
+        if not links:
+            continue
+        for l in links[:MAX_PUBS]:
+            titulo = l['text']
+            if not titulo or len(titulo) < 5:
+                titulo = urllib.parse.unquote(l['href'].split('/')[-1]).replace('.pdf','').replace('_',' ').replace('+',' ')
+            fecha = extract_date_from_text(titulo) or extract_date_from_text(l['href'])
+            pubs.append({
+                'estado_clave': ESTADO_CLAVE,
+                'estado_nombre': ESTADO_NOMBRE,
+                'titulo': titulo[:500],
+                'pdf_url': l['href'][:2000],
+                'url_oficial': BASE_URL,
+                'fuente': f'Periódico Oficial {ESTADO_NOMBRE}',
+                'fecha_publicacion': fecha,
+                'tipo_doc': 'edicion',
+            })
+        if pubs:
+            break
     return pubs
 
 
-# Map de handlers (default: scrape_generic)
 HANDLERS = {
+    '09': scrape_cdmx,
     '14': scrape_jalisco,
+    '15': scrape_edomex,
+    '19': scrape_nl,
 }
 
 
 def main():
     handler = HANDLERS.get(ESTADO_CLAVE, scrape_generic)
     pubs = []
-    
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
@@ -214,35 +390,32 @@ def main():
             ignore_https_errors=True,
         )
         page = context.new_page()
-        page.set_default_timeout(25000)
-        
+        page.set_default_timeout(45000)
         try:
             pubs = handler(page)
         except Exception as e:
             print(f'❌ Handler error: {e}', flush=True)
-        
         browser.close()
-    
+
     print(f'\n📥 {len(pubs)} publicaciones encontradas. Insertando...', flush=True)
-    
-    # Dedup interno (por pdf_url)
+
     seen = set()
     unique = []
     for p in pubs:
         if p['pdf_url'] not in seen:
             seen.add(p['pdf_url'])
             unique.append(p)
-    
-    # Bulk insert
+
     inserted = 0
     batch_size = 30
     for i in range(0, len(unique), batch_size):
         inserted += insert_pubs(unique[i:i+batch_size])
-    
+
     print(f'\n═══ SUMMARY ({ESTADO_NOMBRE}) ═══', flush=True)
     print(f'  found:     {len(pubs)}', flush=True)
     print(f'  unique:    {len(unique)}', flush=True)
     print(f'  inserted:  {inserted}', flush=True)
+    print(f'  with date: {sum(1 for u in unique if u.get("fecha_publicacion"))}/{len(unique)}', flush=True)
 
 
 if __name__ == '__main__':
