@@ -271,64 +271,47 @@ def strategy_playwright(muni_name: str, max_pdfs: int = 8) -> list[str]:
 
 
 # ────────────────────────────────────────────────────────────────
-# Main loop por estado
+# Main loop · v3.1 soporta MODO SHARD (--shard / --total)
 # ────────────────────────────────────────────────────────────────
 
-def main():
-    if len(sys.argv) < 2:
-        print('Uso: python3 playwright_sweep_v3.py <estado_clave> [max_per_muni]')
-        sys.exit(1)
-    
-    estado_key = sys.argv[1].zfill(2)
-    max_per_muni = int(sys.argv[2]) if len(sys.argv) > 2 else 8
-    
-    estado_name = ESTADO_NAMES.get(estado_key)
-    if not estado_name:
-        print(f'Estado clave inválida: {estado_key}')
-        sys.exit(1)
-    
-    # Cargar catálogo INEGI
+def load_all_munis():
+    """Lee TODO el catálogo INEGI · devuelve lista de (estado_key, muni_name)"""
     catalog_file = Path(__file__).parent / 'data' / 'catalogo_inegi_municipios.csv'
-    munis = []
+    out = []
     with open(catalog_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if row['cve_ent'] == estado_key:
-                munis.append(row['nom_mun'])
-    
-    print(f'📋 Procesando {len(munis)} municipios de {estado_name} (clave {estado_key})', flush=True)
-    print(f'   max_per_muni={max_per_muni}', flush=True)
-    print('', flush=True)
-    
+            out.append((row['cve_ent'], row['nom_mun']))
+    return out
+
+
+def process_munis(items, max_per_muni, label):
+    """Procesa lista de (estado_key, muni_name) con las strategies v3"""
     stats = {'discovered': 0, 'inserted': 0, 'skipped': 0, 'no_pdfs': 0, 'failed': 0}
-    
-    for i, muni in enumerate(munis, 1):
-        # Skip si ya tiene suficientes docs
+    total = len(items)
+    for i, (estado_key, muni) in enumerate(items, 1):
+        estado_name = ESTADO_NAMES.get(estado_key, '???')
         existing = already_covered(muni, estado_name, max_per_muni)
         if existing >= max_per_muni:
             stats['skipped'] += 1
             continue
-        
-        print(f'[{i}/{len(munis)}] ▶ {muni} (existing: {existing})', flush=True)
-        
-        # Strategy A: HTTP directo
+
+        print(f'[{i}/{total}] ▶ {muni}, {estado_name} (existing: {existing})', flush=True)
+
         pdfs = strategy_http_direct(muni, max_pdfs=max_per_muni)
-        
-        # Strategy B: Playwright si HTTP no dio nada
         if not pdfs:
             print(f'    🌐 HTTP failed, trying Playwright...', flush=True)
             pdfs = strategy_playwright(muni, max_pdfs=max_per_muni)
-        
+
         if not pdfs:
             stats['no_pdfs'] += 1
             print(f'    ⚠️  Sin PDFs', flush=True)
             continue
-        
+
         stats['discovered'] += len(pdfs)
         entidad = f'{muni}, {estado_name}'
-        slug = slugify(muni)
         fuente = f'Gobierno {muni}'
-        
+
         for pdf_url in pdfs[:max_per_muni - existing]:
             name = normalize_name(pdf_url)
             if insert_ley(name, pdf_url, entidad, fuente):
@@ -336,13 +319,22 @@ def main():
                 print(f'    ✅ {name[:60]}', flush=True)
             else:
                 stats['failed'] += 1
-    
+
     print('', flush=True)
-    print(f'═══ SUMMARY (estado={estado_key}) ═══', flush=True)
+    print(f'═══ SUMMARY ({label}) ═══', flush=True)
     for k, v in stats.items():
         print(f'  {k:<12} : {v}', flush=True)
     print('═══════════════════════════════════════', flush=True)
 
 
-if __name__ == '__main__':
-    main()
+def main():
+    if len(sys.argv) < 2:
+        print('Uso:')
+        print('  Modo estado:  python3 playwright_sweep_v3.py <estado_clave> [max_per_muni]')
+        print('  Modo shard:   python3 playwright_sweep_v3.py SHARD <shard_idx> <total_shards> [max_per_muni]')
+        sys.exit(1)
+
+    # ─── MODO SHARD ───────────────────────────────────────────
+    if sys.argv[1].upper() == 'SHARD':
+        if len(sys.argv) < 4:
+            print('SHARD requiere: SHA
