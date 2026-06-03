@@ -1,0 +1,87 @@
+name: Embeddings Backfill LOCAL (gratis · multilingual-e5-base)
+
+# Llena chunks sin embedding con modelo LOCAL en GH Actions (cero costo API).
+# Reemplaza al workflow Gemini (que se quedó sin crédito).
+#
+# Modelo: intfloat/multilingual-e5-base · 768d · multilingual (~1GB)
+# 10 jobs paralelos, ~30-60 min para 326k chunks.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'null = solo pendientes · all = TODO el corpus (re-embed)'
+        required: false
+        default: 'null'
+        type: choice
+        options:
+          - 'null'
+          - 'all'
+      parallel_jobs:
+        description: 'Cuántos jobs paralelos (1-10)'
+        required: false
+        default: '10'
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        batch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-embed-local-${{ hashFiles('**/requirements-embed-local.txt') }}-v2
+          restore-keys: |
+            pip-embed-local-
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-multilingual-e5-base-v1
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install requests "sentence-transformers>=2.7,<3.0" "torch>=2.0" --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple/ || \
+          pip install requests "sentence-transformers>=2.7,<3.0" torch
+
+      - name: Run backfill batch
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BATCH_IDX: ${{ matrix.batch }}
+          MODE: ${{ inputs.mode || 'null' }}
+        run: |
+          python3 scripts/backfill_chunks_embeddings_local.py "$BATCH_IDX" 10 "--mode=$MODE"
+
+  refresh_kpis:
+    needs: backfill
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh KPI cache
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | grep chunks || true
