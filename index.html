@@ -8968,61 +8968,41 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── GEOPOLÍTICA ───── -->
     <div id="page-geopolitica" class="page">
       <div class="content">
-        <!-- Header oficial -->
-        <div style="background:linear-gradient(135deg,#0c4a6e 0%,#075985 50%,#0369a1 100%);border-radius:20px;padding:24px 28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(3,105,161,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-            <div style="font-size:54px;line-height:1">🌐</div>
-            <div style="flex:1;min-width:240px">
-              <h1 style="font-size:28px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">México en el Mundo</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Relaciones exteriores, tratados, inversión y posición geopolítica del <strong>Estado Mexicano</strong>.</p>
+        <!-- HERO NIVEL 3 -->
+        <div style="position:relative;background:radial-gradient(circle at 0% 0%,rgba(34,197,94,0.22) 0%,transparent 50%),radial-gradient(circle at 100% 100%,rgba(59,130,246,0.20) 0%,transparent 50%),linear-gradient(135deg,rgba(34,197,94,0.10) 0%,rgba(59,130,246,0.10) 50%,rgba(15,23,42,0.95) 100%);border:1px solid rgba(34,197,94,0.28);border-radius:20px;padding:28px 26px 24px;margin:14px 0 16px;overflow:hidden">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.40);color:#86efac;padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:14px">🌐 SRE oficial · Cero invención</div>
+          <h1 style="font-size:30px;font-weight:900;line-height:1.15;margin:0 0 10px;background:linear-gradient(135deg,#fff 0%,#86efac 50%,#93c5fd 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">México en el Mundo</h1>
+          <p style="color:#cbd5e1;font-size:14.5px;line-height:1.6;margin:0;max-width:680px">Relaciones exteriores, tratados, inversión y posición geopolítica del <strong style="color:#fcd34d">Estado Mexicano</strong>. Datos diplomáticos verificados con SRE, Banxico, SE y OMC.</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
+              <div style="font-size:21px;font-weight:900;color:#86efac;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-exp">$593B</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Exportaciones 2024</div>
             </div>
-            <a href="https://www.gob.mx/sre" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Portal SRE →</a>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
+              <div style="font-size:21px;font-weight:900;color:#fcd34d;line-height:1;font-variant-numeric:tabular-nums">14</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Tratados TLC</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
+              <div style="font-size:21px;font-weight:900;color:#d8b4fe;line-height:1;font-variant-numeric:tabular-nums">$63B</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Remesas 2024</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px" title="USD/MXN tipo de cambio FIX en vivo">
+              <div style="font-size:21px;font-weight:900;color:#93c5fd;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-usd">$17.29</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">USD/MXN <span style="color:#86efac">●</span> LIVE</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+            <a href="https://www.gob.mx/sre" target="_blank" style="background:rgba(255,255,255,0.10);color:#fff;padding:9px 16px;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.18)">📎 Portal SRE</a>
+            <a href="https://www.banxico.org.mx/SieInternet/" target="_blank" style="background:rgba(59,130,246,0.15);color:#93c5fd;padding:9px 16px;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid rgba(59,130,246,0.30)">📊 Banxico SIE</a>
+            <a href="https://www.inegi.org.mx/temas/balanza/" target="_blank" style="background:rgba(168,85,247,0.15);color:#d8b4fe;padding:9px 16px;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid rgba(168,85,247,0.30)">📦 INEGI Balanza</a>
           </div>
         </div>
-        <!-- Sello de Fuente Oficial Verificada -->
-        <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div style="font-size:28px">✅</div>
-          <div style="flex:1;min-width:220px">
-            <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Datos diplomáticos de <strong>SRE — Secretaría de Relaciones Exteriores</strong> (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">gob.mx/sre</code>). Cifras económicas de <strong>Banxico</strong>, <strong>SE</strong> y <strong>OMC</strong>. Verifica datos vigentes en los portales oficiales antes de tomar decisiones formales.</div>
-          </div>
+        <!-- Botón análisis IA flotante -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+          <button class="btn btn-primary" onclick="geoAskIA('Dame un resumen del estado actual de las relaciones exteriores de México con sus principales socios comerciales y qué desafíos geopolíticos enfrenta en 2025.')" style="font-size:13px;font-weight:700">🧠 Análisis IA</button>
         </div>
-        <!-- Header + stats rápidos -->
-        <div class="section-header mb-16">
-          <div>
-            <div style="font-family:var(--font-display);font-size:18px;font-weight:800;letter-spacing:-0.5px">Posición Económica Global</div>
-            <div class="card-subtitle">Indicadores clave 2024-2025</div>
-          </div>
-          <button class="btn btn-primary" onclick="geoAskIA('Dame un resumen del estado actual de las relaciones exteriores de México con sus principales socios comerciales y qué desafíos geopolíticos enfrenta en 2025.')">🧠 Análisis IA</button>
-        </div>
-        <!-- KPIs · cifras curadas, verificar vigencia en fuente oficial -->
-        <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:11px;color:#fcd34d;line-height:1.5">
-          ⚠️ <strong>Indicadores curados manualmente (2024).</strong> Las cifras económicas se actualizan trimestralmente desde portales oficiales. Para datos del día, consulta <a href="https://www.banxico.org.mx/SieInternet/" target="_blank" style="color:#fde68a">Banxico SIE</a> · <a href="https://www.inegi.org.mx/temas/balanza/" target="_blank" style="color:#fde68a">INEGI Balanza</a>.
-        </div>
-        <div class="grid-4 mb-24">
-          <div class="geo-stat-mini" title="Fuente: INEGI · Estadísticas de comercio exterior 2024">
-            <div class="geo-stat-mini-label">Exportaciones · 2024</div>
-            <div class="geo-stat-mini-value" style="color:var(--green2)">$593B</div>
-            <div class="geo-stat-mini-sub">USD · INEGI · 3er exportador de Amér.</div>
-          </div>
-          <div class="geo-stat-mini" title="Fuente: SRE / Secretaría de Economía · TLCs vigentes 2024">
-            <div class="geo-stat-mini-label">Tratados Activos</div>
-            <div class="geo-stat-mini-value" style="color:var(--accent2)">14</div>
-            <div class="geo-stat-mini-sub">TLCs con 50+ países · SRE</div>
-          </div>
-          <div class="geo-stat-mini" title="Fuente: Secretaría de Economía · Inversión Extranjera Directa 2024">
-            <div class="geo-stat-mini-label">IED Recibida · 2024</div>
-            <div class="geo-stat-mini-value" style="color:var(--yellow2)">$36.1B</div>
-            <div class="geo-stat-mini-sub">USD · SE · Top 10 mundial</div>
-          </div>
-          <div class="geo-stat-mini" title="Fuente: Banxico · Remesas familiares 2024 (récord histórico)">
-            <div class="geo-stat-mini-label">Remesas · 2024</div>
-            <div class="geo-stat-mini-value" style="color:var(--purple)">$63.3B</div>
-            <div class="geo-stat-mini-sub">USD · Banxico · Récord histórico</div>
-          </div>
-        </div>
-        <!-- Tabs de secciones -->
-        <div class="tab-bar mb-24" id="geo-tab-bar">
+        <!-- Tabs de secciones (sticky) -->
+        <div class="tab-bar mb-24" id="geo-tab-bar" style="position:sticky;top:0;z-index:50;background:rgba(10,14,26,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:8px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);box-shadow:0 4px 16px rgba(0,0,0,0.25)">
           <div class="tab active" onclick="switchGeoTab(this,'geo-mapa')">🗺️ Mapa Mundial</div>
           <div class="tab" onclick="switchGeoTab(this,'geo-relaciones')">🤝 Relaciones</div>
           <div class="tab" onclick="switchGeoTab(this,'geo-tratados')">📜 Tratados</div>
@@ -16502,7 +16482,57 @@ function exportarDocumentoAccion() {
       <div class="disclaimer">⚖️ <strong>AVISO LEGAL:</strong> Este documento fue generado por inteligencia artificial con fines exclusivamente orientativos. No constituye asesoría jurídica. Revise con un abogado o Defensoría Pública (800 200 3030) antes de presentarlo.</div>
       <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
       <div class="footer">Generado por Tequio — Plataforma Cívica Digital · ${new Date().toLocaleDateString('es-MX')} · Solo con fines informativos</div>
-      </body></html>`);
+      
+<script>
+// Live USD/MXN ticker for México en el Mundo
+(function() {
+  async function loadGeoLiveUSD() {
+    try {
+      const r = await fetch('/api/data?vista=banxico_historico&serie=SF43718');
+      const j = await r.json();
+      const pts = j.puntos || [];
+      if (pts.length) {
+        const last = pts[pts.length - 1];
+        const prev = pts.length > 1 ? pts[pts.length - 2] : null;
+        const el = document.getElementById('geo-hero-usd');
+        if (el) {
+          const v = Number(last.valor).toFixed(2);
+          let arrow = '';
+          if (prev) {
+            const diff = last.valor - prev.valor;
+            if (diff > 0.01) arrow = ' <span style="color:#fca5a5;font-size:14px">▲</span>';
+            else if (diff < -0.01) arrow = ' <span style="color:#86efac;font-size:14px">▼</span>';
+          }
+          el.innerHTML = '$' + v + arrow;
+        }
+      }
+    } catch(e) { /* silent */ }
+  }
+  // Run when geopolitica page becomes visible
+  let geoUSDInit = false;
+  const obs = new MutationObserver(() => {
+    const pg = document.getElementById('page-geopolitica');
+    if (pg && pg.classList.contains('active') && !geoUSDInit) {
+      geoUSDInit = true;
+      loadGeoLiveUSD();
+      // Refresh every 5 minutes
+      setInterval(loadGeoLiveUSD, 5 * 60 * 1000);
+    }
+  });
+  obs.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  // Also try on initial load
+  document.addEventListener('DOMContentLoaded', () => {
+    const pg = document.getElementById('page-geopolitica');
+    if (pg && pg.classList.contains('active')) {
+      geoUSDInit = true;
+      loadGeoLiveUSD();
+      setInterval(loadGeoLiveUSD, 5 * 60 * 1000);
+    }
+  });
+})();
+</script>
+
+</body></html>`);
     win.document.close();
     setTimeout(() => win.print(), 400);
   });
