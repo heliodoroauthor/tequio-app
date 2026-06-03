@@ -61,8 +61,37 @@
 </script>
 
 <div class="wrap">
-  <h1>Tu municipio en datos</h1>
-  <div class="tag"><strong>2,478</strong> municipios de México · INEGI · INAFED · SESNSP · SHCP</div>
+  <!-- ═════ HERO Nivel 3 ═════ -->
+  <div style="background:linear-gradient(135deg,#1e3a8a 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.35)">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:60px;line-height:1">🏘️</div>
+      <div style="flex:1;min-width:240px">
+        <h1 style="font-size:30px;font-weight:800;margin:0;color:#fff;letter-spacing:-0.02em">Tu Municipio en Datos</h1>
+        <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Encuentra tu <strong>casa local</strong> entre 2,478 municipios mexicanos · datos INEGI, INAFED, SESNSP, SHCP.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">📍 LOCAL</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800">2,478</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Municipios</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">126M</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Habitantes</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Censo 2020</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">INEGI</div></div>
+    </div>
+  </div>
+
+  <!-- Caja edu colapsable -->
+  <details style="background:linear-gradient(135deg,rgba(67,56,202,0.08),rgba(67,56,202,0.02));border:1px solid rgba(67,56,202,0.35);border-radius:12px;margin-bottom:14px">
+    <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Qué fuentes leemos? · Cuatro instituciones del Estado</span><span style="font-size:11px">▾</span></summary>
+    <div style="padding:0 16px 14px;font-size:12px;color:var(--muted);line-height:1.6">Datos verificados de 4 fuentes oficiales mexicanas:
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+        <div style="background:rgba(67,56,202,0.12);border-left:3px solid #4338ca;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">📊 INEGI</strong><br><span style="font-size:11px">Censo de Población 2020 · 126M habitantes · estadísticas oficiales.</span></div>
+        <div style="background:rgba(124,58,237,0.12);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">🏛️ INAFED</strong><br><span style="font-size:11px">Federalismo: estructura municipal, presupuestos locales, Ramo 28/33.</span></div>
+        <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🚨 SESNSP</strong><br><span style="font-size:11px">Seguridad: incidencia delictiva mensual por municipio.</span></div>
+        <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">💰 SHCP</strong><br><span style="font-size:11px">Hacienda: transferencias federales por entidad y municipio.</span></div>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:var(--hint)">Click en tu municipio para ver presupuesto, contratos, leyes locales y representantes.</p>
+    </div>
+  </details>
 
   <div class="search-box">
     <input id="q" type="search" placeholder="Buscar municipio (ej: Tijuana, Iztapalapa...)" autocomplete="off" autocapitalize="off">
