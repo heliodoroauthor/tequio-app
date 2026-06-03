@@ -66,7 +66,36 @@
   <h1>Vota antes que el Congreso</h1>
 </header>
 <main>
-  <div class="intro">
+  <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 50%,#ea580c 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.35)">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:60px;line-height:1">🗳️</div>
+      <div style="flex:1;min-width:240px">
+        <h1 style="font-size:30px;font-weight:900;margin:0;color:#fff;letter-spacing:-0.02em">Vota antes que el Congreso</h1>
+        <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">El pueblo vota PRIMERO · luego comparamos · <strong>¿tu diputado votó igual o diferente?</strong> · 100% anónimo.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🔒 ANÓNIMO</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="hero-stat-activas">0</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Iniciativas activas</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="hero-stat-votos">0</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Votos totales</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Anónimo</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Sin email</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Sin login</div></div>
+    </div>
+  </div>
+  <details style="background:linear-gradient(135deg,rgba(234,88,12,0.08),rgba(234,88,12,0.02));border:1px solid rgba(234,88,12,0.35);border-radius:12px;margin-bottom:14px">
+    <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fed7aa;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Cómo funciona? · Tu voto antes que el Congreso</span><span style="font-size:11px">▾</span></summary>
+    <div style="padding:0 16px 14px;font-size:12px;color:#cbd5e1;line-height:1.6">El pueblo vota <strong>primero</strong>. Después comparamos contra el voto oficial:
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+        <div style="background:rgba(234,88,12,0.10);border-left:3px solid #ea580c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">1. Lee</strong><br><span style="font-size:11px">Cada iniciativa con resumen + fuente oficial Gaceta.</span></div>
+        <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">2. Vota</strong><br><span style="font-size:11px">A favor · En contra · Abstención. Tarda 30 seg mínimo (anti-bot).</span></div>
+        <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">3. Compara</strong><br><span style="font-size:11px">Cuando el Congreso vota, lo cruzamos en Quemones.</span></div>
+        <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">4. Memoria</strong><br><span style="font-size:11px">Si tu diputado votó diferente, queda registro público.</span></div>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#94a3b8">🔒 <strong>Privacidad:</strong> usamos hash de dispositivo + IP + opcionalmente INE (procesada local en tu navegador). NUNCA tu identidad. Tu voto no es vinculante legalmente: es <em>señal social</em>.</p>
+      <p style="margin-top:6px;font-size:11px;color:#94a3b8">📋 Fuente iniciativas: <a href="https://gaceta.diputados.gob.mx" target="_blank" rel="noopener" style="color:#fbbf24">Gaceta Parlamentaria · Cámara LXVI</a></p>
+    </div>
+  </details>
+  <div class="intro" style="display:none">
     <h2>Tu voz cuenta antes que la votacion oficial</h2>
     <p>Lee la iniciativa, refleja tu postura. Tu voto es anonimo. Si el Congreso vota en contra de tu opinion, tienes derecho a saberlo.</p>
   </div>
@@ -361,6 +390,33 @@
   function escapeHtml(s) {
     return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+})();
+</script>
+<script>
+// Hidratar stats del hero cuando se renderice la lista
+(function(){
+  function updateHeroStats(){
+    var cards = document.querySelectorAll('.card[data-id]');
+    var activas = cards.length;
+    var totalVotos = 0;
+    cards.forEach(function(c){
+      c.querySelectorAll('.bar-row .count').forEach(function(n){
+        var v = parseInt(n.textContent.replace(/[^0-9]/g,''),10);
+        if (!isNaN(v)) totalVotos += v;
+      });
+    });
+    var a = document.getElementById('hero-stat-activas');
+    var v = document.getElementById('hero-stat-votos');
+    if (a) a.textContent = activas;
+    if (v) v.textContent = totalVotos.toLocaleString('es-MX');
+  }
+  var lista = document.getElementById('lista-iniciativas') || document.querySelector('main');
+  if (lista) {
+    var obs = new MutationObserver(updateHeroStats);
+    obs.observe(lista, {childList:true, subtree:true});
+  }
+  setInterval(updateHeroStats, 2000);
+  setTimeout(updateHeroStats, 500);
 })();
 </script>
 </body>
