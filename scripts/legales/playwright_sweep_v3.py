@@ -271,11 +271,11 @@ def strategy_playwright(muni_name: str, max_pdfs: int = 8) -> list[str]:
 
 
 # ────────────────────────────────────────────────────────────────
-# Main loop · v3.1 soporta MODO SHARD (--shard / --total)
+# Main loop por estado
 # ────────────────────────────────────────────────────────────────
 
 def load_all_munis():
-    """Lee TODO el catálogo INEGI · devuelve lista de (estado_key, muni_name)"""
+    """Lee TODO el catalogo INEGI - devuelve lista de (estado_key, muni_name)"""
     catalog_file = Path(__file__).parent / 'data' / 'catalogo_inegi_municipios.csv'
     out = []
     with open(catalog_file, 'r', encoding='utf-8') as f:
@@ -290,51 +290,86 @@ def process_munis(items, max_per_muni, label):
     stats = {'discovered': 0, 'inserted': 0, 'skipped': 0, 'no_pdfs': 0, 'failed': 0}
     total = len(items)
     for i, (estado_key, muni) in enumerate(items, 1):
-        estado_name = ESTADO_NAMES.get(estado_key, '???')
+        estado_name = ESTADO_NAMES.get(estado_key, 'desconocido')
         existing = already_covered(muni, estado_name, max_per_muni)
         if existing >= max_per_muni:
             stats['skipped'] += 1
             continue
 
-        print(f'[{i}/{total}] ▶ {muni}, {estado_name} (existing: {existing})', flush=True)
+        print('[{}/{}] -> {}, {} (existing: {})'.format(i, total, muni, estado_name, existing), flush=True)
 
         pdfs = strategy_http_direct(muni, max_pdfs=max_per_muni)
         if not pdfs:
-            print(f'    🌐 HTTP failed, trying Playwright...', flush=True)
+            print('    HTTP failed, trying Playwright...', flush=True)
             pdfs = strategy_playwright(muni, max_pdfs=max_per_muni)
 
         if not pdfs:
             stats['no_pdfs'] += 1
-            print(f'    ⚠️  Sin PDFs', flush=True)
+            print('    Sin PDFs', flush=True)
             continue
 
         stats['discovered'] += len(pdfs)
-        entidad = f'{muni}, {estado_name}'
-        fuente = f'Gobierno {muni}'
+        entidad = '{}, {}'.format(muni, estado_name)
+        fuente = 'Gobierno {}'.format(muni)
 
         for pdf_url in pdfs[:max_per_muni - existing]:
             name = normalize_name(pdf_url)
             if insert_ley(name, pdf_url, entidad, fuente):
                 stats['inserted'] += 1
-                print(f'    ✅ {name[:60]}', flush=True)
+                print('    OK ' + name[:60], flush=True)
             else:
                 stats['failed'] += 1
 
     print('', flush=True)
-    print(f'═══ SUMMARY ({label}) ═══', flush=True)
+    print('=== SUMMARY ({}) ==='.format(label), flush=True)
     for k, v in stats.items():
-        print(f'  {k:<12} : {v}', flush=True)
-    print('═══════════════════════════════════════', flush=True)
+        print('  {:<12} : {}'.format(k, v), flush=True)
+    print('=========================================', flush=True)
 
 
 def main():
     if len(sys.argv) < 2:
         print('Uso:')
-        print('  Modo estado:  python3 playwright_sweep_v3.py <estado_clave> [max_per_muni]')
-        print('  Modo shard:   python3 playwright_sweep_v3.py SHARD <shard_idx> <total_shards> [max_per_muni]')
+        print('  Modo estado:  python3 playwright_sweep_v3.py ESTADO_CLAVE [max_per_muni]')
+        print('  Modo shard:   python3 playwright_sweep_v3.py SHARD SHARD_IDX TOTAL_SHARDS [max_per_muni]')
         sys.exit(1)
 
-    # ─── MODO SHARD ───────────────────────────────────────────
     if sys.argv[1].upper() == 'SHARD':
         if len(sys.argv) < 4:
-            print('SHARD requiere: SHA
+            print('SHARD requiere: SHARD shard_idx total_shards [max_per_muni]')
+            sys.exit(1)
+        shard_idx = int(sys.argv[2])
+        total_shards = int(sys.argv[3])
+        max_per_muni = int(sys.argv[4]) if len(sys.argv) > 4 else 6
+
+        if not (0 <= shard_idx < total_shards):
+            print('shard_idx ({}) debe estar en [0,{})'.format(shard_idx, total_shards))
+            sys.exit(1)
+
+        all_munis = load_all_munis()
+        my_munis = [m for idx, m in enumerate(all_munis) if idx % total_shards == shard_idx]
+        print('SHARD {}/{} - {} munis de {} totales'.format(
+            shard_idx + 1, total_shards, len(my_munis), len(all_munis)), flush=True)
+        print('   max_per_muni={}'.format(max_per_muni), flush=True)
+        print('', flush=True)
+        process_munis(my_munis, max_per_muni, 'shard {}/{}'.format(shard_idx, total_shards))
+        return
+
+    estado_key = sys.argv[1].zfill(2)
+    max_per_muni = int(sys.argv[2]) if len(sys.argv) > 2 else 8
+
+    estado_name = ESTADO_NAMES.get(estado_key)
+    if not estado_name:
+        print('Estado clave invalida: {}'.format(estado_key))
+        sys.exit(1)
+
+    all_munis = load_all_munis()
+    my_munis = [(ek, mn) for ek, mn in all_munis if ek == estado_key]
+    print('Procesando {} municipios de {} (clave {})'.format(len(my_munis), estado_name, estado_key), flush=True)
+    print('   max_per_muni={}'.format(max_per_muni), flush=True)
+    print('', flush=True)
+    process_munis(my_munis, max_per_muni, 'estado={}'.format(estado_key))
+
+
+if __name__ == '__main__':
+    main()
