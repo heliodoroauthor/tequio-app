@@ -1648,6 +1648,17 @@
   if (new URLSearchParams(location.search).get('source')==='pwa') return;
   // No mostrar si dismisada hace menos de 7 días
   try { var d=parseInt(localStorage.getItem('pwa_dismissed_at')||'0',10); if (d>0 && Date.now()-d < 7*24*60*60*1000) return; } catch(e){}
+  // No mostrar mientras el onboarding NO esté completo
+  try { if (localStorage.getItem('tequio_onboarding_done') !== '1') {
+    // Esperar a que se complete el onboarding antes de mostrar el banner
+    var checkOnboarding = setInterval(function(){
+      if (localStorage.getItem('tequio_onboarding_done') === '1') {
+        clearInterval(checkOnboarding);
+        setTimeout(function(){ if (banner) banner.style.display='flex'; }, 3000);
+      }
+    }, 1500);
+    return;
+  } } catch(e){}
 
   var banner = document.getElementById('pwa-install-banner');
   var btn = document.getElementById('pwa-install-btn');
