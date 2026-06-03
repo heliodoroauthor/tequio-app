@@ -13677,16 +13677,40 @@ function obGoStep(step) {
   if (step === 3) buildOBPreview();
 }
 function buildOBPreview() {
+  // Mapa de labels para los chips (matching OB_INTERESES IDs)
+  var INT_LABELS = {
+    'legislativo': {emoji:'⚖️', titulo:'Legislativo'},
+    'dinero': {emoji:'💰', titulo:'Dinero Público'},
+    'seguridad': {emoji:'🚨', titulo:'Seguridad'},
+    'derechos': {emoji:'🛡️', titulo:'Derechos'},
+    'medioambiente': {emoji:'🌿', titulo:'Medio ambiente'},
+    'cultura': {emoji:'🏺', titulo:'Cultura'},
+    'participacion': {emoji:'🗳️', titulo:'Participación'},
+    'organizacion': {emoji:'✊', titulo:'Organización'}
+  };
   var preview = document.getElementById('ob-preview');
-  // Resolver estado: primero _obEstado (del primer wizard), luego obEstado, luego localStorage
-  var estadoClave = (typeof _obEstado !== 'undefined' && _obEstado) ? _obEstado : (typeof obEstado !== 'undefined' && obEstado ? obEstado : (localStorage.getItem('tequio_estado_clave') || ''));
-  var estadoNombre = (typeof OB_ESTADOS !== 'undefined' && OB_ESTADOS[estadoClave]) ? OB_ESTADOS[estadoClave] : (localStorage.getItem('tequio_estado_nombre') || estadoClave || '—');
-  // Resolver intereses: primero _obIntereses, luego obIntereses
-  var intSet = (typeof _obIntereses !== 'undefined' && _obIntereses && _obIntereses.size > 0) ? _obIntereses : (typeof obIntereses !== 'undefined' ? obIntereses : new Set());
-  var intArr = Array.from(intSet);
+  // 1. Leer estado desde window primero (lo setea obSelectEstado)
+  var estadoNombre = window.__obEstadoNombre;
+  // 2. Fallback: localStorage pending
+  if (!estadoNombre) { try { estadoNombre = localStorage.getItem('tequio_estado_nombre_pending'); } catch(e){} }
+  // 3. Fallback: DOM (detectar botón estado seleccionado por color)
+  if (!estadoNombre) {
+    var sel = document.querySelector('.ob-estado-btn[style*="background: rgb(251, 191, 36)"], .ob-estado-btn[style*="background:#fbbf24"]');
+    if (sel) estadoNombre = (sel.textContent || '').trim();
+  }
+  // 4. Fallback final: ob-estado-txt (textNode actualizado por obSelectEstado)
+  if (!estadoNombre) { var et = document.getElementById('ob-estado-txt'); if (et) estadoNombre = et.textContent.trim(); }
+  estadoNombre = estadoNombre || '—';
+  // Intereses: leer desde window primero (lo setea obToggleInteres)
+  var intArr = window.__obIntereses;
+  if (!intArr) { try { intArr = JSON.parse(localStorage.getItem('tequio_intereses_pending') || '[]'); } catch(e){ intArr = []; } }
+  // Fallback DOM: detectar botones intereses con border amber
+  if (!intArr.length) {
+    var btns = document.querySelectorAll('.ob-interes-btn');
+    btns.forEach(function(b){ if (b.style.borderColor === 'rgb(251, 191, 36)' || b.style.borderColor === '#fbbf24') { intArr.push(b.dataset.id); } });
+  }
   var chipsHtml = intArr.map(function(id){
-    var info = (typeof OB_INTERESES !== 'undefined') ? OB_INTERESES.find(function(x){return x.id === id;}) : null;
-    if (!info) info = {emoji:'•', titulo:id};
+    var info = INT_LABELS[id] || {emoji:'•', titulo:id};
     return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#fbbf24;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;margin:3px">'+info.emoji+' '+info.titulo+'</span>';
   }).join('');
   preview.innerHTML = ''
