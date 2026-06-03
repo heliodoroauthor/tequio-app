@@ -393,30 +393,33 @@
 })();
 </script>
 <script>
-// Hidratar stats del hero cuando se renderice la lista
+// Hidratar stats del hero — solo poll cada 3s (sin MutationObserver, evita loops).
 (function(){
+  var updating = false;
+  var lastA = -1, lastV = -1;
   function updateHeroStats(){
-    var cards = document.querySelectorAll('.card[data-id]');
-    var activas = cards.length;
-    var totalVotos = 0;
-    cards.forEach(function(c){
-      c.querySelectorAll('.bar-row .count').forEach(function(n){
-        var v = parseInt(n.textContent.replace(/[^0-9]/g,''),10);
-        if (!isNaN(v)) totalVotos += v;
+    if (updating) return;
+    updating = true;
+    try {
+      var cards = document.querySelectorAll('#iniciativas-container .card[data-id]');
+      var activas = cards.length;
+      var totalVotos = 0;
+      cards.forEach(function(c){
+        c.querySelectorAll('.bar-row .count').forEach(function(n){
+          var v = parseInt(n.textContent.replace(/[^0-9]/g,''),10);
+          if (!isNaN(v)) totalVotos += v;
+        });
       });
-    });
-    var a = document.getElementById('hero-stat-activas');
-    var v = document.getElementById('hero-stat-votos');
-    if (a) a.textContent = activas;
-    if (v) v.textContent = totalVotos.toLocaleString('es-MX');
+      var a = document.getElementById('hero-stat-activas');
+      var v = document.getElementById('hero-stat-votos');
+      if (a && activas !== lastA) { a.textContent = activas; lastA = activas; }
+      if (v && totalVotos !== lastV) { v.textContent = totalVotos.toLocaleString('es-MX'); lastV = totalVotos; }
+    } finally {
+      updating = false;
+    }
   }
-  var lista = document.getElementById('lista-iniciativas') || document.querySelector('main');
-  if (lista) {
-    var obs = new MutationObserver(updateHeroStats);
-    obs.observe(lista, {childList:true, subtree:true});
-  }
-  setInterval(updateHeroStats, 2000);
-  setTimeout(updateHeroStats, 500);
+  setInterval(updateHeroStats, 3000);
+  setTimeout(updateHeroStats, 1500);
 })();
 </script>
 </body>
