@@ -5238,17 +5238,20 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         try {
           const r = await fetch('/api/data?vista=compranet_stats');
           const j = await r.json();
+          const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
           if (!j.total) {
-            document.getElementById('cmp-stats').innerHTML = '<div style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;color:var(--text2)">Aún sin datos cargados. El scraper de Compranet corre cada lunes.</div>';
+            set('cnt-stat-total', '0');
+            set('cnt-stat-monto', '—');
+            set('cnt-stat-ad', '0');
+            set('cnt-stat-flags', '0');
             return;
           }
-          document.getElementById('cmp-stats').innerHTML = `
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:var(--accent2)">${j.total.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">Contratos federales</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#22c55e">${cmpFmtMonto(j.monto_total)}</div><div style="font-size:11px;color:var(--text2)">Monto total adjudicado</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#ef4444">${j.adjudicacion_directa.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">Adjudicaciones directas</div></div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px"><div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:#fbbf24">${j.flags_rojos.toLocaleString('es-MX')}</div><div style="font-size:11px;color:var(--text2)">🚩 AD &gt; $10M MXN</div></div>`;
+          set('cnt-stat-total', j.total.toLocaleString('es-MX'));
+          set('cnt-stat-monto', cmpFmtMonto(j.monto_total));
+          set('cnt-stat-ad', j.adjudicacion_directa.toLocaleString('es-MX'));
+          set('cnt-stat-flags', j.flags_rojos.toLocaleString('es-MX'));
         } catch (e) {
-          document.getElementById('cmp-stats').innerHTML = '';
+          // dejar el "…" placeholder
         }
       }
       async function cmpCargarProveedores() {
@@ -6578,14 +6581,20 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="content">
         <!-- Banner OCDS en transición (H2.1-04) -->
         <div style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);border-radius:10px;padding:10px 14px;margin:14px 0 6px;font-size:12px;color:#fcd34d;display:flex;gap:10px;align-items:flex-start"><span>⚠️</span><div><strong>Datos al último corte exitoso.</strong> La API OCDS de <code>api.datos.gob.mx</code> tiene latencia variable; el último refresh exitoso del scraper trajo el catálogo hasta el <strong id="contratos-ultimo-corte">2025-12-31</strong>. Total cargados: <strong>23,175</strong> contratos. Fuente directa: <a href="https://compranet.hacienda.gob.mx" target="_blank" rel="noopener" style="color:#fde68a">compranet.hacienda.gob.mx</a></div></div>
-        <div style="background:linear-gradient(135deg,#7c2d12 0%,#dc2626 50%,#ea580c 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(234,88,12,0.35)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#dc2626 50%,#ea580c 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(234,88,12,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">🔥</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Mapa de Contratos Federales</h1>
               <p style="margin:8px 0 0;opacity:0.95;font-size:15px;line-height:1.4">Cada peso que el <strong>gobierno federal mexicano</strong> gasta en contratos públicos. Busca por dependencia, empresa o palabra clave.</p>
             </div>
             <a href="https://api.datos.gob.mx/v2/contratacionesabiertas" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.3)">ComprasMX OCDS →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="cnt-stat-total">…</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Contratos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="cnt-stat-monto">…</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Monto total</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fca5a5" id="cnt-stat-ad">…</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Adj. directas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cnt-stat-flags">…</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">🚩 AD >$10M</div></div>
           </div>
         </div>
         <!-- Sello de Fuente Oficial Verificada -->
@@ -6596,8 +6605,21 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div style="font-size:12px;color:var(--text2);margin-top:3px">Datos extraídos del estándar abierto OCDS de <strong>ComprasMX / Compranet</strong> publicado en <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">datos.gob.mx</code>. Cada contrato es rastreable hasta el expediente oficial. Cero invención.</div>
           </div>
         </div>
-        <!-- Stats globales -->
-        <div id="cmp-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:18px"></div>
+        <!-- Caja edu colapsable -->
+        <details style="background:linear-gradient(135deg,rgba(234,88,12,0.10),rgba(234,88,12,0.03));border:1px solid rgba(234,88,12,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fed7aa;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 Tipos de procedimiento + ¿cuándo es 🚩 sospechoso? · LAASSP / LOPSRM</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El gobierno tiene <strong>3 vías para comprar</strong> según las leyes de Adquisiciones (LAASSP) y Obras Públicas (LOPSRM):
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🟢 Licitación Pública</strong><br><span style="font-size:11px">Regla general. Concurso abierto, transparente. Mejor precio + mejores condiciones.</span></div>
+              <div style="background:rgba(251,191,36,0.10);border-left:3px solid #fbbf24;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">🟡 Invitación a 3</strong><br><span style="font-size:11px">Solo 3 oferentes invitados. Permitido por excepción cuando hay justificación.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔴 Adjudicación Directa</strong><br><span style="font-size:11px">SIN concurso. Solo en casos excepcionales (urgencia, exclusividad, seguridad).</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">🚩 Flag rojo</strong><br><span style="font-size:11px">AD por >$10M MXN. Patrón típico de favoritismo o corrupción.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚖️ <strong>Marco legal:</strong> Art. 134 CPEUM exige licitación pública como regla; las excepciones requieren justificación formal documentada.</p>
+            <p style="margin-top:6px;font-size:11px;color:var(--text3)">📂 <strong>Cero invención:</strong> cada contrato viene del estándar OCDS v1.1 publicado por la SHCP en datos.gob.mx · cada uno se puede rastrear hasta el expediente oficial en compranet.hacienda.gob.mx.</p>
+            <p style="margin-top:6px;font-size:11px;color:var(--text3)">🔎 <strong>¿Sospechoso?</strong> Denuncia en <a href="https://contraloriasocial.org.mx" target="_blank" rel="noopener" style="color:#fbbf24">Contraloría Social</a> o vía <a href="https://www.gob.mx/sfp" target="_blank" rel="noopener" style="color:#fbbf24">SFP</a> (Sec. Función Pública).</p>
+          </div>
+        </details>
         <!-- Tabs Contratos / Proveedores (Lupita Diconsa) -->
         <div class="tab-bar" style="margin-bottom:14px">
           <div class="tab active" id="cmp-tab-contratos" onclick="cmpSetTab('contratos')">📋 Contratos</div>
