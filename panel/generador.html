@@ -89,19 +89,39 @@ a:hover { text-decoration: underline; }
 <body>
 <div class="wrap">
   <a href="/" target="_top" class="back-link" id="backLink">&larr; Tequio</a>
-  <div class="header">
-    <h1>📄 Generador de Documentos</h1>
-    <p>Convierte tu situación en un documento legal listo para presentar.</p>
-  </div>
-  <div id="docs-counter" style="position: absolute; top: 1rem; right: 1rem; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 999px; padding: 0.4rem 0.9rem; font-size: 0.78rem; color: #fbbf24; display: flex; gap: 0.4rem; align-items: center;">
-    <span>📄</span><span id="docs-count">0</span><span style="color:#9ca3af;font-weight:normal;">docs generados</span>
-  </div>
-  <div class="defensoria-banner" style="background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.03)); border: 1px solid rgba(251,191,36,0.3); border-radius: 0.75rem; padding: 1rem 1.25rem; margin: 1rem 0; color: #fbbf24; display: flex; gap: 0.8rem; align-items: flex-start;">
-    <div style="font-size: 1.5rem;">⚖️</div>
-    <div style="flex:1; line-height: 1.5; font-size: 0.92rem;">
-      <span style="color:#e5e7eb;">Documentos orientativos basados en ley mexicana vigente.</span> <strong>Revisa siempre con un abogado o defensor público antes de presentar.</strong> <span style="color:#e5e7eb;">La Defensoría Pública Federal es gratuita: </span><a href="tel:8002003030" style="color:#fbbf24; font-weight:700; text-decoration:underline;">800 200 3030</a>
+  <div style="background:linear-gradient(135deg,#7c2d12 0%,#b45309 50%,#f59e0b 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(180,83,9,0.30)">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:60px;line-height:1">📄</div>
+      <div style="flex:1;min-width:240px">
+        <h1 style="font-size:30px;font-weight:900;margin:0;color:#fff;letter-spacing:-0.02em">Generador de Documentos</h1>
+        <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Convierte tu situación en un <strong>documento legal listo para presentar</strong> · plantillas basadas en ley mexicana vigente.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(8px)">
+        <div style="font-size:18px;font-weight:800;font-family:var(--font-display,inherit)"><span id="docs-count">0</span></div>
+        <div style="font-size:9px;opacity:0.85;letter-spacing:1px">DOCS GENERADOS</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800">📋</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantillas</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Gratis</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin pago</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Privado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">800 200 3030</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Def. pública</div></div>
     </div>
   </div>
+  <details style="background:linear-gradient(135deg,rgba(180,83,9,0.08),rgba(180,83,9,0.02));border:1px solid rgba(180,83,9,0.35);border-radius:12px;margin-bottom:14px">
+    <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Qué tipos de documentos puedo generar?</span><span style="font-size:11px">▾</span></summary>
+    <div style="padding:0 16px 14px;font-size:12px;color:#cbd5e1;line-height:1.6">Documentos <strong>orientativos</strong>. Revisa siempre con abogado o defensor público antes de presentar:
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+        <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📨 Quejas y denuncias</strong><br><span style="font-size:11px">PROFECO, CONDUSEF, CNDH, Contraloría, OIC.</span></div>
+        <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">📋 Demanda laboral</strong><br><span style="font-size:11px">JCA / Tribunales Laborales · despido, salarios.</span></div>
+        <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Amparo</strong><br><span style="font-size:11px">Acto de autoridad · Art. 103 CPEUM · 15 días.</span></div>
+        <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🔐 Datos personales</strong><br><span style="font-size:11px">ARCO ante INAI · acceso, rectificación, cancelación, oposición.</span></div>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#94a3b8">⚠️ <strong>NO sustituye asesoría legal.</strong> Si no puedes pagar abogado: <strong>Defensoría Pública Federal 800 200 3030</strong> (gratis) o defensorías estatales.</p>
+      <p style="margin-top:6px;font-size:11px;color:#94a3b8">🔒 Tequio NO guarda tus datos. Todo el procesamiento ocurre en TU navegador.</p>
+    </div>
+  </details>
+
   <section id="viewSituaciones" class="situaciones" style="margin-bottom: 2rem;">
     <h2 class="section-title" style="font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; text-transform: uppercase; margin: 1.5rem 0 1rem 0;">⚡ Situaciones frecuentes</h2>
     <div class="situaciones-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;"></div>
