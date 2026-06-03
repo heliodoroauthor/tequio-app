@@ -54,7 +54,36 @@
   <h1>Firma iniciativas ciudadanas</h1>
 </header>
 <main>
-  <div class="intro">
+  <div style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(124,58,237,0.35)">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:60px;line-height:1">✍️</div>
+      <div style="flex:1;min-width:240px">
+        <h1 style="font-size:30px;font-weight:900;margin:0;color:#fff;letter-spacing:-0.02em">Firma Iniciativas Ciudadanas</h1>
+        <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Apoya iniciativas para que entren al <strong>proceso legislativo formal</strong> · Art. 35-VII CPEUM · firma 100% anónima.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🔒 ANÓNIMO</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="hero-stat-iniciativas">0</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Iniciativas activas</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="hero-stat-firmas">0</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Firmas totales</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">130k</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">Meta por iniciativa</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Art. 35-VII</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase">CPEUM</div></div>
+    </div>
+  </div>
+  <details style="background:linear-gradient(135deg,rgba(124,58,237,0.10),rgba(124,58,237,0.03));border:1px solid rgba(124,58,237,0.35);border-radius:12px;margin-bottom:14px">
+    <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Cómo entra una iniciativa al Congreso? · Art. 35-VII CPEUM</span><span style="font-size:11px">▾</span></summary>
+    <div style="padding:0 16px 14px;font-size:12px;color:#cbd5e1;line-height:1.6">Para que una iniciativa ciudadana sea tramitada formalmente necesita pasar por estos pasos:
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+        <div style="background:rgba(124,58,237,0.10);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">1. Firmas</strong><br><span style="font-size:11px">0.13% de la lista nominal ≈ 130,000 con clave de elector.</span></div>
+        <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">2. INE valida</strong><br><span style="font-size:11px">Verifica firmas vs padrón electoral.</span></div>
+        <div style="background:rgba(99,102,241,0.10);border-left:3px solid #6366f1;padding:8px 10px;border-radius:6px"><strong style="color:#a5b4fc">3. Cámara</strong><br><span style="font-size:11px">Mesa Directiva la turna a comisión.</span></div>
+        <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">4. Dictamen</strong><br><span style="font-size:11px">Se vota como cualquier ley federal.</span></div>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#94a3b8">🔒 <strong>Privacidad:</strong> tu firma usa hash de dispositivo + IP + opcionalmente INE (procesada local). NUNCA tu identidad.</p>
+      <p style="margin-top:6px;font-size:11px;color:#94a3b8">📜 Casos históricos: <strong>Ley 3 de 3</strong> (2016) y <strong>Ley General de Aguas</strong> alcanzaron el umbral.</p>
+    </div>
+  </details>
+  <div class="intro" style="display:none">
     <h2>Tu firma impulsa el cambio</h2>
     <p>Las iniciativas ciudadanas necesitan apoyo masivo para entrar al proceso legislativo. Firma de forma anónima las que apoyas.</p>
   </div>
@@ -334,6 +363,38 @@
   function escapeHtml(s) {
     return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+})();
+</script>
+<script>
+// Hidratar stats del hero — poll cada 3s, sin MutationObserver (evita loops).
+(function(){
+  var updating = false;
+  var lastI = -1, lastF = -1;
+  function updateHeroStats(){
+    if (updating) return;
+    updating = true;
+    try {
+      var cards = document.querySelectorAll('#iniciativas-container .card[data-id]');
+      var iniciativas = cards.length;
+      var firmas = 0;
+      cards.forEach(function(c){
+        var txt = c.textContent || '';
+        var m = txt.match(/(\d[\d,\.]*)\s*firmas/i);
+        if (m) {
+          var n = parseInt(m[1].replace(/[^0-9]/g,''),10);
+          if (!isNaN(n)) firmas += n;
+        }
+      });
+      var a = document.getElementById('hero-stat-iniciativas');
+      var b = document.getElementById('hero-stat-firmas');
+      if (a && iniciativas !== lastI) { a.textContent = iniciativas; lastI = iniciativas; }
+      if (b && firmas !== lastF) { b.textContent = firmas.toLocaleString('es-MX'); lastF = firmas; }
+    } finally {
+      updating = false;
+    }
+  }
+  setInterval(updateHeroStats, 3000);
+  setTimeout(updateHeroStats, 1500);
 })();
 </script>
 </body>
