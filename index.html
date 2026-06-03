@@ -2212,6 +2212,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🏛️</span> Embajadas y Consulados
       </div>
+      <div class="nav-item" onclick="cargarPanel('instalar')" style="background:linear-gradient(135deg,rgba(34,197,94,0.10),rgba(59,130,246,0.08));border-left:3px solid #22c55e">
+        <span class="icon">📲</span> Instalar como App
+      </div>
       <div class="nav-item" onclick="cargarPanel('donar')" style="background:linear-gradient(135deg,rgba(236,72,153,0.10),rgba(251,191,36,0.08));border-left:3px solid #ec4899">
         <span class="icon">❤️</span> Apoya Tequio
       </div>
@@ -14478,6 +14481,7 @@ function cargarPanel(slug, extras) {
     'chat': '/panel/chat.html?embedded=1',
     'asistente-ia': '/panel/asistente-ia.html?embedded=1',
     'donar': '/panel/donar.html?embedded=1',
+    'instalar': '/panel/instalar.html?embedded=1',
     'deuda': '/panel/deuda.html?embedded=1',
     'emergencia': '/panel/emergencia.html?embedded=1',
     'debates': '/panel/debates.html?embedded=1',
