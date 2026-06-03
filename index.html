@@ -6220,6 +6220,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DINERO PÚBLICO ───── -->
     <div id="page-dinero" class="page">
       <div class="content">
+        <div style="background:linear-gradient(135deg,#14532d 0%,#16a34a 50%,#22c55e 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(22,163,74,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💰</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Dinero Público</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Deuda, contratos, indicadores macro y ASF · <strong>SHCP, ASF, Banxico, INEGI</strong>. Cada cifra enlaza al PDF oficial.</p>
+            </div>
+            <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SHCP →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="din-stat-dolar">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">USD/MXN</div></div>
+            <div style="font-size:14px;text-align:center"><div style="font-size:20px;font-weight:800;color:#fed7aa" id="din-stat-infla">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Inflación anual</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="din-stat-tasa">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tasa Banxico</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="din-stat-deuda">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% PIB deuda</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(22,163,74,0.08),rgba(22,163,74,0.02));border:1px solid rgba(22,163,74,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#86efac;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 Qué fuentes leemos · Frecuencia de actualización</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Cero invención. Cada KPI viene de una fuente del Estado mexicano con refresh propio:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">💱 Banxico</strong><br><span style="font-size:11px">FIX USD/MXN diario, tasa de referencia y dashboards.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📈 INEGI · INPC</strong><br><span style="font-size:11px">Inflación: días 10 y 25 mensuales.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">📑 SHCP · PEF/SHRFSP</strong><br><span style="font-size:11px">Deuda, ingresos, gasto. Refresh mensual.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔍 ASF · CCP</strong><br><span style="font-size:11px">Auditorías Cuenta Pública anual.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Verifica directamente: <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="color:#86efac">finanzaspublicas.hacienda.gob.mx</a> · <a href="https://www.banxico.org.mx" target="_blank" style="color:#86efac">banxico.org.mx</a></p>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>📊</span>
           <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Cada indicador enlaza al PDF oficial. Verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
@@ -7258,14 +7290,40 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── VERIFICACIÓN CIUDADANA ───── -->
     <div id="page-verificacion" class="page">
-      <!-- HERO -->
-      <div style="background:linear-gradient(160deg,#022c22 0%,#064e3b 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(16,185,129,0.25);position:relative;overflow:hidden">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(16,185,129,0.15),transparent 60%);pointer-events:none"></div>
-        <div style="position:relative">
-          <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:#6ee7b7;margin-bottom:8px">✅ VERIFICACIÓN CIUDADANA · PROMESAS POLÍTICAS</div>
-          <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.2">¿Cumplió lo que prometió?<br>La ciudadanía verifica.</div>
-          <div style="font-size:12px;color:#6ee7b7;line-height:1.6;max-width:520px">Reporta cuando una promesa no se cumple, sube evidencia y vota si la denuncia de otros ciudadanos es convincente. La IA analiza el contexto.</div>
+      <!-- HERO Nivel 3 -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#022c22 0%,#047857 50%,#10b981 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(16,185,129,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">✅</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Verificación Ciudadana</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿Cumplió lo que prometió? · Reporta, sube evidencia y vota si las denuncias son convincentes · <strong>IA analiza el contexto</strong>.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🗳️ COMUNIDAD</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="ver-stat-promesas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Promesas trackeadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="ver-stat-pendientes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">⏳ Pendientes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="ver-stat-cumplidas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">✅ Cumplidas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="ver-stat-rotas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">❌ Rotas</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#6ee7b7;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Cómo funciona la verificación ciudadana?</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Sistema de moderación distribuida tipo "Wikipedia de promesas". Cada caso pasa por 4 fases:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(16,185,129,0.10);border-left:3px solid #10b981;padding:8px 10px;border-radius:6px"><strong style="color:#6ee7b7">1️⃣ Reporte</strong><br><span style="font-size:11px">Cualquiera puede reportar una promesa rota con evidencia.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">2️⃣ Evidencia</strong><br><span style="font-size:11px">Link a video/declaración + comparación con la realidad.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">3️⃣ IA analiza</strong><br><span style="font-size:11px">Evalúa si la evidencia es coherente con la promesa.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">4️⃣ Voto comunitario</strong><br><span style="font-size:11px">Si &gt;60% confirma, queda registrado como "promesa rota".</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ Las verificaciones NO son procedimiento legal. Son percepción ciudadana documentada con fuentes. Útil para presión social y prensa.</p>
+          </div>
+        </details>
       </div>
       <div class="content" style="padding-top:18px">
         <!-- Selector de político -->
@@ -7719,12 +7777,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMPARADOR ───── -->
     <div id="page-comparador" class="page">
       <div class="content">
-        <div class="section-header mb-16">
-          <div>
-            <div style="font-size:22px;font-weight:700">⚖️ Comparador Electoral</div>
-            <div class="card-subtitle">IA compara partidos reales · Arena de propuestas ciudadanas</div>
+        <div style="background:linear-gradient(135deg,#3730a3 0%,#6366f1 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🆚</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comparador Electoral</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">IA compara <strong>partidos reales</strong> · Arena de propuestas ciudadanas · Sin sesgo editorial.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🧠 IA</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos vivos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cmp-stat-temas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Temas comparados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="cmp-stat-propuestas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Propuestas</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Plataformas oficiales</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
           </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(99,102,241,0.02));border:1px solid rgba(99,102,241,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿De dónde saca la IA las posiciones de cada partido?</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            La IA solo analiza fuentes oficiales del INE y los partidos. <strong>No inventa posiciones</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(99,102,241,0.10);border-left:3px solid #6366f1;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">📜 Plataformas electorales</strong><br><span style="font-size:11px">Documentos formales ante INE para cada elección.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">🏛️ Iniciativas legislativas</strong><br><span style="font-size:11px">Votos y propuestas registradas en Cámaras LXVI.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">📰 Declaraciones oficiales</strong><br><span style="font-size:11px">Comunicados, redes verificadas y prensa.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">⚠️ Sesgo conocido</strong><br><span style="font-size:11px">Si hay info contradictoria, la IA cita ambas fuentes.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Las plataformas electorales son públicas: <a href="https://www.ine.mx/" target="_blank" style="color:#c4b5fd">ine.mx</a> · Tu voto debe basarse en hechos, no en spots.</p>
+          </div>
+        </details>
         <!-- COMPARADOR DE PARTIDOS CON IA -->
         <div class="card mb-16" style="border-color:rgba(168,85,247,0.4);background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(99,102,241,0.04))">
           <div style="font-size:13px;font-weight:800;margin-bottom:4px">🧠 Comparar posiciones reales de partidos</div>
@@ -8428,6 +8512,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DERECHOS ───── -->
     <div id="page-derechos" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#0c4a6e 0%,#0284c7 50%,#0ea5e9 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(2,132,199,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🛡️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tus Derechos</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Lo que la <strong>Constitución</strong> y los <strong>tratados internacionales</strong> garantizan · qué hacer cuando los violan.</p>
+            </div>
+            <a href="https://www.cndh.org.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CNDH →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">29</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Art. CPEUM</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">800 715 2000</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CNDH 24/7</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">911</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Emergencia</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Pacto SJ Costa Rica</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tratado madre</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(2,132,199,0.08),rgba(2,132,199,0.02));border:1px solid rgba(2,132,199,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#7dd3fc;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿A quién acudo si me violan un derecho?</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            La ruta correcta depende de QUIÉN viola tu derecho. Aquí los canales gratuitos:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(2,132,199,0.10);border-left:3px solid #0284c7;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">🏛️ Autoridad federal</strong><br><span style="font-size:11px">Queja CNDH · oficinas estatales · 800 715 2000.</span></div>
+              <div style="background:rgba(14,165,233,0.10);border-left:3px solid #0ea5e9;padding:8px 10px;border-radius:6px"><strong style="color:#7dd3fc">🏘️ Autoridad estatal</strong><br><span style="font-size:11px">Comisión Estatal DH (CEDH) — una por entidad.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🏢 Particular/empresa</strong><br><span style="font-size:11px">PROFECO (productos) · INAI (datos) · CONDUSEF (banco).</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Acto judicial</strong><br><span style="font-size:11px">Amparo · 15 días naturales · sin costo.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">📌 La queja ante CNDH/CEDH es <strong>gratuita y no necesita abogado</strong>. Investiga y emite recomendación a la autoridad.</p>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>ℹ️</span>
           <span>Información <strong>educativa y orientativa</strong>. Ante situaciones legales reales, consulta un abogado o contacta a la CNDH, Defensoría Pública o PROFECO.</span>
@@ -8870,16 +8986,44 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── GENERADOR DE ACCIONES ───── -->
     <div id="page-acciones" class="page">
       <div class="content" style="max-width:900px">
-        <!-- Header -->
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-          <div>
-            <div style="font-size:22px;font-weight:800;margin-bottom:4px">⚡ Generador de Acciones</div>
-            <div style="font-size:13px;color:var(--text3)">Convierte tu situación en un documento legal listo para presentar</div>
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#b45309 50%,#f59e0b 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(180,83,9,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">⚡</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Generador de Acciones</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Convierte tu situación en un <strong>documento legal listo para presentar</strong> · plantillas basadas en ley mexicana vigente.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(8px)">
+              <div style="font-size:18px;font-weight:800;font-family:var(--font-display)" id="accion-contador">—</div>
+              <div style="font-size:9px;opacity:0.85;letter-spacing:1px">DOCS GENERADOS</div>
+            </div>
           </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;text-align:center">
-            <div style="font-size:18px;font-weight:800;font-family:var(--font-display);color:var(--accent2)" id="accion-contador">—</div>
-            <div style="font-size:9px;color:var(--text3);letter-spacing:1px">DOCS GENERADOS</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">📄</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantillas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Gratis</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin pago</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Privado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">800 200 3030</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Def. pública</div></div>
           </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(180,83,9,0.08),rgba(180,83,9,0.02));border:1px solid rgba(180,83,9,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Qué puedo generar? · Tipos de documentos cubiertos</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Documentos orientativos basados en ley vigente. <strong>Revisa siempre con un abogado o defensor público antes de presentar.</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📨 Quejas y denuncias</strong><br><span style="font-size:11px">PROFECO, CONDUSEF, CNDH, Contraloría.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">📋 Demanda laboral</strong><br><span style="font-size:11px">JCA / Tribunales Laborales — despido, salarios.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Amparo</strong><br><span style="font-size:11px">Demanda contra acto de autoridad · Art. 103 CPEUM.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🔐 Datos personales</strong><br><span style="font-size:11px">ARCO ante INAI (acceso, rectificación, cancelación, oposición).</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ NO sustituye asesoría legal. La <strong>Defensoría Pública Federal (800 200 3030)</strong> y las estatales son gratuitas.</p>
+          </div>
+        </details>
+        <!-- Header (mantenido por compat. JS) -->
+        <div style="display:none">
+          <div id="accion-contador-legacy">—</div>
         </div>
         <div class="alert alert-warn mb-16">
           <span>⚖️</span>
@@ -11216,6 +11360,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── AGENDA / MISSING STUBS ───── -->
     <div id="page-presupuesto" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#4a044e 0%,#86198f 50%,#c026d3 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(134,25,143,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💸</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presupuesto Federal</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · cifras directas de SHCP.</p>
+            </div>
+            <a href="https://www.pef.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">PEF SHCP →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="pre-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">PEF 2026</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="pre-stat-pib">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% del PIB</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="pre-stat-percap">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Per cápita</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Aprobado Nov</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Última votación</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(134,25,143,0.08),rgba(134,25,143,0.02));border:1px solid rgba(134,25,143,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f0abfc;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Cómo se aprueba el PEF? · Calendario y actores</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            El PEF es la <strong>ley anual del gasto</strong>. Solo la Cámara de Diputados lo aprueba (no el Senado, Art. 74 fracción IV CPEUM):
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(134,25,143,0.10);border-left:3px solid #86198f;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">8 sept</strong><br><span style="font-size:11px">Ejecutivo (SHCP) envía Paquete Económico.</span></div>
+              <div style="background:rgba(192,38,211,0.10);border-left:3px solid #c026d3;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">Sept-Oct</strong><br><span style="font-size:11px">Comisión de Presupuesto y Cuenta Pública dictamina.</span></div>
+              <div style="background:rgba(232,121,249,0.10);border-left:3px solid #e879f9;padding:8px 10px;border-radius:6px"><strong style="color:#f0abfc">15 nov</strong><br><span style="font-size:11px">Fecha límite constitucional de aprobación.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">DOF</strong><br><span style="font-size:11px">Publicación oficial → entra en vigor 1° enero.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Ramos = grandes categorías (Educación, Salud, Defensa…). Cada ramo tiene programas con su propio presupuesto. La <strong>ASF</strong> revisa cómo se gastó al año siguiente.</p>
+          </div>
+        </details>
         <div style="margin-bottom:16px">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💸 Dinero Público</div>
           <div style="font-size:13px;color:var(--text3)">¿En qué se gasta tu dinero? · Presupuesto de Egresos de la Federación <strong>2026</strong> · <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">PEF oficial SHCP →</a></div>
@@ -26467,545 +26643,4 @@ window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
       </div>
     </div>
     <div class="acc-section">
-      <div class="acc-label">Contraste</div>
-      <div class="acc-row">
-        <button class="acc-btn" id="acc-contraste-off" onclick="setContraste(false)">Normal</button>
-        <button class="acc-btn" id="acc-contraste-on" onclick="setContraste(true)">Alto Contraste</button>
-      </div>
-    </div>
-    <div class="acc-actions">
-      <button class="acc-btn" onclick="resetAccesibilidad()">Reset</button>
-      <button class="acc-btn" onclick="document.getElementById('acc-modal').style.display='none'">Cerrar</button>
-    </div>
-  </div>
-</div>
-<!-- ════════ MIGRATED UX JS (FASE 1) ════════ -->
-<script>
-// === SOS FAB ===
-function toggleSosMenu() {
-  document.getElementById('sos-menu').classList.toggle('open');
-}
-function sosGo(slug) {
-  document.getElementById('sos-menu').classList.remove('open');
-  // Map de SOS slugs a paneles reales (ya no hay fallback a 'emergencia')
-  const SOS_MAP = {
-    'emergencia': 'emergencia',
-    'servicios': 'servicios',
-    'generador': 'generador',
-    'offline': 'offline'
-  };
-  const target = SOS_MAP[slug] || slug;
-  if (window.cargarPanel) cargarPanel(target);
-}
-document.addEventListener('click', function(e){
-  if (!e.target.closest('#sos-fab')) {
-    var m = document.getElementById('sos-menu');
-    if (m) m.classList.remove('open');
-  }
-});
-// === ACCESIBILIDAD ===
-function abrirAccesibilidad() {
-  document.getElementById('acc-modal').style.display = 'flex';
-  syncAccButtons();
-}
-function cerrarAccesibilidad(e) {
-  if (e && e.target.id !== 'acc-modal') return;
-  document.getElementById('acc-modal').style.display = 'none';
-}
-function syncAccButtons() {
-  var cls = document.documentElement.classList;
-  var size = cls.contains('font-grande') ? 'grande' : cls.contains('font-pequeno') ? 'pequeno' : 'normal';
-  ['pequeno','normal','grande'].forEach(function(s){
-    var el = document.getElementById('acc-size-'+s);
-    if (el) el.classList.toggle('active', s===size);
-  });
-  var alto = cls.contains('alto-contraste');
-  var on = document.getElementById('acc-contraste-on');
-  var off = document.getElementById('acc-contraste-off');
-  if (on) on.classList.toggle('active', alto);
-  if (off) off.classList.toggle('active', !alto);
-}
-function setFontSize(size) {
-  var cls = document.documentElement.classList;
-  cls.remove('font-pequeno','font-grande');
-  if (size === 'pequeno') cls.add('font-pequeno');
-  if (size === 'grande') cls.add('font-grande');
-  try { localStorage.setItem('tequio_font_size', size); } catch(e){}
-  syncAccButtons();
-}
-function setContraste(alto) {
-  document.documentElement.classList.toggle('alto-contraste', !!alto);
-  try { localStorage.setItem('tequio_alto_contraste', alto ? '1' : '0'); } catch(e){}
-  syncAccButtons();
-}
-function resetAccesibilidad() { setFontSize('normal'); setContraste(false); }
-function loadAccesibilidadSettings() {
-  try {
-    var size = localStorage.getItem('tequio_font_size');
-    if (size && size !== 'normal') setFontSize(size);
-    if (localStorage.getItem('tequio_alto_contraste') === '1') setContraste(true);
-  } catch(e){}
-}
-document.addEventListener('DOMContentLoaded', loadAccesibilidadSettings);
-// Bug 2 fix: busqueda global con autocomplete
-(function() {
-  function initBusquedaGlobal() {
-    const input = document.querySelector('input[placeholder*="Buscar leyes"]');
-    if (!input) return false;
-    if (input.dataset.bgInit === '1') return true;
-    input.dataset.bgInit = '1';
-    const dropdown = document.createElement('div');
-    dropdown.id = 'busqueda-dropdown';
-    dropdown.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:#1f2937;border:1px solid #374151;border-radius:8px;max-height:400px;overflow-y:auto;display:none;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-top:4px;';
-    input.parentElement.style.position = 'relative';
-    input.parentElement.appendChild(dropdown);
-    function escapeHtml(s) {
-      return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    }
-    let timer = null;
-    input.addEventListener('input', (e) => {
-      const q = e.target.value.trim();
-      if (timer) clearTimeout(timer);
-      if (q.length < 2) { dropdown.style.display = 'none'; return; }
-      timer = setTimeout(async () => {
-        try {
-          const r = await fetch('/api/data?vista=buscador_global&q=' + encodeURIComponent(q));
-          const data = await r.json();
-          if (!data.items || !data.items.length) {
-            dropdown.innerHTML = '<div style="padding:12px;color:#9ca3af;font-size:13px;">Sin resultados.</div>';
-          } else {
-            dropdown.innerHTML = data.items.map(it => '<a href="' + escapeHtml(it.link || '#') + '" style="display:block;padding:10px 14px;border-bottom:1px solid #374151;color:#e5e7eb;text-decoration:none;font-size:13px;" onmouseover="this.style.background=\'rgba(251,191,36,0.1)\';" onmouseout="this.style.background=\'transparent\';"><div style="display:flex;align-items:center;gap:8px;"><span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;">' + escapeHtml(it.tipo) + '</span><span style="font-weight:600;">' + escapeHtml(it.titulo) + '</span></div>' + (it.sub ? '<div style="color:#9ca3af;font-size:11px;margin-top:2px;margin-left:50px;">' + escapeHtml(it.sub) + '</div>' : '') + '</a>').join('');
-          }
-          dropdown.style.display = 'block';
-        } catch (err) {}
-      }, 250);
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const first = dropdown.querySelector('a');
-        if (first && dropdown.style.display !== 'none') { e.preventDefault(); first.click(); }
-      }
-      if (e.key === 'Escape') dropdown.style.display = 'none';
-    });
-    document.addEventListener('click', (e) => {
-      if (!input.parentElement.contains(e.target)) dropdown.style.display = 'none';
-    });
-    return true;
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(initBusquedaGlobal, 200));
-  } else {
-    setTimeout(initBusquedaGlobal, 200);
-  }
-  setTimeout(initBusquedaGlobal, 1500);
-  setTimeout(initBusquedaGlobal, 4000);
-})();
-// Bug 3 fix: reemplazar loading eterno de "Tu Representante" con CTA real
-(function() {
-  function fixTuRepresentante() {
-    const card = document.getElementById('dash-diputado-card');
-    if (!card) return false;
-    if (card.dataset.tuRepFixed === '1') return true;
-    // Check if it has data already loaded (presence of partido name, voting info, etc)
-    const txt = (card.textContent || '').toLowerCase();
-    const isLoading = txt.includes('cargando') || txt.trim().length < 60;
-    if (!isLoading) { card.dataset.tuRepFixed = '1'; return true; }
-    const estadoClave = (function(){
-      try { return localStorage.getItem('tequio_estado_clave') || localStorage.getItem('estado_clave') || localStorage.getItem('user_estado'); }
-      catch(e){ return null; }
-    })();
-    if (!estadoClave) {
-      // No onboarding: show CTA
-      const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
-      const cta = '<div style="text-align:center;padding:0.8rem 0.5rem;">' +
-        '<div style="font-size:1.8rem;margin-bottom:0.4rem;">' + String.fromCodePoint(0x1F3DB) + '</div>' +
-        '<div style="color:#9ca3af;font-size:0.85rem;line-height:1.4;margin-bottom:0.7rem;">Configura tu estado para ver a tu diputado.</div>' +
-        '<button onclick="(window.cargarPanel && cargarPanel(\'perfil\'))||(window.cargarPagina && cargarPagina(\'perfil\'))||(window.irPerfil && irPerfil())" style="background:#fbbf24;color:#111;border:none;padding:0.5rem 1rem;border-radius:0.4rem;font-weight:700;cursor:pointer;font-size:0.85rem;">Configurar ' + String.fromCharCode(8594) + '</button>' +
-        '</div>';
-      if (placeholder) {
-        placeholder.innerHTML = cta;
-      } else {
-        // Find the inner div that holds "Cargando..." and replace
-        const divs = card.querySelectorAll('div');
-        for (const d of divs) {
-          if ((d.textContent || '').includes('Cargando')) {
-            d.innerHTML = cta;
-            break;
-          }
-        }
-      }
-      card.dataset.tuRepFixed = '1';
-      return true;
-    } else {
-      // Has estado: try fetching directorio_estado, replace loading
-      fetch('/api/data?vista=directorio_estado&clave=' + encodeURIComponent(estadoClave))
-        .then(r => r.json())
-        .then(data => {
-          const dip = (data && (data.diputados_federales || data.diputados || []))[0];
-          const placeholder = card.querySelector('#dash-diputado-info') || card.querySelector('[id*="diputado"]');
-          const html = dip
-            ? '<div style="font-weight:700;color:#fbbf24;">' + (dip.nombre || '') + '</div><div style="color:#9ca3af;font-size:0.8rem;margin-top:0.2rem;">' + (dip.partido || '') + ' \u00b7 ' + (dip.entidad || '') + '</div>'
-            : '<div style="color:#9ca3af;font-size:0.85rem;">No se encontr' + String.fromCharCode(243) + ' representante para tu estado.</div>';
-          if (placeholder) placeholder.innerHTML = html;
-          else {
-            const divs = card.querySelectorAll('div');
-            for (const d of divs) {
-              if ((d.textContent || '').includes('Cargando')) { d.innerHTML = html; break; }
-            }
-          }
-          card.dataset.tuRepFixed = '1';
-        })
-        .catch(() => {
-          const divs = card.querySelectorAll('div');
-          for (const d of divs) {
-            if ((d.textContent || '').includes('Cargando')) {
-              d.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;">Error al cargar.</div>';
-              break;
-            }
-          }
-          card.dataset.tuRepFixed = '1';
-        });
-      return true;
-    }
-  }
-  window.renderTuRepresentanteCard = fixTuRepresentante;
-  // Trigger after dashboard mount
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(fixTuRepresentante, 2500));
-  } else {
-    setTimeout(fixTuRepresentante, 2500);
-  }
-  // Retries because existing code may also be trying to populate
-  setTimeout(fixTuRepresentante, 5000);
-  setTimeout(fixTuRepresentante, 9000);
-})();
-</script>
-<script>
-(async function cargarDeudaHome(){
-  try {
-    const r = await fetch('/api/data?vista=deuda', {cache:'no-store'});
-    if (!r.ok) return;
-    const j = await r.json();
-    const u = j && j.ultimo;
-    if (!u) return;
-    const monto = u.shrfsp_total_mxn;
-    const pib = u.shrfsp_porcentaje_pib;
-    if (typeof monto === 'number') {
-      const elMonto = document.querySelector('[data-deuda-monto]');
-      if (elMonto) elMonto.textContent = '$' + (monto/1e12).toFixed(2) + ' bn';
-    }
-    if (typeof pib === 'number') {
-      const elPib = document.querySelector('[data-deuda-pib]');
-      if (elPib) {
-        const yr = u.anio || '';
-        const estTag = u.es_estimacion ? ' (est.)' : '';
-        elPib.textContent = pib.toFixed(1) + '% PIB · SHCP ' + yr + estTag;
-        if (u.es_estimacion) elPib.title = 'Cifra estimada (PEF). Se actualiza con cierre fiscal definitivo.';
-      }
-    }
-  } catch(e){}
-})();
-</script>
-<script>
-// Unifica cifras de Deuda+PEF+Iniciativas a endpoints API (una sola fuente de verdad)
-async function cargarDinerosCifras(){
-  try {
-    const [deudaR, pefR, iniR] = await Promise.all([
-      fetch('/api/data?vista=deuda', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/data?vista=pef_resumen&anio=2026', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/data?vista=iniciativas', {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null)
-    ]);
-    // Deuda (interna/externa/total/pib)
-    if (deudaR && deudaR.ultimo) {
-      const u = deudaR.ultimo;
-      const total = u.shrfsp_total_mxn;
-      const interna = u.deuda_interna_mxn;
-      const externa = u.deuda_externa_mxn;
-      const pib = u.shrfsp_porcentaje_pib;
-      const fmt = (v) => '$' + (v/1e12).toFixed(2) + ' bn';
-      const pctOf = (v) => total ? ((v/total)*100).toFixed(1) : null;
-      document.querySelectorAll('[data-cifra="deuda-monto"]').forEach(el => { if (typeof total === 'number') el.textContent = fmt(total); });
-      document.querySelectorAll('[data-cifra="deuda-pib"]').forEach(el => { if (typeof pib === 'number') el.textContent = pib.toFixed(1) + '% PIB · SHCP'; });
-      document.querySelectorAll('[data-cifra="deuda-interna"]').forEach(el => { if (typeof interna === 'number') el.textContent = fmt(interna); });
-      document.querySelectorAll('[data-cifra="deuda-externa"]').forEach(el => { if (typeof externa === 'number') el.textContent = fmt(externa); });
-      document.querySelectorAll('[data-cifra="deuda-interna-pct"]').forEach(el => { const p = pctOf(interna); if (p) el.textContent = p + '% del total · CETES, Bonos M'; });
-      document.querySelectorAll('[data-cifra="deuda-externa-pct"]').forEach(el => { const p = pctOf(externa); if (p) el.textContent = p + '% del total · USD, EUR, JPY'; });
-    }
-    // PEF total
-    if (pefR && typeof pefR.total === 'number') {
-      const v = '$' + (pefR.total/1e12).toFixed(2) + ' bn';
-      document.querySelectorAll('[data-cifra="pef-total"]').forEach(el => { el.textContent = v; });
-    }
-    // Iniciativas count + firmas reales
-    if (iniR && Array.isArray(iniR.items)) {
-      const count = iniR.items.length;
-      let totalFirmas = 0;
-      iniR.items.forEach(it => {
-        if (it.tipo === 'iniciativa_ciudadana' && typeof it.firmas === 'number') totalFirmas += it.firmas;
-      });
-      document.querySelectorAll('[data-cifra="iniciativas-count"]').forEach(el => { el.textContent = String(count); });
-      document.querySelectorAll('[data-cifra="iniciativas-firmas"]').forEach(el => { el.textContent = totalFirmas.toLocaleString('es-MX'); });
-    }
-  } catch(e) {
-    console.warn('cargarDinerosCifras error:', e);
-  }
-}
-document.addEventListener('DOMContentLoaded', () => setTimeout(cargarDinerosCifras, 800));
-setTimeout(cargarDinerosCifras, 2500);
-</script>
-<!-- P2.1: Sidebar colapsable -->
-<style>
-  .nav-label {
-    cursor: pointer; user-select: none;
-    display: flex; align-items: center; justify-content: space-between;
-    transition: color 0.15s; padding: 6px 0;
-  }
-  .nav-label:hover { color: var(--gold, #fbbf24); }
-  .nav-label::after {
-    content: '▾'; font-size: 10px; margin-left: 8px;
-    transition: transform 0.2s ease; color: var(--muted, #8b94a7);
-  }
-  .nav-section.collapsed .nav-label::after { transform: rotate(-90deg); }
-  .nav-section .nav-item {
-    max-height: 60px; overflow: hidden;
-    transition: max-height 0.25s ease, opacity 0.15s, padding 0.2s, margin 0.2s;
-  }
-  .nav-section.collapsed .nav-item {
-    max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin: 0;
-  }
-</style>
-<script>
-/* Collapse/expand nav-sections, persist in localStorage. Init: only first section open. */
-(function() {
-  function initCollapsibleSidebar() {
-    const sections = document.querySelectorAll('.nav-section');
-    if (!sections.length) return;
-    let state = {};
-    try { state = JSON.parse(localStorage.getItem('tequio_sidebar') || '{}'); } catch(e) {}
-    sections.forEach(function(sec, i) {
-      const label = sec.querySelector('.nav-label');
-      if (!label) return;
-      const key = 'sec_' + i;
-      // Default: first section (Monitoreo) open, rest closed
-      const defaultCollapsed = i > 0;
-      const collapsed = state[key] !== undefined ? state[key] : defaultCollapsed;
-      if (collapsed) sec.classList.add('collapsed');
-      label.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sec.classList.toggle('collapsed');
-        state[key] = sec.classList.contains('collapsed');
-        try { localStorage.setItem('tequio_sidebar', JSON.stringify(state)); } catch(e) {}
-      });
-    });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCollapsibleSidebar);
-  } else {
-    initCollapsibleSidebar();
-  }
-})();
-</script>
-<!-- /P2.1 -->
-<!-- DASH-LOAD-FIX -->
-<script>
-(function() {
-  function patchNoticia(n) {
-    if (!n || typeof noticiasDB === 'undefined' || noticiasDB.length === 0) return false;
-    if (n.dataset.patched === '1') return true;
-    var nat = noticiasDB.find(function(x){ return x.ambito === 'nacional' && x.titulo; }) || noticiasDB[0];
-    if (!nat) return false;
-    n.textContent = nat.titulo;
-    n.dataset.patched = '1';
-    var res = document.getElementById('dash-noticia-resumen');
-    if (res && nat.resumen) res.textContent = nat.resumen.substring(0, 200);
-    var meta = document.getElementById('dash-noticia-meta');
-    if (meta && nat.fuente) meta.textContent = '📰 ' + nat.fuente + ' · click para ver fuente';
-    var parent = document.getElementById('dash-noticia-estado');
-    if (parent && nat.url_oficial) {
-      parent.style.cursor = 'pointer';
-      parent.onclick = function(){ window.open(nat.url_oficial, '_blank', 'noopener'); };
-    }
-    return true;
-  }
-  function patchDiputado(d) {
-    if (!d || d.dataset.patched === '1') return;
-    d.textContent = 'Sin información disponible';
-    d.dataset.patched = '1';
-    var info = document.getElementById('dash-diputado-info');
-    if (info && (/^\s*$/.test(info.textContent || '') || /Cargando/i.test(info.textContent || ''))) {
-      info.textContent = 'Configura tu estado en Mi Perfil para ver tu representante';
-    }
-  }
-  function loadAndPatch() {
-    if (typeof cargarNoticiasDesdeAPI === 'function' &&
-        typeof noticiasDB !== 'undefined' && noticiasDB.length === 0) {
-      Promise.resolve(cargarNoticiasDesdeAPI()).then(function(){
-        var n = document.getElementById('dash-noticia-titulo');
-        if (n && /Cargando/i.test(n.textContent || '')) patchNoticia(n);
-      }).catch(function(){});
-    } else {
-      var n = document.getElementById('dash-noticia-titulo');
-      if (n && /Cargando/i.test(n.textContent || '')) patchNoticia(n);
-    }
-    var d = document.getElementById('dash-diputado-nombre');
-    if (d && /Cargando/i.test(d.textContent || '')) patchDiputado(d);
-  }
-  function startObserver() {
-    // MutationObserver: si "Cargando" reaparece, re-patchear
-    var targets = ['dash-noticia-titulo', 'dash-diputado-nombre'];
-    targets.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      var obs = new MutationObserver(function() {
-        if (/Cargando/i.test(el.textContent || '')) {
-          el.dataset.patched = '';
-          if (id === 'dash-noticia-titulo') patchNoticia(el);
-          else patchDiputado(el);
-        }
-      });
-      obs.observe(el, { childList: true, characterData: true, subtree: true });
-    });
-  }
-  function init() {
-    loadAndPatch();
-    startObserver();
-    // Backup: retries cada 1s por 20s
-    var n = 0;
-    var t = setInterval(function() {
-      loadAndPatch();
-      n++;
-      if (n >= 20) clearInterval(t);
-    }, 1000);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 500); });
-  } else {
-    setTimeout(init, 500);
-  }
-})();
-</script>
-<!-- /DASH-LOAD-FIX -->
-<!-- FUENTE-CHIPS-FIX -->
-<script>
-(function() {
-  var FUENTES = [
-    { key: 'todas',       label: 'Todas',           emoji: '🌐', count: 676 },
-    { key: 'INAI',        label: 'INAI',            emoji: '📂', count: 503 },
-    { key: 'DOF',         label: 'DOF',             emoji: '📜', count: 68 },
-    { key: 'FGR',         label: 'FGR',             emoji: '⚖️', count: 40 },
-    { key: 'Presidencia', label: 'Presidencia',     emoji: '🏛️', count: 24 },
-    { key: 'SEGOB',       label: 'SEGOB',           emoji: '🛡️', count: 20 },
-    { key: 'SCJN',        label: 'SCJN',            emoji: '⚖️', count: 12 },
-    { key: 'COFEPRIS',    label: 'COFEPRIS',        emoji: '🏥', count: 5 },
-    { key: 'SABG',        label: 'SABG',            emoji: '🏛️', count: 4 }
-  ];
-  window.noticiasFuenteActiva = 'todas';
-  window.selectFuenteNoticias = function(el, fuente) {
-    document.querySelectorAll('#noticias-fuentes-chips .estado-chip').forEach(function(c) {
-      c.classList.remove('active');
-    });
-    el.classList.add('active');
-    window.noticiasFuenteActiva = fuente;
-    if (typeof filtrarNoticias === 'function') filtrarNoticias();
-  };
-  function buildChip(f) {
-    var active = f.key === window.noticiasFuenteActiva ? ' active' : '';
-    return '<div class="estado-chip' + active +
-           '" onclick="selectFuenteNoticias(this, \'' + f.key + '\')"' +
-           ' style="cursor:pointer">' +
-           f.emoji + ' ' + f.label +
-           ' <span style="opacity:0.55;font-size:0.85em">(' + f.count + ')</span>' +
-           '</div>';
-  }
-  function inyectarChips() {
-    var temasChips = document.getElementById('noticias-temas-chips');
-    if (!temasChips) return false;
-    if (document.getElementById('noticias-fuentes-chips')) return true; // ya inyectado
-    var wrap = document.createElement('div');
-    wrap.style.marginTop = '14px';
-    wrap.innerHTML =
-      '<div style="color:#9ca3af;font-size:12px;letter-spacing:1px;font-weight:700;margin-bottom:6px;">FUENTE</div>' +
-      '<div id="noticias-fuentes-chips" style="display:flex;flex-wrap:wrap;gap:8px;">' +
-      FUENTES.map(buildChip).join('') +
-      '</div>';
-    temasChips.parentNode.insertBefore(wrap, temasChips.nextSibling);
-    return true;
-  }
-  // Monkey-patch filtrarNoticias para considerar fuente
-  function aplicarParcheFiltrado() {
-    if (typeof window.filtrarNoticias !== 'function') return false;
-    if (window._filtrarNoticiasOrig) return true; // ya parcheado
-    window._filtrarNoticiasOrig = window.filtrarNoticias;
-    window.filtrarNoticias = function() {
-      var fuenteAct = window.noticiasFuenteActiva;
-      if (!fuenteAct || fuenteAct === 'todas') {
-        return window._filtrarNoticiasOrig.apply(this, arguments);
-      }
-      // Filtrar noticiasDB temporalmente
-      var dbOrig = window.noticiasDB;
-      if (!Array.isArray(dbOrig)) {
-        return window._filtrarNoticiasOrig.apply(this, arguments);
-      }
-      try {
-        window.noticiasDB = dbOrig.filter(function(n) { return n && n.fuente === fuenteAct; });
-        return window._filtrarNoticiasOrig.apply(this, arguments);
-      } finally {
-        window.noticiasDB = dbOrig;
-      }
-    };
-    return true;
-  }
-  function init() {
-    aplicarParcheFiltrado();
-    inyectarChips();
-  }
-  // Retry: la sección de noticias puede renderizar después
-  var tries = 0;
-  var iv = setInterval(function() {
-    init();
-    tries++;
-    var done = document.getElementById('noticias-fuentes-chips') && window._filtrarNoticiasOrig;
-    if (done || tries >= 30) clearInterval(iv);
-  }, 500);
-  // Re-inyectar si el usuario navega entre secciones
-  document.addEventListener('click', function(e) {
-    // Si el click cambia de sección, re-intentar inyección 500ms después
-    setTimeout(function() {
-      if (!document.getElementById('noticias-fuentes-chips')) inyectarChips();
-    }, 500);
-  });
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
-</script>
-<!-- /FUENTE-CHIPS-FIX -->
-<!-- ABRIR-FUENTE-NOTICIA -->
-<script>
-window.abrirFuenteNoticia = function(id) {
-  if (typeof noticiasDB === 'undefined') return;
-  var n = noticiasDB.find(function(x) { return String(x.id) === String(id); });
-  if (!n) return;
-  // Si tiene url_oficial válida y no es la fuente_url genérica, abrir directo
-  if (n.url_oficial && /^https?:\/\//i.test(n.url_oficial) &&
-      n.url_oficial !== n.fuente_url) {
-    window.open(n.url_oficial, '_blank', 'noopener,noreferrer');
-    return;
-  }
-  // Fallback: si solo tiene fuente_url (página general), abrirla también
-  if (n.fuente_url && /^https?:\/\//i.test(n.fuente_url)) {
-    window.open(n.fuente_url, '_blank', 'noopener,noreferrer');
-    return;
-  }
-  // Último fallback: modal interno
-  if (typeof abrirNoticia === 'function') abrirNoticia(id);
-};
-</script>
-<!-- /ABRIR-FUENTE-NOTICIA -->
-<!-- HIDE-INIC-MOCK -->
-<script>
-(function() {
-  // 1) Esconder el card "Iniciativas Ciudadanas / Las más votadas" del dashboard
-  // 2) Esconder boto
+      <div class="acc-label">Contras
