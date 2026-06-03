@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instala Tequio como App · Tequio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e1a; --bg-soft: #0f172a; --card: #111827;
+    --border-soft: #374151; --text: #e5e7eb; --text-dim: #9ca3af;
+    --accent: #fbbf24; --accent-soft: #fcd34d;
+    --green: #22c55e; --green-soft: #86efac;
+    --blue: #3b82f6; --blue-soft: #93c5fd;
+    --violet: #a855f7;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; }
+  body { padding: 16px; min-height: 100vh; }
+  html.embedded a[href="/"] { display: none !important; }
+  .container { max-width: 900px; margin: 0 auto; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--blue-soft); text-decoration: none; font-size: 13px; margin-bottom: 10px; }
+
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(34,197,94,0.22) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(59,130,246,0.20) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(34,197,94,0.10) 0%, rgba(59,130,246,0.08) 50%, rgba(15,23,42,0.95) 100%);
+    border: 1px solid rgba(34,197,94,0.30);
+    border-radius: 20px;
+    padding: 32px 26px 28px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .hero-emoji { font-size: 52px; margin-bottom: 12px; display: block; }
+  .hero h1 {
+    font-size: 30px; font-weight: 900; line-height: 1.15;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #fff 0%, var(--green-soft) 50%, var(--blue-soft) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: #cbd5e1; font-size: 15px; line-height: 1.65; max-width: 600px; margin: 0 auto; }
+  .hero p strong { color: var(--accent-soft); font-weight: 700; }
+
+  .install-btn-big {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+    color: #fff;
+    padding: 14px 28px; border-radius: 12px;
+    border: none;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    font-family: inherit;
+    transition: transform .15s;
+  }
+  .install-btn-big:hover { transform: translateY(-1px); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border-soft);
+    border-radius: 14px; padding: 20px;
+  }
+  .card-icon { font-size: 34px; margin-bottom: 10px; display: block; }
+  .card-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .card-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 12px; }
+  ol { padding-left: 20px; color: var(--text-dim); font-size: 13px; line-height: 1.7; }
+  ol li { margin-bottom: 6px; }
+  ol li strong { color: var(--text); font-weight: 700; }
+
+  .why {
+    background: var(--card); border: 1px solid var(--border-soft);
+    border-radius: 14px; padding: 20px; margin-bottom: 16px;
+  }
+  .why h2 { font-size: 16px; color: var(--accent); margin: 0 0 12px; font-weight: 800; }
+  .why ul { list-style: none; padding: 0; margin: 0; }
+  .why li { padding: 6px 0; color: var(--text-dim); font-size: 13.5px; display: flex; gap: 10px; }
+  .why li::before { content: '✓'; color: var(--green); font-weight: 900; flex-shrink: 0; }
+  .why li strong { color: var(--text); }
+
+  .footer-note { text-align: center; color: var(--text-dim); font-size: 12px; padding: 16px; line-height: 1.6; }
+</style>
+<script src="/js/tequio-kpis.js" defer></script>
+</head>
+<body>
+<script>(function(){if(new URLSearchParams(location.search).get('embedded')==='1'){document.documentElement.classList.add('embedded');}})();</script>
+
+<div class="container">
+  <a href="/" class="back-link" target="_top">← Tequio</a>
+
+  <div class="hero">
+    <span class="hero-emoji">📲</span>
+    <h1>Instala Tequio como app</h1>
+    <p>Acceso directo desde la <strong>pantalla de inicio</strong> de tu teléfono o computadora. Sin abrir el navegador, sin escribir la URL. <strong>Funciona también sin internet.</strong></p>
+    <button class="install-btn-big" onclick="tryInstall()">📲 Instalar ahora</button>
+    <div id="install-result" style="margin-top:12px;font-size:12.5px;color:var(--text-dim);min-height:18px"></div>
+  </div>
+
+  <div class="why">
+    <h2>¿Por qué instalar?</h2>
+    <ul>
+      <li><strong>Ícono en home screen</strong> — abre Tequio con un toque, como cualquier app</li>
+      <li><strong>Sin barra de URL</strong> — pantalla completa para mejor experiencia</li>
+      <li><strong>Funciona offline</strong> — leyes y datos cacheados para consultar sin internet</li>
+      <li><strong>Cero descarga</strong> — usa el mismo navegador, no ocupa espacio extra</li>
+      <li><strong>Actualizaciones automáticas</strong> — siempre tendrás la última versión</li>
+    </ul>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="card-icon">🤖</span>
+      <div class="card-title">Android / Chrome</div>
+      <div class="card-sub">Pasos para instalar</div>
+      <ol>
+        <li>Toca el botón <strong>"📲 Instalar ahora"</strong> arriba</li>
+        <li>Si no aparece el modal, abre el menú del navegador <strong>(⋮)</strong></li>
+        <li>Selecciona <strong>"Instalar app"</strong> o <strong>"Añadir a pantalla de inicio"</strong></li>
+        <li>Confirma y Tequio aparecerá como app en tu pantalla</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <span class="card-icon">🍎</span>
+      <div class="card-title">iPhone / Safari</div>
+      <div class="card-sub">Pasos para instalar</div>
+      <ol>
+        <li>Toca el botón <strong>Compartir</strong> ⬆️ en la barra inferior</li>
+        <li>Desplaza hacia abajo y selecciona <strong>"Añadir a pantalla de inicio"</strong></li>
+        <li>Toca <strong>"Añadir"</strong> en la esquina superior derecha</li>
+        <li>Tequio aparecerá como app en tu home</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <span class="card-icon">💻</span>
+      <div class="card-title">Desktop / Chrome o Edge</div>
+      <div class="card-sub">Pasos para instalar</div>
+      <ol>
+        <li>Toca <strong>"📲 Instalar ahora"</strong> arriba</li>
+        <li>O busca el ícono de instalación en la <strong>barra de URL</strong> (🖥️+)</li>
+        <li>O abre el menú del navegador y selecciona <strong>"Instalar Tequio..."</strong></li>
+        <li>Tequio se abrirá como ventana independiente</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    🦎 Tequio es una <strong style="color:var(--accent)">PWA (Progressive Web App)</strong> — la misma web pero con superpoderes de app.<br>
+    Sin descargas desde Play Store / App Store. Cero costo. Cero anuncios.
+  </div>
+</div>
+
+<script>
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+});
+function tryInstall(){
+  var msg = document.getElementById('install-result');
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (isStandalone){
+    msg.innerHTML = '✅ Tequio ya está instalada en este dispositivo';
+    msg.style.color = 'var(--green-soft)';
+    return;
+  }
+  if (isIOS){
+    msg.innerHTML = '⬆️ Toca <strong>Compartir</strong> en la barra inferior, luego <strong>"Añadir a pantalla de inicio"</strong>';
+    msg.style.color = 'var(--accent-soft)';
+    return;
+  }
+  if (!deferredPrompt){
+    msg.innerHTML = '⚠️ Tu navegador no soporta instalación automática. Sigue las instrucciones abajo para tu plataforma.';
+    msg.style.color = 'var(--accent-soft)';
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(choice){
+    if (choice.outcome === 'accepted'){
+      msg.innerHTML = '🎉 ¡Tequio instalada exitosamente!';
+      msg.style.color = 'var(--green-soft)';
+    } else {
+      msg.innerHTML = 'Instalación cancelada. Puedes intentar de nuevo cuando quieras.';
+      msg.style.color = 'var(--text-dim)';
+    }
+    deferredPrompt = null;
+  });
+}
+</script>
+</body>
+</html>
