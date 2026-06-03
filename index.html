@@ -2206,8 +2206,11 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ── MÉXICO ── -->
     <div class="nav-section">
       <div class="nav-label">🌎 México</div>
-      <div class="nav-item" onclick="cargarPanel('sre')">
+      <div class="nav-item" data-page="geopolitica" onclick="showPage('geopolitica')">
         <span class="icon">🌐</span> México en el Mundo
+      </div>
+      <div class="nav-item" onclick="cargarPanel('sre')">
+        <span class="icon">🏛️</span> Embajadas y Consulados
       </div>
       <div class="nav-item" onclick="cargarPanel('donar')" style="background:linear-gradient(135deg,rgba(236,72,153,0.10),rgba(251,191,36,0.08));border-left:3px solid #ec4899">
         <span class="icon">❤️</span> Apoya Tequio
