@@ -208,14 +208,40 @@
 </style>
 </head>
 <body>
-<header>
-  <div class="row">
-    <a href="/" class="back">&larr; Tequio</a>
-    <h1>Testigo Cívico</h1>
-  </div>
-  <div class="sub">Reporta hechos de interés público. Tu evidencia visible para todos.</div>
+<header style="background:transparent;border:none;padding:8px 16px">
+  <a href="/" class="back" style="color:#9ca3af;text-decoration:none">&larr; Tequio</a>
 </header>
 <main>
+  <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.35)">
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="font-size:60px;line-height:1">📸</div>
+      <div style="flex:1;min-width:240px">
+        <h1 style="font-size:30px;font-weight:900;margin:0;color:#fff;letter-spacing:-0.02em">Testigo Cívico</h1>
+        <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Documenta hechos de <strong>interés público</strong> con foto + ubicación · registro técnico ciudadano · evidencia visible para todos.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🛡️ ANTI-SPAM</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="hero-stat-reportes">0</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase;margin-top:4px">Reportes en feed</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.2;color:#86efac">SHA-256</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase;margin-top:4px">Hash interno</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.2;color:#fde68a">EXIF</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase;margin-top:4px">Timestamp</div></div>
+      <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.2">30s</div><div style="font-size:10px;opacity:0.85;text-transform:uppercase;margin-top:4px">Anti-bot</div></div>
+    </div>
+  </div>
+
+  <details style="background:linear-gradient(135deg,rgba(37,99,235,0.08),rgba(37,99,235,0.02));border:1px solid rgba(37,99,235,0.35);border-radius:12px;margin-bottom:14px">
+    <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#93c5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Esto tiene valor legal? · Lee antes de publicar</span><span style="font-size:11px">▾</span></summary>
+    <div style="padding:0 16px 14px;font-size:12px;color:var(--muted,#9ca3af);line-height:1.6">Testigo Cívico es <strong>registro técnico ciudadano</strong> — útil como pre-evidencia, NO como prueba certificada en juicio:
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+        <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">✅ Sirve para</strong><br><span style="font-size:11px">Quejas CNDH, PROFECO, prensa, presión social.</span></div>
+        <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚠️ Límite legal</strong><br><span style="font-size:11px">NO sustituye peritaje informático ni notario.</span></div>
+        <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ NOM-151</strong><br><span style="font-size:11px">Para prueba plena: PSC autorizado por Sec. Economía.</span></div>
+        <div style="background:rgba(59,130,246,0.10);border-left:3px solid #3b82f6;padding:8px 10px;border-radius:6px"><strong style="color:#93c5fd">🔒 Privacidad</strong><br><span style="font-size:11px">Tu hash es anónimo · feed público pero sin tu identidad.</span></div>
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:var(--muted,#9ca3af)">📍 La <strong>ubicación se redondea a ~10m</strong> para proteger tu privacidad. La foto guarda metadatos EXIF (timestamp del dispositivo) — útiles como referencia técnica.</p>
+      <p style="margin-top:6px;font-size:11px;color:var(--muted,#9ca3af)">🛡️ Sistema anti-spam: honeypot + 30s mínimo de llenado + validación servidor. Esto evita bots y reportes masivos automáticos.</p>
+    </div>
+  </details>
   <div class="tabs">
     <button class="tab active" data-tab="crear">Crear reporte</button>
     <button class="tab" data-tab="feed">Feed reciente</button>
