@@ -1,0 +1,80 @@
+name: Mega-sweep v4 SHARDS (20 paralelo · todo MX)
+
+# 20 jobs paralelos, cada uno procesa 1/20 del catálogo INEGI completo.
+# 2,478 munis / 20 = ~124 munis por job.
+# Cada job ~30-90 min (depende de Playwright failures).
+# Total wall time: ~1-2 hrs. Total minutos GH Actions: ~1,200-2,400.
+
+on:
+  workflow_dispatch:
+    inputs:
+      total_shards:
+        description: 'Total de shards (12-20)'
+        required: false
+        default: '20'
+      max_per_muni:
+        description: 'Max PDFs por muni'
+        required: false
+        default: '6'
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180   # 3 hrs por shard (suficiente para ~125 munis)
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python + tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils tesseract-ocr libtesseract-dev
+          pip install --quiet playwright requests rapidfuzz ddgs
+
+      - name: Setup Playwright browsers
+        run: |
+          playwright install --with-deps chromium
+
+      - name: Run shard sweep
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+          PYTHONWARNINGS: ignore
+          SHARD: ${{ matrix.shard }}
+          TOTAL: ${{ inputs.total_shards }}
+          MAX_PER_MUNI: ${{ inputs.max_per_muni }}
+        run: |
+          cd scripts/legales
+          python3 playwright_sweep_v3.py SHARD "$SHARD" "${TOTAL:-20}" "${MAX_PER_MUNI:-6}"
+
+      - name: Refresh KPI cache
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' > /dev/null || true
+
+  final_refresh:
+    needs: sweep
+    if: always()
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Final cache refresh + log
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.SUPABASE_ANON }}
+        run: |
+          curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | grep -E "(leyes|municipal|chunks)" || true
