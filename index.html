@@ -6945,8 +6945,40 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMUNIDAD (Chat nativo Supabase Realtime) ───── -->
     <div id="page-comunidad" class="page">
       <div class="content" style="max-width:900px">
-        <!-- Hero -->
-        <div style="background:linear-gradient(135deg,#1a1f3a 0%,#0a0f1e 100%);border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#6366f1 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(55,48,163,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💬</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comunidad Tequio</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Chat cívico en vivo · <strong>5 salas temáticas</strong> · sin terceros · soberanía digital.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🦎 CERO INVENCIÓN</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">5</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Salas activas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Anónimo</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Sin email</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Identidad</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No Discord/Telegram</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Storage MX</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(55,48,163,0.08),rgba(55,48,163,0.02));border:1px solid rgba(55,48,163,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a5b4fc;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 Reglas comunitarias · Cómo nos moderamos</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Sin moderadores top-down. La comunidad se modera entre sí por <strong>reportes y votos</strong>. Reglas mínimas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🚫 No incitar violencia</strong><br><span style="font-size:11px">Amenazas, doxxing y llamados a violencia se ocultan.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚠️ Cero spam</strong><br><span style="font-size:11px">Publicidad, scam y enlaces de marketing.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Cita fuentes</strong><br><span style="font-size:11px">Si afirmas un dato, linkéalo. Sin fuente = opinión.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🦎 Discrepar = OK</strong><br><span style="font-size:11px">Debate de buena fe siempre bienvenido. Insulto no.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Storage en Supabase (instancia tequio.app) · NO third-party · sin email · sin recolección de teléfono. El servidor solo guarda el mensaje y un id efímero.</p>
+          </div>
+        </details>
+        <!-- Hero original -->
+        <div style="background:linear-gradient(135deg,#1a1f3a 0%,#0a0f1e 100%);border-radius:14px;padding:20px;margin-bottom:16px;display:none">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💬 Chat Comunitario Tequio</div>
           <div style="font-size:13px;color:var(--text3)">Conversación cívica en vivo · 5 salas · sin terceros</div>
         </div>
@@ -7404,7 +7436,42 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── TESTIGO CÍVICO ───── -->
     <div id="page-testigo" class="page">
-      <!-- HERO -->
+      <!-- HERO Nivel 3 -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">📸</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Testigo Cívico</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Documenta hechos de <strong>interés público</strong> con foto + ubicación · registro técnico ciudadano (no sustituye NOM-151).</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🔒 PRIVADO</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="tst-stat-reportes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Reportes guardados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">SHA-256</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hash criptográfico</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">EXIF</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Metadatos</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Solo tú</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(37,99,235,0.08),rgba(37,99,235,0.02));border:1px solid rgba(37,99,235,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#93c5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Tiene valor legal? · Registro técnico vs prueba plena</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Documentación temprana = pre-evidencia útil. Para fuerza probatoria plena se requiere proceso adicional:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">✅ Útil para</strong><br><span style="font-size:11px">Denuncias ante CNDH/PROFECO, presión social, prensa, contexto.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚠️ Limitación</strong><br><span style="font-size:11px">No es certificación notarial. Juez puede aceptar pero no obliga.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">📜 NOM-151</strong><br><span style="font-size:11px">Estándar oficial de conservación digital. PSC certificado.</span></div>
+              <div style="background:rgba(59,130,246,0.10);border-left:3px solid #3b82f6;padding:8px 10px;border-radius:6px"><strong style="color:#93c5fd">🔐 Privacidad</strong><br><span style="font-size:11px">Tequio NO ve tus fotos. Storage local en tu dispositivo.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Más info: <a href="https://www.gob.mx/se/acciones-y-programas/competitividad-y-normatividad-normalizacion-nom-151-scfi-2002" target="_blank" style="color:#93c5fd">NOM-151-SCFI-2002</a></p>
+          </div>
+        </details>
+      </div>
+      <!-- HERO original -->
       <div style="background:linear-gradient(160deg,#0a0f1e 0%,#1e3a5f 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(59,130,246,0.25);position:relative;overflow:hidden">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 30%,rgba(59,130,246,0.15),transparent 60%);pointer-events:none"></div>
         <div style="position:relative">
@@ -7624,6 +7691,41 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── OMBLIGO — MEMORIA HISTÓRICA ───── -->
     <div id="page-ombligo" class="page">
+      <!-- HERO Nivel 3 -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#451a03 0%,#9a3412 50%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(154,52,18,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🪐</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Ombligo del Mundo</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">México visto desde el centro · <strong>cosmovisión mexica</strong> + raíces vivas · historia profunda como contexto cívico.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 RAÍZ</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">68</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Lenguas vivas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">364</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Variantes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">~5%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hablantes indígenas MX</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INALI · INPI</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(154,52,18,0.08),rgba(154,52,18,0.02));border:1px solid rgba(154,52,18,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fdba74;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Por qué importa la cosmovisión en una app cívica?</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            La identidad cívica no nace del Estado moderno; nace de raíces más antiguas. Entenderlas ayuda a:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(154,52,18,0.10);border-left:3px solid #9a3412;padding:8px 10px;border-radius:6px"><strong style="color:#fdba74">🌽 Tequio</strong><br><span style="font-size:11px">Faena comunitaria mesoamericana — el ADN de esta app.</span></div>
+              <div style="background:rgba(217,119,6,0.10);border-left:3px solid #d97706;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📅 Calendario</strong><br><span style="font-size:11px">Cuenta del tiempo, fiestas, ciclos agrícolas.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Justicia</strong><br><span style="font-size:11px">Usos y costumbres reconocidos en Art. 2 CPEUM.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🗣️ Idiomas</strong><br><span style="font-size:11px">Náhuatl, maya, mixteco, zapoteco… aún vivas.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuentes: <a href="https://www.inali.gob.mx/" target="_blank" style="color:#fdba74">INALI</a> · <a href="https://www.gob.mx/inpi" target="_blank" style="color:#fdba74">INPI</a> · INAH · UNAM.</p>
+          </div>
+        </details>
+      </div>
       <!-- HERO FULL-BLEED (sin .content wrapper para que tome todo el ancho) -->
       <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#0d0500 0%,#1a0800 40%,#0e0418 100%);padding:36px 32px 28px;border-bottom:1px solid rgba(180,83,9,0.3)">
         <!-- SVG pattern: rueda de calendario estilizada -->
@@ -7973,6 +8075,41 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── SIMULADOR ───── -->
     <!-- ───── SIMULADOR DE VOTO 2027 ───── -->
     <div id="page-votosim" class="page">
+      <!-- HERO Nivel 3 -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🗳️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Voto Simulado</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Simula la <strong>boleta real</strong> de tu elección · práctica sin riesgo, descubre tus afinidades por tema.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🎯 PRÁCTICA</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">2027</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Próx. federal</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Privado</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INE oficial</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantilla boleta</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(67,56,202,0.08),rgba(67,56,202,0.02));border:1px solid rgba(67,56,202,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Para qué sirve la simulación?</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            La práctica con boletas reales reduce los <strong>votos nulos por confusión</strong> (la 4ª "fuerza electoral" en MX). Te ayuda a:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(67,56,202,0.10);border-left:3px solid #4338ca;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">📋 Familiarizarte</strong><br><span style="font-size:11px">Con el formato real INE: orden de partidos, posiciones, casillas.</span></div>
+              <div style="background:rgba(124,58,237,0.10);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">🧮 Comparar</strong><br><span style="font-size:11px">Tu intención de voto vs. los temas que más te importan.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Descubrir</strong><br><span style="font-size:11px">Afinidad: a veces votamos contra nuestros propios intereses.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🔐 Sin tracking</strong><br><span style="font-size:11px">Tequio NO ve tu elección. Solo tú.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuente oficial: <a href="https://www.ine.mx/" target="_blank" style="color:#c4b5fd">ine.mx</a> · Plataformas electorales y boleta oficial publicadas en cada proceso.</p>
+          </div>
+        </details>
+      </div>
       <!-- ══ INTRO ══ -->
       <div id="vs-intro">
         <!-- Hero -->
@@ -10562,6 +10699,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── ORGANÍZATE ───── -->
     <div id="page-organizacion" class="page">
       <div class="content">
+        <div style="background:linear-gradient(135deg,#831843 0%,#be185d 50%,#ec4899 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(190,24,93,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">✊</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Organización Ciudadana</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Protesta, sindicatos, colectivos, fondeo · <strong>Art. 9 CPEUM</strong> protege tu derecho de reunión y asociación pacífica.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 ART. 9</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Categorías</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Art. 9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CPEUM</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Art. 123</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Trabajo</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Convenios OIT 87/98</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Internacional</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(190,24,93,0.08),rgba(190,24,93,0.02));border:1px solid rgba(190,24,93,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f9a8d4;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 Qué te protege la Constitución · Marco legal</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Organizarte NO requiere permiso — es un derecho. Lo único es respetar 3 reglas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(190,24,93,0.10);border-left:3px solid #be185d;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">✊ Pacífica</strong><br><span style="font-size:11px">Sin armas. La violencia transforma la protesta en delito.</span></div>
+              <div style="background:rgba(236,72,153,0.10);border-left:3px solid #ec4899;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">📋 Objeto lícito</strong><br><span style="font-size:11px">Causa pública, no contra orden constitucional.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">📣 Aviso (opcional)</strong><br><span style="font-size:11px">Marchas en CDMX se notifican 48 hrs antes (no autorización).</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">⚖️ Huelga</strong><br><span style="font-size:11px">Art. 123 CPEUM + LFT. Estallar requiere emplazamiento 10 días.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Más detalle: <a href="https://www.cndh.org.mx/" target="_blank" style="color:#f9a8d4">CNDH</a> · <a href="https://www.scjn.gob.mx/" target="_blank" style="color:#f9a8d4">SCJN</a> · Convenios OIT 87 y 98 (libertad sindical).</p>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>⚖️</span>
           <span>Toda organización ciudadana pacífica está protegida por el <strong>Art. 9 Constitucional</strong>. El derecho de reunión y asociación es fundamental en México.</span>
@@ -11436,6 +11605,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <div id="page-corrupcion" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#451a03 0%,#7c2d12 50%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(124,45,18,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🔍</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Radar de Corrupción</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Contratos, funcionarios y dependencias con <strong>señalamientos documentados</strong> · ASF, SFP, FGR, CompraNet.</p>
+            </div>
+            <a href="https://www.asf.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">ASF →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="cor-stat-casos">847</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Casos ASF 20-24</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="cor-stat-monto">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Monto observado</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cor-stat-deps">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Dependencias</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">5 años</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cuentas Públicas</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02));border:1px solid rgba(220,38,38,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fca5a5;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Quién audita a quién? · Cadena de control</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            El sistema federal de auditoría tiene 4 actores con poderes distintos. Sin entender quién hace qué, no entiendes los señalamientos:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔍 ASF</strong><br><span style="font-size:11px">Auditoría Superior Federación · Cámara Diputados · independencia técnica.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">🏛️ SFP</strong><br><span style="font-size:11px">Función Pública · sancionadora interna del Ejecutivo.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ FGR</strong><br><span style="font-size:11px">Fiscalía General · investiga delitos por hechos de corrupción.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🏗️ CompraNet</strong><br><span style="font-size:11px">Plataforma de contrataciones · base de datos pública.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ "Señalamiento" ≠ sentencia. Una <strong>observación ASF</strong> es un hallazgo administrativo que requiere proceso. Verifica caso por caso en <a href="https://www.asf.gob.mx" target="_blank" style="color:#fca5a5">asf.gob.mx → Informes Anuales</a>.</p>
+          </div>
+        </details>
         <div style="font-size:22px;font-weight:800;margin-bottom:4px">🔍 Radar de Corrupción</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Contratos, funcionarios y dependencias con señalamientos documentados. Fuentes: ASF, SFP, FGR, CompraNet.</div>
         <!-- Stats · cifras agregadas curadas desde informes ASF, verificable en asf.gob.mx -->
@@ -26260,387 +26461,4 @@ const OMBLIGO_MUSEOS = [
     color:'#1d4ed8',
     ubicacion:'Bosque de Chapultepec, Miguel Hidalgo, CDMX',
     costo:'$95 MXN general · Domingos gratis para mexicanos',
-    horario:'Mar–Dom 9:00–17:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'Residencia de Maximiliano, sede de los Niños Héroes (1847), residencia presidencial hasta Lázaro Cárdenas. Murales de Siqueiros y O\'Gorman. Vista panorámica de la CDMX.',
-    porQueImporta:'Es el único lugar donde puedes ver en un solo espacio la historia del virreinato, la intervención francesa, el Porfiriato y la Revolución — en el escenario físico donde ocurrió.',
-    salas:['Sala del Virreinato','Sala del Imperio de Maximiliano','Sala de la Reforma y República Restaurada','Sala del Porfiriato','Sala de la Revolución']
-  },
-  {
-    nombre:'Museo Nacional de la Revolución',
-    subtitulo:'Dentro del Monumento a la Revolución — la historia de 1910 en el corazón de la ciudad',
-    emoji:'🌵',
-    color:'#dc2626',
-    ubicacion:'Plaza de la República, Cuauhtémoc, CDMX',
-    costo:'$45 MXN general',
-    horario:'Mar–Dom 9:00–17:00 · Sáb 9:00–20:00 · Cerrado lunes',
-    destaca:false,
-    descripcion:'El Monumento alberga las tumbas de Madero, Plutarco Elías Calles, Lázaro Cárdenas y Francisco Villa. El museo documenta 1910–1940 con fotografías, armas y documentos originales.',
-    porQueImporta:'Para entender cómo la Revolución creó las instituciones que aún rigen al país: PEMEX, ejidos, los derechos laborales del art. 123, la educación pública gratuita.',
-    salas:['Sala de la Revolución 1910','Sala de Madero y el Porfiriato','Sala Constitución 1917','Sala del Cardenismo']
-  },
-  {
-    nombre:'Museo Casa de Hidalgo',
-    subtitulo:'La casa del Padre de la Patria en Dolores Hidalgo, Guanajuato',
-    emoji:'🔔',
-    color:'#059669',
-    ubicacion:'Dolores Hidalgo, Guanajuato',
-    costo:'$55 MXN general',
-    horario:'Mar–Sáb 10:00–17:45 · Dom 10:00–14:45 · Cerrado lunes',
-    destaca:false,
-    descripcion:'La casa donde vivió Miguel Hidalgo y Costilla. Objetos personales, documentos originales. Centro de peregrinación cívica cada 15–16 de septiembre. A pasos de la parroquia donde sonó el Grito.',
-    porQueImporta:'Para entender los orígenes de la Independencia más allá del mito — Hidalgo fue un cura ilustrado y economista que defendía industrias locales contra el monopolio colonial.',
-    salas:['Sala biográfica de Hidalgo','Sala de documentos históricos','Exhibición del Movimiento de Independencia']
-  }
-];
-const OMBLIGO_ZONAS = [
-  {
-    nombre:'Teotihuacán',
-    subtitulo:'La Ciudad de los Dioses · La metrópolis más grande de América en el año 500 d.C.',
-    emoji:'🔺',
-    color:'#d97706',
-    estado:'Estado de México',
-    periodo:'100 a.C. – 650 d.C.',
-    costo:'$90 MXN general · Domingos gratis para mexicanos',
-    horario:'Todos los días 9:00–17:00',
-    distancia:'~50 km al NE de la CDMX · 1 hora en camión desde Terminal del Norte',
-    destacado:'Pirámide del Sol (216m de base) · Pirámide de la Luna · Calzada de los Muertos · Palacio de Quetzalpapálotl',
-    descripcion:'La ciudad planificada más grande de Mesoamérica. En su apogeo tenía 125,000 habitantes — más que Roma en el mismo periodo. Quién la construyó sigue siendo misterio; los aztecas llegaron cuando ya estaba abandonada.',
-    patrimonio:true
-  },
-  {
-    nombre:'Monte Albán',
-    subtitulo:'Capital zapoteca sobre una montaña aplanada · 2,500 años de historia continua',
-    emoji:'⛰️',
-    color:'#16a34a',
-    estado:'Oaxaca',
-    periodo:'500 a.C. – 700 d.C.',
-    costo:'$90 MXN general',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'~10 km al O de Oaxaca city · 20 min en taxi o colectivo',
-    destacado:'Gran Plaza · Plataforma Sur · Observatorio · Galería de los Danzantes · 170+ tumbas exploradas',
-    descripcion:'Los zapotecos aplanaron una montaña entera para construir su capital. La Galería de los Danzantes muestra las primeras representaciones de escritura en Mesoamérica. Ciudad sagrada durante 1,200 años continuos.',
-    patrimonio:true
-  },
-  {
-    nombre:'Palenque',
-    subtitulo:'La joya maya en la selva chiapaneca · Arquitectura y astronomía extraordinarias',
-    emoji:'🌿',
-    color:'#0891b2',
-    estado:'Chiapas',
-    periodo:'200 – 900 d.C.',
-    costo:'$90 MXN general',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'8 km de Palenque ciudad · Taxi o colectivo',
-    destacado:'Templo de las Inscripciones · Tumba de Pakal · Palacio con torre observatorio · Templo de la Cruz',
-    descripcion:'Donde se descubrió la tumba del rey Pakal en 1952 — el mayor hallazgo arqueológico de México del siglo XX. El Templo de las Inscripciones contiene el texto histórico maya más largo conocido. La selva la rodea: ambiente incomparable.',
-    patrimonio:true
-  },
-  {
-    nombre:'Chichén Itzá',
-    subtitulo:'Una de las 7 Maravillas del Mundo Moderno · El calendario maya en piedra',
-    emoji:'🏛️',
-    color:'#7c3aed',
-    estado:'Yucatán',
-    periodo:'600 – 1200 d.C.',
-    costo:'$571 MXN aprox (federal + estatal combinado)',
-    horario:'Todos los días 8:00–17:00',
-    distancia:'~200 km de Mérida · 2.5h en bus desde Mérida o Cancún',
-    destacado:'El Castillo (Pirámide de Kukulcán, 365 escalones) · Templo de los Guerreros · El Caracol observatorio · Cenote Sagrado',
-    descripcion:'El Castillo es un calendario en piedra: 365 escalones, 52 paneles, el fenómeno del equinoccio donde "la serpiente baja" por la escalinata norte. La acústica del Juego de Pelota es un logro de ingeniería sin paralelo en el mundo antiguo.',
-    patrimonio:true
-  },
-  {
-    nombre:'Tula (Tollán)',
-    subtitulo:'Capital tolteca · Los Atlantes y el mito de Quetzalcóatl',
-    emoji:'🗿',
-    color:'#9f1239',
-    estado:'Hidalgo',
-    periodo:'700 – 1150 d.C.',
-    costo:'$75 MXN general',
-    horario:'Mar–Dom 9:00–17:00',
-    distancia:'~80 km al N de la CDMX · 1.5h desde Central del Norte',
-    destacado:'Atlantes (4 figuras guerreras de 4.6m) · Pirámide B · Palacio Quemado · Tzompantli (altar de cráneos)',
-    descripcion:'Capital del Imperio Tolteca que influyó en toda Mesoamérica. Los Atlantes son los guardianes más fotografiados de México después del Ángel de la Independencia. El mito de Quetzalcóatl-Topiltzin nace aquí y viaja hasta los mayas de Yucatán.',
-    patrimonio:false
-  },
-  {
-    nombre:'El Tajín',
-    subtitulo:'La ciudad de los nichos · Centro del ritual del Volador de Papantla',
-    emoji:'🌀',
-    color:'#0369a1',
-    estado:'Veracruz',
-    periodo:'600 – 1200 d.C.',
-    costo:'$80 MXN general',
-    horario:'Todos los días 9:00–17:00',
-    distancia:'~20 km de Papantla · Colectivo desde Papantla',
-    destacado:'Pirámide de los Nichos (365 nichos = año solar) · Juegos de Pelota · Complejo de columnas · Voladores en vivo',
-    descripcion:'La Pirámide de los Nichos es única en Mesoamérica: 365 nichos representan el año solar. El Volador de Papantla, ritual que se practica en el sitio, es Patrimonio Cultural Inmaterial de la Humanidad por la UNESCO.',
-    patrimonio:true
-  }
-];
-let ombligoIniciado = false;
-function initOmbligo() {
-  if (ombligoIniciado) return;
-  ombligoIniciado = true;
-  renderOmbligoTimeline();
-  renderOmbligoMuseos();
-  renderOmbligoZonas();
-  // Cargar zonas y museos INAH desde Supabase (195 zonas + 165 museos)
-  fetch('/api/data?vista=ombligo_zonas').then(r => r.ok ? r.json() : null).then(j => {
-    if (!j || !Array.isArray(j.zonas)) return;
-    const ya = new Set(OMBLIGO_ZONAS.map(z => (z.nombre || '').toLowerCase()));
-    const reales = j.zonas.filter(z => !ya.has((z.nombre || '').toLowerCase())).map(z => ({
-      nombre: z.nombre, estado: z.estado,
-      subtitulo: z.responsable || 'Zona Arqueológica INAH',
-      emoji: '🏛️', color: '#d97706', periodo: 'Prehispánico',
-      costo: 'Ver inah.gob.mx',
-      horario: z.condicion === 'Cerrada' ? 'Cerrada' : (z.condicion === 'Temporalmente cerrada' ? 'Temp. cerrada' : 'Consultar INAH'),
-      descripcion: 'Sitio bajo resguardo del ' + (z.responsable || 'INAH') + '.',
-      fuenteINAH: true,
-    }));
-    if (reales.length) { OMBLIGO_ZONAS.push(...reales); renderOmbligoZonas(); }
-    const c = document.getElementById('ombligo-zonas-count');
-    if (c) c.textContent = OMBLIGO_ZONAS.length + '+';
-  }).catch(() => {});
-  fetch('/api/data?vista=ombligo_museos').then(r => r.ok ? r.json() : null).then(j => {
-    if (!j || !Array.isArray(j.museos)) return;
-    const ya = new Set(OMBLIGO_MUSEOS.map(m => (m.nombre || '').toLowerCase()));
-    const reales = j.museos.filter(m => !ya.has((m.nombre || '').toLowerCase())).map(m => ({
-      nombre: m.nombre, ciudad: m.estado,
-      subtitulo: m.responsable || 'Museo del INAH',
-      emoji: '🏛️', color: '#3b82f6',
-      horario: m.condicion === 'Cerrado' ? 'Cerrado' : 'Consultar INAH',
-      costo: 'Ver inah.gob.mx',
-      descripcion: 'Recinto del INAH. ' + (m.ubicacion_fisica || ''),
-      fuenteINAH: true,
-    }));
-    if (reales.length) { OMBLIGO_MUSEOS.push(...reales); renderOmbligoMuseos(); }
-    const c = document.getElementById('ombligo-museos-count');
-    if (c) c.textContent = OMBLIGO_MUSEOS.length + '+';
-  }).catch(() => {});
-}
-function ombligoTab(tab) {
-  ombligoTabActual = tab;
-  const colorMap = { timeline:'#d97706', museos:'#3b82f6', zonas:'#22c55e', unesco:'#22c55e', lenguas:'#a855f7' };
-  ['timeline','museos','zonas','unesco','lenguas'].forEach(t => {
-    const panel = document.getElementById('opanel-' + t);
-    const btn   = document.getElementById('otab-' + t);
-    if (panel) panel.style.display = t === tab ? '' : 'none';
-    if (btn) {
-      const isActive = t === tab;
-      btn.style.color = isActive ? 'var(--text)' : 'var(--text2)';
-      btn.style.fontWeight = isActive ? '700' : '600';
-      btn.style.borderBottom = isActive ? `2px solid ${colorMap[t]}` : '2px solid transparent';
-    }
-  });
-  if (tab === 'unesco' && typeof cargarOmbligoUNESCO === 'function') cargarOmbligoUNESCO();
-  if (tab === 'lenguas' && typeof cargarOmbligoLenguas === 'function') cargarOmbligoLenguas();
-}
-let _lenguasData = null;
-let _lenguasFamilia = 'todas';
-async function cargarOmbligoLenguas() {
-  if (_lenguasData) { renderLenguas(); return; }
-  try {
-    const r = await fetch('/api/data?vista=lenguas');
-    if (!r.ok) throw new Error('http ' + r.status);
-    const j = await r.json();
-    if (!Array.isArray(j.lenguas) || !j.lenguas.length) return;
-    _lenguasData = j;
-    // Render filtro de familia
-    const filtro = document.getElementById('lenguas-familia-filtro');
-    if (filtro) {
-      const familias = Object.keys(j.por_familia).sort((a,b) => j.por_familia[b] - j.por_familia[a]);
-      filtro.innerHTML = `<button class="lengua-fchip" onclick="filtrarLenguas('todas')" style="padding:5px 11px;border-radius:14px;border:1px solid #a855f7;background:#a855f7;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Todas (${j.total})</button>` +
-        familias.map(f => `<button class="lengua-fchip" onclick="filtrarLenguas('${f.replace(/'/g, "\\'")}')" style="padding:5px 11px;border-radius:14px;border:1px solid rgba(168,85,247,0.35);background:rgba(168,85,247,0.10);color:#c4b5fd;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">${f} (${j.por_familia[f]})</button>`).join('');
-    }
-    renderLenguas();
-  } catch (e) {
-    console.warn('Ombligo lenguas:', e);
-  }
-}
-window.cargarOmbligoLenguas = cargarOmbligoLenguas;
-function filtrarLenguas(familia) {
-  _lenguasFamilia = familia;
-  // Update filter button styles
-  document.querySelectorAll('.lengua-fchip').forEach(b => {
-    const isActive = b.textContent.startsWith(familia === 'todas' ? 'Todas' : familia);
-    b.style.background = isActive ? '#a855f7' : 'rgba(168,85,247,0.10)';
-    b.style.color = isActive ? '#fff' : '#c4b5fd';
-  });
-  renderLenguas();
-}
-window.filtrarLenguas = filtrarLenguas;
-function renderLenguas() {
-  if (!_lenguasData) return;
-  const el = document.getElementById('ombligo-lenguas');
-  if (!el) return;
-  const filtradas = _lenguasFamilia === 'todas' ? _lenguasData.lenguas : _lenguasData.lenguas.filter(l => l.familia === _lenguasFamilia);
-  const riesgoColor = { 'no riesgo': '#22c55e', 'vulnerable': '#fbbf24', 'en peligro': '#f97316', 'crítico': '#ef4444' };
-  const riesgoLabel = { 'no riesgo': 'No riesgo', 'vulnerable': '⚠️ Vulnerable', 'en peligro': '🔥 En peligro', 'crítico': '🚨 CRÍTICO' };
-  el.innerHTML = filtradas.map(l => {
-    const c = riesgoColor[l.riesgo] || '#a855f7';
-    const hablantes = l.hablantes ? l.hablantes.toLocaleString('es-MX') : 'N/D';
-    return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:12px 14px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-        <span style="font-size:24px">🪶</span>
-        <span style="font-size:14px;font-weight:800;color:var(--text)">${l.nombre}</span>
-        <span style="background:rgba(168,85,247,0.15);color:#c4b5fd;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${l.familia}</span>
-        <span style="background:${c}22;color:${c};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${riesgoLabel[l.riesgo] || l.riesgo}</span>
-        <span style="margin-left:auto;font-size:11px;color:var(--text3);font-weight:600">${hablantes} hablantes</span>
-      </div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:4px">${l.descripcion || ''}</div>
-      <div style="font-size:10px;color:var(--text3)">📍 ${(l.estados || []).join(' · ')} ${l.variantes > 1 ? ' · ' + l.variantes + ' variantes' : ''}</div>
-    </div>`;
-  }).join('');
-}
-// Cargar 36 sitios UNESCO de México y renderizar
-async function cargarOmbligoUNESCO() {
-  const el = document.getElementById('ombligo-unesco');
-  if (!el || el.dataset.loaded === 'yes') return;
-  try {
-    const r = await fetch('/api/data?vista=unesco');
-    if (!r.ok) throw new Error('http ' + r.status);
-    const j = await r.json();
-    if (!Array.isArray(j.sitios) || !j.sitios.length) return;
-    const colorTipo = { cultural: '#3b82f6', natural: '#22c55e', mixto: '#a855f7' };
-    const labelTipo = { cultural: '🏛️ CULTURAL', natural: '🌿 NATURAL', mixto: '🌐 MIXTO' };
-    el.innerHTML = j.sitios.map(s => {
-      const c = colorTipo[s.tipo] || '#d97706';
-      return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <span style="font-size:24px">${s.emoji || '🏛️'}</span>
-          <span style="background:${c}22;color:${c};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${labelTipo[s.tipo] || s.tipo.toUpperCase()}</span>
-          <span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${s.anio_inscripcion}</span>
-          ${s.en_peligro ? '<span style="background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">⚠️ EN PELIGRO</span>' : ''}
-          <span style="margin-left:auto;font-size:11px;color:var(--text3)">${(s.estados || []).join(' · ')}</span>
-        </div>
-        <div style="font-size:14px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:5px">${s.nombre}</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.55">${s.descripcion || ''}</div>
-      </div>`;
-    }).join('');
-    el.dataset.loaded = 'yes';
-    const cont = document.getElementById('ombligo-unesco-count');
-    if (cont) cont.textContent = j.total;
-  } catch (e) {
-    console.warn('Ombligo UNESCO:', e);
-  }
-}
-window.cargarOmbligoUNESCO = cargarOmbligoUNESCO;
-function renderOmbligoTimeline() {
-  const el = document.getElementById('ombligo-timeline');
-  const nav = document.getElementById('ombligo-era-nav');
-  if (!el) return;
-  // Era mini-nav
-  if (nav) {
-    nav.innerHTML = OMBLIGO_TIMELINE.map(era => `
-      <button onclick="ombligoJumpEra('oera-${era.id}')" title="${era.rango}"
-        style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid ${era.color}40;background:${era.color}12;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s"
-        onmouseover="this.style.background='${era.color}28';this.style.color='var(--text)'"
-        onmouseout="this.style.background='${era.color}12';this.style.color='var(--text2)'">
-        <span style="font-size:12px">${era.emoji}</span>
-        <span style="white-space:nowrap">${era.era.split(' ')[0]} ${era.era.split(' ')[1] || ''}</span>
-      </button>`).join('');
-  }
-  el.innerHTML = OMBLIGO_TIMELINE.map((era, i) => `
-    <div style="display:flex;gap:0;position:relative" id="era-wrap-${era.id}">
-      <!-- Columna izq: nodo + línea -->
-      <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0">
-        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
-          style="width:40px;height:40px;border-radius:50%;background:${era.color}18;border:2px solid ${era.color}70;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;z-index:1;transition:all 0.2s;outline:none"
-          onmouseover="this.style.background='${era.color}35';this.style.borderColor='${era.color}'"
-          onmouseout="this.style.background='${era.color}18';this.style.borderColor='${era.color}70'"
-          id="era-btn-${era.id}">${era.emoji}</button>
-        ${i < OMBLIGO_TIMELINE.length - 1
-          ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,${era.color}50,${OMBLIGO_TIMELINE[i+1].color}30);margin:2px 0"></div>`
-          : ''}
-      </div>
-      <!-- Contenido -->
-      <div style="flex:1;padding:2px 0 24px 16px;min-width:0">
-        <!-- Header siempre visible -->
-        <button onclick="ombligoEraToggle('oera-${era.id}','era-wrap-${era.id}')"
-          style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:0;font-family:inherit">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
-            <span style="font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--text)">${era.era}</span>
-            <span style="font-size:9px;font-weight:700;color:${era.color};background:${era.color}15;border:1px solid ${era.color}30;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap">${era.rango}</span>
-          </div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.55">${era.resumen}</div>
-        </button>
-        <!-- Expanded card -->
-        <div id="oera-${era.id}" style="display:none;margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid ${era.color}30">
-          <!-- Color header strip -->
-          <div style="background:linear-gradient(135deg,${era.color}25,${era.color}10);padding:12px 16px;border-bottom:1px solid ${era.color}20">
-            <div style="font-size:10px;font-weight:700;color:${era.color};letter-spacing:2px;text-transform:uppercase">${era.emoji} ${era.era} · ${era.rango}</div>
-          </div>
-          <!-- Body -->
-          <div style="background:var(--surface);padding:16px;font-size:13px;line-height:1.65;color:var(--text)">
-            ${era.cuerpo}
-            <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px">
-              📚 <span>${era.fuente}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
-}
-function ombligoEraToggle(id, wrapId) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  // Scroll into view when opening
-  if (!isOpen && wrapId) {
-    setTimeout(() => {
-      const wrap = document.getElementById(wrapId);
-      if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }, 50);
-  }
-}
-function ombligoJumpEra(id) {
-  // Open and scroll to era
-  const el = document.getElementById(id);
-  if (el) el.style.display = 'block';
-  setTimeout(() => {
-    const eraId = id.replace('oera-','era-wrap-');
-    const wrap = document.getElementById(eraId);
-    if (wrap) wrap.scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 80);
-}
-function renderOmbligoMuseos(){const el=document.getElementById('ombligo-museos');if(!el)return;el.innerHTML=OMBLIGO_MUSEOS.map(m=>{const c=m.color||'#3b82f6';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${m.emoji||'🏛️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${m.nombre}</span>${m.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${m.ciudad||m.ubicacion||''}</span></div>${m.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${m.subtitulo}</div>`:''}${m.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${m.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${m.horario?`<span>🕐 ${m.horario}</span>`:''}${m.costo?`<span>💰 ${m.costo}</span>`:''}</div></div>`;}).join('');}
-function renderOmbligoZonas(){const el=document.getElementById('ombligo-zonas');if(!el)return;el.innerHTML=OMBLIGO_ZONAS.map(z=>{const c=z.color||'#22c55e';return `<div style="background:var(--surface);border:1px solid ${c}40;border-radius:14px;padding:14px 16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap"><span style="font-size:24px">${z.emoji||'🏔️'}</span><span style="font-size:14px;font-weight:800;color:var(--text)">${z.nombre}</span>${z.patrimonio?'<span style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800">UNESCO</span>':''}${z.fuenteINAH?'<span style="background:rgba(217,119,6,0.15);color:#d97706;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">INAH</span>':''}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${z.estado||''}</span></div>${z.subtitulo?`<div style="font-size:12px;color:${c};font-weight:600;margin-bottom:5px">${z.subtitulo}</div>`:''}${z.descripcion?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px">${z.descripcion}</div>`:''}<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--text3)">${z.periodo?`<span>🗿 ${z.periodo}</span>`:''}${z.horario?`<span>🕐 ${z.horario}</span>`:''}${z.costo?`<span>💰 ${z.costo}</span>`:''}</div></div>`;}).join('');}
-window.initOmbligo=initOmbligo;window.ombligoTab=ombligoTab;
-</script>
-<!-- ════════ SOS FAB ════════ -->
-<div id="sos-fab">
-  <div id="sos-menu">
-    <div class="sos-menu-header">🆘 Ayuda rápida</div>
-    <div class="sos-menu-item" onclick="sosGo('emergencia')"><span class="sos-icon">🚨</span><div><div>Modo Emergencia 24/7</div><div class="sos-desc">Lee tus derechos en voz alta + 911</div></div></div>
-    <div class="sos-menu-item" onclick="sosGo('servicios')"><span class="sos-icon">🆘</span><div><div>Servicios Públicos</div><div class="sos-desc">Teléfonos verificados (CFE, IMSS, fiscalías)</div></div></div>
-    <div class="sos-menu-item" onclick="sosGo('generador')"><span class="sos-icon">⚖️</span><div><div>Genera denuncia legal</div><div class="sos-desc">Plantillas oficiales (CNDH, INAI, Profeco, OIC)</div></div></div>
-    <div class="sos-menu-item" onclick="sosGo('offline')"><span class="sos-icon">📵</span><div><div>Sin Internet</div><div class="sos-desc">Contenido cacheado offline</div></div></div>
-  </div>
-  <button id="sos-btn" onclick="toggleSosMenu()" aria-label="SOS - Ayuda de emergencia">SOS</button>
-</div>
-<!-- ════════ BOTTOM NAV (móvil) ════════ -->
-<nav class="bottom-nav" role="navigation" aria-label="Navegación rápida">
-  <button class="bottom-nav-item" onclick="if(window.showPage)showPage('dashboard')"><span class="bn-icon">🏠</span><span class="bn-label">Inicio</span></button>
-  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('servicios')"><span class="bn-icon">🆘</span><span class="bn-label">Servicios</span></button>
-  <button class="bottom-nav-item bn-emergencia" onclick="if(window.cargarPanel)cargarPanel('emergencia')"><span class="bn-icon">🚨</span><span class="bn-label">Emergencia</span></button>
-  <button class="bottom-nav-item" onclick="if(window.cargarPanel)cargarPanel('estado')"><span class="bn-icon">🗺️</span><span class="bn-label">Estado</span></button>
-  <button class="bottom-nav-item" onclick="if(window.toggleSidebar)toggleSidebar();else if(window.openSidebar)openSidebar()"><span class="bn-icon">📋</span><span class="bn-label">Más</span></button>
-</nav>
-<!-- ════════ ACCESIBILIDAD MODAL ════════ -->
-<div id="acc-modal" onclick="cerrarAccesibilidad(event)">
-  <div class="acc-box" onclick="event.stopPropagation()">
-    <h3>Accesibilidad</h3>
-    <div class="acc-sub">Ajusta el tamaño del texto y el contraste.</div>
-    <div class="acc-section">
-      <div class="acc-label">Tamaño de texto</div>
-      <div class="acc-row">
-        <button class="acc-btn" id="acc-size-pequeno" onclick="setFontSize('pequeno')">Pequeño</button>
-        <button class="acc-btn" id="acc-size-normal" onclick="setFontSize('normal')">Normal</button>
-        <button class="acc-btn" id="acc-size-grande" onclick="setFontSize('grande')">Grande</button>
-      </div>
-    </div>
-    <div class="acc-section">
-      <div class="acc-label">Contras
+    horario:'Mar–Dom 9:00–17:00 · Ce
