@@ -15393,18 +15393,44 @@ function cargarPanel(slug, extras) {
   const titleEl = document.getElementById('page-title');
   if (titleEl) {
     const TITLES = {
-      'pef': 'PEF 2026',
-      'asf': 'Auditorías ASF',
-      'buscador-sat': 'Buscador SAT',
-      'buscador': 'Buscar Municipio',
-      'estado': 'Panel Estatal',
-      'votar': 'Vota antes del Congreso',
-      'iniciativa-firmar': 'Firma Iniciativas',
-      'sre': 'México en el Mundo',
-      'scrapers-admin': 'Scrapers Health',
+      'pef': '💸 PEF 2026',
+      'asf': '🔍 Auditorías ASF',
+      'buscador-sat': '🧾 Buscador SAT',
+      'buscador': '🔍 Buscar Municipio',
+      'estado': '🗺️ Panel Estatal',
+      'votar': '🗳️ Vota antes del Congreso',
+      'iniciativa-firmar': '✍️ Firmar Iniciativa',
+      'sre': '🌐 México en el Mundo',
+      'scrapers-admin': '🔧 Scrapers Health',
       'directorio': '📞 Directorio 32 Estados',
       'cambios-recientes': '📡 Cambios Recientes',
-      'me-afectan': '🎯 Leyes que me afectan'
+      'me-afectan': '🎯 Leyes que me afectan',
+      // Faltantes agregados 2026-06-03
+      'aprobacion': '📊 Aprobación de Gobierno',
+      'asistente-ia': '🧠 Asistente Legal IA',
+      'atlas': '🗺️ Atlas Nacional',
+      'colaboradores': '🤝 Colaboradores',
+      'comparador': '⚖️ Comparador Electoral',
+      'deuda': '💳 Deuda Pública',
+      'diario': '🗞️ Diario Cívico',
+      'donar': '❤️ Apoya Tequio',
+      'emergencia': '🚨 Modo Emergencia',
+      'generador': '📄 Generador de Documentos',
+      'instalar': '📲 Instalar Tequio',
+      'offline': '📵 Sin Internet',
+      'organizacion': '✊ Organízate',
+      'perfil': '👤 Mi Perfil Cívico',
+      'poder': '🕸️ Red de Poder',
+      'precios': '⛽ Precios PROFECO',
+      'promesometro': '📊 Promesómetro',
+      'que-falta': '⚠️ Qué nos falta',
+      'representantes': '👥 Mis Representantes',
+      'servicios': '⚙️ Servicios Públicos',
+      'simulador': '🎲 Simulador',
+      'testigo': '📸 Testigo Cívico',
+      'votosim': '🗳️ Voto Simulado',
+      'mi-rep-vs-yo': '🎯 Mi Rep vs Yo',
+      'municipio': '🏘️ Mi Municipio'
     };
     titleEl.textContent = TITLES[slug] || 'Panel';
   }
@@ -15534,10 +15560,25 @@ function showPage(id) {
     'mun-leyes': '📜 Leyes y Decretos Locales',
     'mun-presupuesto': '💰 Presupuesto Municipal',
     'mun-contratos': '📋 Contratos y Licitaciones',
-    'mun-noticias': '📰 Noticias de Mi Municipio'
+    'mun-noticias': '📰 Noticias de Mi Municipio',
+    // Faltantes agregados 2026-06-03
+    'alertas': '⛈️ Alertas Meteorológicas',
+    'clima': '🌤️ Clima',
+    'corrupcion': '🔍 Radar de Corrupción',
+    'economia': '💱 Economía',
+    'jurisprudencia': '⚖️ Jurisprudencia SCJN',
+    'mi-rep': '🎯 Mi Representante',
+    'pide-ayuda': '🤝 Pide Ayuda Legal',
+    'presas': '💧 Presas y Cuencas',
+    'presupuesto': '💸 Presupuesto Federal',
+    'senadores': '🏛️ Senado',
+    'sequia': '🏜️ Monitor de Sequía',
+    'tu-estado': '🗺️ Tu Estado',
+    'votar': '🗳️ Vota antes del Congreso',
+    'envivo': '📺 En Vivo'
   };
   const pageTitleEl = document.getElementById('page-title');
-  if (pageTitleEl) pageTitleEl.textContent = titles[id] || id;
+  if (pageTitleEl) pageTitleEl.textContent = titles[id] || ('📂 ' + id);
   // Mark active nav — use data-page for exact, reliable matching
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     if (item.getAttribute('data-page') === id) {
