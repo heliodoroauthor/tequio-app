@@ -2814,25 +2814,27 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <!-- GASTO PÚBLICO + DERECHOS -->
         <div class="grid-2">
           <div class="card">
-            <div class="card-title mb-8">💰 Gasto Público Hoy <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🧪 DEMO · cifras de ejemplo</span></div>
-            <div class="card-subtitle mb-12">Ejercido del presupuesto federal</div>
+            <div class="card-title mb-8">💰 PEF 2026 · Principales rubros <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">✅ SHCP oficial</span></div>
+            <div class="card-subtitle mb-12">Presupuesto aprobado · Cámara Diputados 15 nov 2025</div>
             <div class="flex flex-col gap-10">
-              <div><div class="flex justify-between text-xs mb-8"><span>🏥 Salud</span><span class="mono">$148.3B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:72%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🏫 Educación</span><span class="mono">$124.7B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:60%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🛡️ Seguridad</span><span class="mono">$98.2B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner yellow" style="width:47%"></div></div></div>
-              <div><div class="flex justify-between text-xs mb-8"><span>🏗️ Infraestructura</span><span class="mono">$76.1B</span></div><div class="progress-bar-outer"><div class="progress-bar-inner red" style="width:37%"></div></div></div>
+              <div><div class="flex justify-between text-xs mb-8"><span>🏫 Educación (R11+R25)</span><span class="mono">$1,058 MMDP</span></div><div class="progress-bar-outer"><div class="progress-bar-inner green" style="width:88%"></div></div></div>
+              <div><div class="flex justify-between text-xs mb-8"><span>🏥 Salud (R12+IMSS-B)</span><span class="mono">$930 MMDP</span></div><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:77%"></div></div></div>
+              <div><div class="flex justify-between text-xs mb-8"><span>🛡️ Seguridad (R4+R7+R36)</span><span class="mono">$400 MMDP</span></div><div class="progress-bar-outer"><div class="progress-bar-inner yellow" style="width:33%"></div></div></div>
+              <div><div class="flex justify-between text-xs mb-8"><span>🏗️ Infraestructura</span><span class="mono">$380 MMDP</span></div><div class="progress-bar-outer"><div class="progress-bar-inner red" style="width:32%"></div></div></div>
             </div>
-            <button class="btn btn-ghost w-full" onclick="showPage('dinero')" style="justify-content:center;margin-top:12px">Ver desglose completo →</button>
+            <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.4">📌 Cifras redondeadas en MMDP. Fuente: <a href="https://www.pef.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">pef.hacienda.gob.mx</a> · Cuenta Pública anual auditada por ASF.</div>
+            <button class="btn btn-ghost w-full" onclick="cargarPanel('pef')" style="justify-content:center;margin-top:12px">Ver PEF 2026 completo →</button>
           </div>
           <div class="card">
-            <div class="card-title mb-8">🛡️ Derechos más Consultados <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🧪 DEMO · cifras de ejemplo</span></div>
-            <div class="card-subtitle mb-12">Esta semana</div>
+            <div class="card-title mb-8">🛡️ Quejas CNDH 2024 · Top temas <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">✅ CNDH</span></div>
+            <div class="card-subtitle mb-12">Informe Anual de Actividades 2024</div>
             <div class="flex flex-col gap-10">
-              <div class="flex items-center gap-10"><span style="font-size:18px">⚖️</span><div><div style="font-size:13px;font-weight:500">Derechos en detención</div><div class="text-xs">8,420 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">💼</span><div><div style="font-size:13px;font-weight:500">Derechos laborales</div><div class="text-xs">6,210 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">🏥</span><div><div style="font-size:13px;font-weight:500">Acceso a salud pública</div><div class="text-xs">4,100 consultas</div></div></div>
-              <div class="flex items-center gap-10"><span style="font-size:18px">🌿</span><div><div style="font-size:13px;font-weight:500">Derechos ambientales</div><div class="text-xs">2,840 consultas</div></div></div>
+              <div class="flex items-center gap-10"><span style="font-size:18px">⚖️</span><div><div style="font-size:13px;font-weight:500">Detención arbitraria / debido proceso</div><div class="text-xs">Quejas vs autoridad penitenciaria + ministerial</div></div></div>
+              <div class="flex items-center gap-10"><span style="font-size:18px">🏥</span><div><div style="font-size:13px;font-weight:500">Acceso a salud pública</div><div class="text-xs">IMSS · ISSSTE · IMSS-Bienestar</div></div></div>
+              <div class="flex items-center gap-10"><span style="font-size:18px">💼</span><div><div style="font-size:13px;font-weight:500">Derechos laborales y SSST</div><div class="text-xs">Despidos, salarios, seguridad e higiene</div></div></div>
+              <div class="flex items-center gap-10"><span style="font-size:18px">🌿</span><div><div style="font-size:13px;font-weight:500">Medio ambiente y vivienda digna</div><div class="text-xs">PROFEPA · INFONAVIT · derechos colectivos</div></div></div>
             </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.4">📌 Categorías más recurrentes según el <a href="https://www.cndh.org.mx/sites/default/files/documentos/2025-03/IA_2024.pdf" target="_blank" rel="noopener" style="color:var(--accent2)">Informe Anual CNDH 2024</a>. Si vives una situación así: <strong>800 715 2000</strong> (gratis, 24/7).</div>
             <button class="btn btn-danger w-full" onclick="showPage('emergencia')" style="justify-content:center;margin-top:12px">🚨 Modo Emergencia</button>
           </div>
         </div>
