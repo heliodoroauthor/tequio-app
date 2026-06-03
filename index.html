@@ -13665,39 +13665,30 @@ function obGoStep(step) {
   if (step === 3) buildOBPreview();
 }
 function buildOBPreview() {
-  // Diputado del estado
-  const d = diputadosPorEstado?.[obEstado];
-  // Noticia relevante del estado
-  const noticia = (typeof noticiasDB !== 'undefined')
-    ? noticiasDB.find(n => n.estado === obEstado && n.ambito !== 'alerta')
-      || noticiasDB[0]
-    : null;
-  const preview = document.getElementById('ob-preview');
-  preview.innerHTML = `
-    ${d ? `
-    <div style="background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--accent2)">
-      <div style="font-size:10px;color:var(--accent2);font-weight:700;margin-bottom:8px">🗳️ TU DIPUTADO EN ${obEstado.toUpperCase()}</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:40px;height:40px;border-radius:50%;background:${d.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${d.foto}</div>
-        <div>
-          <div style="font-size:14px;font-weight:700">${d.nombre}</div>
-          <div style="font-size:11px;color:var(--text3)">${d.partido} · ${d.cargo}</div>
-        </div>
-      </div>
-    </div>` : ''}
-    ${noticia ? `
-    <div style="background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--green2);border-left:4px solid var(--green2)">
-      <div style="font-size:10px;color:var(--green2);font-weight:700;margin-bottom:6px">📰 NOTICIA EN TU REGIÓN</div>
-      <div style="font-size:13px;font-weight:600;line-height:1.3">${noticia.titulo}</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px">${noticia.fuente} · ${noticia.fecha}</div>
-    </div>` : ''}
-    <div style="background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--border)">
-      <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:8px">🎯 TUS TEMAS</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${[...obIntereses].map(i => `<span class="badge badge-blue">${i}</span>`).join('')}
-      </div>
-    </div>
-  `;
+  // Mapa de emojis para los chips de intereses
+  var INT_LABELS = {
+    'legislativo': {emoji:'🏛️', label:'Legislativo'},
+    'dinero_publico': {emoji:'💰', label:'Dinero Público'},
+    'seguridad': {emoji:'🚨', label:'Seguridad'},
+    'derechos': {emoji:'🛡️', label:'Derechos'},
+    'medio_ambiente': {emoji:'🌱', label:'Medio ambiente'},
+    'cultura': {emoji:'🏺', label:'Cultura'},
+    'participacion': {emoji:'📋', label:'Participación'},
+    'organizacion': {emoji:'✊', label:'Organización'}
+  };
+  var preview = document.getElementById('ob-preview');
+  var estadoNombre = (typeof obEstado !== 'undefined' && obEstado) ? obEstado : (localStorage.getItem('tequio_estado_nombre') || '—');
+  var intArr = Array.from(typeof obIntereses !== 'undefined' ? obIntereses : []);
+  var chipsHtml = intArr.map(function(id){
+    var info = INT_LABELS[id] || {emoji:'•', label:id};
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#fbbf24;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;margin:3px">'+info.emoji+' '+info.label+'</span>';
+  }).join('');
+  preview.innerHTML = ''
+    + '<div style="background:rgba(0,0,0,0.30);border:1px solid var(--border);border-radius:14px;padding:18px">'
+    + '<div style="font-size:10.5px;color:#9ca3af;font-weight:700;letter-spacing:1.4px;margin-bottom:8px">TU PERFIL</div>'
+    + '<div style="color:#f3f4f6;font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:6px">📍 '+estadoNombre+'</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:2px">'+chipsHtml+'</div>'
+    + '</div>';
 }
 let notifsActivas = false;
 function activarNotificaciones() {
