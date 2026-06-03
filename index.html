@@ -3,11 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/appletch.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tequio">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#fbbf24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tequio — Plataforma Cívica Digital</title>
@@ -229,8 +224,7 @@
     font-family: var(--font-body);
   }
   .search-bar input::placeholder { color: var(--text3); }
-  .topbar-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: nowrap; flex-shrink: 0; }
-  .sidebar { width: 260px !important; max-width: 260px; flex-shrink: 0; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 8px; }
   .btn-icon {
     width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
@@ -1629,8 +1623,6 @@
 </style>
 </head>
 <body>
-
-
 <div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
   <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
     <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
@@ -2220,9 +2212,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🏛️</span> Embajadas y Consulados
       </div>
-      <div class="nav-item" onclick="installPWA()" style="background:linear-gradient(135deg,rgba(34,197,94,0.10),rgba(59,130,246,0.08));border-left:3px solid #22c55e">
-        <span class="icon">📲</span> Instalar como App
-      </div>
       <div class="nav-item" onclick="cargarPanel('donar')" style="background:linear-gradient(135deg,rgba(236,72,153,0.10),rgba(251,191,36,0.08));border-left:3px solid #ec4899">
         <span class="icon">❤️</span> Apoya Tequio
       </div>
@@ -2298,7 +2287,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div id="theme-toggle-btn" class="btn-icon" title="Cambiar tema" onclick="toggleTheme()" role="button" aria-label="Cambiar entre modo oscuro y claro">☀️</div>
         <div id="btn-lectura-facil" class="btn-icon" title="Modo lectura fácil" onclick="toggleLecturaFacil()" role="button" style="font-size:13px;width:auto;padding:0 10px;gap:4px">📖 <span style="font-size:10px;font-weight:600">Fácil</span></div>
         <div id="btn-modo-ninos" class="btn-icon" title="Modo niños — explícame como si tuviera 10 años" onclick="toggleModoNiños()" role="button" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 8px;font-size:16px;cursor:pointer">🧒</div>
-        <div id="btn-install-pwa" class="btn-icon" title="Instalar Tequio como app" onclick="installPWA()" role="button" style="background:linear-gradient(135deg,rgba(251,191,36,0.18),rgba(245,158,11,0.10));border:1px solid rgba(251,191,36,0.40);color:#fbbf24;border-radius:8px;padding:0 8px;font-size:16px;cursor:pointer">📲</div>
         <div class="btn-icon" title="Accesibilidad y configuración" onclick="abrirAccesibilidad()" role="button" aria-label="Configuración de accesibilidad">⚙️</div>
       </div>
       </div>
@@ -16573,46 +16561,6 @@ function exportarDocumentoAccion() {
       <pre>${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
       <div class="footer">Generado por Tequio — Plataforma Cívica Digital · ${new Date().toLocaleDateString('es-MX')} · Solo con fines informativos</div>
       
-
-
-<script>
-// PWA Install — botón en header (📲)
-(function(){
-  var deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-  
-  // Hide button if already installed
-  if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
-    document.addEventListener('DOMContentLoaded', function(){
-      var btn = document.getElementById('btn-install-pwa');
-      if (btn) btn.style.display = 'none';
-    });
-  }
-  
-  window.installPWA = function(){
-    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-    if (isIOS){
-      alert('📲 Para instalar Tequio en iPhone:\n\n1. Toca el botón Compartir (⬆️) abajo\n2. Desplaza y selecciona "Añadir a pantalla de inicio"\n3. Toca "Añadir"\n\n¡Listo! Tequio aparecerá como app en tu pantalla de inicio.');
-      return;
-    }
-    if (!deferredPrompt){
-      alert('📲 Para instalar Tequio:\n\nAndroid/Chrome:\n• Abre el menú del navegador (⋮)\n• Toca "Instalar app" o "Añadir a pantalla de inicio"\n\nDesktop Chrome/Edge:\n• Busca el ícono de instalación en la barra de URL\n• O Menú → "Instalar Tequio..."');
-      return;
-    }
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(choice){
-      if (choice.outcome === 'accepted') {
-        var btn = document.getElementById('btn-install-pwa');
-        if (btn) btn.style.display = 'none';
-      }
-      deferredPrompt = null;
-    });
-  };
-})();
-</script>
 
 </body></html>`);
     win.document.close();
