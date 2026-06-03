@@ -2311,6 +2311,39 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
       <div class="content">
+        <!-- ═════ HERO Nivel 3 ═════ -->
+        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🏛️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tequio</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Tu radar cívico de México · <strong>Cero invención</strong>: solo datos verificados de fuentes oficiales (Banxico, INEGI, SCJN, DOF, Cámaras del Congreso).</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">⚡ DATOS LIVE</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="dash-stat-leyes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes indexadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="dash-stat-votos">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Votaciones LXVI</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="dash-stat-noticias">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Noticias hoy</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="dash-stat-alertas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Alertas vivas</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));border:1px solid rgba(124,58,237,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Qué es Tequio? · Frecuencia y fuentes de los datos</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Tequio es una <strong>plataforma cívica gratuita</strong> que indexa fuentes oficiales del Estado mexicano y las hace navegables sin necesidad de saber jerga jurídica. Cero invención de cifras.
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">💱 Banxico · USD/MXN</strong><br><span style="font-size:11px">FIX diario, refresh cada día hábil 12:00 CDMX.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📈 INEGI · INPC</strong><br><span style="font-size:11px">Mensual: días 10 y 25 de cada mes.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ SCJN · SJF2</strong><br><span style="font-size:11px">Tesis publicadas viernes; refresh semanal.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🗳️ Cámaras · SITL</strong><br><span style="font-size:11px">Votaciones nominales: refresh diario.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Si una cifra parece rara, <strong>haz click en la fuente</strong> para verificarla. Si encuentras un error, <a href="mailto:hola@tequio.app" style="color:#c4b5fd">avísanos</a>.</p>
+          </div>
+        </details>
         <!-- ═════ NUEVO: HERO de datos vivos Banxico ═════ -->
         <div style="margin-bottom:20px">
           <p style="color:var(--text2);font-size:13px;margin-bottom:10px" id="dash-fecha-hoy">Cargando fecha…</p>
@@ -2980,8 +3013,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PIDE AYUDA LEGAL ───── -->
     <div id="page-pide-ayuda" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(6,182,212,0.25)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">🤝</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Pide ayuda legal</h1>
@@ -2989,7 +3022,28 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:0.5px">⚡ 24/7</div>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Confidencial</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Free</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">1ª consulta</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9">3</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Pasos</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">&lt; 48 hrs</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Respuesta</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(6,182,212,0.02));border:1px solid rgba(6,182,212,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Cómo funciona? · Tus derechos y qué esperar</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Tequio NO es un despacho — somos el <strong>puente</strong> entre tu caso y abogados verificados que aceptan los términos de la plataforma:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(14,124,123,0.10);border-left:3px solid #0e7c7b;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">1️⃣ Cuéntanos</strong><br><span style="font-size:11px">Describe en tus palabras. No necesitas vocabulario legal.</span></div>
+              <div style="background:rgba(6,182,212,0.10);border-left:3px solid #06b6d4;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">2️⃣ Datos</strong><br><span style="font-size:11px">Tu nombre y contacto (encriptado, solo el despacho asignado lo ve).</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">3️⃣ Match</strong><br><span style="font-size:11px">Despacho verificado en tu área te contacta en &lt; 48 hrs.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚖️ Art. 8 CPEUM: derecho de petición · Art. 17: acceso efectivo a la justicia · Art. 20: defensa adecuada. Si no puedes pagar, también puedes acudir gratis al <strong>Instituto Federal de Defensoría Pública</strong> o las <strong>Defensorías estatales</strong>.</p>
+          </div>
+        </details>
         <div style="padding:16px 0 0">
           <div style="display:flex;gap:6px">
             <div id="lead-dot-1" style="flex:1;height:6px;background:var(--accent);border-radius:3px"></div>
@@ -3094,8 +3148,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── ALERTAS METEO ───── -->
     <div id="page-alertas" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">⛈️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Alertas Meteorológicas</h1>
@@ -3103,15 +3157,37 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://smn.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SMN →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="alerta-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Avisos vigentes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="alerta-stat-rojo">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">🔴 Rojo</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fed7aa" id="alerta-stat-naranja">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">🟠 Naranja</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="alerta-stat-update">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último update</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02));border:1px solid rgba(220,38,38,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fca5a5;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Cómo se leen los avisos del SMN? · Niveles oficiales</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            El Servicio Meteorológico Nacional usa <strong>4 colores</strong> según severidad y certeza del fenómeno:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#22c55e">🟢 Verde · Mínimo</strong><br><span style="font-size:11px">Información preventiva, sin riesgo inminente.</span></div>
+              <div style="background:rgba(250,204,21,0.08);border-left:3px solid #facc15;padding:8px 10px;border-radius:6px"><strong style="color:#facc15">🟡 Amarillo · Moderado</strong><br><span style="font-size:11px">Atención: condiciones que pueden empeorar.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fb923c">🟠 Naranja · Alto</strong><br><span style="font-size:11px">Peligro real: prepararse y limitar exposición.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🔴 Rojo · Extremo</strong><br><span style="font-size:11px">Emergencia: refugiarse y seguir protección civil.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Fuente: <a href="https://smn.conagua.gob.mx/es/avisos-tiempo" target="_blank" style="color:#fca5a5">smn.conagua.gob.mx/es/avisos-tiempo</a></p>
+          </div>
+        </details>
         <div id="alertas-list"></div>
       </div>
     </div>
     <!-- ───── MONITOR SEQUÍA (DATOS REALES) ───── -->
     <div id="page-sequia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">🏜️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Monitor de Sequía</h1>
@@ -3119,15 +3195,38 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="seq-stat-estados">32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados monitoreados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="seq-stat-extrema">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Con D3-D4</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="seq-stat-sin">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin sequía</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="seq-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(217,119,6,0.08),rgba(217,119,6,0.02));border:1px solid rgba(217,119,6,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Qué significan los niveles D0–D4? · Escala CONAGUA</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            El Monitor de Sequía clasifica cada municipio en una de 5 categorías según humedad de suelo, precipitación e índices satelitales:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(254,249,195,0.10);border-left:3px solid #fde68a;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">D0 · Anormalmente seco</strong><br><span style="font-size:11px">Inicio o recuperación de sequía.</span></div>
+              <div style="background:rgba(250,204,21,0.10);border-left:3px solid #facc15;padding:8px 10px;border-radius:6px"><strong style="color:#facc15">D1 · Moderada</strong><br><span style="font-size:11px">Daño a cultivos, baja en cuerpos de agua.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fb923c">D2 · Severa</strong><br><span style="font-size:11px">Pérdidas agrícolas probables, restricción agua.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">D3 · Extrema</strong><br><span style="font-size:11px">Pérdidas mayores, escasez generalizada.</span></div>
+              <div style="background:rgba(124,45,18,0.20);border-left:3px solid #7c2d12;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">D4 · Excepcional</strong><br><span style="font-size:11px">Emergencia: pérdidas totales y desabasto crítico.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Actualización quincenal (días 15 y último de cada mes). Fuente: Monitor de Sequía de México — CONAGUA SMN.</p>
+          </div>
+        </details>
         <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></div>
       </div>
     </div>
     <!-- ───── JURISPRUDENCIA SCJN (DATOS REALES Semanario Judicial) ───── -->
     <div id="page-jurisprudencia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">⚖️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Jurisprudencia SCJN</h1>
@@ -3135,7 +3234,27 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SJF2 oficial →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="jur-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tesis indexadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#d8b4fe" id="jur-stat-undecima">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">11ª época</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#c4b5fd" id="jur-stat-jurisp">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Jurisprudencia</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="jur-stat-sync">SJF2</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(168,85,247,0.02));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#d8b4fe;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Tesis vs Jurisprudencia? · Diferencias clave</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            La SCJN publica criterios en dos categorías que se ven iguales pero <strong>no obligan igual</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;padding:10px;border-radius:6px"><strong style="color:#d8b4fe">📖 Tesis aislada</strong><br><span style="font-size:11px">Un solo precedente. <strong>Orientadora</strong> pero NO obligatoria para jueces inferiores.</span></div>
+              <div style="background:rgba(124,58,237,0.12);border-left:3px solid #7c3aed;padding:10px;border-radius:6px"><strong style="color:#c4b5fd">⚖️ Jurisprudencia</strong><br><span style="font-size:11px">Criterio reiterado 5 veces o por Pleno/Sala con mayoría calificada. <strong>OBLIGATORIA</strong> Art. 217 LA.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Épocas: <strong>11ª</strong> (Reforma Judicial 2021, vigente) · <strong>10ª</strong> (2011-2021) · anteriores ya superadas. Fuente: Semanario Judicial de la Federación, sjf2.scjn.gob.mx</p>
+          </div>
+        </details>
         <!-- Sello de Fuente Oficial Verificada -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
@@ -3172,8 +3291,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PRESAS Y CUENCAS (DATOS REALES CONAGUA SIH) ───── -->
     <div id="page-presas" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">💧</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presas y Cuencas</h1>
@@ -3181,7 +3300,29 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sih.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA SIH →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="presa-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Presas SINA</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="presa-stat-pct">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% nacional</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="presa-stat-criticas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">&lt;30% (crítico)</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="presa-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(8,145,178,0.08),rgba(8,145,178,0.02));border:1px solid rgba(8,145,178,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between">
+            <span>🤓 ¿Qué es el SINA? · Cómo interpretar el % de almacenamiento</span>
+            <span style="font-size:11px">▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">
+            <strong>SINA</strong> = Sistema Nacional de Información del Agua (CONAGUA). Reporta solo las ~210 presas principales con telemetría; el resto del inventario (~2,368) no tiene reporte público diario.
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">&gt; 75%</strong><br><span style="font-size:11px">Llena: presas operando bien, riesgo nulo de desabasto.</span></div>
+              <div style="background:rgba(132,204,22,0.10);border-left:3px solid #84cc16;padding:8px 10px;border-radius:6px"><strong style="color:#bef264">50-75%</strong><br><span style="font-size:11px">Adecuado: rangos típicos en temporada seca.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">30-50%</strong><br><span style="font-size:11px">Bajo: vigilancia, restricciones probables.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">&lt; 30%</strong><br><span style="font-size:11px">Crítico: desabasto urbano y agrícola probable.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Datos: SINA puede tener 2-4 semanas de retraso vs realidad operativa. Fuente: <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#67e8f9">sinav30.conagua.gob.mx</a></p>
+          </div>
+        </details>
         <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5;color:var(--text2)">✅ <strong>Fuente: SINA (Sistema Nacional de Información del Agua, CONAGUA)</strong> · 210 presas principales con telemetría · datos pueden tener 2-4 semanas de retraso vs realidad operativa. <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#22c55e">Ver SINA →</a></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
           <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" id="presas-solo-telemetria" checked onchange="presasFiltrar()"> Solo con telemetría</label>
@@ -26867,480 +27008,4 @@ window.abrirFuenteNoticia = function(id) {
 <script>
 (function() {
   // 1) Esconder el card "Iniciativas Ciudadanas / Las más votadas" del dashboard
-  // 2) Esconder botones "Ver iniciativas ciudadanas" del menú flotante / dropdowns
-  // Sistema de firmas ciudadanas: tabla `firmas_iniciativas` está vacía en Supabase.
-  // Hasta que exista un sistema real, no mostrar widgets fake.
-  function hideInicMock() {
-    // Card del dashboard
-    document.querySelectorAll('.card-title').forEach(function(t) {
-      var txt = (t.textContent || '').trim();
-      if (txt === 'Iniciativas Ciudadanas') {
-        var sub = t.nextElementSibling;
-        var subTxt = sub ? (sub.textContent || '').trim() : '';
-        if (subTxt === 'Las más votadas') {
-          var card = t.closest ? t.closest('.card') : null;
-          if (card) card.style.display = 'none';
-        }
-      }
-    });
-    // Botones flotantes con texto que contiene "iniciativas ciudadanas"
-    document.querySelectorAll('button').forEach(function(btn) {
-      var text = (btn.textContent || '').trim().toLowerCase();
-      if (text.indexOf('iniciativas ciudadanas') !== -1) {
-        btn.style.display = 'none';
-      }
-    });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hideInicMock);
-  } else {
-    hideInicMock();
-  }
-  setTimeout(hideInicMock, 500);
-  setTimeout(hideInicMock, 2000);
-})();
-</script>
-<!-- /HIDE-INIC-MOCK -->
-<!-- TEQUIO-NAV-LISTENER: back-link de paneles embebidos -->
-<script>
-/* Listener para back-link de paneles embebidos (estado, deuda, emergencia, etc.) */
-window.addEventListener('message', function(e) {
-  if (e.data && e.data.type === 'tequio-nav' && e.data.target === 'dashboard') {
-    if (typeof showPage === 'function') showPage('dashboard');
-  }
-});
-</script>
-
-<!-- ════════ TEQUIO · Compartir global (Web Share API + modal fallback) ════════ -->
-<style>
-  #tequio-share-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 99000;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  #tequio-share-overlay.active { display: flex; }
-  #tequio-share-modal {
-    background: var(--surface, #1a243d);
-    border: 1px solid var(--border, #2a3a5c);
-    border-radius: 16px;
-    padding: 22px 22px 18px;
-    width: 100%; max-width: 420px;
-    color: var(--text, #e8edf5);
-    font-family: var(--font-body, system-ui, sans-serif);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  }
-  #tequio-share-modal h3 { font-size: 16px; font-weight: 800; margin: 0 0 4px; }
-  #tequio-share-modal .ts-sub {
-    font-size: 12px; color: var(--text2, #94a3b8); margin-bottom: 16px;
-    line-height: 1.4; max-height: 60px; overflow: hidden;
-    text-overflow: ellipsis; display: -webkit-box;
-    -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-  }
-  #tequio-share-modal .ts-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
-  }
-  #tequio-share-modal .ts-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 12px; border-radius: 10px;
-    font-size: 13px; font-weight: 700; font-family: inherit;
-    text-decoration: none; cursor: pointer; border: none; color: #fff;
-    transition: filter .12s;
-  }
-  #tequio-share-modal .ts-btn:hover { filter: brightness(1.1); }
-  #tequio-share-modal .ts-wa { background: #25D366; }
-  #tequio-share-modal .ts-tw { background: #1DA1F2; }
-  #tequio-share-modal .ts-tg { background: #0088cc; }
-  #tequio-share-modal .ts-copy {
-    background: var(--bg2, #0e1525);
-    border: 1px solid var(--border, #2a3a5c);
-    color: var(--text, #e8edf5);
-  }
-  #tequio-share-modal .ts-close {
-    width: 100%; background: none;
-    border: 1px solid var(--border, #2a3a5c);
-    color: var(--text2, #94a3b8);
-    padding: 9px; border-radius: 10px;
-    font-size: 12px; cursor: pointer; font-family: inherit;
-  }
-  #tequio-share-modal .ts-close:hover { color: var(--text, #e8edf5); }
-</style>
-<div id="tequio-share-overlay" onclick="if(event.target===this) tequioShareClose()">
-  <div id="tequio-share-modal" role="dialog" aria-label="Compartir">
-    <h3>📤 Compartir</h3>
-    <div class="ts-sub" id="ts-sub-text"></div>
-    <div class="ts-grid">
-      <a class="ts-btn ts-wa" id="ts-link-wa" target="_blank" rel="noopener">💬 WhatsApp</a>
-      <a class="ts-btn ts-tw" id="ts-link-tw" target="_blank" rel="noopener">𝕏 Twitter</a>
-      <a class="ts-btn ts-tg" id="ts-link-tg" target="_blank" rel="noopener">✈️ Telegram</a>
-      <button class="ts-btn ts-copy" id="ts-btn-copy" type="button">📋 Copiar</button>
-    </div>
-    <button class="ts-close" type="button" onclick="tequioShareClose()">Cerrar</button>
-  </div>
-</div>
-<script>
-(function () {
-  function ovl() { return document.getElementById('tequio-share-overlay'); }
-  window.tequioShareClose = function () {
-    var o = ovl(); if (o) o.classList.remove('active');
-  };
-  window.tequioShare = function (opts) {
-    opts = opts || {};
-    var titulo = (opts.titulo || 'Tequio').toString();
-    var texto  = (opts.texto  || '').toString();
-    var url    = (opts.url    || 'https://tequio.app/').toString();
-    var full   = (texto ? texto + '\n\n' : '') + url;
-    if (navigator.share) {
-      navigator.share({ title: titulo, text: texto, url: url }).catch(function () {});
-      return;
-    }
-    var encoded = encodeURIComponent(full);
-    var encodedShort = encodeURIComponent(titulo + ' ' + url);
-    document.getElementById('ts-sub-text').textContent = titulo;
-    document.getElementById('ts-link-wa').href = 'https://wa.me/?text=' + encoded;
-    document.getElementById('ts-link-tw').href = 'https://twitter.com/intent/tweet?text=' + encodedShort;
-    document.getElementById('ts-link-tg').href = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(titulo);
-    var copyBtn = document.getElementById('ts-btn-copy');
-    copyBtn.onclick = function () {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(full).then(function () {
-          var prev = copyBtn.textContent;
-          copyBtn.textContent = '✓ Copiado';
-          setTimeout(function () { copyBtn.textContent = prev; }, 1500);
-        });
-      }
-    };
-    ovl().classList.add('active');
-  };
-  window.tequioShareNoticia = function (id) {
-    if (typeof noticiasDB === 'undefined') return;
-    var n = noticiasDB.find(function (x) { return x.id === id; });
-    if (!n) return;
-    tequioShare({
-      titulo: '📰 ' + n.titulo,
-      texto:  (n.resumen || '') + (n.fuente ? '\n— ' + n.fuente : ''),
-      url:    n.url_oficial || ('https://tequio.app/?noticia=' + encodeURIComponent(n.id))
-    });
-  };
-  window.tequioShareLey = function (id) {
-    // Buscar en leyesData (el array real); fallback a leyesDB/window.LEYES por compatibilidad
-    var src = (typeof leyesData !== 'undefined') ? leyesData :
-              (typeof leyesDB   !== 'undefined') ? leyesDB :
-              (window.LEYES || []);
-    var l = src.find ? src.find(function (x) { return x.id === id; }) : null;
-    if (!l) {
-      console.warn('[tequioShareLey] no encontrada:', id);
-      // Fallback: compartir solo el ID + URL de Tequio
-      tequioShare({
-        titulo: '⚖️ Ley ' + id + ' · Tequio',
-        texto:  'Mira esta ley en Tequio.',
-        url:    'https://tequio.app/?ley=' + encodeURIComponent(id)
-      });
-      return;
-    }
-    tequioShare({
-      titulo: '⚖️ ' + l.titulo,
-      texto:  (l.desc || '') + (l.fuente ? '\n— ' + l.fuente : ''),
-      url:    l.url || ('https://tequio.app/?ley=' + encodeURIComponent(l.id))
-    });
-  };
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') tequioShareClose();
-  });
-})();
-</script>
-<!-- ════════ /Compartir global ════════ -->
-<!-- /TEQUIO-NAV-LISTENER -->
-<script>
-// ═════ Hidratación YouTube En Vivo · v2 con filtros + modal player ═════
-(function hydrateYouTubeV2(){
-  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
-  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-  
-  var state = {
-    data: null,
-    canal: '',
-    busqueda: '',
-    timer: null,
-    autoRefresh: null
-  };
-  
-  function fmtDate(iso){
-    if (!iso) return '';
-    var d = new Date(iso);
-    var diff = Date.now() - d.getTime();
-    var mins = Math.floor(diff / 60000);
-    if (mins < 60) return 'hace ' + mins + ' min';
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return 'hace ' + hrs + 'h';
-    var days = Math.floor(hrs / 24);
-    if (days < 30) return 'hace ' + days + 'd';
-    return d.toLocaleDateString('es-MX', {day:'numeric',month:'short'});
-  }
-  function esc(s){
-    return String(s||'').replace(/[&<>"']/g, function(c){
-      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
-    });
-  }
-  function fmt(n){return Number(n||0).toLocaleString('es-MX');}
-  
-  // ── MODAL PLAYER ──
-  window.ytAbrirPlayer = function(videoId, titulo, canal, isLive){
-    var existing = document.getElementById('yt-player-modal');
-    if(existing) existing.remove();
-    var html = '<div id="yt-player-modal" onclick="ytCerrarPlayer(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(8px)">' +
-      '<div onclick="event.stopPropagation()" style="max-width:1000px;width:100%;display:flex;flex-direction:column;gap:10px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;color:#fff">' +
-          '<div style="font-size:14px;line-height:1.4">' +
-            '<div style="font-weight:700;margin-bottom:2px">' + esc(titulo) + '</div>' +
-            '<div style="font-size:11px;opacity:0.7">' + esc(canal) + (isLive?' · <span style="color:#fb7185">🔴 EN VIVO</span>':'') + '</div>' +
-          '</div>' +
-          '<button onclick="ytCerrarPlayer()" style="background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0">✕</button>' +
-        '</div>' +
-        '<div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden">' +
-          '<iframe src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>' +
-        '</div>' +
-        '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
-          '<a href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener" style="background:rgba(255,255,255,0.10);color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:13px">📺 Ver en YouTube</a>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-    document.body.insertAdjacentHTML('beforeend', html);
-    document.body.style.overflow = 'hidden';
-  };
-  window.ytCerrarPlayer = function(e){
-    if(e && e.target.id !== 'yt-player-modal' && e.type === 'click') return;
-    var m = document.getElementById('yt-player-modal');
-    if(m) m.remove();
-    document.body.style.overflow = '';
-  };
-  
-  function renderCard(v, isLive){
-    var thumb = v.thumbnail_url || '';
-    var badge = isLive ? '<span class="live-badge">🔴 EN VIVO</span>' : '';
-    var meta = isLive 
-      ? (v.viewers ? fmt(v.viewers) + ' viendo ahora' : 'En transmisión')
-      : fmtDate(v.published_at);
-    var titEsc = esc(v.titulo||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    var canEsc = esc(v.channel_nombre||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    return '<div class="yt-card" onclick="ytAbrirPlayer(\'' + v.video_id + '\',\'' + titEsc + '\',\'' + canEsc + '\',' + (isLive?'true':'false') + ')">' +
-      '<div class="thumb">' +
-        (thumb ? '<img src="' + esc(thumb) + '" alt="" loading="lazy">' : '') +
-        badge +
-        '<span class="channel-chip">' + (v.channel_emoji||'') + ' ' + esc(v.channel_nombre) + '</span>' +
-      '</div>' +
-      '<div class="body">' +
-        '<div class="title">' + esc(v.titulo) + '</div>' +
-        '<div class="meta">' + meta + '</div>' +
-      '</div>' +
-    '</div>';
-  }
-  
-  function filtrar(arr){
-    return arr.filter(function(v){
-      if(state.canal && v.channel_nombre !== state.canal) return false;
-      if(state.busqueda){
-        var q = state.busqueda.toLowerCase();
-        return (v.titulo||'').toLowerCase().indexOf(q) >= 0;
-      }
-      return true;
-    });
-  }
-  
-  function aplicarFiltros(){
-    if(!state.data) return;
-    var live = filtrar(state.data.en_vivo || []);
-    var ult = filtrar(state.data.ultimos_por_canal || []);
-    var rec = filtrar(state.data.recientes || []);
-    
-    // LIVE
-    var liveSec = document.getElementById('yt-live-section');
-    var liveGrid = document.getElementById('yt-live-grid');
-    var liveCount = document.getElementById('yt-live-count');
-    if(live.length){
-      if(liveSec) liveSec.style.display = '';
-      if(liveGrid) liveGrid.innerHTML = live.map(function(v){return renderCard(v, true);}).join('');
-      if(liveCount) liveCount.textContent = live.length + ' transmisión' + (live.length !== 1 ? 'es' : '');
-    } else {
-      if(liveSec) liveSec.style.display = 'none';
-    }
-    
-    // Por canal
-    var canSec = document.getElementById('yt-canales-section');
-    var canGrid = document.getElementById('yt-canales-grid');
-    if(ult.length){
-      if(canSec) canSec.style.display = '';
-      if(canGrid) canGrid.innerHTML = ult.map(function(v){return renderCard(v, false);}).join('');
-    } else {
-      if(canSec) canSec.style.display = 'none';
-    }
-    
-    // Recientes
-    var recSec = document.getElementById('yt-recientes-section');
-    var recGrid = document.getElementById('yt-recientes-grid');
-    if(rec.length){
-      if(recSec) recSec.style.display = '';
-      if(recGrid) recGrid.innerHTML = rec.map(function(v){return renderCard(v, false);}).join('');
-    } else {
-      if(recSec) recSec.style.display = 'none';
-    }
-    
-    // Si todo vacío
-    if(!live.length && !ult.length && !rec.length){
-      if(canSec) canSec.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3)">📭 Sin resultados con los filtros actuales.</div>';
-      if(canSec) canSec.style.display = '';
-    }
-  }
-  
-  function setStats(d){
-    var setText = function(id, v){var el=document.getElementById(id); if(el) el.textContent=v;};
-    setText('yt-stat-live', fmt((d.en_vivo||[]).length));
-    setText('yt-stat-canales', fmt((d.ultimos_por_canal||[]).length));
-    setText('yt-stat-recientes', fmt((d.recientes||[]).length));
-    if(d.last_sync){
-      var dt = new Date(d.last_sync);
-      var diff = Math.floor((Date.now() - dt.getTime()) / 60000);
-      setText('yt-stat-sync', diff < 60 ? 'hace ' + diff + ' min' : dt.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}));
-    }
-    // Badge sidebar
-    var navBadge = document.getElementById('nav-live-badge');
-    if(navBadge) navBadge.style.display = (d.en_vivo||[]).length ? '' : 'none';
-  }
-  
-  window.ytSetCanal = function(el, c){
-    state.canal = c || '';
-    el.parentElement.querySelectorAll('.estado-chip').forEach(function(x){x.classList.remove('active');});
-    el.classList.add('active');
-    aplicarFiltros();
-  };
-  
-  window.ytFiltrarDeb = function(){
-    clearTimeout(state.timer);
-    state.timer = setTimeout(function(){
-      state.busqueda = document.getElementById('yt-search').value.trim();
-      aplicarFiltros();
-    }, 250);
-  };
-  
-  function tryFetch(){
-    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_youtube_live', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON},
-      body: '{}'
-    })
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(function(d){
-      state.data = d;
-      setStats(d);
-      aplicarFiltros();
-    })
-    .catch(function(){});
-  }
-  
-  window.ytRefresh = function(){
-    var btn = document.getElementById('yt-refresh-btn');
-    if(btn){ btn.innerHTML = '<span>⏳</span> Cargando...'; btn.disabled = true; }
-    tryFetch();
-    setTimeout(function(){
-      if(btn){ btn.innerHTML = '<span>🔄</span> Actualizar'; btn.disabled = false; }
-    }, 1500);
-  };
-  
-  // Auto-refresh cada 60s
-  function startAutoRefresh(){
-    if(state.autoRefresh) clearInterval(state.autoRefresh);
-    state.autoRefresh = setInterval(tryFetch, 60000);
-  }
-  
-  // Boot
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ tryFetch(); startAutoRefresh(); });
-  else { tryFetch(); startAutoRefresh(); }
-})();
-</script>
-<script>
-// ═════ Hydratación KPIs globales · dashboard_kpis_globales ═════
-(function hydrateKpisGlobales(){
-  var SUPABASE_URL = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
-  var ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-  function fmtNum(n){ if (n == null) return '—'; return Number(n).toLocaleString('es-MX'); }
-  function applyKpis(k){
-    if (!k) return;
-    var map = {
-      'leyes':              function(){ return fmtNum(k.leyes); },
-      'leyes-estatal':      function(){ return fmtNum(k.leyes_estatal); },
-      'leyes-municipal':    function(){ return fmtNum(k.leyes_municipal); },
-      'leyes-federal':      function(){ return fmtNum(k.leyes_federal); },
-      'leyes-calidad':      function(){ return fmtNum(k.leyes_con_contenido_calidad); },
-      'contratos':          function(){ return fmtNum(k.contratos_publicos); },
-      'inah-zonas':         function(){ return fmtNum(k.inah_zonas); },
-      'inah-museos':        function(){ return fmtNum(k.inah_museos); },
-      'inah-patrimonio':    function(){ return (k.inah_zonas||0) + '+' + (k.inah_museos||0); },
-      'sre-embajadas':      function(){ return fmtNum(k.sre_embajadas); },
-      'sre-consulados':     function(){ return fmtNum(k.sre_consulados); },
-      'inali-lenguas':      function(){ return fmtNum(k.inali_lenguas); },
-      'unesco-patrimonio':  function(){ return fmtNum(k.unesco_patrimonio); },
-      'diputados':          function(){ return fmtNum(k.politicos_diputados); },
-      'senadores':          function(){ return fmtNum(k.politicos_senadores); },
-      'actores-poder':      function(){ return fmtNum(k.actores_poder); },
-      'vinculos-poder':     function(){ return fmtNum(k.vinculos_poder); },
-      'sat-69':             function(){ return fmtNum(k.sat_69); },
-      'sat-69b':            function(){ return fmtNum(k.sat_69b); },
-      'gasolina':           function(){ return fmtNum(k.gasolina_estaciones); },
-      'profeco-precios':    function(){ return fmtNum(k.profeco_precios); },
-      'municipios':         function(){ return fmtNum(k.municipios); },
-      'votos-individuales': function(){ return fmtNum(k.votos_individuales); },
-      'contratos-ultimo-corte': function(){ return k.contratos_ultimo_corte || '—'; },
-      'pef-total': function(){
-        if (!k.pef || !k.pef.monto_total_mxn) return '—';
-        return '$' + (k.pef.monto_total_mxn / 1e12).toFixed(2) + ' bn';
-      },
-      // ── claves planas nuevas (audit 2026-05-28) ──
-      'costo_financiero_pib_pct': function(){
-        if (k.costo_financiero_pib_pct == null) return '—';
-        return Number(k.costo_financiero_pib_pct).toFixed(1) + '%';
-      },
-      'total_puntos_servicio': function(){ return fmtNum(k.total_puntos_servicio); }
-    };
-    Object.keys(map).forEach(function(key){
-      var els = document.querySelectorAll('[data-kpi="' + key + '"]');
-      if (!els.length) return;
-      var v = map[key]();
-      els.forEach(function(el){ if (v && v !== '—') el.textContent = v; });
-    });
-    document.querySelectorAll('[data-kpi]').forEach(function(el){
-      if (!el.title || el.title.indexOf('Tequio') < 0) {
-        el.title = '🦎 Cero Invención · count en vivo · ' + new Date(k.actualizado).toLocaleString('es-MX');
-      }
-    });
-  }
-  function tryFetch(){
-    fetch(SUPABASE_URL + '/rest/v1/rpc/dashboard_kpis_globales', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'apikey':ANON, 'Authorization':'Bearer '+ANON },
-      body: '{}'
-    })
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(function(k){
-      applyKpis(k);
-      window.__tequioKpis = k;
-      console.log('[Tequio] KPIs globales hydratados:', Object.keys(k).length, 'campos');
-    })
-    .catch(function(){ /* silencioso */ });
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryFetch);
-  else setTimeout(tryFetch, 0);
-  var origShowPage = window.showPage;
-  if (typeof origShowPage === 'function') {
-    window.showPage = function(){
-      var r = origShowPage.apply(this, arguments);
-      if (window.__tequioKpis) setTimeout(function(){ applyKpis(window.__tequioKpis); }, 50);
-      return r;
-    };
-  }
-})();
-// ═════ /KPIs ═════
-</script>
-</body>
-</html>
+  // 2) Esconder boto
