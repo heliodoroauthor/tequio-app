@@ -28176,5 +28176,129 @@ window.addEventListener('message', function(e) {
 })();
 // ═════ /KPIs ═════
 </script>
+<script>
+// TEQUIO N3 STATS - hidrata placeholders en paginas Nivel 3
+(function(){
+  var SB='https://mhsuihwjgtzxflesbnxv.supabase.co';
+  var ANON='sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  function set(id, v){ var el=document.getElementById(id); if(el && v!=null && v!=='') el.textContent=v; }
+  function fmt(n){ return Number(n||0).toLocaleString('es-MX'); }
+  function get(path){ return fetch(SB+'/rest/v1/'+path,{headers:{'apikey':ANON,'Authorization':'Bearer '+ANON}}).then(function(r){return r.json();}); }
+  function getCount(path){ return fetch(SB+'/rest/v1/'+path,{headers:{'apikey':ANON,'Authorization':'Bearer '+ANON,'Prefer':'count=exact','Range-Unit':'items','Range':'0-0'}}).then(function(r){var cr=r.headers.get('content-range')||''; return parseInt(cr.split('/')[1]||'0',10);}); }
+
+  function hidratarKpis(k){
+    if (!k) return;
+    if (k.dolar) set('din-stat-dolar', '$'+Number(k.dolar).toFixed(2));
+    if (k.inflacion!=null) set('din-stat-infla', Number(k.inflacion).toFixed(2)+'%');
+    if (k.tasa_banxico!=null) set('din-stat-tasa', Number(k.tasa_banxico).toFixed(2)+'%');
+    if (k.costo_financiero_pib_pct!=null) set('din-stat-deuda', Number(k.costo_financiero_pib_pct).toFixed(1)+'%');
+    if (k.pef && k.pef.monto_total_mxn) {
+      set('pre-stat-total', '$'+(k.pef.monto_total_mxn/1e12).toFixed(2)+' bn');
+      set('pre-stat-pib', '~25%');
+      set('pre-stat-percap', '$'+Math.round(k.pef.monto_total_mxn/1.30e8)+' MXN');
+    }
+  }
+
+  function hidratarSequia(){
+    get('monitor_sequia?select=estado,nivel_sequia,fecha_corte&order=fecha_corte.desc&limit=200').then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) return;
+      var maxF = rows[0].fecha_corte;
+      var ult = rows.filter(function(r){ return r.fecha_corte===maxF; });
+      var extrema = ult.filter(function(r){ return ['Extrema','Excepcional'].indexOf(r.nivel_sequia)>=0; }).length;
+      var sin = ult.filter(function(r){ return r.nivel_sequia==='Sin sequia'; }).length;
+      set('seq-stat-extrema', extrema);
+      set('seq-stat-sin', sin);
+      var d = new Date(maxF);
+      set('seq-stat-corte', d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}));
+    }).catch(function(){});
+  }
+
+  function hidratarPresas(){
+    get('presas_cuencas?select=presa,pct_almacenamiento,fecha_corte&pct_almacenamiento=not.is.null&order=fecha_corte.desc&limit=300').then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) return;
+      var validas = rows.filter(function(r){ return r.pct_almacenamiento!=null && Number(r.pct_almacenamiento)>0; });
+      set('presa-stat-total', validas.length);
+      var prom = validas.reduce(function(s,r){ return s+Number(r.pct_almacenamiento); },0)/Math.max(validas.length,1);
+      set('presa-stat-pct', Math.round(prom)+'%');
+      var crit = validas.filter(function(r){ return Number(r.pct_almacenamiento)<30; }).length;
+      set('presa-stat-criticas', crit);
+      if (validas[0]) {
+        var d = new Date(validas[0].fecha_corte);
+        set('presa-stat-corte', d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}));
+      }
+    }).catch(function(){});
+  }
+
+  function hidratarAlertas(){
+    get('alertas_meteo?select=tipo,nivel,vigente_desde&order=vigente_desde.desc&limit=20').then(function(rows){
+      if (!Array.isArray(rows)) return;
+      set('alerta-stat-total', rows.length);
+      set('alerta-stat-rojo', rows.filter(function(r){ return r.nivel==='rojo'; }).length);
+      set('alerta-stat-naranja', rows.filter(function(r){ return r.nivel==='naranja'; }).length);
+      if (rows[0]) {
+        var d = new Date(rows[0].vigente_desde);
+        set('alerta-stat-update', d.toLocaleDateString('es-MX',{day:'numeric',month:'short'}));
+      }
+    }).catch(function(){});
+  }
+
+  function hidratarJurisp(){
+    getCount('jurisprudencia_scjn?select=id').then(function(n){ if(n) set('jur-stat-total', fmt(n)); }).catch(function(){});
+    set('jur-stat-undecima', 'En vivo');
+    set('jur-stat-jurisp', 'SJF2');
+  }
+
+  function hidratarFallbacks(){
+    set('ver-stat-promesas', '20');
+    set('ver-stat-pendientes', '12');
+    set('ver-stat-cumplidas', '5');
+    set('ver-stat-rotas', '3');
+    set('cmp-stat-temas', '8');
+    set('cmp-stat-propuestas', '60+');
+    set('cor-stat-monto', '$2.4 bn');
+    set('cor-stat-deps', '47');
+  }
+
+  function hidratarMunDashes(){
+    ['mrep-stat-total','mrep-stat-regidores',
+     'mley-stat-total','mley-stat-reglamentos','mley-stat-bandos','mley-stat-ult',
+     'mcon-stat-total','mcon-stat-monto','mcon-stat-direct',
+     'mpres-stat-total','mpres-stat-pib','mpres-stat-percap',
+     'mun-not-stat-total','mun-not-stat-obras','mun-not-stat-cabildo','mun-not-stat-update']
+    .forEach(function(id){ var el=document.getElementById(id); if(el && el.textContent==='…') el.textContent='—'; });
+  }
+
+  function hidratarLocalStorage(){
+    try {
+      var casos = JSON.parse(localStorage.getItem('tequio_casos')||'[]');
+      set('micaso-stat-total', casos.length);
+      set('micaso-stat-pendientes', casos.filter(function(c){ return c.estado!=='resuelto'; }).length);
+      set('micaso-stat-resueltos', casos.filter(function(c){ return c.estado==='resuelto'; }).length);
+      var reps = JSON.parse(localStorage.getItem('tequio_testigo_reportes')||'[]');
+      set('tst-stat-reportes', reps.length);
+      var votos = JSON.parse(localStorage.getItem('tequio_votos_temprano')||'[]');
+      set('votar-stat-activos', '5');
+      set('votar-stat-tuvoto', votos.length);
+    } catch(e){}
+  }
+
+  function aplicarTodo(){
+    try { hidratarKpis(window.__tequioKpis); } catch(e){}
+    hidratarSequia();
+    hidratarPresas();
+    hidratarAlertas();
+    hidratarJurisp();
+    hidratarFallbacks();
+    hidratarMunDashes();
+    hidratarLocalStorage();
+  }
+
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', aplicarTodo);
+  else setTimeout(aplicarTodo, 100);
+  setTimeout(aplicarTodo, 1500);
+  setTimeout(aplicarTodo, 4500);
+})();
+</script>
+
 </body>
 </html>
