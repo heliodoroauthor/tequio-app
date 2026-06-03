@@ -342,7 +342,7 @@ def scrape_monitor_sequia():
             rows_out.append({
                 'fecha_corte':           fecha_corte,
                 'estado':                str(estado)[:80],
-                'nivel_sequia':          dominante,
+                # nivel_sequia es generated column en DB - NO enviarlo
                 'pct_anomalo_seco':      pct('D0'),
                 'pct_sequia_moderada':   pct('D1'),
                 'pct_sequia_severa':     pct('D2'),
