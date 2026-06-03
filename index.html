@@ -10495,13 +10495,32 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       </div>
 
       <!-- Sello fuente oficial -->
-      <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <div style="font-size:28px">✅</div>
         <div style="flex:1;min-width:220px">
           <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada noticia tiene link directo a la publicación oficial: dof.gob.mx · scjn.gob.mx · inai.org.mx · fgr.org.mx · presidente.gob.mx · gob.mx/segob · cofepris.gob.mx</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada noticia tiene link directo a la publicación oficial. Sin intermediarios, sin opinión editorial, sin "fact-check" de terceros.</div>
         </div>
       </div>
+
+      <!-- Caja edu: las 8 fuentes -->
+      <details style="background:linear-gradient(135deg,rgba(168,85,247,0.10),rgba(168,85,247,0.03));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px">
+        <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#d8b4fe;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Qué publica cada fuente? · Guía de las 8 instituciones</span><span style="font-size:11px">▾</span></summary>
+        <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El Estado mexicano publica comunicados oficiales por varios canales. Estos son los 8 que monitoreamos:
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px">
+            <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">📰 DOF</strong> · <a href="https://dof.gob.mx" target="_blank" rel="noopener" style="color:#c4b5fd;font-size:10px">dof.gob.mx</a><br><span style="font-size:11px">Diario Oficial · leyes, decretos, acuerdos federales · publicación obligatoria.</span></div>
+            <div style="background:rgba(124,58,237,0.08);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">⚖️ SCJN</strong> · <a href="https://scjn.gob.mx" target="_blank" rel="noopener" style="color:#c4b5fd;font-size:10px">scjn.gob.mx</a><br><span style="font-size:11px">Suprema Corte · sentencias, tesis, jurisprudencia, comunicados de Ministros.</span></div>
+            <div style="background:rgba(99,102,241,0.08);border-left:3px solid #6366f1;padding:8px 10px;border-radius:6px"><strong style="color:#a5b4fc">🔐 INAI</strong> · <a href="https://inai.org.mx" target="_blank" rel="noopener" style="color:#a5b4fc;font-size:10px">inai.org.mx</a><br><span style="font-size:11px">Transparencia · datos personales, acceso info pública, sanciones a sujetos obligados.</span></div>
+            <div style="background:rgba(220,38,38,0.08);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🚨 FGR</strong> · <a href="https://fgr.org.mx" target="_blank" rel="noopener" style="color:#fca5a5;font-size:10px">fgr.org.mx</a><br><span style="font-size:11px">Fiscalía General · investigaciones, vinculaciones a proceso, capturas, comunicados.</span></div>
+            <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🇲🇽 Presidencia</strong> · <a href="https://presidente.gob.mx" target="_blank" rel="noopener" style="color:#86efac;font-size:10px">presidente.gob.mx</a><br><span style="font-size:11px">Conferencias matutinas, comunicados oficiales, declaraciones del Ejecutivo.</span></div>
+            <div style="background:rgba(251,191,36,0.08);border-left:3px solid #fbbf24;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">🏛️ SEGOB</strong> · <a href="https://gob.mx/segob" target="_blank" rel="noopener" style="color:#fde68a;font-size:10px">gob.mx/segob</a><br><span style="font-size:11px">Gobernación · política interior, migración, derechos humanos, prensa.</span></div>
+            <div style="background:rgba(20,184,166,0.08);border-left:3px solid #14b8a6;padding:8px 10px;border-radius:6px"><strong style="color:#5eead4">💊 COFEPRIS</strong> · <a href="https://cofepris.gob.mx" target="_blank" rel="noopener" style="color:#5eead4;font-size:10px">cofepris.gob.mx</a><br><span style="font-size:11px">Salud · alertas sanitarias, retiros de productos, registros sanitarios.</span></div>
+            <div style="background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">🛡️ SABG</strong><br><span style="font-size:11px">Secretaría de Bienestar / Seguridad · programas sociales, comunicados.</span></div>
+          </div>
+          <p style="margin-top:10px;font-size:11px;color:var(--text3)">🦎 <strong>Cero invención:</strong> nosotros NO escribimos noticias. Solo extraemos comunicados publicados por estas instituciones, los clasificamos por tema/ámbito y te damos el link directo a la fuente original. Tu decides.</p>
+          <p style="margin-top:6px;font-size:11px;color:var(--text3)">⏱️ <strong>Frecuencia:</strong> el scraper corre cada hora. La última publicación detectada aparece en el stat "ÚLTIMA PUB" arriba.</p>
+        </div>
+      </details>
 
       <!-- Búsqueda + filtros -->
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
