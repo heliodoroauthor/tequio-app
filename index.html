@@ -2311,6 +2311,35 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DASHBOARD HÍBRIDO (live data + contenido original) ───── -->
     <div id="page-dashboard" class="page active">
       <div class="content">
+        <!-- ═════ HERO Nivel 3 ═════ -->
+        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🏛️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Tequio</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Tu radar cívico de México · <strong>Cero invención</strong>: solo datos verificados de fuentes oficiales.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">⚡ LIVE</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="dash-stat-leyes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="dash-stat-votos">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Votaciones</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="dash-stat-noticias">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Noticias hoy</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="dash-stat-alertas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Alertas vivas</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(124,58,237,0.02));border:1px solid rgba(124,58,237,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Qué es Tequio? · Fuentes y frecuencias</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Plataforma cívica gratuita que indexa fuentes oficiales mexicanas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Banxico</strong><br><span style="font-size:11px">FIX diario 12:00.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">INEGI</strong><br><span style="font-size:11px">INPC mensual.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">SCJN SJF2</strong><br><span style="font-size:11px">Semanal viernes.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">Cámaras SITL</strong><br><span style="font-size:11px">Diario votaciones.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Si una cifra parece rara, haz click en la fuente. Errores → <a href="mailto:hola@tequio.app" style="color:#c4b5fd">hola@tequio.app</a>.</p>
+          </div>
+        </details>
         <!-- ═════ NUEVO: HERO de datos vivos Banxico ═════ -->
         <div style="margin-bottom:20px">
           <p style="color:var(--text2);font-size:13px;margin-bottom:10px" id="dash-fecha-hoy">Cargando fecha…</p>
@@ -6891,10 +6920,36 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMUNIDAD (Chat nativo Supabase Realtime) ───── -->
     <div id="page-comunidad" class="page">
       <div class="content" style="max-width:900px">
-        <!-- Hero -->
-        <div style="background:linear-gradient(135deg,#1a1f3a 0%,#0a0f1e 100%);border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#6366f1 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(55,48,163,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💬</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comunidad Tequio</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Chat cívico en vivo · <strong>5 salas temáticas</strong> · soberanía digital.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🦎 CERO INVENCIÓN</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">5</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Salas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Anónimo</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Sin email</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Identidad</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No Discord</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Storage MX</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(55,48,163,0.08),rgba(55,48,163,0.02));border:1px solid rgba(55,48,163,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a5b4fc;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>Reglas comunitarias</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Moderación distribuida por reportes y votos:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">No violencia</strong><br><span style="font-size:11px">Amenazas, doxxing.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">Cero spam</strong><br><span style="font-size:11px">Publicidad fuera.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Cita fuentes</strong><br><span style="font-size:11px">Sin fuente = opinión.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Discrepar = OK</strong><br><span style="font-size:11px">Insultar no.</span></div>
+            </div>
+          </div>
+        </details>
+        <!-- Hero original (oculto, JS legacy) -->
+        <div style="display:none">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">💬 Chat Comunitario Tequio</div>
-          <div style="font-size:13px;color:var(--text3)">Conversación cívica en vivo · 5 salas · sin terceros</div>
         </div>
 
         <!-- Banner Cero Invención -->
@@ -7354,7 +7409,36 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── TESTIGO CÍVICO ───── -->
     <div id="page-testigo" class="page">
-      <!-- HERO -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 50%,#3b82f6 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(37,99,235,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">📸</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Testigo Cívico</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Documenta hechos de <strong>interés público</strong> con foto + ubicación · registro técnico ciudadano.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🔒 PRIVADO</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="tst-stat-reportes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Reportes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">SHA-256</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hash</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">EXIF</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Metadatos</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">Solo tú</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local-only</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(37,99,235,0.08),rgba(37,99,235,0.02));border:1px solid rgba(37,99,235,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#93c5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Tiene valor legal?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Pre-evidencia útil. Para prueba plena: NOM-151 + PSC autorizado.
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Útil para</strong><br><span style="font-size:11px">CNDH, PROFECO, prensa.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">Límite</strong><br><span style="font-size:11px">No certificación notarial.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">NOM-151</strong><br><span style="font-size:11px">Estándar PSC + Sec Economía.</span></div>
+              <div style="background:rgba(59,130,246,0.10);border-left:3px solid #3b82f6;padding:8px 10px;border-radius:6px"><strong style="color:#93c5fd">Privacidad</strong><br><span style="font-size:11px">Tequio NO ve tus fotos.</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
+      <!-- HERO original -->
       <div style="background:linear-gradient(160deg,#0a0f1e 0%,#1e3a5f 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(59,130,246,0.25);position:relative;overflow:hidden">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 30%,rgba(59,130,246,0.15),transparent 60%);pointer-events:none"></div>
         <div style="position:relative">
@@ -7574,6 +7658,35 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── OMBLIGO — MEMORIA HISTÓRICA ───── -->
     <div id="page-ombligo" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#451a03 0%,#9a3412 50%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(154,52,18,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🪐</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Ombligo del Mundo</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">México desde el centro · <strong>cosmovisión + raíces vivas</strong>.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 RAÍZ</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">68</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Lenguas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">364</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Variantes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">~5%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Indígenas</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INALI · INPI</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(154,52,18,0.08),rgba(154,52,18,0.02));border:1px solid rgba(154,52,18,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fdba74;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Por qué cosmovisión en app cívica?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Identidad cívica nace de raíces más antiguas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(154,52,18,0.10);border-left:3px solid #9a3412;padding:8px 10px;border-radius:6px"><strong style="color:#fdba74">🌽 Tequio</strong><br><span style="font-size:11px">Faena comunitaria.</span></div>
+              <div style="background:rgba(217,119,6,0.10);border-left:3px solid #d97706;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">📅 Calendario</strong><br><span style="font-size:11px">Fiestas, ciclos.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">⚖️ Justicia</strong><br><span style="font-size:11px">Usos y costumbres Art. 2.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">🗣️ Idiomas</strong><br><span style="font-size:11px">Náhuatl, maya, mixteco.</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
       <!-- HERO FULL-BLEED (sin .content wrapper para que tome todo el ancho) -->
       <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#0d0500 0%,#1a0800 40%,#0e0418 100%);padding:36px 32px 28px;border-bottom:1px solid rgba(180,83,9,0.3)">
         <!-- SVG pattern: rueda de calendario estilizada -->
@@ -7924,6 +8037,35 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── SIMULADOR ───── -->
     <!-- ───── SIMULADOR DE VOTO 2027 ───── -->
     <div id="page-votosim" class="page">
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🗳️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Voto Simulado</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Simula la <strong>boleta real</strong> · practica sin riesgo y descubre tus afinidades.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🎯 PRÁCTICA</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">2027</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Próx. federal</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Privado</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INE oficial</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Boleta</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(67,56,202,0.08),rgba(67,56,202,0.02));border:1px solid rgba(67,56,202,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Para qué sirve simular?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Reduce votos nulos por confusión:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(67,56,202,0.10);border-left:3px solid #4338ca;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">Familiarizarte</strong><br><span style="font-size:11px">Formato INE.</span></div>
+              <div style="background:rgba(124,58,237,0.10);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Comparar</strong><br><span style="font-size:11px">Voto vs temas.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Descubrir</strong><br><span style="font-size:11px">Afinidad real.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Sin tracking</strong><br><span style="font-size:11px">Solo tú.</span></div>
+            </div>
+          </div>
+        </details>
+      </div>
       <!-- ══ INTRO ══ -->
       <div id="vs-intro">
         <!-- Hero -->
@@ -11402,6 +11544,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <div id="page-corrupcion" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#451a03 0%,#7c2d12 50%,#dc2626 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(124,45,18,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🔍</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Radar de Corrupción</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Contratos y señalamientos <strong>documentados</strong> · ASF, SFP, FGR, CompraNet.</p>
+            </div>
+            <a href="https://www.asf.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">ASF →</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="cor-stat-casos">847</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Casos ASF</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="cor-stat-monto">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Observado</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cor-stat-deps">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Dependencias</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">5 años</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cuentas Pub.</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.02));border:1px solid rgba(220,38,38,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fca5a5;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Quién audita a quién?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">4 actores con poderes distintos:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">ASF</strong><br><span style="font-size:11px">Cám. Diputados, independencia.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">SFP</strong><br><span style="font-size:11px">Interno Ejecutivo.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">FGR</strong><br><span style="font-size:11px">Delitos por hechos.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">CompraNet</strong><br><span style="font-size:11px">Plataforma contrataciones.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ "Señalamiento" ≠ sentencia.</p>
+          </div>
+        </details>
         <div style="font-size:22px;font-weight:800;margin-bottom:4px">🔍 Radar de Corrupción</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Contratos, funcionarios y dependencias con señalamientos documentados. Fuentes: ASF, SFP, FGR, CompraNet.</div>
         <!-- Stats · cifras agregadas curadas desde informes ASF, verificable en asf.gob.mx -->
