@@ -7236,7 +7236,37 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <!-- ───── VERIFICACIÓN CIUDADANA ───── -->
     <div id="page-verificacion" class="page">
-      <!-- HERO -->
+      <div class="content">
+        <div style="background:linear-gradient(135deg,#022c22 0%,#047857 50%,#10b981 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(16,185,129,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">✅</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Verificación Ciudadana</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿Cumplió lo que prometió? · Reporta y vota · <strong>IA analiza el contexto</strong>.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🗳️ COMUNIDAD</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="ver-stat-promesas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Trackeadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="ver-stat-pendientes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Pendientes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="ver-stat-cumplidas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cumplidas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="ver-stat-rotas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Rotas</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#6ee7b7;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo funciona la verificación?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Moderación distribuida tipo "Wikipedia de promesas":
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(16,185,129,0.10);border-left:3px solid #10b981;padding:8px 10px;border-radius:6px"><strong style="color:#6ee7b7">1. Reporte</strong><br><span style="font-size:11px">Cualquiera con evidencia.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">2. Evidencia</strong><br><span style="font-size:11px">Link a video + comparación.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">3. IA analiza</strong><br><span style="font-size:11px">Coherencia.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">4. Voto</strong><br><span style="font-size:11px">&gt;60% confirma.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ NO procedimiento legal. Percepción ciudadana documentada.</p>
+          </div>
+        </details>
+      </div>
+      <!-- HERO original -->
       <div style="background:linear-gradient(160deg,#022c22 0%,#064e3b 50%,#0a0f1e 100%);padding:24px 28px 20px;border-bottom:1px solid rgba(16,185,129,0.25);position:relative;overflow:hidden">
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(16,185,129,0.15),transparent 60%);pointer-events:none"></div>
         <div style="position:relative">
@@ -7697,6 +7727,33 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── COMPARADOR ───── -->
     <div id="page-comparador" class="page">
       <div class="content">
+        <div style="background:linear-gradient(135deg,#3730a3 0%,#6366f1 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🆚</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comparador Electoral</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">IA compara <strong>partidos reales</strong> · Sin sesgo editorial.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🧠 IA</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">7</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Partidos vivos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="cmp-stat-temas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Temas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="cmp-stat-propuestas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Propuestas</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">INE oficial</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(99,102,241,0.02));border:1px solid rgba(99,102,241,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿De dónde saca la IA las posiciones?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Solo fuentes oficiales del INE y partidos. <strong>No inventa</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(99,102,241,0.10);border-left:3px solid #6366f1;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">Plataformas</strong><br><span style="font-size:11px">Docs formales ante INE.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Iniciativas</strong><br><span style="font-size:11px">Cámaras LXVI.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Declaraciones</strong><br><span style="font-size:11px">Comunicados, prensa verificada.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">Sesgo</strong><br><span style="font-size:11px">Cita ambas si contradicen.</span></div>
+            </div>
+          </div>
+        </details>
         <div class="section-header mb-16">
           <div>
             <div style="font-size:22px;font-weight:700">⚖️ Comparador Electoral</div>
@@ -8876,16 +8933,40 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── GENERADOR DE ACCIONES ───── -->
     <div id="page-acciones" class="page">
       <div class="content" style="max-width:900px">
-        <!-- Header -->
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-          <div>
-            <div style="font-size:22px;font-weight:800;margin-bottom:4px">⚡ Generador de Acciones</div>
-            <div style="font-size:13px;color:var(--text3)">Convierte tu situación en un documento legal listo para presentar</div>
+        <div style="background:linear-gradient(135deg,#7c2d12 0%,#b45309 50%,#f59e0b 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(180,83,9,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">⚡</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Generador de Acciones</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Convierte tu situación en un <strong>documento legal listo para presentar</strong> · plantillas basadas en ley vigente.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(8px)">
+              <div style="font-size:18px;font-weight:800;font-family:var(--font-display)" id="accion-contador">—</div>
+              <div style="font-size:9px;opacity:0.85;letter-spacing:1px">DOCS GENERADOS</div>
+            </div>
           </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;text-align:center">
-            <div style="font-size:18px;font-weight:800;font-family:var(--font-display);color:var(--accent2)" id="accion-contador">—</div>
-            <div style="font-size:9px;color:var(--text3);letter-spacing:1px">DOCS GENERADOS</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">📄</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Plantillas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Gratis</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin pago</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Privado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Local</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">800 200 3030</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Def. pública</div></div>
           </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(180,83,9,0.08),rgba(180,83,9,0.02));border:1px solid rgba(180,83,9,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Qué puedo generar?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Documentos orientativos. <strong>Revisa con un abogado o defensor público antes de presentar.</strong>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">Quejas</strong><br><span style="font-size:11px">PROFECO, CONDUSEF, CNDH.</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">Demanda laboral</strong><br><span style="font-size:11px">Despido, salarios.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Amparo</strong><br><span style="font-size:11px">Art. 103 CPEUM.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Datos ARCO</strong><br><span style="font-size:11px">INAI.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ NO sustituye asesoría legal.</p>
+          </div>
+        </details>
+        <!-- Header original (oculto, JS legacy) -->
+        <div style="display:none">
+          <div id="accion-contador-legacy">—</div>
         </div>
         <div class="alert alert-warn mb-16">
           <span>⚖️</span>
@@ -10424,6 +10505,33 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── ORGANÍZATE ───── -->
     <div id="page-organizacion" class="page">
       <div class="content">
+        <div style="background:linear-gradient(135deg,#831843 0%,#be185d 50%,#ec4899 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(190,24,93,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">✊</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Organización Ciudadana</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Protesta, sindicatos, colectivos, fondeo · <strong>Art. 9 CPEUM</strong> protege tu derecho de reunión pacífica.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🇲🇽 ART. 9</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Categorías</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Art. 9</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">CPEUM</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Art. 123</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Trabajo</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">OIT 87/98</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Convenios</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(190,24,93,0.08),rgba(190,24,93,0.02));border:1px solid rgba(190,24,93,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#f9a8d4;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>Marco legal · Qué te protege</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Organizarte NO requiere permiso — es derecho. Solo 3 reglas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(190,24,93,0.10);border-left:3px solid #be185d;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">Pacífica</strong><br><span style="font-size:11px">Sin armas.</span></div>
+              <div style="background:rgba(236,72,153,0.10);border-left:3px solid #ec4899;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">Objeto lícito</strong><br><span style="font-size:11px">Causa pública.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Aviso opcional</strong><br><span style="font-size:11px">CDMX: 48 hrs (no autorización).</span></div>
+              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">Huelga</strong><br><span style="font-size:11px">Emplazamiento 10 días (LFT).</span></div>
+            </div>
+          </div>
+        </details>
         <div class="alert alert-info mb-16">
           <span>⚖️</span>
           <span>Toda organización ciudadana pacífica está protegida por el <strong>Art. 9 Constitucional</strong>. El derecho de reunión y asociación es fundamental en México.</span>
