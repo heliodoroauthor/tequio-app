@@ -382,13 +382,20 @@ def scrape_presas_cuencas():
         arr = data if isinstance(data, list) else data.get('presas', [])
         print(f"   {len(arr)} presas recibidas del API")
         for p in arr:
+            cap = _num(p.get('capacidadNAMO') or p.get('capacidad'))
+            alm = _num(p.get('almacenaactual') or p.get('almacenamiento'))
+            pct = _num(p.get('llenano') or p.get('porcentaje'))
+            # FIX 2026-06-03: skipear bad data del API (0/0/0 = SINA no tiene reading hoy)
+            # Diferente de presa REALMENTE vacia: si capacidad>0 pero alm=0 y pct=0, probable bad data.
+            if (alm is None or alm == 0) and (pct is None or pct == 0):
+                continue
             rows.append({
                 'fecha_corte':            hoy,
                 'presa':                  (p.get('nombreoficial') or p.get('nombre') or '')[:200],
                 'estado':                 (p.get('estado') or '')[:80],
-                'capacidad_total_hm3':    _num(p.get('capacidadNAMO') or p.get('capacidad')),
-                'almacenamiento_hm3':     _num(p.get('almacenaactual') or p.get('almacenamiento')),
-                'pct_almacenamiento':     _num(p.get('llenano') or p.get('porcentaje')),
+                'capacidad_total_hm3':    cap,
+                'almacenamiento_hm3':     alm,
+                'pct_almacenamiento':     pct,
                 'region_hidrologica':     (p.get('region') or '')[:80],
                 'fuente':                 'SINA CONAGUA',
             })
