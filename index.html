@@ -8967,26 +8967,30 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="content">
         <!-- HERO NIVEL 3 -->
         <div style="position:relative;background:radial-gradient(circle at 0% 0%,rgba(34,197,94,0.22) 0%,transparent 50%),radial-gradient(circle at 100% 100%,rgba(59,130,246,0.20) 0%,transparent 50%),linear-gradient(135deg,rgba(34,197,94,0.10) 0%,rgba(59,130,246,0.10) 50%,rgba(15,23,42,0.95) 100%);border:1px solid rgba(34,197,94,0.28);border-radius:20px;padding:28px 26px 24px;margin:14px 0 16px;overflow:hidden">
-          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.40);color:#86efac;padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:14px">🌐 SRE oficial · Cero invención</div>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.40);color:#86efac;padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:14px">🌐 Datos verificados · INEGI · Banxico · SRE</div>
           <h1 style="font-size:30px;font-weight:900;line-height:1.15;margin:0 0 10px;background:linear-gradient(135deg,#fff 0%,#86efac 50%,#93c5fd 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">México en el Mundo</h1>
           <p style="color:#cbd5e1;font-size:14.5px;line-height:1.6;margin:0;max-width:680px">Relaciones exteriores, tratados, inversión y posición geopolítica del <strong style="color:#fcd34d">Estado Mexicano</strong>. Datos diplomáticos verificados con SRE, Banxico, SE y OMC.</p>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px">
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
-              <div style="font-size:21px;font-weight:900;color:#86efac;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-exp">$593B</div>
-              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Exportaciones 2024</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
-              <div style="font-size:21px;font-weight:900;color:#fcd34d;line-height:1;font-variant-numeric:tabular-nums">14</div>
-              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Tratados TLC</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px">
-              <div style="font-size:21px;font-weight:900;color:#d8b4fe;line-height:1;font-variant-numeric:tabular-nums">$63B</div>
-              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Remesas 2024</div>
-            </div>
             <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px" title="USD/MXN tipo de cambio FIX en vivo">
               <div style="font-size:21px;font-weight:900;color:#93c5fd;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-usd">$17.29</div>
               <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">USD/MXN <span style="color:#86efac">●</span> LIVE</div>
             </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px" title="Inflación anual INPC · Banxico en vivo">
+              <div style="font-size:21px;font-weight:900;color:#fca5a5;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-infl">—</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px" id="geo-hero-infl-lbl">Inflación <span style="color:#86efac">●</span> LIVE</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px" title="Tasa de referencia Banxico">
+              <div style="font-size:21px;font-weight:900;color:#fcd34d;line-height:1;font-variant-numeric:tabular-nums" id="geo-hero-tasa">—</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Tasa Banxico <span style="color:#86efac">●</span> LIVE</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 10px" title="14 TLCs vigentes según SRE">
+              <div style="font-size:21px;font-weight:900;color:#d8b4fe;line-height:1;font-variant-numeric:tabular-nums">14</div>
+              <div style="font-size:10.5px;color:#9ca3af;font-weight:600;margin-top:4px">Tratados TLC</div>
+            </div>
+          </div>
+          <!-- Disclaimer honesto -->
+          <div style="margin-top:14px;font-size:11px;color:#fcd34d;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.20);border-radius:8px;padding:8px 12px;line-height:1.5">
+            ⚠️ <strong>Honestidad:</strong> KPIs financieros (USD, inflación, tasa) <strong style="color:#86efac">en vivo desde Banxico</strong>. Contenido de tabs (países, tratados, comercio) <strong>curado manualmente con fuentes oficiales 2024</strong>. No es scraping en tiempo real — verifica vigencia en SRE/Banxico/INEGI antes de decisiones formales.
           </div>
           <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
             <a href="https://www.gob.mx/sre" target="_blank" style="background:rgba(255,255,255,0.10);color:#fff;padding:9px 16px;border-radius:10px;font-size:12.5px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.18)">📎 Portal SRE</a>
@@ -14686,6 +14690,7 @@ function showPage(id) {
       window._geoUSDInit = true;
       const loadUSD = async () => {
         try {
+          // 1. USD live
           const r = await fetch('/api/data?vista=banxico_historico&serie=SF43718');
           const j = await r.json();
           const pts = j.puntos || [];
@@ -14703,6 +14708,19 @@ function showPage(id) {
               }
               el.innerHTML = '$' + v + arrow;
             }
+          }
+          // 2. Inflación + tasa from dashboard endpoint
+          const r2 = await fetch('/api/data?vista=dashboard');
+          const d = await r2.json();
+          if (d.inflacion) {
+            const infEl = document.getElementById('geo-hero-infl');
+            const infLbl = document.getElementById('geo-hero-infl-lbl');
+            if (infEl) infEl.textContent = d.inflacion.valor.toFixed(2) + '%';
+            if (infLbl && d.inflacion.mes) infLbl.innerHTML = '<span style="color:#86efac">●</span> ' + d.inflacion.mes;
+          }
+          if (d.tasa_banxico) {
+            const tasaEl = document.getElementById('geo-hero-tasa');
+            if (tasaEl) tasaEl.textContent = d.tasa_banxico.valor.toFixed(2) + '%';
           }
         } catch(e) {}
       };
