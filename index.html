@@ -6607,6 +6607,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </div>
     <div id="page-redes" class="page">
       <div class="content" style="max-width:900px">
+        <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#475569 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(30,41,59,0.40)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🕸️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Redes de Poder</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Grafo de <strong>actores y vínculos</strong> documentados · DOF, INE, SAT, Cámaras.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">GRAFO</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">132</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Actores</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">64</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Vínculos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Curado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Modo editorial</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">DOF·INE·SAT</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(71,85,105,0.08),rgba(71,85,105,0.02));border:1px solid rgba(71,85,105,0.40);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#cbd5e1;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo leer un grafo de poder?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Un grafo NO es acusación. Es mapa de vínculos documentados:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(71,85,105,0.10);border-left:3px solid #475569;padding:8px 10px;border-radius:6px"><strong style="color:#cbd5e1">Nodos</strong><br><span style="font-size:11px">Personas con cargo público o económico.</span></div>
+              <div style="background:rgba(100,116,139,0.10);border-left:3px solid #64748b;padding:8px 10px;border-radius:6px"><strong style="color:#cbd5e1">Aristas</strong><br><span style="font-size:11px">Vínculo verificado.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Centralidad</strong><br><span style="font-size:11px">Más conexiones = más poder.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Validación</strong><br><span style="font-size:11px">Click → fuentes DOF/INE.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ Estar en el grafo NO implica delito.</p>
+          </div>
+        </details>
         <div class="alert alert-warn mb-16">
           <span>⚠️</span>
           <span>Datos basados en <strong>fuentes públicas verificadas</strong> (DOF, INE, SAT, Congreso.gob.mx). El grafo carga desde la base de Tequio (<strong>132 actores · 64 vínculos curados</strong>) priorizando por influencia. Cada nodo es figura pública en el ejercicio de cargo o actividad económica; no implica acusación de ilegalidad. Si la base no responde, se muestra el seed curado original.</span>
@@ -6755,7 +6783,25 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
             </div>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" data-kpi="leyes-calidad">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Calidad</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">RAG</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cita fuentes</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No es abogado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Orientativo</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(91,33,182,0.08),rgba(91,33,182,0.02));border:1px solid rgba(91,33,182,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo evita inventar? · RAG</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Usa <strong>RAG</strong> (Retrieval-Augmented Generation):
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(91,33,182,0.10);border-left:3px solid #5b21b6;padding:8px 10px;border-radius:6px"><strong style="color:#c4b5fd">1. Pregunta</strong><br><span style="font-size:11px">Vectorizada.</span></div>
+              <div style="background:rgba(124,58,237,0.10);border-left:3px solid #7c3aed;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">2. Busca</strong><br><span style="font-size:11px">En corpus.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">3. Cita</strong><br><span style="font-size:11px">Pasa fragmentos.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">4. Responde</strong><br><span style="font-size:11px">Con fuente DOF/SCJN.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ NO reemplaza abogado.</p>
+          </div>
+        </details>
         <!-- Sello de Fuente Oficial Verificada con RAG -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
@@ -8485,10 +8531,36 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── DEBATES (Pol.is) ───── -->
     <div id="page-debates" class="page">
       <div class="content" style="max-width:1100px">
-        <!-- Header -->
-        <div style="margin-bottom:18px">
+        <div style="background:linear-gradient(135deg,#155e75 0%,#0e7490 50%,#06b6d4 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(14,116,144,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">🗣️</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Debates Cívicos</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Deliberación abierta · powered by <strong>pol.is</strong>.</p>
+            </div>
+            <a href="https://pol.is/about" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">pol.is</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">5</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Temas activos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Anónimo</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Open-source</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">pol.is</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No tracking</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Privacy</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(14,116,144,0.08),rgba(14,116,144,0.02));border:1px solid rgba(14,116,144,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Qué es pol.is?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">pol.is es herramienta abierta de deliberación. NO es red social:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(14,116,144,0.10);border-left:3px solid #0e7490;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">Propones</strong><br><span style="font-size:11px">Opinión corta.</span></div>
+              <div style="background:rgba(6,182,212,0.10);border-left:3px solid #06b6d4;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">Votas</strong><br><span style="font-size:11px">Favor / contra / pasar.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Te agrupa</strong><br><span style="font-size:11px">ML cluster.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Consenso</strong><br><span style="font-size:11px">Cruza clusters.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Usado por Taiwán para política pública (vTaiwan).</p>
+          </div>
+        </details>
+        <div style="margin-bottom:18px;display:none">
           <div style="font-size:22px;font-weight:800;margin-bottom:4px">🗣️ Debates Pol.is</div>
-          <div style="font-size:13px;color:var(--text3)">Deliberación cívica abierta · 5 temas seleccionados · Powered by <a href="https://pol.is/about" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">pol.is</a></div>
         </div>
 
         <!-- Banner Cero Invención -->
@@ -10226,7 +10298,24 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://www.gob.mx/sre/acciones-y-programas/embajadas-y-consulados-de-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">Directorio SRE →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="sre-embajadas">80</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Embajadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" data-kpi="sre-consulados">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Consulados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">~13M</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Mex. en EUA</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">SRE / IME</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(194,65,12,0.08),rgba(194,65,12,0.02));border:1px solid rgba(194,65,12,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fed7aa;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>Embajada vs Consulado · Qué pides a quién</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Funciones distintas:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(194,65,12,0.10);border-left:3px solid #c2410c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">Embajada</strong><br><span style="font-size:11px">1 por país · diplomacia Estado a Estado.</span></div>
+              <div style="background:rgba(154,52,18,0.10);border-left:3px solid #9a3412;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">Consulado</strong><br><span style="font-size:11px">Atención al mexicano: pasaporte, matrícula.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Sección Consular</strong><br><span style="font-size:11px">Sin consulado, la embajada hace trámites.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">CIAM</strong><br><span style="font-size:11px">1-855-463-6395 (24/7 EUA).</span></div>
+            </div>
+          </div>
+        </details>
         <!-- Sello de Fuente Oficial Verificada -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
@@ -12761,7 +12850,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     </style>
     <div id="page-mun-representantes" class="page">
       <div class="content" style="max-width:780px">
-        <!-- HERO -->
+        <div style="background:linear-gradient(135deg,#1e1b4b 0%,#4338ca 50%,#7c3aed 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(67,56,202,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">👥</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Representantes Municipales</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Quién decide en tu Cabildo · Art. 115 I CPEUM: gobierno colegiado.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">CABILDO</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="mrep-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Integrantes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">1</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Presidente</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">1</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Síndico</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="mrep-stat-regidores">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Regidores</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(67,56,202,0.08),rgba(67,56,202,0.02));border:1px solid rgba(67,56,202,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#c4b5fd;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Qué hace cada rol del Cabildo?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El Ayuntamiento es <strong>colegiado</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Pdte. Municipal</strong><br><span style="font-size:11px">Ejecuta · representa · convoca cabildo.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Síndico</strong><br><span style="font-size:11px">Defiende patrimonio + cuenta pública.</span></div>
+              <div style="background:rgba(103,232,249,0.10);border-left:3px solid #06b6d4;padding:8px 10px;border-radius:6px"><strong style="color:#67e8f9">Regidores</strong><br><span style="font-size:11px">Legislan local · votan.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">Secretario</strong><br><span style="font-size:11px">No vota · custodia documentos.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Sesiones públicas según LFTAIP.</p>
+          </div>
+        </details>
         <div class="rep-hero">
           <div>
             <div style="font-size:9px;font-weight:800;letter-spacing:2.5px;color:#a78bfa;margin-bottom:6px">👥 REPRESENTANTES MUNICIPALES</div>
