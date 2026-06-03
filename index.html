@@ -2212,12 +2212,6 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
       <div class="nav-item" onclick="cargarPanel('sre')">
         <span class="icon">🏛️</span> Embajadas y Consulados
       </div>
-      <div class="nav-item" onclick="cargarPanel('instalar')" style="background:linear-gradient(135deg,rgba(34,197,94,0.10),rgba(59,130,246,0.08));border-left:3px solid #22c55e">
-        <span class="icon">📲</span> Instalar como App
-      </div>
-      <div class="nav-item" onclick="cargarPanel('donar')" style="background:linear-gradient(135deg,rgba(236,72,153,0.10),rgba(251,191,36,0.08));border-left:3px solid #ec4899">
-        <span class="icon">❤️</span> Apoya Tequio
-      </div>
       <div class="nav-item" onclick="cargarPanel('poder')">
         <span class="icon">🕸️</span> Mapa de Poder <span style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;font-size:8px;font-weight:700;padding:1px 5px;border-radius:6px;margin-left:4px;vertical-align:middle">DEMO</span>
       </div>
@@ -2256,7 +2250,16 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <span class="icon">📞</span> Directorio 32 Estados
       </div>
     </div>
-        <!-- ── FOOTER: PERFIL ── -->
+        <!-- ── BOTONES CTA: INSTALAR + APOYAR (siempre visibles) ── -->
+    <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,0.15)">
+      <div onclick="cargarPanel('instalar')" style="cursor:pointer;background:linear-gradient(135deg,#22c55e,#3b82f6);color:#fff;padding:12px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(34,197,94,0.25);transition:transform .15s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+        <span style="font-size:20px">📲</span> Instalar como App
+      </div>
+      <div onclick="cargarPanel('donar')" style="cursor:pointer;background:linear-gradient(135deg,#ec4899,#fbbf24);color:#fff;padding:12px 14px;border-radius:12px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(236,72,153,0.25);transition:transform .15s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+        <span style="font-size:20px">❤️</span> Apoya Tequio
+      </div>
+    </div>
+    <!-- ── FOOTER: PERFIL ── -->
     <div class="sidebar-footer">
       <div class="user-chip" onclick="cargarPanel('perfil')" style="cursor:pointer">
         <div class="avatar">CM</div>
