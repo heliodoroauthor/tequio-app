@@ -1648,17 +1648,33 @@
   if (new URLSearchParams(location.search).get('source')==='pwa') return;
   // No mostrar si dismisada hace menos de 7 días
   try { var d=parseInt(localStorage.getItem('pwa_dismissed_at')||'0',10); if (d>0 && Date.now()-d < 7*24*60*60*1000) return; } catch(e){}
-  // No mostrar mientras el onboarding NO esté completo
-  try { if (localStorage.getItem('tequio_onboarding_done') !== '1') {
-    // Esperar a que se complete el onboarding antes de mostrar el banner
-    var checkOnboarding = setInterval(function(){
-      if (localStorage.getItem('tequio_onboarding_done') === '1') {
-        clearInterval(checkOnboarding);
-        setTimeout(function(){ if (banner) banner.style.display='flex'; }, 3000);
+
+  // Helper: check if onboarding is currently visible
+  function isOnboardingVisible(){
+    var ob = document.getElementById('onboarding-overlay');
+    if (ob && ob.style.display !== 'none' && ob.offsetParent !== null) return true;
+    try { if (localStorage.getItem('tequio_onboarding_done') !== '1') return true; } catch(e){}
+    return false;
+  }
+  function showBannerSafe(){
+    if (!banner) return;
+    if (isOnboardingVisible()){
+      // Polling: re-check cada 1s hasta que el onboarding se cierre
+      setTimeout(showBannerSafe, 1000);
+      return;
+    }
+    banner.style.display='flex';
+  }
+  // Hard guard: NEVER show during onboarding
+  if (isOnboardingVisible()){
+    var pollOb = setInterval(function(){
+      if (!isOnboardingVisible()){
+        clearInterval(pollOb);
+        setTimeout(showBannerSafe, 3000);
       }
-    }, 1500);
-    return;
-  } } catch(e){}
+    }, 800);
+    // Pero seguir registrando los listeners para cuando esté listo
+  }
 
   var banner = document.getElementById('pwa-install-banner');
   var btn = document.getElementById('pwa-install-btn');
@@ -1670,7 +1686,7 @@
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
     deferredPrompt = e;
-    setTimeout(function(){ banner.style.display='flex'; }, 2500);
+    setTimeout(showBannerSafe, 2500);
   });
 
   // iOS: muestra instrucciones manuales (Safari no soporta beforeinstallprompt)
@@ -1680,7 +1696,7 @@
     btn.onclick = function(){
       alert('Para instalar Tequio en tu iPhone:\n\n1. Toca el botón Compartir (⬆️) abajo\n2. Desplaza y selecciona "Añadir a pantalla de inicio"\n3. Toca "Añadir"\n\nListo, Tequio aparecerá como app en tu home.');
     };
-    setTimeout(function(){ banner.style.display='flex'; }, 3500);
+    setTimeout(showBannerSafe, 3500);
     return;
   }
 
