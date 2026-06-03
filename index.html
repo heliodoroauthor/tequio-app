@@ -229,7 +229,8 @@
     font-family: var(--font-body);
   }
   .search-bar input::placeholder { color: var(--text3); }
-  .topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: nowrap; flex-shrink: 0; }
+  .sidebar { width: 260px !important; max-width: 260px; flex-shrink: 0; }
   .btn-icon {
     width: 36px; height: 36px;
     display: flex; align-items: center; justify-content: center;
