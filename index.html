@@ -12980,7 +12980,35 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ══════════════════════════════════════════════════════ -->
     <div id="page-mun-presupuesto" class="page">
       <div class="content" style="max-width:820px">
-        <!-- ── HEADER ── -->
+        <div style="background:linear-gradient(135deg,#365314 0%,#65a30d 50%,#84cc16 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(101,163,13,0.30)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+            <div style="font-size:60px;line-height:1">💰</div>
+            <div style="flex:1;min-width:240px">
+              <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presupuesto Municipal</h1>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">¿En qué gasta tu ayuntamiento? · <strong id="mpres-mun-nombre">Guadalajara</strong> · Cuenta Pública según Art. 115 IV CPEUM.</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">📊 LOCAL</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="mpres-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Egresos año</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="mpres-stat-percap">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Por habitante</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="mpres-stat-pred">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% Predial</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="mpres-stat-fuente">INAFED · ASF</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
+          </div>
+        </div>
+        <details style="background:linear-gradient(135deg,rgba(101,163,13,0.08),rgba(101,163,13,0.02));border:1px solid rgba(101,163,13,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#bef264;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿De dónde sale el dinero municipal?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El ingreso municipal viene de <strong>4 fuentes principales</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(101,163,13,0.10);border-left:3px solid #65a30d;padding:8px 10px;border-radius:6px"><strong style="color:#bef264">Predial · Locales</strong><br><span style="font-size:11px">Impuesto inmobiliario + derechos (~30%).</span></div>
+              <div style="background:rgba(132,204,22,0.10);border-left:3px solid #84cc16;padding:8px 10px;border-radius:6px"><strong style="color:#d9f99d">Participaciones</strong><br><span style="font-size:11px">Ramo 28 — federales no condicionadas.</span></div>
+              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Aportaciones</strong><br><span style="font-size:11px">Ramo 33 — condicionadas: FAIS, FORTAMUN.</span></div>
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Otros</strong><br><span style="font-size:11px">Estatales, deuda, financiamiento.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">⚠️ <strong>Cuenta Pública</strong> (ya gastado) ≠ Presupuesto (proyectado). La ASF audita la Cuenta Pública municipal con 2-3 años de retraso típico. Datos pueden ser estimaciones cuando aún no se publica oficial.</p>
+          </div>
+        </details>
+        <!-- ── HEADER original ── -->
         <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
           <div>
             <div style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:2px;margin-bottom:4px">💰 PRESUPUESTO MUNICIPAL</div>
