@@ -4956,22 +4956,9 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         document.getElementById('vot-stats').textContent = `${filas.length} de ${window.__votacionesData.length} votaciones nominales del pleno (LXVI Legislatura)`;
       }
       async function cargarVotaciones() {
-        if (window.__loadedPages['votaciones']) return;
-        const cont = document.getElementById('vot-lista');
-        cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Cargando votaciones del pleno…</div>';
-        try {
-          const r = await fetch('/api/data?vista=votaciones&limit=150');
-          const j = await r.json();
-          window.__votacionesData = j.votaciones || [];
-          if (!window.__votacionesData.length) {
-            cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Aún sin datos. El scraper de Diputados corre cada lunes.</div>';
-            return;
-          }
-          votFiltrar();
-          window.__loadedPages['votaciones'] = true;
-        } catch (e) {
-          cont.innerHTML = '<div style="color:#ef4444;text-align:center;padding:20px">Error al cargar.</div>';
-        }
+        // DEPRECATED: nueva implementación cargar(retries) en page-votaciones script maneja todo
+        // Esta función queda como no-op para compatibilidad con showPage()
+        return;
       }
       // ── MI REPRESENTANTE — ¿Cómo votó TU diputado? ──────────
       const VOTO_VISUAL = {
