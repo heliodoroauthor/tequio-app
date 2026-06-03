@@ -270,31 +270,35 @@ const genNoticiasUrl = '/panel/generador.html?tipo=transparencia&municipio=' + e
 const estadoPanelUrl = claveEnt ? '/panel/estado.html?clave=' + encodeURIComponent(claveEnt) : '/panel/estado.html';
 
 const html = `
-<div class="hero">
-<div class="estado">${m.nombre_estado || ''}</div>
-<h1>${m.nombre} <span class="clave">${m.clave_inegi}</span></h1>
-<div class="pob">${fmtNum(m.poblacion_total)} <span>habitantes</span></div>
+<div style="background:linear-gradient(135deg,#064e3b 0%,#047857 50%,#10b981 100%);border-radius:20px;padding:28px;margin:0 0 18px;color:#fff;box-shadow:0 8px 24px rgba(4,120,87,0.30)">
+  <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+    <div style="font-size:60px;line-height:1">🏘️</div>
+    <div style="flex:1;min-width:240px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;opacity:0.85;text-transform:uppercase;margin-bottom:4px">${m.nombre_estado || ''}</div>
+      <h1 style="font-size:34px;font-weight:900;margin:0;color:#fff;line-height:1.05;letter-spacing:-0.02em">${m.nombre} <span style="font-size:14px;font-weight:600;background:rgba(255,255,255,0.18);padding:3px 8px;border-radius:8px;vertical-align:middle">${m.clave_inegi}</span></h1>
+      <div style="margin:8px 0 0;opacity:0.94;font-size:15px">${fmtNum(m.poblacion_total)} <span style="opacity:0.8">habitantes (INEGI Censo 2020)</span></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">📍 LOCAL</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+    <div style="text-align:center"><div style="font-size:20px;font-weight:800">${fmtNum(m.viviendas_totales)}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Viviendas</div></div>
+    <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">${pobHomb ? pobHomb + '% / ' + (pobMuj || 0) + '%' : '—'}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Hombres / Mujeres</div></div>
+    <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9">${m.altitud_msnm ? fmtNum(m.altitud_msnm) + 'm' : '—'}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Altitud</div></div>
+    <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af">${del.total_periodo ? fmtNum(del.total_periodo) : '—'}</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Delitos 23-25</div></div>
+  </div>
 </div>
-
-<div class="stats">
-<div class="stat">
-<div class="n">${fmtNum(m.viviendas_totales)}</div>
-<div class="l">Viviendas</div>
-</div>
-<div class="stat">
-<div class="n">${pobHomb ? pobHomb + '%' : '—'}<span style="color:var(--muted);font-size:13px"> / ${pobMuj ? pobMuj + '%' : '—'}</span></div>
-<div class="l">Hombres / Mujeres</div>
-</div>
-<div class="stat">
-<div class="n">${m.altitud_msnm ? fmtNum(m.altitud_msnm) + 'm' : '—'}</div>
-<div class="l">Altitud</div>
-</div>
-<div class="stat">
-<div class="n">${del.total_periodo ? fmtNum(del.total_periodo) : '—'}</div>
-<div class="l">Delitos registrados</div>
-<div class="sub">2023–2025</div>
-</div>
-</div>
+<details style="background:linear-gradient(135deg,rgba(4,120,87,0.08),rgba(4,120,87,0.02));border:1px solid rgba(4,120,87,0.35);border-radius:12px;margin-bottom:14px">
+  <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#6ee7b7;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>🤓 ¿Qué encuentro en este panel? · Datos de tu muni</span><span style="font-size:11px">▾</span></summary>
+  <div style="padding:0 16px 14px;font-size:12px;color:var(--muted);line-height:1.6">5 dimensiones de tu municipio, cada una con su fuente oficial:
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px">
+      <div style="background:rgba(245,158,11,0.12);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">👥 Representantes</strong><br><span style="font-size:11px">Presidente municipal + diputados federales del estado · INAFED.</span></div>
+      <div style="background:rgba(168,85,247,0.12);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">💰 Presupuesto</strong><br><span style="font-size:11px">Cuenta pública + Ramos 28/33 transferencias · SHCP/INAFED.</span></div>
+      <div style="background:rgba(220,38,38,0.12);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">🚨 Delitos</strong><br><span style="font-size:11px">Incidencia delictiva mensual · SESNSP 2023-2025.</span></div>
+      <div style="background:rgba(20,184,166,0.12);border-left:3px solid #14b8a6;padding:8px 10px;border-radius:6px"><strong style="color:#5eead4">⚖️ Leyes locales</strong><br><span style="font-size:11px">Reglamentos + bandos · Gaceta Municipal.</span></div>
+    </div>
+    <p style="margin-top:10px;font-size:11px;color:var(--hint)">⚠️ Si falta data en alguna sección es porque ese ayuntamiento aún no publica fuente verificable — no nos la inventamos.</p>
+  </div>
+</details>
 
 <div class="mun-tabs" role="tablist">
 <button class="mun-tab active" data-tab="representantes" onclick="switchMunTab('representantes')">👥 Representantes</button>
