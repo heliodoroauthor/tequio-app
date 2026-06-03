@@ -3132,8 +3132,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── MONITOR SEQUÍA (DATOS REALES) ───── -->
     <div id="page-sequia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#78350f 0%,#d97706 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(217,119,6,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">🏜️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Monitor de Sequía</h1>
@@ -3141,15 +3141,34 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados monitoreados</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="seq-stat-extrema">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Con D3-D4</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="seq-stat-sin">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Sin sequía</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="seq-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(217,119,6,0.08),rgba(217,119,6,0.02));border:1px solid rgba(217,119,6,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#fbbf24;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Qué significan D0–D4? · Escala CONAGUA</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">El Monitor clasifica cada municipio según humedad e índices satelitales:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(254,249,195,0.10);border-left:3px solid #fde68a;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">D0 · Anormal</strong><br><span style="font-size:11px">Inicio o recuperación.</span></div>
+              <div style="background:rgba(250,204,21,0.10);border-left:3px solid #facc15;padding:8px 10px;border-radius:6px"><strong style="color:#facc15">D1 · Moderada</strong><br><span style="font-size:11px">Daño a cultivos.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fb923c">D2 · Severa</strong><br><span style="font-size:11px">Pérdidas agrícolas.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">D3 · Extrema</strong><br><span style="font-size:11px">Escasez generalizada.</span></div>
+              <div style="background:rgba(124,45,18,0.20);border-left:3px solid #7c2d12;padding:8px 10px;border-radius:6px"><strong style="color:#f9a8d4">D4 · Excepcional</strong><br><span style="font-size:11px">Emergencia: pérdidas totales.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Actualización quincenal. Fuente: Monitor de Sequía México — CONAGUA SMN.</p>
+          </div>
+        </details>
         <div id="sequia-tabla" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15)"></div>
       </div>
     </div>
     <!-- ───── JURISPRUDENCIA SCJN (DATOS REALES Semanario Judicial) ───── -->
     <div id="page-jurisprudencia" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#4c1d95 0%,#7e22ce 50%,#a855f7 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(168,85,247,0.35)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">⚖️</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Jurisprudencia SCJN</h1>
@@ -3157,7 +3176,23 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SJF2 oficial →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="jur-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Tesis indexadas</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#d8b4fe" id="jur-stat-undecima">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">11ª época</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#c4b5fd" id="jur-stat-jurisp">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Jurisprudencia</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">SJF2</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuente</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(168,85,247,0.02));border:1px solid rgba(168,85,247,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#d8b4fe;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Tesis vs Jurisprudencia? · Diferencias clave</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">La SCJN publica criterios en dos categorías que <strong>no obligan igual</strong>:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;padding:10px;border-radius:6px"><strong style="color:#d8b4fe">Tesis aislada</strong><br><span style="font-size:11px">Un solo precedente. Orientadora pero NO obligatoria.</span></div>
+              <div style="background:rgba(124,58,237,0.12);border-left:3px solid #7c3aed;padding:10px;border-radius:6px"><strong style="color:#c4b5fd">Jurisprudencia</strong><br><span style="font-size:11px">Criterio reiterado 5 veces o por Pleno con mayoría calificada. OBLIGATORIA Art. 217 LA.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">Épocas: 11ª (Reforma 2021, vigente) · 10ª (2011-2021).</p>
+          </div>
+        </details>
         <!-- Sello de Fuente Oficial Verificada -->
         <div style="background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.35);border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div style="font-size:28px">✅</div>
@@ -3194,8 +3229,8 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
     <!-- ───── PRESAS Y CUENCAS (DATOS REALES CONAGUA SIH) ───── -->
     <div id="page-presas" class="page">
       <div class="content">
-        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 24px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
-          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,#0e7c7b 0%,#0891b2 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(8,145,178,0.3)">
+          <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">💧</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Presas y Cuencas</h1>
@@ -3203,7 +3238,25 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             </div>
             <a href="https://sih.conagua.gob.mx/" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">CONAGUA SIH →</a>
           </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="presa-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Presas SINA</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" id="presa-stat-pct">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">% nacional</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="presa-stat-criticas">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">&lt;30% críticas</div></div>
+            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="presa-stat-corte">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Último corte</div></div>
+          </div>
         </div>
+        <details style="background:linear-gradient(135deg,rgba(8,145,178,0.08),rgba(8,145,178,0.02));border:1px solid rgba(8,145,178,0.35);border-radius:12px;margin-bottom:14px">
+          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#67e8f9;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>¿Cómo interpretar el % de almacenamiento?</span><span style="font-size:11px">▾</span></summary>
+          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">SINA reporta solo las ~210 presas con telemetría. Niveles de riesgo:
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
+              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">&gt; 75%</strong><br><span style="font-size:11px">Llena: operación óptima.</span></div>
+              <div style="background:rgba(132,204,22,0.10);border-left:3px solid #84cc16;padding:8px 10px;border-radius:6px"><strong style="color:#bef264">50-75%</strong><br><span style="font-size:11px">Adecuado: típico en temporada seca.</span></div>
+              <div style="background:rgba(251,146,60,0.10);border-left:3px solid #fb923c;padding:8px 10px;border-radius:6px"><strong style="color:#fed7aa">30-50%</strong><br><span style="font-size:11px">Bajo: restricciones probables.</span></div>
+              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">&lt; 30%</strong><br><span style="font-size:11px">Crítico: desabasto urbano probable.</span></div>
+            </div>
+            <p style="margin-top:10px;font-size:11px;color:var(--text3)">SINA puede tener 2-4 semanas de retraso.</p>
+          </div>
+        </details>
         <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.5;color:var(--text2)">✅ <strong>Fuente: SINA (Sistema Nacional de Información del Agua, CONAGUA)</strong> · 210 presas principales con telemetría · datos pueden tener 2-4 semanas de retraso vs realidad operativa. <a href="https://sinav30.conagua.gob.mx:8080/Presas/" target="_blank" style="color:#22c55e">Ver SINA →</a></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
           <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" id="presas-solo-telemetria" checked onchange="presasFiltrar()"> Solo con telemetría</label>
