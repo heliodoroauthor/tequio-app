@@ -123,7 +123,8 @@ def extract_tesis_from_response(resp_body):
         # Campos del API
         tesis['rubro'] = (item.get('rubro') or item.get('titulo') or '')[:800]
         tesis['texto'] = (item.get('texto') or item.get('contenido') or '')[:8000]
-        tesis['tipo'] = item.get('tipo') or item.get('tipoTesis')
+        # 'tipo' es NOT NULL en DB — default 'Aislada'
+        tesis['tipo'] = (item.get('tipo') or item.get('tipoTesis') or 'Aislada')[:50]
         tesis['instancia'] = item.get('instancia') or item.get('organo')
         tesis['materia'] = (item.get('materia') or item.get('materias') or '')[:200]
         tesis['tesis_clave'] = (item.get('tesisClave') or item.get('clave') or item.get('numTesis') or '')[:80]
@@ -132,9 +133,10 @@ def extract_tesis_from_response(resp_body):
         tesis['votacion'] = (item.get('votacion') or '')[:200]
         tesis['fecha_publicacion'] = parse_fecha_es(item.get('fecha') or item.get('fechaPublicacion') or '')
         
-        # Solo agregar si tiene contenido mínimo
-        if tesis['rubro'] or tesis['texto']:
-            tesis_list.append(tesis)
+        # 'rubro' es NOT NULL en DB — skip si está vacío
+        if not tesis['rubro'].strip():
+            continue
+        tesis_list.append(tesis)
     
     return tesis_list
 
@@ -216,13 +218,17 @@ def main():
                 if tesis_batch:
                     inserted = upsert_tesis_bulk(tesis_batch)
                     inserted_total += inserted
-                    print(f'  page {pagina}: {len(tesis_batch)} tesis encontradas, {inserted} insertadas (total {inserted_total})', flush=True)
+                    print(f'  page {pagina}: {len(tesis_batch)} tesis encontradas, {inserted} insertadas (total {inserted_total}) · {len(captured_responses)} XHRs', flush=True)
                 else:
-                    print(f'  page {pagina}: 0 tesis en XHRs ({len(captured_responses)} responses capturadas)', flush=True)
-                    # Print URLs capturadas como debug
-                    if captured_responses:
-                        for r in captured_responses[:3]:
-                            print(f'    debug url: {r["url"][:140]}', flush=True)
+                    print(f'  page {pagina}: 0 tesis en {len(captured_responses)} XHRs', flush=True)
+                    # Print URLs capturadas como debug (siempre las primeras 5)
+                    for r in captured_responses[:5]:
+                        body_preview = ''
+                        try:
+                            body_preview = json.dumps(r['body'])[:200] if r.get('body') else ''
+                        except Exception:
+                            pass
+                        print(f'    debug XHR [{r.get("status","?")}]: {r["url"][:120]} | body: {body_preview}', flush=True)
             except PWTimeout:
                 print(f'  page {pagina}: timeout', flush=True)
             except Exception as e:
