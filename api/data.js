@@ -864,12 +864,27 @@ export default async function handler(req, res) {
       const q = (req.query.q || '').trim();
       const materia = req.query.materia || '';
       const instancia = req.query.instancia || '';
-      let path = 'jurisprudencia_scjn?select=id,registro_digital,tipo,rubro,materia,instancia,epoca,tesis_clave,fecha_publicacion,importancia,resumen_ciudadano,url_oficial&order=importancia.desc,fecha_publicacion.desc&limit=200';
-      if (materia) path += `&materia=eq.${encodeURIComponent(materia)}`;
-      if (instancia) path += `&instancia=eq.${encodeURIComponent(instancia)}`;
-      if (q && q.length > 2) path += `&or=(rubro.ilike.*${encodeURIComponent(q)}*,resumen_ciudadano.ilike.*${encodeURIComponent(q)}*,tesis_clave.ilike.*${encodeURIComponent(q)}*)`;
-      const tesis = await sb(path);
-      return res.status(200).json({ tesis, total: tesis.length });
+      const page = Math.max(0, parseInt(req.query.page || '0', 10));
+      const pageSize = Math.min(50, Math.max(10, parseInt(req.query.pageSize || '25', 10)));
+      const offset = page * pageSize;
+      // Build filter clauses (reusable for query + count)
+      let filters = '';
+      if (materia) filters += `&materia=eq.${encodeURIComponent(materia)}`;
+      if (instancia) filters += `&instancia=eq.${encodeURIComponent(instancia)}`;
+      if (q && q.length > 2) filters += `&or=(rubro.ilike.*${encodeURIComponent(q)}*,resumen_ciudadano.ilike.*${encodeURIComponent(q)}*,tesis_clave.ilike.*${encodeURIComponent(q)}*)`;
+      const path = `jurisprudencia_scjn?select=id,registro_digital,tipo,rubro,materia,instancia,epoca,tesis_clave,fecha_publicacion,importancia,resumen_ciudadano,url_oficial&order=importancia.desc,fecha_publicacion.desc&limit=${pageSize}&offset=${offset}${filters}`;
+      const countPath = `jurisprudencia_scjn?select=id${filters}`;
+      const [tesis, totalCount] = await Promise.all([
+        sb(path),
+        sbCount(countPath),
+      ]);
+      return res.status(200).json({
+        tesis,
+        total: totalCount || tesis.length,
+        page,
+        pageSize,
+        hasMore: totalCount ? (offset + tesis.length) < totalCount : tesis.length === pageSize,
+      });
     }
 
     if (vista === 'jurisprudencia_detalle') {
