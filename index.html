@@ -2713,7 +2713,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div id="dash-alerta-ia-card" style="display:none;margin-bottom:16px">
           <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(245,158,11,0.08));border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:14px 16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div style="font-size:10px;color:var(--red2);font-weight:700;letter-spacing:0.5px">🚨 ALERTA IA PARA TU ESTADO</div>
+              <div style="font-size:10px;color:var(--red2);font-weight:700;letter-spacing:0.5px">🚨 ALERTAS EN VIVO · TU ESTADO</div>
               <button onclick="recargarAlertaEstado()" style="background:none;border:none;font-size:10px;color:var(--text3);cursor:pointer;font-family:inherit">↻</button>
             </div>
             <div id="dash-alerta-ia-texto" style="font-size:13px;line-height:1.6;color:var(--text)">Cargando alerta de tu estado...</div>
@@ -20340,33 +20340,94 @@ Sé objetivo, neutro y basado en hechos. Si no hay posición clara de un partido
 // ALERTAS POR ESTADO CON IA
 // ═══════════════════════════════════════════════════════════
 let _alertaEstadoCache = {};
+// Reemplazo CERO-INVENCIÓN: consulta data real de Supabase en lugar de pedirle a la IA que invente.
+// Fuentes: alertas_meteo (CONAGUA-SMN) + monitor_sequia (CONAGUA) + presas_cuencas.
 async function generarAlertaEstadoIA(estado) {
   if (!estado) return;
   const card = document.getElementById('dash-alerta-ia-card');
   const texto = document.getElementById('dash-alerta-ia-texto');
   if (!card || !texto) return;
-  // Caché de 10 minutos por estado
+  // Cabeza del card — cambia label IA → DATA REAL
+  try {
+    const labelEl = card.querySelector('[id^="dash-alerta-ia-card"] div[style*="ALERTA IA"], div');
+    // (label ya viene en el HTML, no lo tocamos aquí)
+  } catch(e){}
+  // Cache 10 min
   if (_alertaEstadoCache[estado] && Date.now() - _alertaEstadoCache[estado].ts < 600000) {
     texto.innerHTML = _alertaEstadoCache[estado].html;
     card.style.display = 'block';
     return;
   }
   card.style.display = 'block';
-  texto.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  texto.innerHTML = '<div style="color:var(--text3);font-size:12px">Consultando datos oficiales para ' + estado + '…</div>';
+
+  const SB = 'https://mhsuihwjgtzxflesbnxv.supabase.co/rest/v1/';
+  const ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
+  const headers = { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON };
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const estadoN = norm(estado);
+
   try {
-    const res = await fetch('/api/ai-proxy', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:250,
-        messages:[{role:'user', content:
-          `¿Cuál es la situación más urgente o importante que enfrenta el estado de ${estado}, México, en este momento (2025)? Menciona en 2-3 oraciones cortas: el problema principal, por qué es urgente, y qué puede hacer un ciudadano. Sé específico y directo. No inventes datos. Si no tienes información específica, menciona un problema conocido del estado.`
-        }]})
-    });
-    const data = await res.json();
-    const html = (data.content?.[0]?.text || 'No hay alertas disponibles para este estado.').replace(/\n/g,'<br>');
-    texto.innerHTML = html;
-    _alertaEstadoCache[estado] = { html, ts: Date.now() };
+    const [resAlertas, resSequia, resPresas] = await Promise.all([
+      fetch(SB + 'alertas_meteo?select=tipo,nivel,nombre,zona_afectada,vigente_desde,url_oficial&order=vigente_desde.desc&limit=10', { headers }).then(r=>r.json()).catch(()=>[]),
+      fetch(SB + 'monitor_sequia?select=estado,nivel_sequia,fecha_corte&order=fecha_corte.desc&limit=200', { headers }).then(r=>r.json()).catch(()=>[]),
+      fetch(SB + 'presas_cuencas?select=presa,pct_almacenamiento,fecha_corte&pct_almacenamiento=not.is.null&order=fecha_corte.desc&limit=400', { headers }).then(r=>r.json()).catch(()=>[]),
+    ]);
+
+    const partes = [];
+
+    // 1) Alertas meteorológicas que mencionen el estado en zona_afectada
+    if (Array.isArray(resAlertas)) {
+      const hit = resAlertas.find(a => norm(a.zona_afectada || '').includes(estadoN));
+      if (hit) {
+        const colorBadge = hit.nivel === 'rojo' ? '#ef4444' : (hit.nivel === 'naranja' ? '#f59e0b' : '#fbbf24');
+        const fecha = hit.vigente_desde ? new Date(hit.vigente_desde).toLocaleDateString('es-MX',{day:'numeric',month:'short'}) : '';
+        const txt = (hit.nombre || hit.tipo || '').slice(0, 180);
+        partes.push('<div style="display:flex;gap:8px;align-items:start"><span style="background:' + colorBadge + ';color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0">🌧️ ' + (hit.nivel || 'aviso').toUpperCase() + '</span><span style="font-size:12px">' + txt + (txt.length===180?'…':'') + ' <a href="' + (hit.url_oficial || 'https://smn.conagua.gob.mx') + '" target="_blank" rel="noopener" style="color:var(--accent2)">SMN ' + fecha + ' →</a></span></div>');
+      }
+    }
+
+    // 2) Sequía del estado en la fecha de corte más reciente
+    if (Array.isArray(resSequia) && resSequia.length) {
+      const maxF = resSequia[0].fecha_corte;
+      const ult = resSequia.filter(r => r.fecha_corte === maxF);
+      const mio = ult.find(r => norm(r.estado) === estadoN);
+      if (mio && mio.nivel_sequia && mio.nivel_sequia !== 'Sin sequia' && mio.nivel_sequia !== 'Sin sequía') {
+        const colorSeq = {'Excepcional':'#7f1d1d','Extrema':'#dc2626','Severa':'#f59e0b','Moderada':'#fbbf24','Anormalmente seca':'#fde68a'}[mio.nivel_sequia] || '#9ca3af';
+        const fechaS = new Date(maxF).toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        partes.push('<div style="display:flex;gap:8px;align-items:start"><span style="background:' + colorSeq + ';color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0">🏜️ SEQUÍA</span><span style="font-size:12px">Nivel <strong>' + mio.nivel_sequia + '</strong> · CONAGUA corte ' + fechaS + '. <a onclick="showPage(\'sequia\')" style="color:var(--accent2);cursor:pointer">Ver mapa →</a></span></div>');
+      }
+    }
+
+    // 3) Presas críticas del estado (<30%)
+    if (Array.isArray(resPresas)) {
+      const presasEst = resPresas.filter(p => {
+        const txt = norm(p.presa || '');
+        // formato típico: "Presa Nombre, NL" o "Algo, Nuevo León"
+        return txt.indexOf(estadoN) >= 0 || (estadoN === 'nuevo leon' && (txt.endsWith(', nl') || txt.endsWith(' nl'))) || (estadoN === 'estado de mexico' && (txt.endsWith(', mex') || txt.endsWith(' edomex')));
+      });
+      const criticas = presasEst.filter(p => Number(p.pct_almacenamiento) < 30);
+      if (criticas.length) {
+        const ej = criticas[0];
+        partes.push('<div style="display:flex;gap:8px;align-items:start"><span style="background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0">💧 PRESAS</span><span style="font-size:12px"><strong>' + criticas.length + '</strong> presa' + (criticas.length>1?'s':'') + ' por debajo del 30% · ej. <em>' + (ej.presa||'').split(',')[0] + '</em> al ' + Math.round(Number(ej.pct_almacenamiento)) + '%. <a onclick="showPage(\'presas\')" style="color:var(--accent2);cursor:pointer">Ver presas →</a></span></div>');
+      } else if (presasEst.length) {
+        const prom = presasEst.reduce((s,p)=>s+Number(p.pct_almacenamiento),0)/presasEst.length;
+        partes.push('<div style="display:flex;gap:8px;align-items:start"><span style="background:#22c55e;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0">💧 PRESAS</span><span style="font-size:12px">' + presasEst.length + ' presas monitoreadas · promedio <strong>' + Math.round(prom) + '%</strong> · sin críticas. <a onclick="showPage(\'presas\')" style="color:var(--accent2);cursor:pointer">Ver presas →</a></span></div>');
+      }
+    }
+
+    let htmlOut;
+    if (partes.length) {
+      htmlOut = '<div style="display:flex;flex-direction:column;gap:8px">' + partes.join('') + '</div>'
+              + '<div style="margin-top:8px;font-size:10px;color:var(--text3)">🦎 Datos en vivo desde CONAGUA-SMN · Cero invención.</div>';
+    } else {
+      htmlOut = '<div style="font-size:12px;color:var(--text2)">✅ Sin alertas críticas activas para <strong>' + estado + '</strong> en este momento. Datos al corte más reciente de CONAGUA-SMN.</div>'
+              + '<div style="margin-top:6px;font-size:11px;color:var(--text3)">Consulta también <a onclick="showPage(\'alertas\')" style="color:var(--accent2);cursor:pointer">Alertas meteorológicas</a> · <a onclick="showPage(\'sequia\')" style="color:var(--accent2);cursor:pointer">Monitor de sequía</a> · <a onclick="showPage(\'presas\')" style="color:var(--accent2);cursor:pointer">Presas y cuencas</a>.</div>';
+    }
+    texto.innerHTML = htmlOut;
+    _alertaEstadoCache[estado] = { html: htmlOut, ts: Date.now() };
   } catch(e) {
-    texto.innerHTML = 'No se pudo cargar la alerta. Verifica tu conexión.';
+    texto.innerHTML = '<div style="font-size:12px;color:var(--text3)">No se pudieron cargar las alertas. Reintenta en unos segundos.</div>';
   }
 }
 function recargarAlertaEstado() {
