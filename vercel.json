@@ -3,5 +3,18 @@
     { "path": "/api/cron/dof",      "schedule": "0 9 * * *" },
     { "path": "/api/cron/fgr",      "schedule": "5 9 * * *" },
     { "path": "/api/cron/cofepris", "schedule": "30 9 * * 1" }
+  ],
+  "rewrites": [
+    { "source": "/sitemap-leyes.xml", "destination": "/api/sitemap-leyes" },
+    { "source": "/sitemap-tesis.xml", "destination": "/api/sitemap-tesis" },
+    { "source": "/sitemap-main.xml",  "destination": "/sitemap-main.xml" }
+  ],
+  "headers": [
+    {
+      "source": "/(sitemap.*\\.xml)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" }
+      ]
+    }
   ]
 }
