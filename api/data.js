@@ -868,8 +868,14 @@ export default async function handler(req, res) {
       const pageSize = Math.min(50, Math.max(10, parseInt(req.query.pageSize || '25', 10)));
       const offset = page * pageSize;
       // Build filter clauses (reusable for query + count)
+      // NOTA: 299,980 de las 300,000 tesis tienen materia=NULL (la API SCJN no devolvió ese campo).
+      // Por eso el filtro materia hace OR con búsqueda de texto en rubro/resumen, para que sea útil.
       let filters = '';
-      if (materia) filters += `&materia=eq.${encodeURIComponent(materia)}`;
+      if (materia) {
+        const m = encodeURIComponent(materia);
+        // Heurística: tesis con materia exacta OR tesis cuyo rubro/resumen menciona la palabra
+        filters += `&or=(materia.eq.${m},rubro.ilike.*${m}*,resumen_ciudadano.ilike.*${m}*)`;
+      }
       if (instancia) filters += `&instancia=eq.${encodeURIComponent(instancia)}`;
       if (q && q.length > 2) filters += `&or=(rubro.ilike.*${encodeURIComponent(q)}*,resumen_ciudadano.ilike.*${encodeURIComponent(q)}*,tesis_clave.ilike.*${encodeURIComponent(q)}*)`;
       const path = `jurisprudencia_scjn?select=id,registro_digital,tipo,rubro,materia,instancia,epoca,tesis_clave,fecha_publicacion,importancia,resumen_ciudadano,url_oficial&order=importancia.desc,fecha_publicacion.desc&limit=${pageSize}&offset=${offset}${filters}`;
