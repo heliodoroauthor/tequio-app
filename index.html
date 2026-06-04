@@ -1623,42 +1623,7 @@
 </style>
 </head>
 <body>
-<div id="onboarding-overlay-legacy" style="display:none !important;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
-  <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
-    <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <div class="ob-step-bar active" id="ob-bar-1" style="flex:1;height:4px;border-radius:4px;background:#fbbf24;"></div>
-        <div class="ob-step-bar" id="ob-bar-2" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
-        <div class="ob-step-bar" id="ob-bar-3" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:11px;color:#9ca3af;" id="ob-step-label">Paso 1 de 3</div>
-        <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
-      </div>
-    </div>
-    <div id="ob-step-1" style="padding:28px 4px 32px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿De dónde eres?</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Personalizamos tu Tequio según tu estado.</p>
-      <div id="ob-estados-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
-      <div id="ob-estado-selected" style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;color:#fbbf24;display:none;">
-        <strong>Tu estado:</strong> <span id="ob-estado-txt"></span>
-      </div>
-      <button onclick="obGoStep(2)" id="ob-step1-next" disabled style="margin-top:20px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
-    </div>
-    <div id="ob-step-2" style="display:none;padding:28px 4px 32px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿Qué te importa?</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Selecciona los temas que más te interesan (mín. 1).</p>
-      <div id="ob-intereses-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;"></div>
-      <button onclick="obGoStep(3)" id="ob-step2-next" disabled style="margin-top:24px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
-    </div>
-    <div id="ob-step-3" style="display:none;padding:28px 4px 40px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¡Listo, ciudadano!</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;line-height:1.6;">Tequio queda personalizado para ti. Toda tu información se guarda <strong>solo en tu dispositivo</strong> — cero servidores externos.</p>
-      <div id="ob-preview" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:18px;margin-bottom:20px;"></div>
-      <button onclick="obComplete()" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🚀 Entrar a Tequio</button>
-    </div>
-  </div>
-</div>
+<!-- legacy onboarding overlay removed (id collisions with new overlay) -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
