@@ -1623,7 +1623,7 @@
 </style>
 </head>
 <body>
-<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
+<div id="onboarding-overlay-legacy" style="display:none !important;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
   <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
     <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
       <div style="display:flex;gap:6px;margin-bottom:8px;">
@@ -1760,10 +1760,14 @@ window.tequioWelcomeAceptar = function(){
   var m = document.getElementById('tequio-welcome-modal');
   if(m) m.remove();
   document.body.style.overflow = '';
-  // Lanzar onboarding
-  document.getElementById('onboarding-overlay').style.display = 'block';
-  if(typeof obRenderEstados === 'function') obRenderEstados();
-  if(typeof obRenderIntereses === 'function') obRenderIntereses();
+  // Lanzar onboarding NUEVO (visual mejorado · top 8 estados emoji + 10 cards intereses)
+  if (typeof checkOnboarding === 'function') {
+    checkOnboarding();
+  } else {
+    // Fallback: si por alguna razón checkOnboarding no está definido, mostrar el overlay directo
+    var el = document.getElementById('onboarding-overlay');
+    if (el) { el.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+  }
 };
 function obRenderEstados() {
   const grid = document.getElementById('ob-estados-grid');
@@ -1849,7 +1853,17 @@ window.obToggleInteres = obToggleInteres;
 window.obGoStep = obGoStep;
 window.obComplete = obComplete;
 window.obSkip = obSkip;
-window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    // FIX: usar el flow NUEVO (checkOnboarding) en lugar del viejo (obShow)
+    // El viejo overlay ahora tiene id="onboarding-overlay-legacy" y nunca se muestra.
+    if (localStorage.getItem('tequio_welcome_accepted') !== '1') {
+      if (typeof tequioMostrarWelcome === 'function') tequioMostrarWelcome();
+    } else if (localStorage.getItem('voto_onboarding_done') !== '1') {
+      if (typeof checkOnboarding === 'function') checkOnboarding();
+    }
+  }, 1400);
+});
 })();
 </script>
 <!-- ════════ SPLASH SCREEN ════════ -->
