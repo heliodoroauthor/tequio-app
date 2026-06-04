@@ -2303,6 +2303,10 @@ window.addEventListener('load', function(){
         <span style="margin-left:auto;font-size:11px;color:var(--text3)">👤</span>
       </div>
       <div style="margin-top:8px">
+        <div class="nav-item" onclick="cargarPanel('contacto')">
+          <span class="icon" style="font-size:14px">📧</span> <span style="font-size:12px">Contacto</span>
+          <span style="font-size:9px;color:var(--text3);margin-left:auto">9 emails</span>
+        </div>
         <div class="nav-item" data-page="tos" onclick="showPage('tos')">
           <span class="icon" style="font-size:14px">📜</span> <span style="font-size:12px">Términos de Uso</span>
           <span style="font-size:9px;color:var(--text3);margin-left:auto">v1.0</span>
@@ -15472,6 +15476,7 @@ function cargarPanel(slug, extras) {
   const PANELS = {
     'municipio': '/panel/municipio.html?embedded=1',
     'colaboradores': '/panel/colaboradores.html?embedded=1',
+    'contacto': '/panel/contacto.html?embedded=1',
     'que-falta': '/panel/que-falta.html?embedded=1',
     'que-falta-municipios': '/panel/que-falta-municipios.html?embedded=1',
     'mi-rep': '/panel/mi-rep-vs-yo.html?embedded=1',
@@ -15549,6 +15554,7 @@ function cargarPanel(slug, extras) {
       'asistente-ia': '🧠 Asistente Legal IA',
       'atlas': '🗺️ Atlas Nacional',
       'colaboradores': '🤝 Colaboradores',
+      'contacto': '📧 Contacto',
       'comparador': '⚖️ Comparador Electoral',
       'deuda': '💳 Deuda Pública',
       'diario': '🗞️ Diario Cívico',
