@@ -1,6 +1,24 @@
 User-agent: *
 Allow: /
-Disallow: /panel/
 Disallow: /admin/
+Disallow: /api/
 
+# Allow major search engines to index everything in /panel/
+# (estos son nuestros paneles cívicos con contenido público)
+User-agent: Googlebot
+Allow: /panel/
+
+User-agent: Bingbot
+Allow: /panel/
+
+User-agent: DuckDuckBot
+Allow: /panel/
+
+# Polite crawl-delay for crawlers (en segundos)
+User-agent: *
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://tequio.app/sitemap.xml
+Sitemap: https://tequio.app/sitemap-leyes.xml
+Sitemap: https://tequio.app/sitemap-tesis.xml
