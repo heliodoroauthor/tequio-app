@@ -20,7 +20,7 @@ if not all([SUPABASE_URL, SERVICE_KEY]):
 BATCH_IDX = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 TOTAL_BATCHES = int(sys.argv[2]) if len(sys.argv) > 2 else 5
 
-HEADERS = {'apikey': SERVICE_KEY, 'Authorization': f'Bearer {SERVICE_KEY}', 'Content-Type': 'application/json'}
+HEADERS = {'apikey': SERVICE_KEY, 'Authorization': f'Bearer {SERVICE_KEY}', 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'}
 
 print(f'🦎 OCR PDFs parallel · Batch {BATCH_IDX}/{TOTAL_BATCHES}', flush=True)
 
@@ -109,9 +109,12 @@ def extract_text_ocr(pdf_path):
     return '\n\n'.join(text_parts).strip()
 
 
-def update_chunks_for_ley(ley_id, full_text):
-    """Borra chunks viejos basura, inserta nuevos del texto OCR'd"""
-    # Split en chunks ~500 chars
+def update_chunks_for_ley(ley_id, full_text, ley_nombre='Sin nombre'):
+    """Borra chunks OCR viejos (offset>=10000) e inserta nuevos.
+
+    leyes_chunks tiene NOT NULL en ley_nombre/texto/caracteres y UNIQUE(ley_id, chunk_idx).
+    Usamos chunk_idx 10000+ para no chocar con los chunks producidos por el parser legal,
+    y borramos los 10000+ antes de re-insertar (idempotente)."""
     chunks = []
     sentences = full_text.replace('\n', ' ').split('. ')
     current = ''
@@ -124,38 +127,43 @@ def update_chunks_for_ley(ley_id, full_text):
             current += s + '. '
     if current.strip():
         chunks.append(current.strip())
-    
+
     if not chunks:
         return False
-    
-    # Delete chunks basura existentes
+
     url = f'{SUPABASE_URL}/rest/v1/leyes_chunks'
+
+    # Borrar chunks OCR viejos (offset >= 10000)
     try:
-        # Borrar chunks con texto basura (< 50 chars) para este ley_id
         del_params = {
             'ley_id': f'eq.{ley_id}',
-            'texto': 'is.null',  # solo los basura/null
+            'chunk_idx': 'gte.10000',
         }
         requests.delete(url, params=del_params, headers=HEADERS, timeout=15)
     except Exception:
         pass
-    
-    # Insertar nuevos
+
+    nombre_safe = (ley_nombre or 'Sin nombre')[:500]
     rows = []
-    for i, txt in enumerate(chunks[:100]):  # cap 100 chunks por ley
+    for i, txt in enumerate(chunks[:100]):
+        txt_safe = txt[:5000]
         rows.append({
             'ley_id': ley_id,
-            'chunk_idx': 10000 + i,  # offset alto para no chocar con chunks existentes
-            'texto': txt[:5000],
-            'caracteres': len(txt),
+            'ley_nombre': nombre_safe,
+            'chunk_idx': 10000 + i,
+            'texto': txt_safe,
+            'caracteres': len(txt_safe),
         })
-    
+
     try:
         r = requests.post(url, headers=HEADERS, json=rows, timeout=30)
-        return r.ok
-    except Exception:
+        if r.ok:
+            return True
+        print(f'  [chunks insert HTTP {r.status_code}] {r.text[:200]}', flush=True)
         return False
-
+    except Exception as e:
+        print(f'  [chunks insert exc] {e}', flush=True)
+        return False
 
 def main():
     leyes = find_leyes_que_necesitan_ocr()
@@ -193,13 +201,13 @@ def main():
                 text_ocr = extract_text_ocr(tmp_path)
                 if len(text_ocr) > len(text):
                     text = text_ocr
-                    if update_chunks_for_ley(ley_id, text):
+                    if update_chunks_for_ley(ley_id, text, nombre):
                         ocr_success += 1
                         print(f'  [{processed}] ✅ OCR: {nombre} ({len(text)} chars)', flush=True)
                 else:
                     no_text += 1
             else:
-                if update_chunks_for_ley(ley_id, text):
+                if update_chunks_for_ley(ley_id, text, nombre):
                     text_extract_success += 1
             
             processed += 1
