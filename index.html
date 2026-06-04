@@ -3263,6 +3263,7 @@ window.addEventListener('load', function(){
         </div>
         <div id="jur-stats" style="font-size:11px;color:var(--text3);margin-bottom:12px"></div>
         <div id="jur-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+        <div id="jur-pagination" style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap"></div>
         <div style="padding:24px 0;color:var(--text3);font-size:11px;text-align:center">Fuente: <a href="https://sjf2.scjn.gob.mx/" target="_blank" style="color:var(--accent2)">SJF2 · Semanario Judicial de la Federación</a> · Suprema Corte de Justicia de la Nación</div>
       </div>
     </div>
@@ -4782,36 +4783,69 @@ window.addEventListener('load', function(){
         _jurDebTimer = setTimeout(jurBuscar, 350);
       }
       window.jurDebounceBuscar = jurDebounceBuscar;
-      async function jurBuscar() {
+      let _jurPage = 0;
+      let _jurLastFilters = '';
+      async function jurBuscar(opts) {
+        opts = opts || {};
         const q = document.getElementById('jur-search')?.value || '';
         const materia = document.getElementById('jur-materia')?.value || '';
         const instancia = document.getElementById('jur-instancia')?.value || '';
+        // Reset page si cambian los filtros
+        const curFilters = q + '|' + materia + '|' + instancia;
+        if (curFilters !== _jurLastFilters && !opts.keepPage) {
+          _jurPage = 0;
+          _jurLastFilters = curFilters;
+        }
+        if (typeof opts.page === 'number') _jurPage = opts.page;
         const stats = document.getElementById('jur-stats');
         const lista = document.getElementById('jur-lista');
         if (!lista) return;
         lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Buscando tesis…</div>';
         try {
-          const params = new URLSearchParams({ vista: 'jurisprudencia' });
+          const params = new URLSearchParams({ vista: 'jurisprudencia', page: String(_jurPage), pageSize: '25' });
           if (q) params.set('q', q);
           if (materia) params.set('materia', materia);
           if (instancia) params.set('instancia', instancia);
           const r = await fetch(`/api/data?${params.toString()}`);
           const j = await r.json();
           const tesis = j.tesis || [];
-          // Mostrar contador honesto: lo que se muestra vs el corpus completo
+          window._jurTotal = j.total || 0;
+          window._jurHasMore = !!j.hasMore;
+          // Contador con paginación real
+          const totalReal = window._jurTotal || tesis.length;
+          const pageStart = _jurPage * 25 + 1;
+          const pageEnd = _jurPage * 25 + tesis.length;
           if (stats) {
             var hayFiltro = !!(q || materia || instancia);
+            const totalFmt = totalReal.toLocaleString('es-MX');
             if (hayFiltro) {
-              stats.innerHTML = `<strong>${tesis.length}</strong> tesis con esos filtros · <span style="color:var(--text3)">cap 200 · busca palabras clave si necesitas más</span>`;
+              stats.innerHTML = `Mostrando <strong>${pageStart}–${pageEnd}</strong> de <strong>${totalFmt}</strong> tesis con esos filtros`;
             } else {
-              stats.innerHTML = `<strong>${tesis.length}</strong> tesis · de <strong>300,000</strong> indexadas (3a-11a Época) · <span style="color:var(--text3)">usa el buscador para refinar</span>`;
+              stats.innerHTML = `Mostrando <strong>${pageStart}–${pageEnd}</strong> de <strong>${totalFmt}</strong> tesis · 3ª-11ª Época`;
             }
           }
           if (!tesis.length) {
             lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">No se encontraron tesis con esos filtros. Prueba con menos restricciones o palabras más generales.</div>';
+            // limpia paginación
+            const pg = document.getElementById('jur-pagination'); if (pg) pg.innerHTML = '';
             return;
           }
           lista.innerHTML = tesis.map(t => jurRenderCard(t)).join('');
+          // Render paginación
+          const pgEl = document.getElementById('jur-pagination');
+          if (pgEl) {
+            const totalPages = Math.max(1, Math.ceil(totalReal / 25));
+            const cur = _jurPage + 1; // 1-indexed
+            const prevDisabled = _jurPage === 0;
+            const nextDisabled = !window._jurHasMore;
+            pgEl.innerHTML = `
+              <button onclick="jurBuscar({page:Math.max(0,_jurPage-1),keepPage:true})" ${prevDisabled?'disabled':''} style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;color:${prevDisabled?'var(--text3)':'var(--text)'};cursor:${prevDisabled?'not-allowed':'pointer'};font-family:inherit;font-size:13px;opacity:${prevDisabled?'0.5':'1'}">◀ Anterior</button>
+              <span style="font-size:13px;color:var(--text2);min-width:120px;text-align:center">Página <strong>${cur}</strong> de <strong>${totalPages.toLocaleString('es-MX')}</strong></span>
+              <button onclick="jurBuscar({page:_jurPage+1,keepPage:true})" ${nextDisabled?'disabled':''} style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;color:${nextDisabled?'var(--text3)':'var(--text)'};cursor:${nextDisabled?'not-allowed':'pointer'};font-family:inherit;font-size:13px;opacity:${nextDisabled?'0.5':'1'}">Siguiente ▶</button>
+            `;
+            // Scroll a top de la lista
+            try { lista.scrollIntoView({behavior:'smooth', block:'start'}); } catch(e){}
+          }
         } catch (e) {
           lista.innerHTML = `<div style="text-align:center;padding:40px;color:#ef4444">Error: ${e.message}</div>`;
         }
