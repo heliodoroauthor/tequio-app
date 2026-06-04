@@ -20116,26 +20116,11 @@ async function toggleLecturaFacil() {
     mostrarToast('Error simplificando. Intenta de nuevo.', 'error');
   }
 }
-// Navegación inteligente tras onboarding
+// Tras onboarding: SOLO ir al dashboard (sin auto-routing).
+// El usuario eligió intereses para personalizar, no para ser redirigido —
+// el dashboard ya destaca cosas según los temas de interés.
 function finishOnboardingSmartNav() {
   finishOnboarding();
-  // Determinar módulo más relevante según intereses
-  const moduloMap = {
-    seguridad: 'derechos', corrupcion: 'dinero', salud: 'derechos',
-    educacion: 'leyes', laboral: 'acciones', economia: 'dinero',
-    medio_ambiente: 'leyes', derechos: 'derechos', politica: 'votaciones', vivienda: 'acciones'
-  };
-  const interesesArr = [...obIntereses];
-  if (interesesArr.length > 0) {
-    const primero = interesesArr[0];
-    const modulo = moduloMap[primero] || 'dashboard';
-    if (modulo !== 'dashboard') {
-      setTimeout(() => {
-        showPage(modulo);
-        mostrarToast('Te llevamos a ' + modulo + ' según tus intereses 🎯', 'success');
-      }, 400);
-    }
-  }
 }
 // selectOBEstadoVal para el dropdown
 function selectOBEstadoVal(val) {
