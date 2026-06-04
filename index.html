@@ -14546,20 +14546,33 @@ function obGoStep(step) {
   if (step === 3) buildOBPreview();
 }
 function buildOBPreview() {
-  // Mapa de labels para los chips (matching OB_INTERESES IDs)
+  // Mapa de labels para los chips (matching ambos sets de IDs: viejo + nuevo)
   var INT_LABELS = {
-    'legislativo': {emoji:'⚖️', titulo:'Legislativo'},
-    'dinero': {emoji:'💰', titulo:'Dinero Público'},
-    'seguridad': {emoji:'🚨', titulo:'Seguridad'},
-    'derechos': {emoji:'🛡️', titulo:'Derechos'},
-    'medioambiente': {emoji:'🌿', titulo:'Medio ambiente'},
-    'cultura': {emoji:'🏺', titulo:'Cultura'},
-    'participacion': {emoji:'🗳️', titulo:'Participación'},
-    'organizacion': {emoji:'✊', titulo:'Organización'}
+    // Viejos
+    'legislativo':    {emoji:'⚖️', titulo:'Legislativo'},
+    'dinero':         {emoji:'💰', titulo:'Dinero Público'},
+    'medioambiente':  {emoji:'🌿', titulo:'Medio ambiente'},
+    'cultura':        {emoji:'🏺', titulo:'Cultura'},
+    'participacion':  {emoji:'🗳️', titulo:'Participación'},
+    'organizacion':   {emoji:'✊', titulo:'Organización'},
+    // Nuevos (overlay grande con colores)
+    'seguridad':      {emoji:'🛡️', titulo:'Seguridad'},
+    'corrupcion':     {emoji:'💰', titulo:'Corrupción'},
+    'salud':          {emoji:'🏥', titulo:'Salud'},
+    'educacion':      {emoji:'🎓', titulo:'Educación'},
+    'laboral':        {emoji:'💼', titulo:'Trabajo'},
+    'economia':       {emoji:'📊', titulo:'Economía'},
+    'medio_ambiente': {emoji:'🌿', titulo:'Medio Ambiente'},
+    'derechos':       {emoji:'✊', titulo:'Derechos'},
+    'politica':       {emoji:'🏛️', titulo:'Política'},
+    'vivienda':       {emoji:'🏠', titulo:'Vivienda'}
   };
   var preview = document.getElementById('ob-preview');
-  // 1. Leer estado desde window primero (lo setea obSelectEstado)
-  var estadoNombre = window.__obEstadoNombre;
+  if (!preview) return;
+  // 0. PRIMERO: leer del global window.obEstado (flow NUEVO) si existe
+  var estadoNombre = (typeof obEstado !== 'undefined' && obEstado) ? obEstado : null;
+  // 1. Fallback: window.__obEstadoNombre (flow viejo)
+  if (!estadoNombre) estadoNombre = window.__obEstadoNombre;
   // 2. Fallback: localStorage pending
   if (!estadoNombre) { try { estadoNombre = localStorage.getItem('tequio_estado_nombre_pending'); } catch(e){} }
   // 3. Fallback: DOM (detectar botón estado seleccionado por color)
@@ -14570,9 +14583,15 @@ function buildOBPreview() {
   // 4. Fallback final: ob-estado-txt (textNode actualizado por obSelectEstado)
   if (!estadoNombre) { var et = document.getElementById('ob-estado-txt'); if (et) estadoNombre = et.textContent.trim(); }
   estadoNombre = estadoNombre || '—';
-  // Intereses: leer desde window primero (lo setea obToggleInteres)
-  var intArr = window.__obIntereses;
-  if (!intArr) { try { intArr = JSON.parse(localStorage.getItem('tequio_intereses_pending') || '[]'); } catch(e){ intArr = []; } }
+  // Intereses: PRIMERO desde el Set global obIntereses (flow NUEVO)
+  var intArr = [];
+  if (typeof obIntereses !== 'undefined' && obIntereses && obIntereses.size) {
+    intArr = Array.from(obIntereses);
+  } else if (window.__obIntereses) {
+    intArr = window.__obIntereses;
+  } else {
+    try { intArr = JSON.parse(localStorage.getItem('tequio_intereses_pending') || '[]'); } catch(e){ intArr = []; }
+  }
   // Fallback DOM: detectar botones intereses con border amber
   if (!intArr.length) {
     var btns = document.querySelectorAll('.ob-interes-btn');
@@ -16863,7 +16882,7 @@ function filtrarNoticias() {
   if (orden === 'impacto')    lista.sort((a,b) => ['critico','alto','medio','bajo'].indexOf(a.impactoNivel) - ['critico','alto','medio','bajo'].indexOf(b.impactoNivel));
   else if (orden === 'comentados') lista.sort((a,b) => b.comentarios - a.comentarios);
   { const _e = document.getElementById('noticias-count'); if (_e) _e.textContent = `${lista.length} noticía${lista.length !== 1 ? 's' : ''}`; }
-  document.getElementById('noticias-vacio').style.display = lista.length === 0 ? 'block' : 'none';
+  { var _vac = document.getElementById('noticias-vacio'); if (_vac) _vac.style.display = lista.length === 0 ? 'block' : 'none'; }
   const impactoColor = { critico: 'var(--red2)', alto: 'var(--yellow2)', medio: 'var(--accent2)', bajo: 'var(--green2)' };
   const impactoLabel = { critico: '🔴 Crítico', alto: '🟠 Alto', medio: '🔵 Medio', bajo: '🟢 Bajo' };
   const ambitoLabel  = { nacional: 'Nacional', estatal: 'Estatal', municipal: 'Municipal', alerta: 'Alerta' };
