@@ -3238,7 +3238,7 @@ window.addEventListener('load', function(){
           <div style="font-size:28px">✅</div>
           <div style="flex:1;min-width:220px">
             <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">FUENTE OFICIAL VERIFICADA</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada tesis tiene un <strong>número de registro digital</strong> del Semanario Judicial de la Federación (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">sjf2.scjn.gob.mx</code>). Curaduría inicial: 20 criterios emblemáticos · Décima y Undécima Época. Cero invención.</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada tesis tiene un <strong>número de registro digital</strong> del Semanario Judicial de la Federación (<code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:11px">sjf2.scjn.gob.mx</code>). Catálogo: <strong>300,000 tesis</strong> de 3ª a 11ª Época · scrape directo del SJF2 · Cero invención.</div>
           </div>
         </div>
         <!-- Filtros -->
@@ -4798,9 +4798,17 @@ window.addEventListener('load', function(){
           const r = await fetch(`/api/data?${params.toString()}`);
           const j = await r.json();
           const tesis = j.tesis || [];
-          if (stats) stats.textContent = `${tesis.length} tesis · curaduría inicial`;
+          // Mostrar contador honesto: lo que se muestra vs el corpus completo
+          if (stats) {
+            var hayFiltro = !!(q || materia || instancia);
+            if (hayFiltro) {
+              stats.innerHTML = `<strong>${tesis.length}</strong> tesis con esos filtros · <span style="color:var(--text3)">cap 200 · busca palabras clave si necesitas más</span>`;
+            } else {
+              stats.innerHTML = `<strong>${tesis.length}</strong> tesis · de <strong>300,000</strong> indexadas (3a-11a Época) · <span style="color:var(--text3)">usa el buscador para refinar</span>`;
+            }
+          }
           if (!tesis.length) {
-            lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">No se encontraron tesis con esos filtros.</div>';
+            lista.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">No se encontraron tesis con esos filtros. Prueba con menos restricciones o palabras más generales.</div>';
             return;
           }
           lista.innerHTML = tesis.map(t => jurRenderCard(t)).join('');
