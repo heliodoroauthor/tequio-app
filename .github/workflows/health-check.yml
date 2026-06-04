@@ -1,0 +1,100 @@
+name: 🩺 Health Check (daily)
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 14:00 UTC = 08:00 CDMX
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Call health_check_global RPC
+        id: check
+        run: |
+          set -e
+          response=$(curl -sS -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/health_check_global" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          echo "$response" > /tmp/health.json
+          cat /tmp/health.json
+
+          # Extract overall
+          overall=$(python3 -c "import json; d=json.load(open('/tmp/health.json')); print(d.get('overall','unknown'))")
+          red=$(python3 -c "import json; d=json.load(open('/tmp/health.json')); print(d.get('red_count',0))")
+          yellow=$(python3 -c "import json; d=json.load(open('/tmp/health.json')); print(d.get('yellow_count',0))")
+          green=$(python3 -c "import json; d=json.load(open('/tmp/health.json')); print(d.get('green_count',0))")
+          echo "overall=$overall" >> "$GITHUB_OUTPUT"
+          echo "red=$red" >> "$GITHUB_OUTPUT"
+          echo "yellow=$yellow" >> "$GITHUB_OUTPUT"
+          echo "green=$green" >> "$GITHUB_OUTPUT"
+
+      - name: Build report body
+        id: report
+        run: |
+          python3 << 'PYEOF' > /tmp/body.md
+          import json, os
+          d = json.load(open('/tmp/health.json'))
+          overall = d.get('overall','unknown')
+          checked_at = d.get('checked_at','?')
+          checks = d.get('checks', [])
+
+          icon = {'red':'🚨','yellow':'⚠️','green':'✅'}.get(overall,'❓')
+          lines = []
+          lines.append(f"## {icon} Tequio Health Check — overall **{overall.upper()}**")
+          lines.append(f"_Checked at {checked_at}_")
+          lines.append("")
+          lines.append("| Status | Subsistema | Categoría | Mensaje |")
+          lines.append("|--------|------------|-----------|---------|")
+          for c in checks:
+            s = c.get('status','?')
+            i = {'red':'🔴','yellow':'🟡','green':'🟢'}.get(s,'⚪')
+            lines.append(f"| {i} {s} | `{c.get('name','?')}` | {c.get('category','-')} | {c.get('message','-')} |")
+          lines.append("")
+          lines.append(f"Counts: 🔴 {d.get('red_count',0)} · 🟡 {d.get('yellow_count',0)} · 🟢 {d.get('green_count',0)}")
+          lines.append("")
+          lines.append("---")
+          lines.append("_Generado por `.github/workflows/health-check.yml` · cron 08:00 CDMX diario_")
+          print('\n'.join(lines))
+          PYEOF
+          cat /tmp/body.md
+
+      - name: Open / update issue if RED
+        if: steps.check.outputs.overall == 'red'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Buscar issue abierto con label health-check
+          existing=$(gh issue list --repo "${{ github.repository }}" --label "health-check" --state open --json number --jq '.[0].number')
+          title="🚨 Health check FALLÓ — $(date -u +'%Y-%m-%d')"
+          if [ -n "$existing" ]; then
+            echo "Updating issue #$existing"
+            gh issue comment "$existing" --repo "${{ github.repository }}" --body-file /tmp/body.md
+          else
+            echo "Creating new issue"
+            gh issue create --repo "${{ github.repository }}" \
+              --title "$title" \
+              --body-file /tmp/body.md \
+              --label "health-check"
+          fi
+
+      - name: Close issue if back to GREEN
+        if: steps.check.outputs.overall == 'green'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh issue list --repo "${{ github.repository }}" --label "health-check" --state open --json number --jq '.[].number')
+          for num in $existing; do
+            echo "Closing issue #$num (recovery)"
+            gh issue comment "$num" --repo "${{ github.repository }}" \
+              --body "✅ Auto-resolved: health check vuelve a estar verde."
+            gh issue close "$num" --repo "${{ github.repository }}" --reason completed
+          done
