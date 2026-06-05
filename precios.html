@@ -23,6 +23,10 @@
 <link rel="manifest" href="/manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800&family=DM+Mono&display=swap" rel="stylesheet">
 
+<!-- Leaflet (mapa de gasolineras) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+
 <style>
   :root {
     --bg: #0a0f1a; --bg2: #0e1525; --surface: #1a243d; --surface2: #1e2a42;
@@ -307,6 +311,35 @@
   .results-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 18px; }
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Mapa Leaflet gasolineras ── */
+  .map-toggle { display: flex; gap: 6px; margin-bottom: 12px; background: var(--surface); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+  .map-toggle button { flex: 1; padding: 8px 12px; border-radius: 7px; background: transparent; color: var(--text2); border: none; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .12s; }
+  .map-toggle button:hover { color: var(--text); }
+  .map-toggle button.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #111827; }
+  #gas-map { height: 380px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px; background: var(--bg2); z-index: 1; }
+  #gas-map.hidden { display: none; }
+  #gas-list-wrap.hidden { display: none; }
+  .leaflet-container { background: var(--bg2); font-family: 'DM Sans', sans-serif; }
+  .leaflet-popup-content-wrapper { background: var(--surface); color: var(--text); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .leaflet-popup-tip { background: var(--surface); border: 1px solid var(--border); }
+  .leaflet-popup-content { margin: 12px 14px; min-width: 180px; }
+  .leaflet-popup-content .pop-nombre { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--text); line-height: 1.3; }
+  .leaflet-popup-content .pop-precio { font-family: 'DM Mono', monospace; font-weight: 800; color: var(--accent2); font-size: 20px; margin-bottom: 4px; }
+  .leaflet-popup-content .pop-precio.cheap { color: var(--green2); }
+  .leaflet-popup-content .pop-badge { display: inline-block; background: var(--green); color: #fff; padding: 1px 6px; border-radius: 6px; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .leaflet-popup-content .pop-meta { font-size: 11px; color: var(--text3); margin-bottom: 8px; line-height: 1.4; }
+  .leaflet-popup-content .pop-btn { display: inline-block; background: var(--accent); color: #111827 !important; padding: 7px 11px; border-radius: 8px; font-size: 11px; font-weight: 800; text-decoration: none; }
+  .leaflet-popup-content .pop-btn:hover { filter: brightness(1.08); text-decoration: none; }
+  .leaflet-control-attribution { background: rgba(26, 36, 61, 0.85) !important; color: var(--text3) !important; font-size: 10px !important; border-radius: 4px 0 0 0 !important; }
+  .leaflet-control-attribution a { color: var(--accent) !important; }
+  .leaflet-control-zoom a { background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--border) !important; }
+  .leaflet-control-zoom a:hover { background: var(--surface2) !important; color: var(--accent) !important; }
+  .gas-marker { display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.4); font-weight: 800; font-family: 'DM Mono', monospace; font-size: 11px; color: #111827; }
+  .gas-marker.cheap { background: linear-gradient(135deg, #4ade80, #22c55e); color: #fff; border: 2px solid #fff; }
+  .gas-marker.normal { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: 2px solid #fff; }
+  .gas-marker.user { background: #3b82f6; border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.3); }
+  .station-row.highlight { background: rgba(251,191,36,0.08); border-left: 3px solid var(--accent); transition: background .3s; }
 
 </style>
 </head>
@@ -837,32 +870,168 @@
     } catch (err) { $resultsGas.innerHTML = '<div class="empty">⚠️ ' + (err.message || 'Error') + '</div>'; }
     finally { $goGas.disabled = false; }
   }
+  // Estado global del mapa (para destruirlo entre renders)
+  let gasMap = null;
+  let gasMarkers = [];
+
   function renderGas(data) {
+    // Limpiar mapa anterior si existe
+    if (gasMap) { try { gasMap.remove(); } catch (e) {} gasMap = null; gasMarkers = []; }
+
     if (data.error) { $resultsGas.innerHTML = '<div class="empty">' + (data.mensaje || 'Error') + '</div>'; return; }
     const estaciones = data.estaciones || [];
     const stats = data.stats || {};
     const total = parseInt(stats.total || 0, 10);
     if (total === 0) { $resultsGas.innerHTML = '<div class="empty">Sin gasolineras en ' + data.radio_km + ' km. Prueba un radio mayor.</div>'; return; }
+
+    // Filtrar estaciones con coords válidas
+    const conCoords = estaciones.filter(s => s.lat != null && s.lng != null);
+    const tieneMapa = conCoords.length > 0 && typeof L !== 'undefined';
+
     let html = '';
+    // Stats
     html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">';
     html += '<div class="box" style="margin:0;padding:10px;text-align:center"><div class="lbl">Estaciones</div><div style="font-weight:800;font-size:18px;color:var(--text)">' + total + '</div></div>';
     html += '<div class="box" style="margin:0;padding:10px;text-align:center"><div class="lbl">Más barata</div><div style="font-weight:800;font-size:16px;color:var(--green2)">' + fmtGas(stats.precio_min) + '</div></div>';
     html += '<div class="box" style="margin:0;padding:10px;text-align:center"><div class="lbl">Promedio</div><div style="font-weight:800;font-size:16px;color:var(--accent)">' + fmtGas(stats.precio_promedio) + '</div></div>';
     html += '<div class="box" style="margin:0;padding:10px;text-align:center"><div class="lbl">Más cara</div><div style="font-weight:800;font-size:16px;color:var(--rojo)">' + fmtGas(stats.precio_max) + '</div></div>';
     html += '</div>';
+
+    // Toggle mapa / lista (solo si hay mapa)
+    if (tieneMapa) {
+      html += '<div class="map-toggle">';
+      html += '  <button id="view-mapa" class="active" type="button">🗺️ Mapa</button>';
+      html += '  <button id="view-lista" type="button">📋 Lista</button>';
+      html += '  <button id="view-ambos" type="button">⊞ Ambos</button>';
+      html += '</div>';
+      html += '<div id="gas-map"></div>';
+    }
+
+    // Lista
+    html += '<div id="gas-list-wrap"' + (tieneMapa ? ' class="hidden"' : '') + '>';
     html += '<div class="results-table">';
     estaciones.forEach((s, idx) => {
       const cheapest = idx === 0;
       const mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng;
-      html += '<div class="station-row' + (cheapest ? ' cheapest' : '') + '">';
-      html += '  <div><div class="nombre">' + (s.nombre || '') + (cheapest ? '<span class="badge-cheapest">MÁS BARATA</span>' : '') + '</div>';
-      html += '    <div class="meta">📍 ' + (s.distancia_km != null ? s.distancia_km + ' km · ' : '') + 'Permiso ' + (s.cre_id || '?') + '</div></div>';
+      const safeNombre = esc(s.nombre || '');
+      html += '<div class="station-row' + (cheapest ? ' cheapest' : '') + '" data-idx="' + idx + '">';
+      html += '  <div><div class="nombre">' + safeNombre + (cheapest ? '<span class="badge-cheapest">MÁS BARATA</span>' : '') + '</div>';
+      html += '    <div class="meta">📍 ' + (s.distancia_km != null ? s.distancia_km + ' km · ' : '') + 'Permiso ' + esc(s.cre_id || '?') + '</div></div>';
       html += '  <div class="precio">' + fmtGas(s.precio_consulta) + '</div>';
-      html += '  <a class="map-btn" href="' + mapUrl + '" target="_blank" rel="noopener" title="Ver en Maps">🧭</a>';
+      html += '  <a class="map-btn" href="' + mapUrl + '" target="_blank" rel="noopener" title="Cómo llegar">🧭</a>';
       html += '</div>';
     });
     html += '</div>';
+    html += '</div>';
+
+    // Share
+    const combLabel = $gasCombustible.options[$gasCombustible.selectedIndex].text;
+    const shareText = '⛽ La ' + combLabel + ' más barata cerca de mí: ' + fmtGas(stats.precio_min) + ' · vs promedio ' + fmtGas(stats.precio_promedio) + ' · vía Tequio';
+    const waLink = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + SHARE_URL + '?tab=gasolina');
+    const twLink = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(SHARE_URL + '?tab=gasolina');
+    html += '<div class="share-section">';
+    html += '  <p>📢 Comparte para que más raza ahorre en el tanque</p>';
+    html += '  <div class="share-row">';
+    html += '    <a class="share-btn-big wa" href="' + waLink + '" target="_blank" rel="noopener">💬 WhatsApp</a>';
+    html += '    <a class="share-btn-big tw" href="' + twLink + '" target="_blank" rel="noopener">𝕏 Twitter</a>';
+    html += '  </div>';
+    html += '</div>';
+
     $resultsGas.innerHTML = html;
+
+    // ── Inicializar Leaflet ─────────────────────────────────
+    if (tieneMapa) {
+      initGasMap(conCoords, estaciones);
+      const $vMapa = document.getElementById('view-mapa');
+      const $vLista = document.getElementById('view-lista');
+      const $vAmbos = document.getElementById('view-ambos');
+      const $mapEl = document.getElementById('gas-map');
+      const $listWrap = document.getElementById('gas-list-wrap');
+      function setView(mode) {
+        [$vMapa, $vLista, $vAmbos].forEach(b => b.classList.remove('active'));
+        if (mode === 'mapa')  { $vMapa.classList.add('active');  $mapEl.classList.remove('hidden'); $listWrap.classList.add('hidden'); }
+        if (mode === 'lista') { $vLista.classList.add('active'); $mapEl.classList.add('hidden');    $listWrap.classList.remove('hidden'); }
+        if (mode === 'ambos') { $vAmbos.classList.add('active'); $mapEl.classList.remove('hidden'); $listWrap.classList.remove('hidden'); }
+        setTimeout(() => { if (gasMap && !$mapEl.classList.contains('hidden')) gasMap.invalidateSize(); }, 50);
+      }
+      $vMapa.addEventListener('click', () => setView('mapa'));
+      $vLista.addEventListener('click', () => setView('lista'));
+      $vAmbos.addEventListener('click', () => setView('ambos'));
+    }
+  }
+
+  function initGasMap(conCoords, todasEstaciones) {
+    if (typeof L === 'undefined') return;
+    const mapEl = document.getElementById('gas-map');
+    if (!mapEl) return;
+
+    const tileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    const attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+    gasMap = L.map(mapEl, { zoomControl: true, attributionControl: true, scrollWheelZoom: false }).setView([userLat, userLng], 13);
+    L.tileLayer(tileUrl, { attribution: attr, maxZoom: 19, subdomains: 'abcd' }).addTo(gasMap);
+
+    // Marker del usuario
+    const userIcon = L.divIcon({
+      className: '',
+      html: '<div class="gas-marker user" style="width:18px;height:18px;"></div>',
+      iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+    L.marker([userLat, userLng], { icon: userIcon, zIndexOffset: 1000 })
+      .addTo(gasMap)
+      .bindPopup('<div style="font-weight:700;color:var(--text);font-size:12px">📍 Tu ubicación</div>');
+
+    const bounds = L.latLngBounds([[userLat, userLng]]);
+    gasMarkers = [];
+
+    conCoords.forEach(s => {
+      const realIdx = todasEstaciones.indexOf(s);
+      const cheap = realIdx === 0;
+      const precioStr = '$' + Number(s.precio_consulta).toFixed(2);
+      const iconHtml = '<div class="gas-marker ' + (cheap ? 'cheap' : 'normal') + '" style="width:' + (cheap ? '46px' : '40px') + ';height:' + (cheap ? '26px' : '24px') + ';border-radius:14px;">' + precioStr + '</div>';
+      const icon = L.divIcon({
+        className: '',
+        html: iconHtml,
+        iconSize: cheap ? [46, 26] : [40, 24],
+        iconAnchor: cheap ? [23, 13] : [20, 12]
+      });
+      const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng;
+      const popupHtml =
+        (cheap ? '<div class="pop-badge">⭐ MÁS BARATA</div>' : '') +
+        '<div class="pop-nombre">' + esc(s.nombre || '?') + '</div>' +
+        '<div class="pop-precio' + (cheap ? ' cheap' : '') + '">' + precioStr + '</div>' +
+        '<div class="pop-meta">' +
+          (s.distancia_km != null ? '📍 ' + s.distancia_km + ' km de ti' : '') +
+          (s.cre_id ? '<br>Permiso CRE: ' + esc(s.cre_id) : '') +
+        '</div>' +
+        '<a class="pop-btn" href="' + mapsUrl + '" target="_blank" rel="noopener">🧭 Cómo llegar</a>';
+
+      const m = L.marker([s.lat, s.lng], { icon: icon, zIndexOffset: cheap ? 500 : 100 })
+        .addTo(gasMap)
+        .bindPopup(popupHtml, { maxWidth: 240, minWidth: 180 });
+
+      m.on('click', () => {
+        document.querySelectorAll('.station-row.highlight').forEach(r => r.classList.remove('highlight'));
+        const row = document.querySelector('.station-row[data-idx="' + realIdx + '"]');
+        if (row) {
+          row.classList.add('highlight');
+          const listWrap = document.getElementById('gas-list-wrap');
+          if (listWrap && !listWrap.classList.contains('hidden')) {
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+
+      bounds.extend([s.lat, s.lng]);
+      gasMarkers.push(m);
+    });
+
+    if (gasMarkers.length > 0) {
+      gasMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      setTimeout(() => { try { gasMarkers[0].openPopup(); } catch (e) {} }, 400);
+    }
+
+    setTimeout(() => { if (gasMap) gasMap.invalidateSize(); }, 100);
   }
   $goGas.addEventListener('click', buscarGas);
   $gasCombustible.addEventListener('change', () => { if (userLat) buscarGas(); });
