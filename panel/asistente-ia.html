@@ -224,7 +224,7 @@
   if (params.get('embedded') === '1') document.body.classList.add('embedded');
   const history = [];
   function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-  function addMessage(role,text,sources){
+  function addMessage(role,text,sources,isHtml){
     const el=document.createElement('div');
     el.className='msg '+role;
     const avatar=role==='user'?'👤':'🤖';
@@ -237,7 +237,7 @@
         return `<div class="fuente-item">${linkHtml}</div>`;
       }).join('')+'</div>';
     }
-    el.innerHTML=`<div class="avatar">${avatar}</div><div class="bubble">${escapeHtml(text)}${sourcesHtml}</div>`;
+    el.innerHTML=`<div class="avatar">${avatar}</div><div class="bubble">${isHtml?text:escapeHtml(text)}${sourcesHtml}</div>`;
     messagesEl.appendChild(el);
     messagesEl.scrollTop=messagesEl.scrollHeight;
     return el;
@@ -305,7 +305,7 @@
       } else {
         humano = '<strong style="color:#f87171">🦎 Algo salió mal.</strong> Intenta reformular tu pregunta. Si el problema persiste, escríbenos a hola@tequio.app · <details style="margin-top:6px"><summary style="cursor:pointer;color:#64748b;font-size:11px">Detalle técnico</summary><pre style="font-size:10px;color:#94a3b8;white-space:pre-wrap;margin-top:6px">' + (msg.replace(/</g,'&lt;')) + '</pre></details>';
       }
-      addMessage('ai', humano);
+      addMessage('ai', humano, null, true);
     } finally {
       sendBtn.disabled=false;
       inputEl.focus();
