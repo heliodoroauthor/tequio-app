@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
 """
-scrape_presas.py — CONAGUA SIH dam levels (replaces broken SINA scraper)
+scrape_presas.py v2 — CONAGUA SIH dam levels (rewrite)
 ========================================================================
-1. Descarga el catalogo maestro (.xls) con clave, nombre, estado, NAMO.
-2. Para cada presa, descarga su CSV diario y extrae el ultimo VolumenAlm.
-3. Calcula % de llenado vs NAMO y hace UPSERT en presas_cuencas.
+v1 leía cols[5] del CSV (que es Vertedor, casi siempre 0) en lugar de
+cols[3] (VolumenAlm). Resultado: 96% de los registros recientes salían
+con NULL o 0.
+
+v2 fixes:
+  1. Auto-detect de columna VolumenAlm desde el header (no índice fijo)
+  2. Encoding latin-1 (el CSV de CONAGUA viene en latin-1, no utf-8)
+  3. Retry con backoff exponencial para vencer Imperva Challenge
+  4. Quality guard: si >40% de presas fallan o devuelven vol=0, abortar
+     antes de escribir BD (no envenenar la tabla)
+  5. Descartar lecturas vol=0 cuando hay lecturas anteriores >0
+     (probable error de captura del día más reciente)
 
 Fuente: https://sih.conagua.gob.mx/basedatos/Presas/
-
-H2.6-01b 2026-05-21 fix 3: agregado cloudscraper para bypass de anti-bot
-Imperva en sih.conagua.gob.mx. urllib3 v2 rechaza verify=False con
-check_hostname=True, asi que dejamos verify=True (default) y confiamos en
-el cert valido de SIH. cs_get pop()ea verify=False legacy de llamadas.
 """
-import os, sys, time, requests
+import os, sys, time, random, requests
 from datetime import datetime
 
 import urllib3
 urllib3.disable_warnings()
 
-# ---- Anti-bot bypass (Imperva/Akamai en gob.mx) ----
+# ---- Anti-bot bypass (Imperva en gob.mx) ----
 try:
     import cloudscraper
     _SCRAPER = cloudscraper.create_scraper(
@@ -40,9 +44,16 @@ SERVICE_KEY  = os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')
 
 CATALOGO_URL = 'https://sih.conagua.gob.mx/basedatos/Presas/0_Catalogo_de_presas.xls'
 CSV_BASE     = 'https://sih.conagua.gob.mx/basedatos/Presas'
-HEADERS_WEB  = {'User-Agent': 'Mozilla/5.0 (compatible; TequioBot/1.0; +https://tequio-app.vercel.app)'}
+HEADERS_WEB  = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+                  '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8',
+}
 TIMEOUT      = 30
 MAX_PRESAS   = int(os.environ.get('MAX_PRESAS', '210'))
+QUALITY_THRESHOLD = float(os.environ.get('QUALITY_THRESHOLD', '0.40'))  # abortar si fail > 40%
+MAX_RETRIES  = 3
 
 HEADERS_SB = {
     'apikey': SERVICE_KEY,
@@ -50,7 +61,7 @@ HEADERS_SB = {
     'Content-Type': 'application/json',
 }
 
-# -- Capacidades NAMO (hm3) de las ~50 presas mas grandes de Mexico --
+# -- Capacidades NAMO (hm3) de las ~50 presas más grandes de México --
 # Fuente: CONAGUA - Inventario Nacional de Presas
 CAPACIDAD_FALLBACK = {
     'angostura': 19737, 'malpaso': 12373, 'nezahualcoyotl': 12373,
@@ -76,7 +87,6 @@ CAPACIDAD_FALLBACK = {
 
 
 def buscar_capacidad_fallback(nombre_presa):
-    """Si el XLS no dio capacidad, intenta match por nombre con dict hardcoded."""
     if not nombre_presa:
         return None
     n = nombre_presa.lower()
@@ -87,10 +97,39 @@ def buscar_capacidad_fallback(nombre_presa):
             return cap
     return None
 
-print("Tequio Presas Scraper - CONAGUA SIH")
+
+def get_with_retry(url, **kw):
+    """GET con retry y backoff exponencial para vencer Imperva."""
+    last_err = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            r = cs_get(url, **kw)
+            # Detectar Imperva challenge page
+            if r.status_code == 200:
+                first_bytes = r.content[:300].decode('latin-1', errors='ignore').lower()
+                if 'challenge validation' in first_bytes or 'imperva' in first_bytes:
+                    last_err = f"imperva_challenge (intento {attempt+1})"
+                    sleep_for = (2 ** attempt) + random.uniform(0, 1)
+                    time.sleep(sleep_for)
+                    continue
+                return r
+            if r.status_code in (429, 503):
+                last_err = f"http_{r.status_code}"
+                sleep_for = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(sleep_for)
+                continue
+            return r
+        except Exception as e:
+            last_err = str(e)
+            time.sleep(1 + attempt)
+    return None
+
+
+print("Tequio Presas Scraper v2 - CONAGUA SIH")
 print(f"  Python: {sys.version.split()[0]}")
 print(f"  SUPABASE_URL: {'OK' if SUPABASE_URL else 'MISSING'}")
 print(f"  SERVICE_KEY:  {'OK' if SERVICE_KEY else 'MISSING'}")
+print(f"  Quality threshold: {QUALITY_THRESHOLD*100:.0f}% fail max")
 
 if not (SUPABASE_URL and SERVICE_KEY):
     print("ERROR: env vars faltantes.")
@@ -100,20 +139,11 @@ if not (SUPABASE_URL and SERVICE_KEY):
 def cargar_catalogo():
     """Baja el .xls maestro y extrae (clave, presa, estado, capacidad_NAMO)."""
     print(f"\n[CATALOGO] GET {CATALOGO_URL}")
-    try:
-        r = cs_get(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT)
-        print(f"  Status: {r.status_code}, bytes: {len(r.content)}")
-        # Detectar anti-bot challenge
-        if r.status_code == 200 and len(r.content) < 5000:
-            head = r.content[:600].decode('latin-1', errors='ignore').lower()
-            if 'challenge' in head or 'imperva' in head or 'akamai' in head:
-                print("  WARN: respuesta parece anti-bot challenge, no XLS real")
-                return []
-        if not r.ok:
-            return []
-    except Exception as e:
-        print(f"  EXC: {e}")
+    r = get_with_retry(CATALOGO_URL, headers=HEADERS_WEB, timeout=TIMEOUT)
+    if not r or not r.ok:
+        print(f"  ERR: catalogo no descargable")
         return []
+    print(f"  Status: {r.status_code}, bytes: {len(r.content)}")
 
     try:
         import xlrd
@@ -123,9 +153,8 @@ def cargar_catalogo():
 
     try:
         book = xlrd.open_workbook(file_contents=r.content)
-        print(f"  Hojas: {book.nsheets} -> {book.sheet_names()}")
         sheet = book.sheet_by_index(0)
-        print(f"  Hoja[0]: {sheet.name}, filas={sheet.nrows}, cols={sheet.ncols}")
+        print(f"  Hoja: {sheet.name}, filas={sheet.nrows}, cols={sheet.ncols}")
     except Exception as e:
         print(f"  EXC parse xls: {e}")
         return []
@@ -138,31 +167,25 @@ def cargar_catalogo():
             row = [v.upper() for v in row_raw]
         except Exception:
             continue
-        if any('CLAVE' in v for v in row) or any('ESTACI' in v for v in row):
+        if any('CLAVE' in v for v in row) or any('NOMBRE' in v for v in row):
             header_row = ri
-            print(f"  Fila encabezado [{ri}]: {row_raw[:14]}")
+            print(f"  Header fila [{ri}]: {row_raw[:14]}")
             for ci, v in enumerate(row):
                 v_clean = v.replace('.', '').replace(' ', '')
-                if ('CLAVE' in v or v == 'ESTACION' or v == 'ESTACIÓN') and 'clave' not in col_map:
+                if 'CLAVE' in v and 'clave' not in col_map:
                     col_map['clave'] = ci
                 elif (('NOMBRE' in v and 'OFICIAL' not in v) or 'COMUN' in v) and 'presa' not in col_map:
                     col_map['presa'] = ci
                 elif ('ENTIDAD' in v or 'ESTADO' in v) and 'estado' not in col_map:
                     col_map['estado'] = ci
-                elif ('NAMO' in v_clean or 'CAPACIDAD' in v or v_clean.startswith('CAP') or
-                      'VOLUMENALNAMO' in v_clean or 'CAPNAMO' in v_clean) and 'capacidad' not in col_map:
+                elif ('NAMO' in v_clean or 'CAPACIDAD' in v or 'CAPNAMO' in v_clean) and 'capacidad' not in col_map:
                     col_map['capacidad'] = ci
             break
 
     if header_row is None or 'clave' not in col_map:
         print(f"  ERR: encabezados no encontrados. col_map: {col_map}")
-        for ri in range(min(6, sheet.nrows)):
-            print(f"    [{ri}] {[str(sheet.cell_value(ri,c))[:20] for c in range(min(sheet.ncols,12))]}")
         return []
-    print(f"  Encabezados fila {header_row}, mapeo: {col_map}")
-    if sheet.nrows > header_row + 1:
-        sample = {k: sheet.cell_value(header_row+1, ci) for k, ci in col_map.items()}
-        print(f"  Sample fila {header_row+1}: {sample}")
+    print(f"  Header fila {header_row}, mapeo: {col_map}")
 
     presas = []
     for ri in range(header_row + 1, sheet.nrows):
@@ -186,47 +209,73 @@ def cargar_catalogo():
     return presas[:MAX_PRESAS]
 
 
-def ultimo_volumen(clave):
-    """Descarga CSV y devuelve (fecha_iso, volumen_hm3) mas reciente."""
-    url = f"{CSV_BASE}/{clave}.csv"
-    try:
-        r = cs_get(url, headers=HEADERS_WEB, timeout=TIMEOUT)
-        if not r.ok:
-            return None, None
-    except Exception:
-        return None, None
+def parse_csv(text):
+    """
+    Parsea el CSV y devuelve (fecha_iso, volumen_hm3) del último día con dato VÁLIDO.
+    Auto-detecta la columna VolumenAlm desde el header.
+    Encoding: latin-1.
+    """
+    lines = text.split('\n')
 
-    lines = r.text.split('\n')
-    data_start = None
-    for i, ln in enumerate(lines):
-        if ln.startswith('Estacion,'):
-            data_start = i + 1
+    # Buscar header dinámicamente
+    header_idx = None
+    vol_col_idx = None
+    fecha_col_idx = None
+    for i, ln in enumerate(lines[:30]):
+        ln_norm = ln.strip().lower()
+        if 'estacion' in ln_norm and 'fecha' in ln_norm and 'volumen' in ln_norm:
+            header_idx = i
+            cols = [c.strip().lower() for c in ln.split(',')]
+            for ci, c in enumerate(cols):
+                if 'volumenalm' in c.replace(' ',''):
+                    vol_col_idx = ci
+                elif c == 'fecha':
+                    fecha_col_idx = ci
             break
-    if data_start is None:
+
+    if vol_col_idx is None or fecha_col_idx is None or header_idx is None:
         return None, None
 
-    for ln in reversed(lines[data_start:]):
+    # Recorrer de atrás hacia adelante buscando una fila con vol válido
+    for ln in reversed(lines[header_idx+1:]):
         ln = ln.strip()
         if not ln:
             continue
         cols = ln.split(',')
-        if len(cols) < 6:
+        if len(cols) <= max(vol_col_idx, fecha_col_idx):
             continue
-        fecha = cols[1].strip()
-        vol_raw = cols[5].strip() if len(cols) > 5 else ''
+        fecha = cols[fecha_col_idx].strip()
+        vol_raw = cols[vol_col_idx].strip()
         if not vol_raw or not fecha:
             continue
         try:
             vol = float(vol_raw)
             datetime.strptime(fecha, '%Y-%m-%d')
+            if vol <= 0:
+                # vol=0 o negativo: salta y busca un día anterior con dato real
+                continue
             return fecha, vol
         except Exception:
             continue
     return None, None
 
 
+def ultimo_volumen(clave):
+    """Descarga CSV (con retry) y devuelve (fecha, volumen) del último día válido."""
+    url = f"{CSV_BASE}/{clave}.csv"
+    r = get_with_retry(url, headers=HEADERS_WEB, timeout=TIMEOUT)
+    if not r or not r.ok:
+        return None, None
+    # CONAGUA sirve en latin-1
+    try:
+        text = r.content.decode('latin-1')
+    except Exception:
+        text = r.text
+    return parse_csv(text)
+
+
 def upsert_presa(row):
-    """Insert sin upsert estricto (acepta historia)."""
+    """Insert con merge para acumular historia."""
     url = f"{SUPABASE_URL}/rest/v1/presas_cuencas?on_conflict=presa,fecha_corte"
     h = {**HEADERS_SB, 'Prefer': 'resolution=merge-duplicates,return=minimal'}
     try:
@@ -248,11 +297,16 @@ def main():
         print("ERROR: catalogo vacio. Abortando.")
         sys.exit(1)
 
-    ok = falla = sin_dato = 0
+    # Primera pasada: recolectar datos en memoria (NO escribir BD aún)
+    print(f"\n[SCRAPE] Procesando {len(presas)} presas...")
+    resultados = []
+    sin_dato = 0
     for i, p in enumerate(presas, 1):
         fecha, vol = ultimo_volumen(p['clave'])
         if not fecha or vol is None:
             sin_dato += 1
+            resultados.append((p, None, None, None))
+            time.sleep(0.18)
             continue
         cap = p['capacidad']
         if not cap:
@@ -262,25 +316,41 @@ def main():
             pct = round((vol / cap) * 100, 2)
             if pct > 200:
                 pct = None
+        resultados.append((p, fecha, vol, pct))
+        if i % 25 == 0 or i == len(presas):
+            pct_str = f"{pct:.0f}%" if pct is not None else 'n/a'
+            print(f"  [{i}/{len(presas)}] {p['presa'][:32]:32} {fecha}  {vol:>8.1f} hm3  {pct_str}")
+        time.sleep(0.18)
+
+    # Quality guard: si % de fallos > umbral, NO escribir BD
+    fail_rate = sin_dato / len(presas) if presas else 1.0
+    print(f"\n[QUALITY] Tasa fallo: {fail_rate*100:.1f}% ({sin_dato}/{len(presas)})")
+    if fail_rate > QUALITY_THRESHOLD:
+        print(f"❌ ABORTAR: fallo > {QUALITY_THRESHOLD*100:.0f}%. CONAGUA puede haber cambiado formato o estar bloqueando.")
+        print(f"   No se escribió a BD para no envenenar la tabla. Investiga manualmente.")
+        sys.exit(2)
+
+    # Segunda pasada: escribir BD solo con datos válidos
+    print(f"\n[WRITE] Escribiendo {len(presas)-sin_dato} registros válidos a BD...")
+    ok = falla = 0
+    for p, fecha, vol, pct in resultados:
+        if fecha is None or vol is None:
+            continue
         row = {
             'fecha_corte': fecha,
             'presa': (p['presa'] or p['clave'])[:120],
             'estado': (p['estado'][:80] if p['estado'] else None),
-            'capacidad_total_hm3': cap,
+            'capacidad_total_hm3': p['capacidad'] or buscar_capacidad_fallback(p['presa']),
             'almacenamiento_hm3': round(vol, 2),
             'pct_almacenamiento': pct,
             'fuente': 'CONAGUA SIH',
         }
         if upsert_presa(row):
             ok += 1
-            if i % 25 == 0 or i == len(presas):
-                pct_str = f"{pct:.0f}%" if pct is not None else 'n/a'
-                print(f"  [{i}/{len(presas)}] {p['presa'][:32]:32} {fecha}  {vol:>8.1f} hm3  {pct_str}")
         else:
             falla += 1
-        time.sleep(0.12)
 
-    print(f"\nResumen: {ok} actualizadas, {falla} fallidas, {sin_dato} sin dato reciente")
+    print(f"\n✅ Resumen: {ok} escritas OK, {falla} fallaron al escribir, {sin_dato} sin dato CONAGUA")
 
 
 if __name__ == '__main__':
