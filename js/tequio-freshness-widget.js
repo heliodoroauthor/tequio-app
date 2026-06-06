@@ -32,6 +32,7 @@
   // Status → color
   var COLORS = {
     fresca:    { bg: 'rgba(34,197,94,0.12)',   border: 'rgba(34,197,94,0.45)',   txt: '#4ade80', label: 'FRESCA' },
+    vigilada:  { bg: 'rgba(168,85,247,0.10)',  border: 'rgba(168,85,247,0.45)',  txt: '#c084fc', label: 'VIGILADA' },
     reciente:  { bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.40)',  txt: '#60a5fa', label: 'RECIENTE' },
     stale:     { bg: 'rgba(251,191,36,0.10)',  border: 'rgba(251,191,36,0.40)',  txt: '#fbbf24', label: 'STALE' },
     vieja:     { bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.40)',   txt: '#f87171', label: 'VIEJA' },
@@ -89,7 +90,7 @@
     var html = '';
 
     // Resumen rápido
-    var counts = { fresca: 0, reciente: 0, stale: 0, vieja: 0, sin_datos: 0 };
+    var counts = { fresca: 0, reciente: 0, vigilada: 0, stale: 0, vieja: 0, sin_datos: 0 };
     Object.keys(fuentes).forEach(function (k) {
       var status = fuentes[k].status;
       if (counts[status] !== undefined) counts[status]++;
