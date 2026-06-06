@@ -137,24 +137,44 @@ munis = requests.get(
     headers=H_SB, timeout=30).json()
 print(f"  {len(munis)} municipios totales")
 
-# Saltar los que ya tienen 'simbolos' (los demás campos siguen actualizables)
-existentes_simbolos = {r['municipio_id'] for r in requests.get(
-    f"{SB_URL}/rest/v1/municipio_docs?select=municipio_id&categoria_id=eq.simbolos&vigente=eq.true",
-    headers=H_SB, timeout=30).json()}
+# Cargar ya-existentes con su titulo para no re-buscar Wikipedia
+print("  Cargando docs existentes...")
+existentes = {}
+for r in requests.get(
+    f"{SB_URL}/rest/v1/municipio_docs?select=municipio_id,categoria_id,nombre_doc&vigente=eq.true",
+    headers=H_SB, timeout=30).json():
+    key = (r['municipio_id'], r['categoria_id'])
+    existentes[key] = r.get('nombre_doc')
+print(f"  {len(existentes)} docs existentes cargados")
+
+# Saltar municipios donde YA tenemos las 3 categorías Wikipedia
+ya_completos = set()
+for muni_id, _, _ in [(k[0],) + k for k in existentes if k[1] in ('simbolos','sitio_web','redes_sociales')]:
+    cats = {k[1] for k in existentes if k[0] == muni_id}
+    if {'simbolos','sitio_web','redes_sociales'}.issubset(cats):
+        ya_completos.add(muni_id)
+print(f"  {len(ya_completos)} municipios ya completos (3/3 cats)")
 
 print(f"\n[2] Iterando Wikipedia con rate limit 0.4 s/req...")
 n_sim = n_web = n_red = 0
 fails = 0
 for i, m in enumerate(munis):
-    if m['id'] in existentes_simbolos:
+    if m['id'] in ya_completos:
         continue
-    titulo, url_wiki = buscar_wiki(m['nombre'], m['nombre_estado'])
-    if not titulo:
-        fails += 1
-        continue
-    # Símbolos: URL del artículo
-    if upsert_doc(m['id'], 'simbolos', url_wiki, titulo, 'Wikipedia ES (CC BY-SA)'):
-        n_sim += 1
+
+    # Si ya tiene 'simbolos', usar el titulo guardado; si no, buscar en Wikipedia
+    titulo_existente = existentes.get((m['id'], 'simbolos'))
+    if titulo_existente:
+        titulo = titulo_existente
+        url_wiki = None  # no necesitamos URL nuevo
+    else:
+        titulo, url_wiki = buscar_wiki(m['nombre'], m['nombre_estado'])
+        if not titulo:
+            fails += 1
+            continue
+        # Insert simbolos solo si es nuevo
+        if upsert_doc(m['id'], 'simbolos', url_wiki, titulo, 'Wikipedia ES (CC BY-SA)'):
+            n_sim += 1
     # Infobox: sitio_web + redes
     wc = get_wikicode(titulo)
     if wc:
