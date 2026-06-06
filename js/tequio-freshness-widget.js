@@ -125,6 +125,8 @@
       html += '  <div>';
       html += '    <div style="font-weight:700;font-size:13px;color:#e8edf5;line-height:1.3">' + meta.titulo + '</div>';
       html += '    <div style="font-size:11px;color:#94a3b8;margin-top:3px">' + f.fuente_oficial + '</div>';
+      var cadenciaLabel = { diaria:'⏱️ diaria', continua:'⏱️ continua', semanal:'⏱️ semanal', mensual:'⏱️ mensual', sesiones:'🏛️ en sesiones', anual:'📅 anual', irregular:'🔄 irregular', censal:'📊 censal' };
+      if (f.cadencia_oficial) html += '    <div style="font-size:10px;color:#64748b;margin-top:2px">Cadencia oficial: <strong style="color:#94a3b8">' + (cadenciaLabel[f.cadencia_oficial] || f.cadencia_oficial) + '</strong></div>';
       html += '    <div style="font-size:11px;color:#64748b;margin-top:3px">📅 ' + (f.fecha || 'sin dato') + ' · ' + (f.total != null ? f.total.toLocaleString('es-MX') + ' registros' : '') + '</div>';
       html += '  </div>';
       html += '  <div style="text-align:right">';
