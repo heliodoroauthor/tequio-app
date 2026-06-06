@@ -171,6 +171,49 @@ function geminiToAnthropic(data, originalModel, docs) {
   };
 }
 
+// ── Rate limit por IP usando Supabase RPC ──
+const crypto = require('crypto');
+const RATE_LIMIT_PER_MIN = parseInt(process.env.AI_RATE_LIMIT_PER_MIN || '10', 10);
+
+function getClientIp(req) {
+  return (
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+    req.headers['x-real-ip'] ||
+    (req.socket && req.socket.remoteAddress) ||
+    'unknown'
+  );
+}
+
+function hashIp(ip) {
+  return crypto.createHash('sha256').update(String(ip)).digest('hex').substring(0, 32);
+}
+
+async function checkRateLimit(ip) {
+  const supaUrl = process.env.SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!supaUrl || !supaKey) return { ok: true };
+  try {
+    const r = await fetch(`${supaUrl}/rest/v1/rpc/ai_proxy_check_rate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supaKey,
+        Authorization: `Bearer ${supaKey}`,
+      },
+      body: JSON.stringify({
+        p_ip_hash: hashIp(ip),
+        p_limit: RATE_LIMIT_PER_MIN,
+        p_window_sec: 60,
+      }),
+    });
+    if (!r.ok) return { ok: true };
+    return await r.json();
+  } catch (e) {
+    console.warn('[rate-limit] error:', e.message);
+    return { ok: true };
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -179,6 +222,23 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') {
     res.status(405).json({ error: { type: 'method_not_allowed', message: 'Only POST allowed' } });
+    return;
+  }
+
+  // Rate limit por IP
+  const clientIp = getClientIp(req);
+  const rateCheck = await checkRateLimit(clientIp);
+  if (!rateCheck.ok) {
+    res.setHeader('Retry-After', String(rateCheck.retry_after_sec || 60));
+    res.setHeader('X-RateLimit-Limit', String(rateCheck.limit || RATE_LIMIT_PER_MIN));
+    res.setHeader('X-RateLimit-Remaining', '0');
+    res.status(429).json({
+      error: {
+        type: 'rate_limited',
+        message: `Demasiadas consultas. Espera ${rateCheck.retry_after_sec || 60}s y reintenta. Límite: ${rateCheck.limit}/min.`,
+        retry_after_sec: rateCheck.retry_after_sec || 60,
+      },
+    });
     return;
   }
 
