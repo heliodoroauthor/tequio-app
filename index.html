@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#fbbf24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tequio — Plataforma Cívica Digital de México · Leyes, Congreso, Presupuesto</title>
-<meta name="description" content="Plataforma cívica de México con 8,973 leyes (federal/estatal/municipal), 300,000 tesis SCJN, votaciones del Congreso, PEF, contratos públicos. Sin registro. Gratis. Cero invención.">
+<meta name="description" content="Plataforma cívica de México con 9,194 leyes (federal/estatal/municipal), 300,000 tesis SCJN, votaciones del Congreso, PEF, contratos públicos. Sin registro. Gratis. Cero invención.">
 <meta name="keywords" content="México, leyes mexicanas, Congreso, Cámara Diputados, Senado, SCJN, jurisprudencia, presupuesto federal, PEF, contratos públicos, transparencia, derechos ciudadanos, ley municipal, ley estatal">
 <meta name="author" content="Tequio">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="Tequio">
 <meta property="og:url" content="https://tequio.app/">
 <meta property="og:title" content="Tequio — Plataforma Cívica Digital de México">
-<meta property="og:description" content="8,973 leyes mexicanas · 300,000 tesis SCJN · Congreso en vivo · PEF 2026 · contratos públicos. Cero invención.">
+<meta property="og:description" content="9,194 leyes mexicanas · 300,000 tesis SCJN · Congreso en vivo · PEF 2026 · contratos públicos. Cero invención.">
 <meta property="og:image" content="https://tequio.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -139,7 +139,7 @@ function tequioMostrarWelcome() {
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">📚</span>' +
-          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,518</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">9,194</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
         '</div>' +
       '</div>' +
       '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px">' +
@@ -1201,7 +1201,7 @@ window.addEventListener('load', function(){
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,518</div>
+            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">9,194</div>
             <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
           <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
@@ -3950,7 +3950,7 @@ window.addEventListener('load', function(){
           </div>
           <!-- Stats inline en el hero -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,518</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">9,194</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">32/32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">560+</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Ciudades</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">325,751</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
@@ -12883,7 +12883,7 @@ let obIntereses = new Set();
 // ─── FUENTES VERIFICABLES ───
 // ════════════════════════════════════════
 const fuentesDB = {
-  leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'5,961 leyes federales+estatales · 2,557 reglamentos municipales · 8,518 total', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'292 leyes federales (diputados.gob.mx) + 5,669 leyes estatales de los 32 congresos + 2,557 reglamentos municipales de 560 ciudades. Scraping continuo + workflow autónomo. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
+  leyes_vigentes: { titulo:'Leyes Federales y Estatales', dato:'5,961 leyes federales+estatales · 3,233 leyes municipales · 9,194 total', fuente:'Cámara de Diputados · LeyesBiblio + DOF', url:'https://www.diputados.gob.mx/LeyesBiblio/index.htm', fecha:'Actualización continua vía scraper', metodologia:'292 leyes federales (diputados.gob.mx) + 5,669 leyes estatales de los 32 congresos + 3,233 leyes municipales (reglamentos + gacetas) de 560+ ciudades. Scraping continuo + workflow autónomo. Cada ley incluye embedding semántico (768-d) para búsqueda con IA.', verificar:'diputados.gob.mx/LeyesBiblio · dof.gob.mx' },
   contratos_publicos: { titulo:'Contratos Públicos APF', dato:'23,175 contratos cargados', fuente:'ComprasMX / CompraNet (OCDS)', url:'https://comprasmx.buengobierno.gob.mx', fecha:'Actualización semanal vía workflow', metodologia:'Contratos publicados por la Administración Pública Federal en el estándar de datos abiertos OCDS. Incluye contratante, proveedor, monto, fecha, modalidad de contratación.', verificar:'comprasmx.buengobierno.gob.mx → Contrataciones' },
   deuda_publica: { titulo:'Deuda Pública', dato:'$18.20 billones de pesos (52.4% PIB)', fuente:'SHCP — Informe de Finanzas Públicas Q3 2024', url:'https://www.finanzaspublicas.hacienda.gob.mx', fecha:'Publicado: 31 octubre 2024', metodologia:'Saldo de deuda del Sector Público Federal: interna ($9.84T) + externa ($3.86T) + PEMEX + CFE. Calculado conforme a la metodología del FMI.', verificar:'finanzaspublicas.hacienda.gob.mx → Deuda Pública → Informes Trimestrales' },
   patrimonio_inah: { titulo:'Patrimonio Cultural · INAH', dato:'195 zonas arqueológicas + 165 museos', fuente:'INAH · Datos Abiertos', url:'https://datos.inah.gob.mx', fecha:'Catálogo INAH vigente', metodologia:'Catálogo oficial de zonas arqueológicas abiertas al público y museos administrados por el INAH. Datos abiertos del Instituto Nacional de Antropología e Historia.', verificar:'datos.inah.gob.mx → Zonas Arqueológicas · Museos' },
