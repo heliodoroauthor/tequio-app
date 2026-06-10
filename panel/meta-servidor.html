@@ -222,6 +222,7 @@
     <a href="https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=10644737-6ab4a3de-060d-4174-a08f-626c40701bdc" target="_blank" rel="noopener" class="btn-primary" style="background:linear-gradient(135deg,#00b1ea,#009ee3);">🇲🇽 Donar con Mercado Pago (SPEI · Oxxo · tarjeta MX)</a>
     <div style="font-size:11px;color:#94a3b8;margin-top:6px;text-align:center;line-height:1.4">Pagos a la cuenta <strong style="color:#cbd5e1">Business "Tequio.app"</strong> en PayPal (registrada a nombre de Heliodoro Gómez). Cuando se constituya <strong>Tequio Cívico A.C.</strong>, transferimos los saldos. Cada peso registrado en la hoja pública de transparencia.</div>
     <a href="/panel/donar.html" class="btn-secondary">Ver todos los métodos de donación</a>
+    <a href="https://docs.google.com/spreadsheets/d/165Zq7QwlnVkQqwnw3F1VOocrHbT0W-Dzhh5kPXxVz9s/edit?usp=sharing" target="_blank" rel="noopener" class="btn-secondary">📊 Auditar la meta en hoja pública</a>
     <a href="/" class="btn-secondary">Volver a Tequio</a>
   </div>
 
@@ -252,9 +253,49 @@
   }
   recalcular();
 
-  // TODO: cuando exista hoja de transparencia, hacer fetch a su CSV pública
-  // y actualizar #recaudado-e1, prog-e1, etc. en tiempo real.
-  // Por ahora, valores en cero.
+  // 🦎 Hidratación de barras de progreso desde la hoja pública de transparencia
+  // CSV endpoint público de Google Sheets · TOTAL HISTÓRICO está en fila "TOTAL HISTÓRICO"
+  (function hidratarMetaDesdeSheet() {
+    var CSV_URL = 'https://docs.google.com/spreadsheets/d/165Zq7QwlnVkQqwnw3F1VOocrHbT0W-Dzhh5kPXxVz9s/gviz/tq?tqx=out:csv&sheet=Resumen';
+    function parsearMXN(s) {
+      if (!s) return 0;
+      s = String(s).replace(/[^0-9\.\-]/g, '');
+      return parseFloat(s) || 0;
+    }
+    fetch(CSV_URL, { cache: 'no-store' })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function(csv) {
+        // Parser CSV simple
+        var lineas = csv.split('\n');
+        var data = {};
+        for (var i = 0; i < lineas.length; i++) {
+          var match = lineas[i].match(/^"([^"]*)","([^"]*)"/);
+          if (match) data[match[1]] = match[2];
+        }
+        var recaudado = parsearMXN(data['TOTAL HISTÓRICO']);
+        var gastado = parsearMXN(data['Total gastado']);
+        var saldo = parsearMXN(data['SALDO ACTUAL']);
+        // Etapa 1: meta 66,000 MXN
+        var META_E1 = 66000;
+        var pct_e1 = Math.min(100, (recaudado / META_E1) * 100);
+        var barra_e1 = document.getElementById('prog-e1');
+        var txt_e1 = document.getElementById('recaudado-e1');
+        if (barra_e1) barra_e1.style.width = pct_e1.toFixed(2) + '%';
+        if (txt_e1) txt_e1.textContent = '$' + recaudado.toLocaleString('es-MX') + ' MXN';
+        // Actualizar el porcentaje en el span de la derecha
+        var hermano_e1 = txt_e1 && txt_e1.closest('.progress-text');
+        if (hermano_e1) {
+          var spans = hermano_e1.querySelectorAll('span');
+          if (spans[1]) spans[1].textContent = pct_e1.toFixed(2) + '% · meta $66,000 MXN';
+        }
+        // Etapa 2 y 3: por ahora solo se llenan después de completar Etapa 1
+        console.log('[Tequio] Meta hidratada desde Sheet:', { recaudado: recaudado, gastado: gastado, saldo: saldo, pct_e1: pct_e1.toFixed(2) + '%' });
+      })
+      .catch(function(e) {
+        console.warn('[Tequio] No se pudo hidratar la meta desde Sheet:', e.message);
+        // Silencioso · queda en $0 hardcoded
+      });
+  })();
 </script>
 </body>
 </html>
