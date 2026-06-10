@@ -91,7 +91,11 @@ jobs:
             echo "::error::panel/privacidad.html no devuelve 200 (got $STATUS)"
             exit 1
           fi
-          for STR in "LFPDPPP" "ARCO" "responsable" "privacidad@tequio.app" "Supabase" "Vercel"; do
+          # Nota: 'privacidad@tequio.app' está protegido por Cloudflare Email Obfuscation
+          # en producción (reescrito como /cdn-cgi/l/email-protection). El archivo origen
+          # sí lo contiene literal — verificamos la presencia del marker de CF como prueba
+          # indirecta de que un email fue obfuscado en la página.
+          for STR in "LFPDPPP" "ARCO" "responsable" "Supabase" "Vercel" "cdn-cgi/l/email-protection"; do
             if ! grep -Fq "$STR" /tmp/priv.html; then
               echo "::error::aviso de privacidad sin cadena requerida: '$STR'"
               exit 1
