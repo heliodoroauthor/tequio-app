@@ -1,0 +1,77 @@
+name: 🔄 Sync KPIs Fallback (SEO + crawlers)
+
+# 🦎 Cero Invención · Mantiene los fallbacks HTML hardcoded en index.html
+# sincronizados con el cache de Supabase (kpis_globales_cache).
+#
+# Por qué: tequio-kpis.js hidrata data-kpi en cliente, pero crawlers
+# (Google, Twitter, Facebook, LinkedIn, Bing) y usuarios con JS deshabilitado
+# ven el fallback estático. Este workflow lo refresca diariamente para que
+# tampoco esos vean cifras viejas.
+
+on:
+  schedule:
+    # 09:00 UTC = 03:00 CDMX · después de que termina el sweep nocturno de scrapers
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+  # También se puede pegar a workflows que actualicen el cache directamente.
+
+permissions:
+  contents: write   # necesita push si hay cambios
+
+jobs:
+  sync:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Run sync script (check mode)
+        id: check
+        run: |
+          python3 scripts/sync_kpis_fallback.py --check > /tmp/check.log 2>&1
+          cat /tmp/check.log
+          if grep -q "cambios detectados" /tmp/check.log; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: python3 scripts/sync_kpis_fallback.py
+
+      - name: Show diff
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git diff --stat index.html || true
+          git diff index.html | head -100 || true
+
+      - name: Commit + push
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          # Construyo mensaje con la fecha y diff
+          git -c user.name="github-actions[bot]" \
+              -c user.email="github-actions[bot]@users.noreply.github.com" \
+              commit -m "chore(kpis): sync fallbacks HTML desde kpis_globales_cache
+
+🤖 Workflow sync-kpis-fallback (automático)
+🦎 Cero Invención · mantiene crawlers SEO + no-JS al día"
+          git push
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
+            echo "✅ Sincronización aplicada · index.html actualizado"
+          else
+            echo "✓ Sin cambios · fallbacks ya estaban frescos"
+          fi
