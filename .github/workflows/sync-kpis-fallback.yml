@@ -2,21 +2,14 @@ name: 🔄 Sync KPIs Fallback (SEO + crawlers)
 
 # 🦎 Cero Invención · Mantiene los fallbacks HTML hardcoded en index.html
 # sincronizados con el cache de Supabase (kpis_globales_cache).
-#
-# Por qué: tequio-kpis.js hidrata data-kpi en cliente, pero crawlers
-# (Google, Twitter, Facebook, LinkedIn, Bing) y usuarios con JS deshabilitado
-# ven el fallback estático. Este workflow lo refresca diariamente para que
-# tampoco esos vean cifras viejas.
 
 on:
   schedule:
-    # 09:00 UTC = 03:00 CDMX · después de que termina el sweep nocturno de scrapers
-    - cron: '0 9 * * *'
+    - cron: '0 9 * * *'  # 09:00 UTC = 03:00 CDMX
   workflow_dispatch:
-  # También se puede pegar a workflows que actualicen el cache directamente.
 
 permissions:
-  contents: write   # necesita push si hay cambios
+  contents: write
 
 jobs:
   sync:
@@ -28,14 +21,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run sync script (check mode)
-        id: check
+      - name: Python info
         run: |
-          python3 scripts/sync_kpis_fallback.py --check > /tmp/check.log 2>&1
-          cat /tmp/check.log
-          if grep -q "cambios detectados" /tmp/check.log; then
+          python3 --version
+          ls -la scripts/sync_kpis_fallback.py
+
+      - name: Run sync (--check)
+        id: check
+        shell: bash
+        run: |
+          set +e  # No fail-on-error en este step
+          python3 scripts/sync_kpis_fallback.py --check
+          EXIT=$?
+          echo "exit_code=$EXIT"
+          if [ $EXIT -ne 0 ]; then
+            echo "::warning::sync_kpis_fallback exit code $EXIT"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Re-run to capture output
+          OUT=$(python3 scripts/sync_kpis_fallback.py --check 2>&1)
+          echo "$OUT"
+          if echo "$OUT" | grep -q "NOTE"; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -45,33 +54,27 @@ jobs:
         if: steps.check.outputs.has_changes == 'true'
         run: python3 scripts/sync_kpis_fallback.py
 
-      - name: Show diff
-        if: steps.check.outputs.has_changes == 'true'
-        run: |
-          git diff --stat index.html || true
-          git diff index.html | head -100 || true
-
       - name: Commit + push
         if: steps.check.outputs.has_changes == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          # Construyo mensaje con la fecha y diff
-          git -c user.name="github-actions[bot]" \
-              -c user.email="github-actions[bot]@users.noreply.github.com" \
-              commit -m "chore(kpis): sync fallbacks HTML desde kpis_globales_cache
+          if git diff --cached --quiet; then
+            echo "::notice::Sin cambios para commit"
+            exit 0
+          fi
+          git commit -m "chore(kpis): sync fallbacks HTML desde kpis_globales_cache
 
-🤖 Workflow sync-kpis-fallback (automático)
+🤖 Workflow sync-kpis-fallback
 🦎 Cero Invención · mantiene crawlers SEO + no-JS al día"
           git push
 
       - name: Summary
+        if: always()
         run: |
           if [ "${{ steps.check.outputs.has_changes }}" = "true" ]; then
-            echo "✅ Sincronización aplicada · index.html actualizado"
+            echo "::notice::✅ Sincronización aplicada"
           else
-            echo "✓ Sin cambios · fallbacks ya estaban frescos"
+            echo "::notice::✓ Sin cambios"
           fi
