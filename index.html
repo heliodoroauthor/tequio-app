@@ -6807,7 +6807,7 @@ window.addEventListener('load', function(){
             <div id="vs-boleta" style="max-width:400px;margin:0 auto;background:#fffbf0;border:2px solid #92400e;border-radius:6px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.35)">
               <!-- Boleta header -->
               <div style="background:#92400e;padding:12px 16px;text-align:center">
-                <div style="font-size:8px;letter-spacing:4px;color:#fde68a;font-weight:700;font-family:'Courier New',monospace">SIMULACIÓN ELECTORAL · TEQUIO.MX</div>
+                <div style="font-size:8px;letter-spacing:4px;color:#fde68a;font-weight:700;font-family:'Courier New',monospace">SIMULACIÓN ELECTORAL · TEQUIO.APP</div>
                 <div style="font-size:15px;font-weight:900;color:#fff;margin:4px 0;letter-spacing:1px;font-family:'Courier New',monospace">ELECCIONES FEDERALES</div>
                 <div style="font-size:10px;color:#fde68a;letter-spacing:2px;font-family:'Courier New',monospace">MÉXICO 2027</div>
               </div>
@@ -16468,7 +16468,7 @@ ${promesasCumplidas ? '✅ CUMPLIDAS:\n' + promesasCumplidas + '\n\n' : ''}${pro
   const urls = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent(texto)}`,
     twitter:  `https://twitter.com/intent/tweet?text=${encoded}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=https://tequio.mx`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?quote=${encoded}&u=https://tequio.app`,
   };
   if (red === 'copiar') {
     navigator.clipboard?.writeText(texto).then(() => {
@@ -19896,7 +19896,7 @@ function vsCompartir() {
     const pct = Math.round(((pts-minPts)/rango)*100);
     return `${PARTIDOS_INFO[pid].nombre} ${pct}%`;
   }).join(' · ');
-  const txt = `🗳️ Mi simulador de voto 2027 en Tequio:\n\n1️⃣ ${top3}\n\nDescubre tu afinidad política → tequio.mx\n#SimuladorDeVoto #México2027`;
+  const txt = `🗳️ Mi simulador de voto 2027 en Tequio:\n\n1️⃣ ${top3}\n\nDescubre tu afinidad política → tequio.app\n#SimuladorDeVoto #México2027`;
   if (navigator.share) {
     navigator.share({ title:'Mi boleta simulada 2027', text: txt }).catch(() => {});
   } else {
@@ -23679,7 +23679,7 @@ function offlineBuscar(q) {
     </div>`).join('') : `<div style="padding:20px;text-align:center;color:var(--text3)">Sin resultados para "${q}"</div>`;
 }
 function offlineCompartir() {
-  const txt = 'Guía de derechos ciudadanos de México — Sin internet. Incluye qué hacer si te detienen, derechos laborales, salud, vivienda y teléfonos de emergencia gratuitos. Via Tequio.mx';
+  const txt = 'Guía de derechos ciudadanos de México — Sin internet. Incluye qué hacer si te detienen, derechos laborales, salud, vivienda y teléfonos de emergencia gratuitos. Via Tequio.app';
   if (navigator.share) { navigator.share({title:'Guía de derechos — Sin internet', text: txt}); }
   else { navigator.clipboard?.writeText(txt); mostrarToast('Texto copiado','success'); }
 }
