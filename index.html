@@ -5331,7 +5331,7 @@ window.addEventListener('load', function(){
             <div style="font-size:54px;line-height:1">🧠</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Asistente Legal IA</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes">9,194</span> leyes mexicanas</strong> (federal/estatal/municipal). El RAG devuelve los <strong>5 fragmentos más relevantes</strong> de tu pregunta y cita texto literal.</p>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
@@ -5358,7 +5358,7 @@ window.addEventListener('load', function(){
           <div style="font-size:28px">✅</div>
           <div style="flex:1;min-width:220px">
             <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">RAG SOBRE FUENTES OFICIALES</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong><span data-kpi="chunks-embedded">325,751</span> artículos completos</strong> de leyes federales, estatales y municipales (Cámara de Diputados + Congresos estatales + Ayuntamientos) más 20 tesis SCJN. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Powered by <strong>Gemini</strong> + <strong>Supabase</strong> (FTS spanish + pgvector). <strong>No sustituye asesoría legal profesional.</strong></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong><span data-kpi="chunks-embedded">325,751</span> artículos vectorizados</strong> de leyes federales, estatales y municipales (Cámara de Diputados + Congresos estatales + Ayuntamientos) usando <strong>FTS spanish + pgvector top-5</strong>. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Las <strong>300,000 tesis SCJN</strong> están disponibles en el panel de <a onclick="showPage('jurisprudencia')" style="color:#fbbf24;cursor:pointer;text-decoration:underline">Jurisprudencia</a> para consulta manual (no integradas al RAG todavía). Powered by <strong>Gemini</strong> + <strong>Supabase</strong>. <strong>No sustituye asesoría legal profesional.</strong></div>
           </div>
         </div>
         <div class="alert alert-warn mb-16">
@@ -5399,8 +5399,9 @@ window.addEventListener('load', function(){
                   ¡Hola! Soy el <strong>Asistente Legal de Tequio</strong>.<br><br>
                   Antes de responder, busco en una base vectorial de fuentes oficiales:
                   <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
-                    <li><strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes</strong> federales y estatales (Cám. Diputados + Congresos)</li>
-                    <li><strong>20 tesis emblemáticas</strong> de la SCJN (Semanario Judicial)</li>
+                    <li><strong><span data-kpi="leyes">9,194</span> leyes mexicanas</strong> federal/estatal/municipal (Cám. Diputados + 32 Congresos estatales + 560+ ayuntamientos)</li>
+                    <li><strong><span data-kpi="chunks-embedded">325,751</span> artículos vectorizados</strong> con embeddings semánticos pgvector 768-d</li>
+                    <li><strong>300,000 tesis SCJN</strong> en panel Jurisprudencia (consulta manual · NO integradas al RAG aún)</li>
                     <li><strong>Decretos del DOF</strong> y comunicados SCJN (RSS oficial)</li>
                   </ul>
                   <br>Puedo ayudarte a:
