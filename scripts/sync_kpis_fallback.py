@@ -2,18 +2,44 @@
 """
 🦎 Tequio · sync_kpis_fallback.py
 
-Sincroniza fallbacks HTML hardcoded en index.html con cache kpis_globales_cache.
-Resuelve el gap de Cero Invención para crawlers (Google/Twitter/FB/OG) y no-JS.
+Sincroniza fallbacks HTML hardcoded en index.html con cache kpis_globales_cache,
++ stamps ?v=<git_sha7> en /js/ /css/ propios para cache-bust el browser,
++ bumpea VERSION del service worker para invalidar SW cache.
+
+Resuelve gap de Cero Invención para:
+  - crawlers (Google/Twitter/FB/OG) — fallback HTML
+  - usuarios sin JS — fallback HTML
+  - usuarios con SW cache estancado — ?v=SHA + VERSION bump
+  - browsers normales con CF cache 4h — ?v=SHA → URL diferente → bypass cache
 
 Uso:
     python scripts/sync_kpis_fallback.py
     python scripts/sync_kpis_fallback.py --check
+    python scripts/sync_kpis_fallback.py --git-sha be6069a  # override
+
+Si --git-sha no se pasa: usa GITHUB_SHA env o git rev-parse --short HEAD.
 """
-import argparse, json, os, re, sys, urllib.error, urllib.request
+import argparse, json, os, re, subprocess, sys, urllib.error, urllib.request
+from pathlib import Path
 
 SUPABASE_URL = "https://mhsuihwjgtzxflesbnxv.supabase.co"
 ANON_KEY = "sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz"
 INDEX_FILE = "index.html"
+
+# JS/CSS mutables propios — todos llevan cache-bust
+ASSET_PATHS = [
+    "/js/tequio-kpis.js",
+    "/js/tequio-freshness-widget.js",
+    "/js/anti-bot.js",
+    "/js/verificacion-ine.js",
+    "/css/main.css",
+]
+
+# Glob de HTMLs a estampar (top-level + panel/)
+HTML_GLOBS = ["index.html", "*.html", "panel/*.html"]
+
+# Service worker
+SW_FILE = "sw.js"
 
 
 def fmt_num(n):
@@ -71,6 +97,22 @@ def fetch_cache():
         return json.loads(resp.read())
 
 
+def resolve_sha(override=None):
+    if override:
+        return override[:7]
+    env_sha = os.environ.get("GITHUB_SHA")
+    if env_sha:
+        return env_sha[:7]
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short=7", "HEAD"],
+            stderr=subprocess.DEVNULL,
+        )
+        return out.decode().strip()
+    except Exception:
+        return None
+
+
 def update_kpi(html, kpi_id, new_value):
     pattern = re.compile(
         r'(data-kpi="' + re.escape(kpi_id) + r'"[^>]*>)([^<]*)(</[a-zA-Z]+>)',
@@ -107,17 +149,65 @@ def update_meta_tags(html, cache):
     return pattern.sub(replace, html), changed
 
 
+def stamp_asset(html, asset_path, sha):
+    """
+    Stamps ?v=<sha> al final del src/href de un asset path.
+    Si ya tiene ?v=X, lo reemplaza por ?v=<sha>.
+    Soporta: src="/js/x.js" defer, href="/css/y.css" rel=...
+    """
+    # Patrón con o sin query string actual
+    pattern = re.compile(
+        r'((?:src|href)=")(' + re.escape(asset_path) + r')(\?v=[^"]*)?(")',
+    )
+    changed = 0
+    target_qs = f"?v={sha}"
+    def replace(m):
+        nonlocal changed
+        attr_open, path, old_qs, attr_close = m.group(1), m.group(2), m.group(3), m.group(4)
+        if old_qs == target_qs:
+            return m.group(0)
+        changed += 1
+        return f"{attr_open}{path}{target_qs}{attr_close}"
+    return pattern.sub(replace, html), changed
+
+
+def update_sw_version(sw_content, sha):
+    """
+    Bumpea VERSION del SW para terminar en -<sha>.
+    'tequio-v2.0.3' o 'tequio-v2.0.3-OLDSHA' → 'tequio-v2.0.3-<sha>'
+    """
+    pattern = re.compile(
+        r"(const\s+VERSION\s*=\s*')(tequio-v\d+\.\d+\.\d+)(-[a-f0-9]+)?(';)",
+    )
+    target_suffix = f"-{sha}"
+    changed = 0
+    def replace(m):
+        nonlocal changed
+        prefix, base, old_suffix, close = m.group(1), m.group(2), m.group(3), m.group(4)
+        if old_suffix == target_suffix:
+            return m.group(0)
+        changed += 1
+        return f"{prefix}{base}{target_suffix}{close}"
+    return pattern.sub(replace, sw_content), changed
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--index", default=INDEX_FILE)
+    parser.add_argument("--git-sha", default=None, help="Override SHA (default: env GITHUB_SHA or git HEAD)")
     args = parser.parse_args()
+
+    sha = resolve_sha(args.git_sha)
+    if not sha:
+        print("WARN no se pudo resolver git SHA (cache-busting skipped)", file=sys.stderr)
 
     if not os.path.exists(args.index):
         print(f"X No existe {args.index}", file=sys.stderr)
         return 1
 
     print("Tequio sync_kpis_fallback")
+    print(f"  Git SHA: {sha or '(skip)'}")
     print("  Fetching RPC dashboard_kpis_globales...")
     try:
         cache = fetch_cache()
@@ -129,10 +219,11 @@ def main():
     print(f"  leyes={cache.get('leyes')} inali={cache.get('inali_lenguas')} unesco={cache.get('unesco_patrimonio')} sre={cache.get('sre_embajadas')}")
     print()
 
+    # 1) KPI fallbacks + meta tags en index.html
+    total = 0
     with open(args.index, "r", encoding="utf-8") as f:
         html = f.read()
 
-    total = 0
     for kpi_id, getter in KPI_MAP.items():
         v = getter(cache)
         if v is None or v == "": continue
@@ -140,22 +231,62 @@ def main():
         if n > 0:
             print(f"  data-kpi=\"{kpi_id}\" -> {v} ({n} elementos)")
             total += n
-
     html, n = update_meta_tags(html, cache)
     if n > 0:
         print(f"  meta tags actualizados ({n} reemplazos)")
         total += n
 
+    files_to_write = {}
+    if total > 0 and not args.check:
+        files_to_write[args.index] = html
+
+    # 2) Cache-bust ?v=<sha> en TODOS los HTMLs (raíz + panel/)
+    if sha:
+        html_files = []
+        html_files.append(Path(args.index))
+        html_files.extend(p for p in Path(".").glob("*.html") if p.name != args.index)
+        html_files.extend(Path(".").glob("panel/*.html"))
+        # Dedupe
+        seen, dedup = set(), []
+        for p in html_files:
+            if p in seen: continue
+            seen.add(p); dedup.append(p)
+
+        for path in dedup:
+            content = files_to_write.get(str(path))
+            if content is None:
+                content = path.read_text(encoding="utf-8")
+            file_changes = 0
+            for asset in ASSET_PATHS:
+                content, n2 = stamp_asset(content, asset, sha)
+                file_changes += n2
+            if file_changes > 0:
+                print(f"  ?v={sha} stamped en {path} ({file_changes} assets)")
+                total += file_changes
+                if not args.check:
+                    files_to_write[str(path)] = content
+
+    # 3) SW VERSION bump
+    if sha and os.path.exists(SW_FILE):
+        sw_content = Path(SW_FILE).read_text(encoding="utf-8")
+        sw_new, n3 = update_sw_version(sw_content, sha)
+        if n3 > 0:
+            print(f"  SW VERSION bumped → -{sha}")
+            total += n3
+            if not args.check:
+                files_to_write[SW_FILE] = sw_new
+
     print()
     if total == 0:
-        print("OK Sin cambios - fallbacks ya sincronizados")
+        print("OK Sin cambios - todo sincronizado")
         return 0
     if args.check:
         print(f"NOTE {total} cambios detectados (modo --check, no se escribe)")
         return 0
-    with open(args.index, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"OK {total} cambios escritos a {args.index}")
+
+    for path, content in files_to_write.items():
+        Path(path).write_text(content, encoding="utf-8")
+    print(f"OK {total} cambios escritos en {len(files_to_write)} archivo(s)")
     return 0
 
 

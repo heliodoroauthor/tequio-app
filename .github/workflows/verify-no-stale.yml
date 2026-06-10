@@ -1,0 +1,93 @@
+name: 🔍 Verify no-stale (tequio.app live)
+
+# 🦎 Cero Invención · Si tequio.app vuelve a servir HTML con cifras viejas
+# (por cache CF, Vercel edge, SW, lo que sea), este workflow falla en rojo
+# y abre un issue automático vía health-check pipeline.
+
+on:
+  workflow_run:
+    workflows: ["🔄 Sync KPIs Fallback (SEO + crawlers)"]
+    types: [completed]
+  schedule:
+    - cron: '15 * * * *'  # cada hora al minuto 15
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 3
+
+    steps:
+      - name: Fetch live HTML
+        id: fetch
+        run: |
+          set -euo pipefail
+          curl -sSL --max-time 15 \
+            -A "tequio-verify-no-stale/1.0 (+https://tequio.app)" \
+            -H "Cache-Control: no-cache" \
+            -H "Pragma: no-cache" \
+            https://tequio.app/ > /tmp/live.html
+          BYTES=$(wc -c </tmp/live.html)
+          echo "bytes=$BYTES" >> "$GITHUB_OUTPUT"
+          echo "fetched $BYTES bytes"
+          if [ "$BYTES" -lt 1000 ]; then
+            echo "::error::Live HTML demasiado pequeño ($BYTES bytes)"
+            exit 1
+          fi
+
+      - name: Assert no stale strings
+        run: |
+          set -e
+          FAIL=0
+          for STR in "8,973" "8,518" "TEQUIO.MX"; do
+            if grep -Fq "$STR" /tmp/live.html; then
+              echo "::error::Cadena obsoleta encontrada en live HTML: '$STR'"
+              echo "  Sample matches:"
+              grep -Fn "$STR" /tmp/live.html | head -3
+              FAIL=1
+            else
+              echo "✓ '$STR' ausente"
+            fi
+          done
+          if [ "$FAIL" = "1" ]; then exit 1; fi
+
+      - name: Assert meta == data-kpi=leyes
+        run: |
+          set -e
+          # Meta description ("...con N,NNN leyes...")
+          META_LEYES=$(grep -oP '(?<=Plataforma cívica de México con )[\d,]+ leyes' /tmp/live.html | head -1 | grep -oP '[\d,]+')
+          # data-kpi="leyes">N,NNN</…
+          KPI_LEYES=$(grep -oP 'data-kpi="leyes">\K[\d,]+' /tmp/live.html | sort -u)
+          echo "meta description leyes = '$META_LEYES'"
+          echo "data-kpi leyes (únicos) = '$KPI_LEYES'"
+
+          if [ -z "$META_LEYES" ]; then
+            echo "::error::No se encontró cifra de leyes en meta description"
+            exit 1
+          fi
+          if [ -z "$KPI_LEYES" ]; then
+            echo "::error::No se encontraron data-kpi=leyes en HTML"
+            exit 1
+          fi
+          # KPI_LEYES puede tener múltiples valores únicos → cada uno debe = META_LEYES
+          MISMATCH=0
+          while IFS= read -r v; do
+            if [ "$v" != "$META_LEYES" ]; then
+              echo "::error::Drift: data-kpi=leyes ('$v') != meta description ('$META_LEYES')"
+              MISMATCH=1
+            fi
+          done <<< "$KPI_LEYES"
+          if [ "$MISMATCH" = "1" ]; then exit 1; fi
+          echo "✓ meta description leyes == data-kpi=leyes ($META_LEYES)"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "::notice::✅ tequio.app sirve HTML coherente y sin cadenas obsoletas"
+          else
+            echo "::error::🚨 STALE detectado en tequio.app — revisa CF / Vercel / SW / sync_kpis_fallback"
+          fi
