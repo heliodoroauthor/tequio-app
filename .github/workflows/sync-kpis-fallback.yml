@@ -64,10 +64,9 @@ jobs:
             echo "::notice::Sin cambios para commit"
             exit 0
           fi
-          git commit -m "chore(kpis): sync fallbacks HTML desde kpis_globales_cache
-
-🤖 Workflow sync-kpis-fallback
-🦎 Cero Invención · mantiene crawlers SEO + no-JS al día"
+          git commit \
+            -m "chore(kpis): sync fallbacks HTML desde kpis_globales_cache" \
+            -m "🤖 Workflow sync-kpis-fallback · 🦎 Cero Invención · mantiene crawlers SEO + no-JS al día"
           git push
 
       - name: Summary
