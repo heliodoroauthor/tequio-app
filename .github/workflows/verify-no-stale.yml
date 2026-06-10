@@ -83,6 +83,42 @@ jobs:
           if [ "$MISMATCH" = "1" ]; then exit 1; fi
           echo "✓ meta description leyes == data-kpi=leyes ($META_LEYES)"
 
+      - name: Assert Red de Poder · Cero Invención filter
+        run: |
+          set -e
+          # Verifica que el JS del monolito incluye el filtro Cero Invención
+          # que evita pintar vínculos sin fuente_url por default
+          if ! grep -Fq "if (!e.verificado && !redesShowSinFuente)" /tmp/live.html; then
+            echo "::error::Filtro Cero Invención de Red de Poder ausente en HTML live"
+            echo "  → vínculos sin fuente_url podrían pintarse por default"
+            exit 1
+          fi
+          echo "✓ Filtro Cero Invención presente"
+          if ! grep -Fq "let redesShowSinFuente = false" /tmp/live.html; then
+            echo "::error::Default redesShowSinFuente no es false"
+            exit 1
+          fi
+          echo "✓ Default toggle off (solo verificados visibles)"
+          # Sanity al RPC
+          RPC=$(curl -sS --max-time 10 -X POST \
+            "https://mhsuihwjgtzxflesbnxv.supabase.co/rest/v1/rpc/dashboard_red_poder" \
+            -H "Content-Type: application/json" \
+            -H "apikey: sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz" \
+            -H "Authorization: Bearer sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz" \
+            -d '{"p_limit":50}')
+          TOTAL=$(echo "$RPC" | python3 -c "import json,sys; print(json.load(sys.stdin).get('total_vinculos',0))")
+          VERIF=$(echo "$RPC" | python3 -c "import json,sys; print(json.load(sys.stdin).get('vinculos_verificados',0))")
+          echo "  RPC total_vinculos=$TOTAL  vinculos_verificados=$VERIF"
+          if [ "$VERIF" -le 0 ]; then
+            echo "::error::vinculos_verificados=$VERIF (esperado >0). Red de Poder no muestra nada."
+            exit 1
+          fi
+          if [ "$VERIF" -gt "$TOTAL" ]; then
+            echo "::error::Imposible: vinculos_verificados ($VERIF) > total ($TOTAL)"
+            exit 1
+          fi
+          echo "::notice::✓ Red de Poder Cero Invención · default pinta $VERIF/$TOTAL"
+
       - name: Summary
         if: always()
         run: |

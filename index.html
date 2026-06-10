@@ -4739,7 +4739,7 @@ window.addEventListener('load', function(){
             <div style="font-size:60px;line-height:1">💰</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Dinero Público</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Deuda, contratos, indicadores macro · <strong>SHCP, ASF, Banxico, INEGI</strong>. Cada cifra enlaza al PDF oficial.</p>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">KPIs en vivo (Banxico/INEGI/SHCP). <strong>Tablas curadas con fuente por sección</strong>. Cifras puntuales con su badge de origen — Cero invención.</p>
             </div>
             <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" style="background:rgba(255,255,255,0.18);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,0.25)">SHCP →</a>
           </div>
@@ -4763,7 +4763,7 @@ window.addEventListener('load', function(){
         </details>
         <div class="alert alert-info mb-16">
           <span>📊</span>
-          <span>Datos basados en fuentes oficiales: <strong>SHCP, ASF, INEGI, Banxico</strong>. Cifras en pesos mexicanos. Cada indicador enlaza al PDF oficial. Verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a>.</span>
+          <span>KPIs hidratados en vivo de fuentes oficiales: <strong>Banxico</strong> (tasa, FIX), <strong>INEGI</strong> (INPC), <strong>SHCP</strong> (PEF, deuda). Las tablas estáticas son <strong>curaduría editorial</strong> con badges por origen — verifica también en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">finanzaspublicas.hacienda.gob.mx</a> y <a href="https://disciplinafinanciera.hacienda.gob.mx" target="_blank" rel="noopener" style="color:var(--accent2)">disciplinafinanciera.hacienda.gob.mx</a> (deuda subnacional).</span>
         </div>
         <!-- KPIs (carga dinámica desde Supabase tabla indicadores_fiscales) -->
         <div class="grid-4 mb-16" id="dinero-kpis">
@@ -4783,7 +4783,7 @@ window.addEventListener('load', function(){
         <!-- ── TAB: FEDERAL ── -->
         <div id="dt-federal">
           <div class="card mb-16">
-            <div class="card-title mb-4">Distribución del Gasto Federal por Sector</div>
+            <div class="card-title mb-4">Distribución del Gasto Federal por Sector <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.40);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟡 CURADO · CIERRE FISCAL</span></div>
             <div class="card-subtitle mb-12">Presupuesto aprobado vs ejercido · Miles de millones de pesos</div>
             <div class="table-wrap">
               <table>
@@ -4802,7 +4802,7 @@ window.addEventListener('load', function(){
             </div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-12">📉 Gasto por cada $100 de impuestos que pagas</div>
+            <div class="card-title mb-12">📉 Gasto por cada $100 de impuestos que pagas <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.40);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟡 CÁLCULO DERIVADO · base PEF</span></div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>🏥 Salud</span><span style="color:var(--green2);font-weight:700">$9.87</span></div><div style="height:8px;background:var(--surface2);border-radius:4px"><div style="width:9.87%;height:100%;background:var(--green);border-radius:4px"></div></div></div>
               <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>🏫 Educación</span><span style="color:var(--accent2);font-weight:700">$8.39</span></div><div style="height:8px;background:var(--surface2);border-radius:4px"><div style="width:8.39%;height:100%;background:var(--accent);border-radius:4px"></div></div></div>
@@ -4816,7 +4816,7 @@ window.addEventListener('load', function(){
         <!-- ── TAB: ESTADOS ── -->
         <div id="dt-estados" style="display:none">
           <div class="card mb-16">
-            <div class="card-title mb-4">Presupuesto y Deuda por Estado 2024</div>
+            <div class="card-title mb-4">Presupuesto y Deuda por Estado 2024 <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟢 SHCP · DISCIPLINA FINANCIERA</span></div>
             <div class="card-subtitle mb-12">Participaciones federales + deuda local · Miles de millones MXN</div>
             <div class="table-wrap">
               <table>
@@ -4837,7 +4837,7 @@ window.addEventListener('load', function(){
             </div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-12">🏙️ Municipios con mayor deuda per cápita</div>
+            <div class="card-title mb-12">🏙️ Municipios con mayor deuda per cápita <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.40);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟡 CURADO · acreedores prensa pública</span></div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="background:var(--surface);border-radius:10px;padding:12px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
                 <div><div style="font-size:13px;font-weight:600">Monterrey, NL</div><div style="font-size:11px;color:var(--text3)">Deuda: $18.4B · Acreedor: Banorte, BBVA</div></div>
@@ -4877,26 +4877,26 @@ window.addEventListener('load', function(){
             </div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-4">💳 Quién pidió deuda — Principales deudores públicos</div>
+            <div class="card-title mb-4">💳 Quién pidió deuda — Principales deudores públicos <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟢 SHCP · saldo registrado</span></div>
             <div class="card-subtitle mb-12">Saldo de deuda registrado 2024 · Fuente: SHCP</div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Entidad</th><th>Saldo deuda</th><th>Tipo</th><th>A quién le deben</th><th>Plazo prom.</th><th>Vencimiento próx.</th></tr></thead>
+                <thead><tr><th>Entidad</th><th>Saldo deuda</th><th>Tipo</th><th>A quién le deben</th><th>Plazo prom.</th></tr></thead>
                 <tbody>
-                  <tr><td>🏛️ <b>Gobierno Federal</b></td><td class="mono" style="color:var(--red2)">$11.2T</td><td><span class="badge badge-red">Soberana</span></td><td>Tenedores CETES, FMI, BM</td><td>8.2 años</td><td>Mar 2026</td></tr>
-                  <tr><td>⚡ <b>PEMEX</b></td><td class="mono" style="color:var(--red2)">$1.84T</td><td><span class="badge badge-yellow">Empresa pública</span></td><td>JPMorgan, Citi, bonistas</td><td>6.1 años</td><td>Feb 2026</td></tr>
-                  <tr><td>🔌 <b>CFE</b></td><td class="mono" style="color:var(--yellow2)">$412B</td><td><span class="badge badge-yellow">Empresa pública</span></td><td>Banco Mundial, bonistas</td><td>9.4 años</td><td>Jun 2027</td></tr>
-                  <tr><td>🏙️ <b>CDMX</b></td><td class="mono">$82.4B</td><td><span class="badge badge-blue">Subnacional</span></td><td>Banobras, BBVA, Santander</td><td>12 años</td><td>Dic 2028</td></tr>
-                  <tr><td>⚙️ <b>Nuevo León</b></td><td class="mono">$91.3B</td><td><span class="badge badge-blue">Subnacional</span></td><td>Banorte, HSBC, Banobras</td><td>7 años</td><td>Ago 2026</td></tr>
-                  <tr><td>🏖️ <b>Quintana Roo</b></td><td class="mono">$22.8B</td><td><span class="badge badge-red">⚠️ En alerta</span></td><td>Banamex, Scotiabank</td><td>4 años</td><td>Nov 2025</td></tr>
-                  <tr><td>🏜️ <b>Coahuila</b></td><td class="mono">$39.1B</td><td><span class="badge badge-red">⚠️ En alerta</span></td><td>Banobras, BBVA, Bajío</td><td>5 años</td><td>Ene 2026</td></tr>
-                  <tr><td>🚇 <b>NAFINSA</b></td><td class="mono">$284B</td><td><span class="badge badge-yellow">Banca desarrollo</span></td><td>Mercados internacionales</td><td>11 años</td><td>Sep 2027</td></tr>
+                  <tr><td>🏛️ <b>Gobierno Federal</b></td><td class="mono" style="color:var(--red2)">$11.2T</td><td><span class="badge badge-red">Soberana</span></td><td>Tenedores CETES, FMI, BM</td><td>8.2 años</td></tr>
+                  <tr><td>⚡ <b>PEMEX</b></td><td class="mono" style="color:var(--red2)">$1.84T</td><td><span class="badge badge-yellow">Empresa pública</span></td><td>JPMorgan, Citi, bonistas</td><td>6.1 años</td></tr>
+                  <tr><td>🔌 <b>CFE</b></td><td class="mono" style="color:var(--yellow2)">$412B</td><td><span class="badge badge-yellow">Empresa pública</span></td><td>Banco Mundial, bonistas</td><td>9.4 años</td></tr>
+                  <tr><td>🏙️ <b>CDMX</b></td><td class="mono">$82.4B</td><td><span class="badge badge-blue">Subnacional</span></td><td>Banobras, BBVA, Santander</td><td>12 años</td></tr>
+                  <tr><td>⚙️ <b>Nuevo León</b></td><td class="mono">$91.3B</td><td><span class="badge badge-blue">Subnacional</span></td><td>Banorte, HSBC, Banobras</td><td>7 años</td></tr>
+                  <tr><td>🏖️ <b>Quintana Roo</b></td><td class="mono">$22.8B</td><td><span class="badge badge-red">⚠️ En alerta</span></td><td>Banamex, Scotiabank</td><td>4 años</td></tr>
+                  <tr><td>🏜️ <b>Coahuila</b></td><td class="mono">$39.1B</td><td><span class="badge badge-red">⚠️ En alerta</span></td><td>Banobras, BBVA, Bajío</td><td>5 años</td></tr>
+                  <tr><td>🚇 <b>NAFINSA</b></td><td class="mono">$284B</td><td><span class="badge badge-yellow">Banca desarrollo</span></td><td>Mercados internacionales</td><td>11 años</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-12">🏦 A quiénes le debe México — Principales acreedores</div>
+            <div class="card-title mb-12">🏦 A quiénes le debe México — Principales acreedores <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.40);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟡 PARCIALMENTE CURADO</span></div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div style="background:var(--surface);border-radius:10px;padding:12px;border:1px solid var(--border)">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -4921,29 +4921,23 @@ window.addEventListener('load', function(){
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:12px;border:1px solid var(--border)">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                  <span style="font-size:13px;font-weight:600">🏦 JPMorgan, Citi, HSBC (bonos PEMEX)</span>
-                  <span class="badge badge-red">$890B</span>
-                </div>
-                <div style="font-size:11px;color:var(--text3)">Bonos internacionales de PEMEX en USD y EUR. Alta exposición al precio del petróleo.</div>
-              </div>
-              <div style="background:var(--surface);border-radius:10px;padding:12px;border:1px solid var(--border)">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                   <span style="font-size:13px;font-weight:600">🏦 AFORES (fondos de pensión mexicanos)</span>
                   <span class="badge badge-blue">$2.1T</span>
                 </div>
                 <div style="font-size:11px;color:var(--text3)">Los fondos de pensión de los propios trabajadores mexicanos son el mayor acreedor interno del gobierno.</div>
               </div>
             </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:12px;line-height:1.4">⚪ <strong>Filas removidas por falta de fuente pública verificable:</strong> el desglose de tenencia de bonos PEMEX por banco internacional no se publica oficialmente — si tienes una fuente con cifras agregadas auditadas, escribe a <a href="mailto:hola@tequio.app" style="color:var(--accent2)">hola@tequio.app</a>.</div>
           </div>
           <div class="alert" style="background:rgba(239,68,68,.08);border-color:var(--red);color:var(--red2)">
             <span>🚨</span>
-            <span style="font-size:12px"><strong>Dato crítico:</strong> En 2024 México pagó más en servicio de deuda ($2.1T) que en salud y educación juntos. El déficit fiscal llegó al 5.9% del PIB, el más alto desde 1988. PEMEX tiene bonos por $480 mil millones USD con vencimientos entre 2025–2027.</span>
+            <span style="font-size:12px"><strong>Dato crítico:</strong> El servicio de deuda 2026 representa <strong>3.7% del PIB</strong> (~$1.30 billones MXN) según PEF SHCP — más de lo que muchos rubros sociales reciben. Saldo histórico SHRFSP estimado ~52.4% del PIB. PEMEX mantiene bonos en USD con vencimientos relevantes a corto plazo. <em>Cifras hidratadas del cache PEF/SHCP del sitio — verifica último corte en <a href="https://www.finanzaspublicas.hacienda.gob.mx" target="_blank" rel="noopener" style="color:#fca5a5;text-decoration:underline">finanzaspublicas.hacienda.gob.mx</a>.</em></span>
           </div>
         </div>
         <!-- ── TAB: EMPRESAS ── -->
         <div id="dt-empresas" style="display:none">
           <div class="card mb-16">
-            <div class="card-title mb-4">🏢 Empresas con deudas ante el gobierno mexicano</div>
+            <div class="card-title mb-4">🏢 Empresas con deudas ante el gobierno mexicano <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.40);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟡 PARCIALMENTE CURADO · SAT/ASF</span></div>
             <div class="card-subtitle mb-12">Adeudos fiscales, SAT y créditos NAFIN · Fuente: SAT / ASF 2024</div>
             <div class="table-wrap">
               <table>
@@ -4954,15 +4948,13 @@ window.addEventListener('load', function(){
                   <tr><td>✈️ <b>Mexicana (liquidada)</b></td><td>Adeudo laboral+SAT</td><td class="mono">$22B</td><td>IMSS/SAT</td><td>Litigio</td><td><span class="badge badge-red">⚖️ Litigio</span></td></tr>
                   <tr><td>🚂 <b>Ferrocarriles (KCSM)</b></td><td>Concesión + impuestos</td><td class="mono">$8.4B</td><td>SCT / SAT</td><td>2047</td><td><span class="badge badge-green">Al corriente</span></td></tr>
                   <tr><td>🏗️ <b>OHL México</b></td><td>Concesión autopistas</td><td class="mono">$31B</td><td>Banobras</td><td>2030–2045</td><td><span class="badge badge-yellow">Revisión</span></td></tr>
-                  <tr><td>📡 <b>Televisa</b></td><td>Adeudo SAT (2019)</td><td class="mono">$12B</td><td>SAT</td><td>Pagado parcial</td><td><span class="badge badge-yellow">Acuerdo</span></td></tr>
-                  <tr><td>🏦 <b>Grupo Higa</b></td><td>Contratos observados ASF</td><td class="mono">$4.8B</td><td>ASF</td><td>Litigio</td><td><span class="badge badge-red">⚖️ Litigio</span></td></tr>
-                  <tr><td>🌾 <b>Mineras (varias)</b></td><td>Derechos mineros SAT</td><td class="mono">$18.2B</td><td>SAT</td><td>En disputa</td><td><span class="badge badge-red">Conflicto</span></td></tr>
                 </tbody>
               </table>
             </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.4">⚪ <strong>3 filas removidas</strong> por confidencialidad fiscal (Art. 69 CFF) o falta de fuente pública verificable. Los adeudos SAT específicos por empresa son confidenciales salvo declaración pública del contribuyente o sentencia firme. Reportar fuentes verificables a <a href="mailto:hola@tequio.app" style="color:var(--accent2)">hola@tequio.app</a>.</div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-12">📊 Empresas públicas — Situación financiera</div>
+            <div class="card-title mb-12">📊 Empresas públicas — Situación financiera <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟢 Moody's + CNH + Banxico</span></div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border-left:4px solid var(--red)">
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px">
@@ -4986,7 +4978,7 @@ window.addEventListener('load', function(){
                   <span class="badge badge-green">Superávit</span>
                 </div>
                 <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Reservas internacionales: $223B USD · Independiente del gobierno federal</div>
-                <div style="font-size:11px;color:var(--text3)">Entidad sólida. Mantuvo tasa de referencia alta (11%) para combatir inflación 2022-2024.</div>
+                <div style="font-size:11px;color:var(--text3)">Entidad sólida e independiente del gobierno federal. Tasa de referencia llegó a pico <strong>11.25%</strong> (mar-2023 a feb-2024) por inflación post-COVID. Tasa actual: ver KPI <strong>"Tasa Banxico"</strong> arriba (LIVE).</div>
               </div>
             </div>
           </div>
@@ -4998,7 +4990,7 @@ window.addEventListener('load', function(){
             <span style="font-size:12px">Contratos observados o con irregularidades señaladas por la <strong>Auditoría Superior de la Federación (ASF)</strong> y la <strong>SFP</strong>. Fuente pública y verificable.</span>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-4">📋 Contratos públicos de mayor monto 2020–2024</div>
+            <div class="card-title mb-4">📋 Contratos públicos de mayor monto 2020–2024 <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟢 ASF + CompraNet · INAI por fila</span></div>
             <div class="card-subtitle mb-12">Obras, servicios y adquisiciones federales · Fuente: CompraNet / ASF</div>
             <div class="table-wrap">
               <table>
@@ -5016,7 +5008,7 @@ window.addEventListener('load', function(){
             </div>
           </div>
           <div class="card mb-16">
-            <div class="card-title mb-12">🚨 Contratos observados por la ASF con mayor monto</div>
+            <div class="card-title mb-12">🚨 Contratos observados por la ASF con mayor monto <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.40);color:#22c55e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle">🟢 ASF · Informe citado</span></div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="background:rgba(239,68,68,.06);border-radius:10px;padding:14px;border-left:4px solid var(--red)">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
@@ -5049,6 +5041,10 @@ window.addEventListener('load', function(){
               📋 Solicitar información sobre un contrato (INAI)
             </button>
           </div>
+        </div>
+        <div class="alert" style="margin-top:16px;background:rgba(251,191,36,0.08);border-color:var(--yellow);color:var(--yellow2);font-size:12px">
+          <span>🟡</span>
+          <span><strong>Sobre las tablas estáticas:</strong> son <strong>curaduría editorial</strong> con base en informes oficiales SHCP, ASF, Banxico, INEGI. Cifras puntuales sin URL específica reflejan el último informe público disponible — para datos en tiempo real usa los KPIs hidratados del hero arriba. Reporta errores a <a href="mailto:hola@tequio.app" style="color:var(--accent2)">hola@tequio.app</a>.</span>
         </div>
         <div class="alert alert-info" style="margin-top:16px">
           <span>🧠</span>
@@ -5172,7 +5168,7 @@ window.addEventListener('load', function(){
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">132</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Actores</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="red-stats-vinculos">64</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Vínculos</div><div style="font-size:9px;color:#86efac;margin-top:2px" id="red-stats-verificados">14 con fuente</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Curado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Modo editorial</div></div>
+            <div style="text-align:center"><div style="font-size:13px;font-weight:700;color:#86efac" id="red-stats-pintados">14 pintados</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Visibles ahora</div><label style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#cbd5e1;margin-top:4px;cursor:pointer;opacity:0.9"><input type="checkbox" id="red-toggle-sinfuente" onchange="redesToggleSinFuente()" style="cursor:pointer"> +50 sin URL</label></div>
             <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">DOF·INE·SAT</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
           </div>
         </div>
@@ -22746,9 +22742,22 @@ let REDES_ENLACES = [
       try {
         var elV = document.getElementById('red-stats-vinculos');
         var elVerif = document.getElementById('red-stats-verificados');
-        if (elV) elV.textContent = data.total_vinculos || 0;
-        if (elVerif && data.vinculos_verificados != null) {
-          elVerif.textContent = data.vinculos_verificados + ' con fuente';
+        var elPint = document.getElementById('red-stats-pintados');
+        var elToggle = document.getElementById('red-toggle-sinfuente');
+        window.__redVerif = data.vinculos_verificados || 0;
+        window.__redTotal = data.total_vinculos || 0;
+        if (elV) elV.textContent = window.__redTotal;
+        if (elVerif) elVerif.textContent = window.__redVerif + ' con fuente';
+        if (elPint) elPint.textContent = window.__redVerif + ' pintados';
+        if (elToggle) {
+          var sinFuente = window.__redTotal - window.__redVerif;
+          var lbl = elToggle.closest('label');
+          if (lbl) {
+            // Re-construir el label dejando el input intacto
+            lbl.innerHTML = '';
+            lbl.appendChild(elToggle);
+            lbl.appendChild(document.createTextNode(' +' + sinFuente + ' sin URL'));
+          }
         }
       } catch(e){}
       REDES_NODOS.length = 0;
@@ -22758,6 +22767,26 @@ let REDES_ENLACES = [
       // Si la red ya está dibujada, re-init
       if (typeof window.initRedes === 'function' && document.getElementById('redes-canvas')) {
         try { window.initRedes(); } catch(e){}
+      }
+      // Exponer toggle como función global
+      window.redesToggleSinFuente = function(){
+        redesShowSinFuente = !redesShowSinFuente;
+        var elPint = document.getElementById('red-stats-pintados');
+        if (elPint) {
+          var n = redesShowSinFuente ? (window.__redTotal||0) : (window.__redVerif||0);
+          elPint.textContent = n + ' pintados';
+        }
+        // Re-render canvas
+        if (typeof window.drawRedes === 'function') {
+          try { window.drawRedes(); } catch(e){}
+        } else if (typeof window.initRedes === 'function') {
+          try { window.initRedes(); } catch(e){}
+        }
+      };
+      // Sincronizar checkbox initial state
+      var _t = document.getElementById('red-toggle-sinfuente');
+      if (_t) _t.checked = redesShowSinFuente;
+      if (false) { // bloque viejo siempre falso para no romper estructura
       }
       console.log('[Tequio] Red de Poder hydratada desde DB:', nuevosNodos.length, 'nodos /', nuevosEnlaces.length, 'enlaces');
     })
@@ -22778,6 +22807,8 @@ let redesFiltroActivo = 'todos';
 let redesBusqueda = '';
 let redesAnimFrame = null;
 let redesNodoArrastrado = null;
+// 🦎 Cero Invención · default solo pinta vínculos con fuente_url (verificado=true)
+let redesShowSinFuente = false;
 const TIPO_COLOR = { politico:'#ef4444', empresa:'#3b82f6', medio:'#f59e0b', sociedad:'#22c55e' };
 const ENLACE_COLOR = { institucional:'rgba(96,165,250,0.45)', financiero:'rgba(168,85,247,0.45)', partido:'rgba(34,197,94,0.45)', mediatico:'rgba(245,158,11,0.45)' };
 function initRedes() {
@@ -22917,19 +22948,32 @@ function redesDibujar() {
   ctx.translate(redesOffX, redesOffY);
   ctx.scale(redesScale, redesScale);
   const vis = new Set(redesNodosVisibles().map(n => n.id));
-  // Dibujar enlaces
+  // Dibujar enlaces · 🦎 Cero Invención
+  // Default: solo pinta vínculos con fuente_url (verificado=true).
+  // Toggle redesShowSinFuente=true pinta los demás como punteados atenuados.
   REDES_ENLACES.forEach(e => {
     const a = redesNodos.find(n => n.id === e.a);
     const b = redesNodos.find(n => n.id === e.b);
     if (!a || !b || !vis.has(a.id) || !vis.has(b.id)) return;
+    // Filtro Cero Invención
+    if (!e.verificado && !redesShowSinFuente) return;
     const isRelated = redesSelectedId && (e.a === redesSelectedId || e.b === redesSelectedId);
     const dim = redesSelectedId && !isRelated;
+    ctx.save();
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
-    ctx.strokeStyle = dim ? 'rgba(100,116,139,0.08)' : (ENLACE_COLOR[e.tipo] || 'rgba(100,116,139,0.3)');
-    ctx.lineWidth = dim ? 0.5 : e.peso;
+    if (!e.verificado) {
+      // Punteado + alpha reducido para curaduría editorial sin URL pública
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = dim ? 'rgba(148,163,184,0.06)' : 'rgba(148,163,184,0.35)';
+      ctx.lineWidth = dim ? 0.5 : 1.5;
+    } else {
+      ctx.strokeStyle = dim ? 'rgba(100,116,139,0.08)' : (ENLACE_COLOR[e.tipo] || 'rgba(100,116,139,0.3)');
+      ctx.lineWidth = dim ? 0.5 : e.peso;
+    }
     ctx.stroke();
+    ctx.restore();
   });
   // Dibujar nodos
   redesNodos.forEach(n => {
@@ -23054,8 +23098,18 @@ function redesMostrarDetalle(nodo) {
     if (!other) return;
     const chip = document.createElement('span');
     chip.style.cssText = `background:${TIPO_COLOR[other.tipo]}20;border:1px solid ${TIPO_COLOR[other.tipo]}50;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;color:${TIPO_COLOR[other.tipo]};cursor:pointer`;
-    chip.textContent = other.emoji + ' ' + other.label.replace('\n',' ');
-    chip.onclick = () => { redesMostrarDetalle(other); redesSelectedId = other.id; };
+    const verifMark = e.verificado ? ' 🔗' : ' <span style="opacity:0.5;font-size:9px">(curado)</span>';
+    chip.innerHTML = other.emoji + ' ' + other.label.replace('\n',' ') + verifMark;
+    chip.title = e.descripcion || (e.verificado ? 'Vínculo con fuente pública' : 'Curaduría editorial · sin fuente pública');
+    chip.onclick = () => {
+      if (e.verificado && e.fuente_url) {
+        // Si está verificado + tiene URL: abrir fuente en nueva pestaña
+        window.open(e.fuente_url, '_blank', 'noopener,noreferrer');
+      } else {
+        // Sino: ir al detalle del otro nodo
+        redesMostrarDetalle(other); redesSelectedId = other.id;
+      }
+    };
     conexEl.appendChild(chip);
   });
   document.getElementById('redes-ia-texto').style.display = 'none';
