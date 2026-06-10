@@ -285,18 +285,22 @@
       if (msg.indexOf('429') >= 0 || /depleted|rate_limited|quota|credits|exceeded/i.test(msg)) {
         humano =
           '<div style="line-height:1.55">' +
-          '<div style="font-weight:700;color:#fbbf24;margin-bottom:8px">🦎 Asistente temporalmente sin créditos de IA</div>' +
+          '<div style="font-weight:700;color:#fbbf24;margin-bottom:8px">🦎 Asistente sin créditos · Tequio se autofinancia</div>' +
           '<div style="font-size:13px;color:#94a3b8;margin-bottom:12px">' +
-          'Tequio opera con recursos limitados (≈$80 USD/mes). Cuando hay mucho tráfico, agotamos la cuota del modelo. ' +
-          'Estamos trabajando en infraestructura propia (servidor + IA soberana, sin depender de Google).' +
+          'La IA legal nos cuesta <strong>$80 USD/mes</strong> en tokens de Google Gemini. Cuando hay tráfico viral, agotamos la cuota mensual prepagada y volvemos al mes siguiente.' +
           '</div>' +
-          '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Mientras tanto puedes:</div>' +
+          '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">📚 <strong>El resto de Tequio funciona al 100%</strong> — 9,290 leyes, 300,000 tesis SCJN, votaciones del Congreso, contratos públicos, todo sin tocar la IA.</div>' +
+          '<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;font-weight:700">🦅 Camino a no depender de Google:</div>' +
+          '<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.30);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.5;color:#86efac">' +
+          '<strong>Meta Etapa 1:</strong> $66,000 MXN para un servidor propio con RTX 4090 que corra <strong>Llama 70B</strong> en CDMX, sin pagar a nadie. Cada $50 MXN = ~10 consultas para otros mexicanos.' +
+          '</div>' +
           '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
-          '<a href="/panel/leyes.html" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">📚 Buscar leyes directamente (100% funcional)</a>' +
-          '<a href="/panel/donar.html" style="background:linear-gradient(135deg,#a855f7,#c084fc);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">💜 Apoyar Tequio (acelera la infra propia)</a>' +
+          '<a href="/panel/meta-servidor.html" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:12px 14px;border-radius:10px;font-weight:800;font-size:13px;text-decoration:none;display:inline-block;text-align:center">🦎 Ver meta del servidor propio</a>' +
+          '<a href="https://paypal.me/tequioapp" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#a855f7,#c084fc);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">💜 Donar directo con PayPal</a>' +
+          '<a href="/panel/leyes.html" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">📚 Buscar leyes directamente (sin IA)</a>' +
           '<a href="mailto:hola@tequio.app?subject=Avísame%20cuando%20el%20Asistente%20vuelva" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e8edf5;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;text-align:center">✉️ Avísame cuando vuelva</a>' +
           '</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">🦎 Cero invención: no te ocultamos que el servicio está degradado.</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">🦎 Cero invención: te decimos exactamente cuánto cuesta y por qué se topa.</div>' +
           '</div>';
       } else if (msg.indexOf('500') >= 0 || msg.indexOf('502') >= 0 || msg.indexOf('503') >= 0) {
         humano = '<strong style="color:#f87171">🦎 El asistente tuvo un error de servidor.</strong> Intenta de nuevo en unos segundos. Si persiste, escríbenos a hola@tequio.app';

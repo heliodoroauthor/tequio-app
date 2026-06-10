@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Meta: Infraestructura propia · Tequio</title>
+<meta name="description" content="Tequio camino a infraestructura de IA legal soberana mexicana. Sin Google, sin OpenAI, sin depender de nadie del extranjero. 3 etapas con metas claras.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tequio.app/panel/meta-servidor.html">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-2: #11151d;
+    --bg-3: #1a2030;
+    --border: #232a3a;
+    --text: #e6edf3;
+    --muted: #9aa6b8;
+    --accent: #fbbf24;
+    --accent-2: #f59e0b;
+    --green: #22c55e;
+    --green-soft: #86efac;
+    --blue: #3b82f6;
+    --violet: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.55; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 820px; margin: 0 auto; padding: 28px 18px 60px; }
+  .topbar { display: flex; align-items: center; margin-bottom: 18px; gap: 14px; flex-wrap: wrap; }
+  .back { color: var(--muted); font-size: 13px; }
+  .back:hover { color: var(--text); }
+  .hero { background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%); border-radius: 18px; padding: 26px; color: #fff; box-shadow: 0 6px 20px rgba(22,163,74,0.25); margin-bottom: 22px; }
+  .hero h1 { font-size: 26px; font-weight: 800; margin: 0 0 6px; }
+  .hero p { font-size: 14px; opacity: 0.94; margin: 0; }
+  h2 { font-size: 19px; font-weight: 700; margin: 26px 0 10px; }
+  h3 { font-size: 15px; font-weight: 700; margin: 14px 0 6px; }
+  p { font-size: 14px; color: var(--text); margin: 0 0 10px; }
+  ul { margin: 0 0 12px 22px; font-size: 14px; }
+  li { margin-bottom: 4px; }
+  .etapa { background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 18px; }
+  .etapa-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .etapa-num { background: var(--accent); color: #0b0e14; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
+  .etapa-num.activa { background: var(--green); }
+  .etapa-num.aspirational { background: rgba(168,85,247,0.20); color: var(--violet); border: 1px solid rgba(168,85,247,0.40); }
+  .etapa-title { font-size: 18px; font-weight: 800; }
+  .etapa-meta { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .progress-wrap { background: var(--bg-3); border-radius: 999px; height: 14px; overflow: hidden; margin: 10px 0 6px; border: 1px solid var(--border); }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; transition: width .4s; }
+  .progress-bar.green { background: linear-gradient(90deg, var(--green), #34d399); }
+  .progress-bar.violet { background: linear-gradient(90deg, var(--violet), #c084fc); }
+  .progress-text { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .progress-text strong { color: var(--text); }
+  .desglose { background: var(--bg-3); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 13px; }
+  .desglose-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .desglose-row:last-child { border-bottom: none; font-weight: 700; }
+  .desglose-row td { padding: 4px 0; }
+  .capacidad { background: rgba(34,197,94,0.08); border-left: 3px solid var(--green); border-radius: 8px; padding: 12px 14px; margin-top: 12px; font-size: 13px; line-height: 1.5; }
+  .cta { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 0; }
+  .btn-primary { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #0b0e14; padding: 14px 18px; border-radius: 12px; font-weight: 800; font-size: 15px; text-align: center; text-decoration: none; display: block; }
+  .btn-primary:hover { text-decoration: none; opacity: 0.94; }
+  .btn-secondary { background: var(--bg-3); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; text-align: center; text-decoration: none; display: block; }
+  .btn-secondary:hover { background: var(--bg-2); text-decoration: none; }
+  .calc { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 18px 0; }
+  .calc h3 { margin: 0 0 12px; font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+  .calc-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .calc input { flex: 1; padding: 8px 10px; background: var(--bg-3); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 14px; }
+  .calc-result { font-size: 14px; padding: 12px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.30); border-radius: 8px; margin-top: 10px; color: var(--text); }
+  .filo { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 18px 0; font-size: 13.5px; line-height: 1.6; }
+  .filo strong { color: var(--green-soft); }
+  .footnote { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 20px 0 0; padding: 14px; background: var(--bg-2); border-radius: 10px; border-left: 3px solid var(--border); }
+  .warn { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.30); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 12.5px; color: var(--accent); }
+  table.componentes { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  table.componentes th, table.componentes td { padding: 8px 10px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+  table.componentes th { background: var(--bg-3); font-weight: 700; }
+  table.componentes td.precio { text-align: right; font-family: ui-monospace, 'SF Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <a href="/" class="back">← Inicio</a>
+    <a href="/panel/donar.html" class="back">💜 Donar</a>
+  </div>
+
+  <div class="hero">
+    <h1>🦎 Camino a soberanía de IA legal mexicana</h1>
+    <p>3 etapas claras. Cada peso cuenta. Cero intermediarios, cero gobiernos, cero partidos.</p>
+  </div>
+
+  <p>Tequio depende hoy de <strong>Google Gemini</strong> para el Asistente Legal IA. Eso significa que la IA cívica mexicana corre en servidores de una corporación gringa, con cuota mensual prepagada de $80 USD que se agota antes de fin de mes cuando hay tráfico.</p>
+
+  <p><strong>La salida es construir nuestra propia infraestructura.</strong> No alquilar — comprar. Una vez pagada, los costos operativos bajan a la electricidad mensual del edificio.</p>
+
+  <p>Te enseñamos las 3 etapas con números reales del mercado mexicano, qué compra cada etapa, y cuánta capacidad da cada una.</p>
+
+  <!-- ============== ETAPA 1 ============== -->
+  <div class="etapa">
+    <div class="etapa-head">
+      <span class="etapa-num activa">Etapa 1 · ACTIVA</span>
+      <span class="etapa-title">Servidor propio en casa</span>
+      <span class="etapa-meta">$66,000 MXN · ~$3,800 USD</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar green" id="prog-e1" style="width: 0%"></div>
+    </div>
+    <div class="progress-text">
+      <span><strong id="recaudado-e1">$0 MXN</strong> recaudado</span>
+      <span>0% · meta $66,000 MXN</span>
+    </div>
+
+    <p style="margin-top: 14px;">Una workstation pro armada en casa con <strong>RTX 4090</strong>. Corre <strong>Llama 3.3 70B</strong> cuantizado a 4-bit, comparable a Gemini Flash o GPT-4o-mini en RAG legal mexicano.</p>
+
+    <h3>Qué se compra (precios MX jun-2026)</h3>
+    <table class="componentes">
+      <tr><th>Componente</th><th>Modelo</th><th class="precio">MXN</th></tr>
+      <tr><td>GPU</td><td>NVIDIA RTX 4090 24GB</td><td class="precio">$30,000</td></tr>
+      <tr><td>CPU</td><td>AMD Ryzen 9 7950X (16C/32T)</td><td class="precio">$9,500</td></tr>
+      <tr><td>Motherboard</td><td>ASUS X670E TUF Gaming</td><td class="precio">$7,500</td></tr>
+      <tr><td>RAM</td><td>64GB DDR5-6000 (2×32GB)</td><td class="precio">$3,800</td></tr>
+      <tr><td>SSD sistema</td><td>2TB NVMe Samsung 990 Pro</td><td class="precio">$3,200</td></tr>
+      <tr><td>SSD datos</td><td>4TB NVMe WD Black SN850X</td><td class="precio">$4,200</td></tr>
+      <tr><td>PSU</td><td>Corsair RM1000x 80+ Gold</td><td class="precio">$3,500</td></tr>
+      <tr><td>Case</td><td>Lian Li O11 Dynamic EVO</td><td class="precio">$2,800</td></tr>
+      <tr><td>Cooling CPU</td><td>NZXT Kraken X73 360mm AIO</td><td class="precio">$3,500</td></tr>
+      <tr><td>UPS (crítico en México)</td><td>CyberPower OR1500LCDRT2U</td><td class="precio">$4,200</td></tr>
+      <tr><td></td><td><strong>Total</strong></td><td class="precio"><strong>$66,200 MXN</strong></td></tr>
+    </table>
+
+    <div class="capacidad">
+      <strong>🦅 Capacidad:</strong> ~50,000-70,000 consultas/día sostenidas · ~1.5-2 millones/mes. Suficiente para los primeros <strong>2-3 años de Tequio</strong> con crecimiento orgánico ambicioso (200,000 usuarios activos al mes).<br>
+      <strong>💸 Costo operativo:</strong> ~$300-400 MXN/mes de luz CFE. <strong>Cero pagos a Google</strong>, OpenAI ni a ningún proveedor de cómputo.<br>
+      <strong>🛡️ Riesgo:</strong> el servidor está en una sola casa. Si se va la luz prolongada o falla un componente, el Asistente queda offline. Para mitigar → Etapa 2.
+    </div>
+  </div>
+
+  <!-- ============== ETAPA 2 ============== -->
+  <div class="etapa">
+    <div class="etapa-head">
+      <span class="etapa-num">Etapa 2 · siguiente</span>
+      <span class="etapa-title">Redundancia + capacidad doble</span>
+      <span class="etapa-meta">+$80,000 MXN · ~$4,700 USD</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="prog-e2" style="width: 0%"></div>
+    </div>
+    <div class="progress-text">
+      <span><strong id="recaudado-e2">$0 MXN</strong> recaudado</span>
+      <span>0% · meta $80,000 MXN adicionales</span>
+    </div>
+
+    <p style="margin-top: 14px;">Segunda RTX 4090 con NVLink al mismo build, o segundo servidor independiente en otra casa (familiar o socio de confianza) con load balancer. Soberanía técnica real con backup geográfico.</p>
+
+    <h3>Qué se compra</h3>
+    <ul>
+      <li><strong>2da NVIDIA RTX 4090</strong> (48GB VRAM combinados, NVLink) → corre Llama 3.3 70B sin cuantización a 40-50 tokens/seg</li>
+      <li>Upgrade PSU a 1600W Titanium</li>
+      <li>Case full tower con flujo de aire para 2 GPUs</li>
+      <li>Internet redundante (fibra Telmex + Megacable backup)</li>
+      <li>Servidor 2 independiente en otra ubicación (clonación del Build A) — opcional, alternativa al doble GPU</li>
+    </ul>
+
+    <div class="capacidad">
+      <strong>🦅 Capacidad:</strong> 200,000-500,000 usuarios activos al mes. Calidad superior porque modelo corre sin cuantización. Headroom para fine-tuning con datos legales mexicanos.<br>
+      <strong>🛡️ Disponibilidad:</strong> uptime de 99.5%+ con load balancing entre dos servidores.
+    </div>
+  </div>
+
+  <!-- ============== ETAPA 3 ============== -->
+  <div class="etapa">
+    <div class="etapa-head">
+      <span class="etapa-num aspirational">Etapa 3 · visión año 5</span>
+      <span class="etapa-title">Infraestructura en colo CDMX</span>
+      <span class="etapa-meta">+$300,000 MXN · ~$17,500 USD</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar violet" id="prog-e3" style="width: 0%"></div>
+    </div>
+    <div class="progress-text">
+      <span><strong id="recaudado-e3">$0 MXN</strong> recaudado</span>
+      <span>0% · meta $300,000 MXN adicionales</span>
+    </div>
+
+    <p style="margin-top: 14px;">Migrar el hardware a un colocation profesional en Ciudad de México (KIO Networks, Equinix MX1, Telmex Triara). Cero riesgo de luz residencial. Conectividad enterprise. Datos físicamente en suelo mexicano operados por mexicanos.</p>
+
+    <h3>Qué se compra</h3>
+    <ul>
+      <li>Rack 1U-2U en colo Tier-III CDMX: ~$8,000 MXN/mes año 1</li>
+      <li>Upgrade del Build A/B a chasis rackeable</li>
+      <li>Internet enterprise redundante: ~$5,000 MXN/mes</li>
+      <li>Climatización profesional incluida en el colo</li>
+      <li>Personal de soporte on-site 24/7 del colo</li>
+    </ul>
+
+    <div class="capacidad">
+      <strong>🦅 Capacidad:</strong> 1-2 millones de MAU activos. Disponibilidad 99.9%+. Latencia &lt;50ms desde toda Latinoamérica.<br>
+      <strong>🇲🇽 Soberanía completa:</strong> "datos de mexicanos, procesados por hardware de mexicanos, operados en suelo mexicano, sin tocar ni un servidor del extranjero". Frase que hoy nadie puede decir honestamente.
+    </div>
+  </div>
+
+  <!-- ============== CALCULADORA ============== -->
+  <div class="calc">
+    <h3>🧮 Qué compra tu donación</h3>
+    <div class="calc-row">
+      <label for="monto" style="white-space:nowrap; color: var(--muted);">Tu donación:</label>
+      <input id="monto" type="number" min="10" step="10" value="100" oninput="recalcular()" /> MXN
+    </div>
+    <div class="calc-result" id="resultado"></div>
+  </div>
+
+  <!-- ============== FILOSOFÍA ============== -->
+  <div class="filo">
+    🦎 <strong>Por qué hacerlo así, una sola vez.</strong> El modelo SaaS te tiene pagando para siempre y dependiendo de las decisiones de un proveedor extranjero. Comprar el hardware tiene un costo inicial mayor, pero el OPEX mensual baja de $80 USD/mes a $18 USD/mes (luz). Eso es <strong>ahorro de $62 USD/mes a perpetuidad</strong>, que en 12 meses son ~$12,500 MXN. En 5 años el servidor se "paga solo" por la diferencia. Pero la cuenta real es otra: <strong>las donaciones lo financian</strong>, y los ahorros operativos pagan upgrades.
+  </div>
+
+  <!-- ============== CTA ============== -->
+  <div class="cta">
+    <a href="https://paypal.me/tequioapp" target="_blank" rel="noopener" class="btn-primary">💜 Apoyar la Etapa 1 con PayPal</a>
+    <a href="/panel/donar.html" class="btn-secondary">Ver todos los métodos de donación</a>
+    <a href="/" class="btn-secondary">Volver a Tequio</a>
+  </div>
+
+  <!-- ============== FOOTNOTE ============== -->
+  <div class="footnote">
+    <strong>Transparencia:</strong> los precios MX están al mercado de junio 2026 (CyberPuerta, PCH Mayoreo, MercadoLibre Plus). Pueden bajar 10-15% en Buen Fin o Black Friday. Si el Build A se compra con descuentos, el excedente va a Etapa 2.<br><br>
+    <strong>Por qué no H100/A100:</strong> esas GPUs cuestan ~$30,000 USD cada una y para nuestro caso (RAG legal mexicano, ~30 t/s necesarios) no añaden valor proporcional al costo. Reservadas para cuando Tequio tenga 1M+ MAU sostenidos.<br><br>
+    <strong>Por qué Llama 3.3 70B y no GPT-4 / Claude:</strong> son modelos cerrados, sus pesos están en servidores corporativos. Llama es open-source, podemos correrlo en nuestro hardware sin depender de OpenAI ni Anthropic.<br><br>
+    <strong>Hoja pública de transparencia financiera:</strong> en cuanto las donaciones lleguen, se reportarán en una Google Sheet abierta (link en /panel/donar.html). Cada peso recibido y cada peso gastado.
+  </div>
+</div>
+
+<script>
+  // Calculadora "qué compra tu donación"
+  function recalcular() {
+    var monto = parseFloat(document.getElementById('monto').value || 0);
+    var res = document.getElementById('resultado');
+    if (!monto || monto < 10) { res.innerHTML = 'Mete un monto en pesos.'; return; }
+    var pct_e1 = (monto / 66200 * 100).toFixed(3);
+    var minutos_ia = (monto / 50 * 5).toFixed(0); // $50 MXN = 5 min de IA aprox
+    var mensajes_ia = (monto / 50 * 10).toFixed(0); // ~10 consultas por cada $50
+    res.innerHTML =
+      '<strong>$' + monto.toLocaleString('es-MX') + ' MXN</strong> = ' +
+      '<strong>' + pct_e1 + '%</strong> de la Etapa 1<br>' +
+      '~' + minutos_ia + ' minutos de IA Llama 70B corriendo en CDMX para todo México<br>' +
+      '~' + mensajes_ia + ' consultas de RAG legal sostenidas para otros mexicanos<br>' +
+      '<em style="color:#94a3b8;font-size:12px">(Hoy mismo, cubre tokens Gemini para ~' + Math.floor(monto/10) + ' consultas en el modelo actual.)</em>';
+  }
+  recalcular();
+
+  // TODO: cuando exista hoja de transparencia, hacer fetch a su CSV pública
+  // y actualizar #recaudado-e1, prog-e1, etc. en tiempo real.
+  // Por ahora, valores en cero.
+</script>
+</body>
+</html>
