@@ -83,6 +83,56 @@ jobs:
           if [ "$MISMATCH" = "1" ]; then exit 1; fi
           echo "✓ meta description leyes == data-kpi=leyes ($META_LEYES)"
 
+      - name: Assert Aviso de Privacidad publicado
+        run: |
+          set -e
+          STATUS=$(curl -sS -o /tmp/priv.html -w "%{http_code}" --max-time 10 https://tequio.app/panel/privacidad.html)
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::panel/privacidad.html no devuelve 200 (got $STATUS)"
+            exit 1
+          fi
+          for STR in "LFPDPPP" "ARCO" "responsable" "privacidad@tequio.app" "Supabase" "Vercel"; do
+            if ! grep -Fq "$STR" /tmp/priv.html; then
+              echo "::error::aviso de privacidad sin cadena requerida: '$STR'"
+              exit 1
+            fi
+          done
+          echo "✓ Aviso de privacidad publicado con LFPDPPP, ARCO, responsable, contacto, transferencias"
+
+      - name: Assert claims falsos eliminados
+        run: |
+          set -e
+          for STR in "compañías del Oeste" "no en Discord, Telegram ni" "Cumplimos con la LFPDPPP" "Cada cifra enlaza al PDF oficial"; do
+            if grep -Fq "$STR" /tmp/live.html; then
+              echo "::error::Claim falso encontrado en live HTML: '$STR'"
+              exit 1
+            fi
+          done
+          echo "✓ 4 claims falsos ausentes"
+
+      - name: Assert footer link a aviso
+        run: |
+          set -e
+          if ! grep -Fq "/panel/privacidad.html" /tmp/live.html; then
+            echo "::error::Footer no linkea aviso de privacidad"
+            exit 1
+          fi
+          echo "✓ Footer linkea /panel/privacidad.html"
+
+      - name: Assert ARCO endpoint válido
+        run: |
+          set -e
+          # POST inválido (sin email) debe devolver 400 con error específico
+          RESP=$(curl -sS -X POST "https://tequio.app/api/data?vista=arco_request" \
+            -H "Content-Type: application/json" \
+            -d '{"tipo_derecho":"acceso"}')
+          if ! echo "$RESP" | grep -q "email"; then
+            echo "::error::Endpoint /api/data?vista=arco_request no valida email correctamente"
+            echo "  Respuesta: $RESP"
+            exit 1
+          fi
+          echo "✓ Endpoint arco_request responde con validación de email"
+
       - name: Assert Red de Poder · Cero Invención filter
         run: |
           set -e
