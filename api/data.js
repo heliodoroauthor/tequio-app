@@ -1638,6 +1638,7 @@ export default async function handler(req, res) {
       const validCats = ['corrupcion','infraestructura','seguridad','salud','ambiental','servicios','otro'];
       if (!validCats.includes(categoria)) return res.status(400).json({ error: 'categoria invalida' });
       if (!device_hash || device_hash.length < 10) return res.status(400).json({ error: 'device_hash requerido' });
+      if (body.consentimiento_aviso !== true) return res.status(400).json({ error: 'Debes aceptar el aviso de privacidad para publicar.' });
 
       const dia = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const recientes = await sb(`testigo_reportes?device_hash=eq.${encodeURIComponent(device_hash)}&created_at=gte.${encodeURIComponent(dia)}&select=id`);
@@ -1660,7 +1661,9 @@ export default async function handler(req, res) {
         clave_entidad: clave_entidad || null,
         nombre_municipio: nombre_municipio || null,
         device_hash,
-        ip_hash
+        ip_hash,
+        consentimiento_aviso: true,
+        consentimiento_version: '1.0'
       };
 
       const ins = await fetch(`${SUPABASE_URL}/rest/v1/testigo_reportes`, {
@@ -2383,6 +2386,40 @@ export default async function handler(req, res) {
       const slug = (req.query.slug || '').toString();
       if (!slug) return res.status(400).json({ error: 'slug requerido' });
       const arr = (await sb('puntos_servicio?slug=eq.' + encodeURIComponent(slug) + '&select=*')) || [];
+    // ── ARCO requests · 2E Phase 2 · LFPDPPP ──
+    if (vista === 'arco_request') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const { tipo_derecho, email_solicitante, cookie_id, detalle } = body;
+      if (!['acceso','rectificacion','cancelacion','oposicion'].includes(tipo_derecho)) {
+        return res.status(400).json({ error: 'tipo_derecho debe ser acceso/rectificacion/cancelacion/oposicion' });
+      }
+      if (!email_solicitante || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email_solicitante)) {
+        return res.status(400).json({ error: 'email_solicitante inválido' });
+      }
+      if (detalle && detalle.length > 5000) {
+        return res.status(400).json({ error: 'detalle máximo 5000 caracteres' });
+      }
+      const ipRaw = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+      const ip_hash = nodeCrypto.createHash('sha256').update(ipRaw + (process.env.SALT_IP || 'tequio-salt-v1')).digest('hex').slice(0, 32);
+      try {
+        await sbWrite('arco_requests', {
+          tipo_derecho,
+          email_solicitante: email_solicitante.slice(0, 200),
+          cookie_id: cookie_id ? String(cookie_id).slice(0, 64) : null,
+          detalle: detalle ? String(detalle).slice(0, 5000) : null,
+          ip_hash,
+          aviso_version: '1.0'
+        });
+        return res.status(201).json({
+          ok: true,
+          mensaje: 'Solicitud recibida. Te responderemos en máximo 20 días hábiles al correo proporcionado.'
+        });
+      } catch (e) {
+        return res.status(500).json({ error: 'No se pudo registrar la solicitud', detail: e.message });
+      }
+    }
+
       if (!arr.length) return res.status(404).json({ error: 'No encontrado' });
       return res.status(200).json({ punto: arr[0] });
     }

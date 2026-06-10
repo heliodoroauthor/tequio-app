@@ -137,7 +137,7 @@ function tequioMostrarWelcome() {
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">🇲🇽</span>' +
-          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#a855f7">Soberanía digital.</strong> Tequio opera bajo leyes mexicanas (LFPDPPP). Servidores en Supabase, no en Discord, Telegram ni compañías del Oeste.</div>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#a855f7">Privacidad y datos.</strong> Tequio opera bajo leyes mexicanas (LFPDPPP). Infraestructura: Supabase + Vercel + Gemini (EE.UU. con cláusulas DPA). Detalles en <a href="/panel/privacidad.html" style="color:#a855f7">aviso de privacidad</a>.</div>' +
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">📚</span>' +
@@ -151,7 +151,7 @@ function tequioMostrarWelcome() {
         '</label>' +
       '</div>' +
       '<button id="tequio-welcome-confirm" onclick="tequioWelcomeAceptar()" disabled style="width:100%;padding:14px;background:#fbbf24;border:none;border-radius:12px;color:#0b0f1a;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;opacity:0.4;transition:opacity 0.2s">🚀 Acepto y empezar a personalizar</button>' +
-      '<div style="margin-top:10px;font-size:10px;color:#6b7280;text-align:center;line-height:1.5">Tequio opera bajo leyes de México · LFPDPPP · Art. 1 y 16 CPEUM<br>Soporte: <a href="mailto:hola@tequio.app" style="color:#9ca3af">hola@tequio.app</a></div>' +
+      '<div style="margin-top:10px;font-size:10px;color:#6b7280;text-align:center;line-height:1.5">Tequio opera bajo leyes de México · <a href="/panel/privacidad.html" style="color:#9ca3af;text-decoration:underline">Aviso de privacidad LFPDPPP</a> · Art. 1 y 16 CPEUM<br>Soporte: <a href="mailto:hola@tequio.app" style="color:#9ca3af">hola@tequio.app</a> · Privacidad: <a href="mailto:privacidad@tequio.app" style="color:#9ca3af">privacidad@tequio.app</a></div>' +
     '</div>' +
   '</div>';
   document.body.insertAdjacentHTML('beforeend', html);
@@ -5513,377 +5513,34 @@ window.addEventListener('load', function(){
       .yt-card .meta { font-size: 10px; color: var(--text3); }
     </style>
 
-    <!-- ───── COMUNIDAD (Chat nativo Supabase Realtime) ───── -->
+    <!-- ───── COMUNIDAD (apagada para lanzamiento · A1 Brief #2) ───── -->
     <div id="page-comunidad" class="page">
-      <div class="content" style="max-width:900px">
+      <div class="content" style="max-width:760px">
         <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#6366f1 100%);border-radius:20px;padding:28px;margin:20px 0 18px;color:#fff;box-shadow:0 8px 24px rgba(55,48,163,0.30)">
           <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px">
             <div style="font-size:60px;line-height:1">💬</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:30px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Comunidad Tequio</h1>
-              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4">Chat cívico en vivo · <strong>5 salas temáticas</strong> · soberanía digital.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">🦎 CERO INVENCIÓN</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800">5</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Salas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">100%</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Anónimo</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">Sin email</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Identidad</div></div>
-            <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No Discord</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Storage MX</div></div>
-          </div>
-        </div>
-        <details style="background:linear-gradient(135deg,rgba(55,48,163,0.08),rgba(55,48,163,0.02));border:1px solid rgba(55,48,163,0.35);border-radius:12px;margin-bottom:14px">
-          <summary style="cursor:pointer;padding:12px 16px;font-size:13px;font-weight:700;color:#a5b4fc;list-style:none;display:flex;align-items:center;justify-content:space-between"><span>Reglas comunitarias</span><span style="font-size:11px">▾</span></summary>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--text2);line-height:1.6">Moderación distribuida por reportes y votos:
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:10px">
-              <div style="background:rgba(220,38,38,0.10);border-left:3px solid #dc2626;padding:8px 10px;border-radius:6px"><strong style="color:#fca5a5">No violencia</strong><br><span style="font-size:11px">Amenazas, doxxing.</span></div>
-              <div style="background:rgba(245,158,11,0.10);border-left:3px solid #f59e0b;padding:8px 10px;border-radius:6px"><strong style="color:#fde68a">Cero spam</strong><br><span style="font-size:11px">Publicidad fuera.</span></div>
-              <div style="background:rgba(168,85,247,0.10);border-left:3px solid #a855f7;padding:8px 10px;border-radius:6px"><strong style="color:#d8b4fe">Cita fuentes</strong><br><span style="font-size:11px">Sin fuente = opinión.</span></div>
-              <div style="background:rgba(34,197,94,0.10);border-left:3px solid #22c55e;padding:8px 10px;border-radius:6px"><strong style="color:#86efac">Discrepar = OK</strong><br><span style="font-size:11px">Insultar no.</span></div>
+              <p style="margin:8px 0 0;opacity:0.94;font-size:15px;line-height:1.4"><strong>Próximamente.</strong> Estamos diseñando la moderación antes de abrirlo.</p>
             </div>
           </div>
-        </details>
-        <!-- Hero original (oculto, JS legacy) -->
-        <div style="display:none">
-          <div style="font-size:22px;font-weight:800;margin-bottom:4px">💬 Chat Comunitario Tequio</div>
         </div>
-
-        <!-- Banner Cero Invención -->
-        <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:12px 14px;border-radius:8px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:18px;line-height:1">🦎</span>
-          <div style="font-size:13px;line-height:1.5">
-            <strong>Cero Invención · Soberanía digital.</strong> Mensajes alojados en Supabase (instancia de Tequio · no Discord, no Telegram, no compañías del Oeste).
-            Identidad anónima · sin email · sin terceros · moderación comunitaria por reportes.
-          </div>
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.40);border-radius:14px;padding:18px;line-height:1.6">
+          <div style="font-size:18px;font-weight:700;color:#fde68a;margin-bottom:6px">🟡 Chat comunitario · cerrado temporalmente</div>
+          <p style="margin:0 0 8px;font-size:13px;color:var(--text2)">El chat se reabrirá después del lanzamiento con:</p>
+          <ul style="margin:0 0 12px 18px;font-size:13px;color:var(--text2)">
+            <li>Verificación humana al primer mensaje (Cloudflare Turnstile · gratis · sin email)</li>
+            <li>Lista de filtros automáticos contra spam y discurso violento</li>
+            <li>Moderación distribuida por reportes con respuesta &lt;24h</li>
+            <li>Bloqueo automático por reincidencia (device + IP hash)</li>
+          </ul>
+          <p style="margin:0;font-size:12px;color:var(--text3)">Mientras tanto, el resto de Tequio funciona al 100% — leyes, votaciones, IA legal, dinero público, red de poder, etc.</p>
         </div>
-
-        <!-- Tabs salas -->
-        <div id="chatTabs" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px">
-          <button type="button" data-sala="general"    class="chat-tab chat-tab-active">📣 General</button>
-          <button type="button" data-sala="politica"   class="chat-tab">🏛️ Política</button>
-          <button type="button" data-sala="derechos"   class="chat-tab">⚖️ Derechos</button>
-          <button type="button" data-sala="municipios" class="chat-tab">🗺️ Municipios</button>
-          <button type="button" data-sala="economia"   class="chat-tab">💰 Economía</button>
-        </div>
-
-        <!-- Status realtime -->
-        <div id="chatStatus" style="font-size:11px;color:var(--text3);margin-bottom:8px">
-          <span id="chatDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#666;margin-right:6px;vertical-align:middle"></span>
-          <span id="chatStatusText">Sin inicializar</span>
-        </div>
-
-        <!-- Lista mensajes -->
-        <div id="chatMessages" role="log" aria-live="polite" style="background:rgba(0,0,0,0.2);border-radius:10px;padding:12px;height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;border:1px solid rgba(255,255,255,0.05)">
-          <div id="chatLoading" style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Cargando mensajes…</div>
-        </div>
-
-        <!-- Input -->
-        <div id="chatInputWrap" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input id="chatNick" type="text" maxlength="20" placeholder="Tu nick"
-            style="width:120px;background:var(--card);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;color:var(--text1);font-size:13px;font-family:inherit"/>
-          <input id="chatInput" type="text" maxlength="500" placeholder="Mensaje (Enter para enviar)" autocomplete="off"
-            style="flex:1;min-width:200px;background:var(--card);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;color:var(--text1);font-size:14px;font-family:inherit"/>
-          <button id="chatSendBtn" type="button" onclick="chatEnviar()" style="background:var(--accent);border:none;border-radius:8px;color:#fff;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Enviar</button>
-        </div>
-        <div id="chatError" style="font-size:11px;color:#ef4444;margin-top:6px;min-height:14px"></div>
-        <div style="font-size:10px;color:var(--text3);margin-top:6px">
-          Sin links · Máx 500 caracteres · 30 mensajes/hora · 3 segundos entre mensajes · Reportar con ⚑
+        <div class="alert alert-info" style="margin-top:14px">
+          <span>📬</span>
+          <span style="font-size:12px">Si quieres reportar algo urgente: <a href="mailto:hola@tequio.app" style="color:var(--accent2)">hola@tequio.app</a> · revisamos cada 24h.</span>
         </div>
       </div>
-
-      <style>
-        .chat-tab { background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s }
-        .chat-tab:hover { border-color:var(--accent);color:var(--text1) }
-        .chat-tab-active { background:var(--accent);color:#fff;border-color:var(--accent) }
-        .chat-msg { display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.03) }
-        .chat-msg-header { display:flex;align-items:baseline;gap:8px;font-size:11px }
-        .chat-msg-nick { font-weight:700;color:var(--accent) }
-        .chat-msg-time { color:var(--text3) }
-        .chat-msg-body { font-size:14px;color:var(--text1);word-break:break-word;line-height:1.4 }
-        .chat-msg-report { color:var(--text3);font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;margin-left:auto }
-        .chat-msg-report:hover { color:#ef4444 }
-      </style>
-
-      <script>
-      (function(){
-        // ---- Config ----
-        var SB_URL  = 'https://mhsuihwjgtzxflesbnxv.supabase.co';
-        var SB_ANON = 'sb_publishable_grJAWIMoSr5b8YfaB7HVlw_OesNipBz';
-        var TURNSTILE_SITE = '0x4AAAAAADVsqa6-gYYg2pDO';
-        var SALAS = ['general','politica','derechos','municipios','economia'];
-
-        // ---- State ----
-        var state = {
-          sala: 'general',
-          token: null,
-          userId: null,
-          nick: localStorage.getItem('tequio_chat_nick') || '',
-          lastEnvioTs: 0,
-          msgs: [],
-          hydratado: false,
-          enviando: false,
-          channel: null,
-          sb: null
-        };
-
-        function $(id){ return document.getElementById(id); }
-        function fmtTime(iso){
-          try { var d = new Date(iso); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
-          catch(e){ return ''; }
-        }
-        function esc(s){
-          return String(s||'').replace(/[&<>"']/g,function(c){
-            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
-          });
-        }
-        function setStatus(color, text){
-          var d = $('chatDot'), t = $('chatStatusText');
-          if (d) d.style.background = color;
-          if (t) t.textContent = text;
-        }
-        function setError(msg){
-          var el = $('chatError'); if (!el) return;
-          el.textContent = msg || '';
-          if (msg) setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, 5000);
-        }
-
-        // ---- Lazy load Supabase JS SDK ----
-        function loadSdk(){
-          return new Promise(function(resolve, reject){
-            if (window.supabase && window.supabase.createClient) return resolve(window.supabase);
-            var s = document.createElement('script');
-            s.src = 'https://unpkg.com/@supabase/supabase-js@2';
-            s.async = true;
-            s.onload  = function(){ resolve(window.supabase); };
-            s.onerror = function(){ reject(new Error('No se pudo cargar Supabase SDK')); };
-            document.head.appendChild(s);
-          });
-        }
-
-        // ---- Auth anónimo ----
-        // ---- Cloudflare Turnstile (captcha invisible) ----
-        function loadTurnstile(){
-          return new Promise(function(resolve, reject){
-            if (window.turnstile && window.turnstile.render) return resolve(window.turnstile);
-            // Si el script ya está cargando, esperar al global
-            var existing = document.querySelector('script[data-tequio-turnstile]');
-            if (existing) {
-              var waited = 0;
-              var iv = setInterval(function(){
-                if (window.turnstile && window.turnstile.render) { clearInterval(iv); resolve(window.turnstile); }
-                else if (waited > 10000) { clearInterval(iv); reject(new Error('Turnstile timeout')); }
-                waited += 100;
-              }, 100);
-              return;
-            }
-            var s = document.createElement('script');
-            s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-            s.async = true; s.defer = true;
-            s.setAttribute('data-tequio-turnstile','1');
-            s.onload  = function(){ resolve(window.turnstile); };
-            s.onerror = function(){ reject(new Error('No se pudo cargar Turnstile')); };
-            document.head.appendChild(s);
-          });
-        }
-
-        function getCaptchaToken(){
-          return new Promise(function(resolve, reject){
-            loadTurnstile().then(function(ts){
-              var c = document.getElementById('turnstile-container');
-              if (!c) {
-                c = document.createElement('div');
-                c.id = 'turnstile-container';
-                c.style.cssText = 'margin:8px 0;display:flex;justify-content:center';
-                var iw = document.getElementById('chatInputWrap');
-                if (iw && iw.parentNode) iw.parentNode.insertBefore(c, iw);
-              } else {
-                try { ts.remove(c); } catch(e){}
-                c.innerHTML = '';
-                c.style.display = 'flex';
-              }
-              try {
-                ts.render(c, {
-                  sitekey: TURNSTILE_SITE,
-                  theme: 'dark',
-                  callback: function(token){ resolve(token); },
-                  'error-callback': function(){ reject(new Error('Turnstile rechazó la verificación')); },
-                  'expired-callback': function(){ /* el siguiente intento re-renderiza */ }
-                });
-              } catch(e){ reject(e); }
-            }).catch(reject);
-          });
-        }
-
-        function ensureAuth(){
-          return state.sb.auth.getSession().then(function(res){
-            if (res.data && res.data.session && res.data.session.access_token) {
-              state.token = res.data.session.access_token;
-              state.userId = res.data.session.user.id;
-              return true;
-            }
-            setStatus('#666', 'Verificando captcha…');
-            return getCaptchaToken().then(function(captchaToken){
-              setStatus('#666', 'Autenticando…');
-              return state.sb.auth.signInAnonymously({ options: { captchaToken: captchaToken } });
-            }).then(function(r){
-              if (r && r.error) {
-                setStatus('#ef4444', 'Auth fallida · ' + (r.error.message || 'error'));
-                console.error('signInAnonymously:', r.error);
-                return false;
-              }
-              state.token  = r.data.session.access_token;
-              state.userId = r.data.user.id;
-              sessionStorage.setItem('tequio_chat_uid', state.userId);
-              var c = document.getElementById('turnstile-container');
-              if (c) c.style.display = 'none';
-              return true;
-            }).catch(function(err){
-              setStatus('#ef4444', 'Captcha fallido · ' + (err && err.message || 'error'));
-              console.error('captcha/auth:', err);
-              return false;
-            });
-          });
-        }
-
-        // ---- Cargar mensajes ----
-        function loadMessages(){
-          return state.sb.rpc('chat_recientes', { p_sala: state.sala, p_limit: 100 })
-            .then(function(r){
-              if (r.error) { setError('No pude cargar mensajes'); return; }
-              state.msgs = Array.isArray(r.data) ? r.data.slice().reverse() : [];
-              renderMessages();
-            });
-        }
-
-        function renderMessages(){
-          var box = $('chatMessages'); if (!box) return;
-          if (!state.msgs.length) {
-            box.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Sin mensajes aún en #'+esc(state.sala)+'. ¡Empieza la conversación!</div>';
-            return;
-          }
-          box.innerHTML = state.msgs.map(function(m){
-            return '<div class="chat-msg" data-id="'+esc(m.id)+'">'
-              + '<div class="chat-msg-header">'
-              +   '<span class="chat-msg-nick">'+esc(m.nick || 'anon')+'</span>'
-              +   '<span class="chat-msg-time">'+fmtTime(m.ts)+'</span>'
-              +   '<button class="chat-msg-report" type="button" title="Reportar" onclick="chatReportar('+m.id+')">⚑</button>'
-              + '</div>'
-              + '<div class="chat-msg-body">'+esc(m.mensaje)+'</div>'
-            + '</div>';
-          }).join('');
-          box.scrollTop = box.scrollHeight;
-        }
-
-        function pushMsg(m){
-          if (!m || m.sala !== state.sala) return;
-          if (state.msgs.some(function(x){ return x.id === m.id; })) return;
-          state.msgs.push(m);
-          if (state.msgs.length > 150) state.msgs.shift();
-          renderMessages();
-        }
-
-        // ---- Realtime ----
-        function subscribeSala(){
-          if (state.channel) { try { state.sb.removeChannel(state.channel); } catch(e){} }
-          state.channel = state.sb.channel('chat-' + state.sala)
-            .on('postgres_changes', { event:'INSERT', schema:'public', table:'chat_mensajes', filter:'sala=eq.'+state.sala },
-              function(payload){
-                var r = payload && payload.new;
-                if (!r) return;
-                pushMsg({ id:r.id, nick:r.nick, mensaje:r.mensaje, sala:r.sala, ts:r.timestamp });
-              })
-            .subscribe(function(status){
-              if (status === 'SUBSCRIBED') setStatus('#22c55e', 'En vivo · #'+state.sala);
-              else if (status === 'CHANNEL_ERROR') setStatus('#ef4444', 'Error realtime');
-              else if (status === 'CLOSED') setStatus('#fb923c', 'Reconectando…');
-            });
-        }
-
-        // ---- Enviar ----
-        window.chatEnviar = function(){
-          if (state.enviando) return;
-          var input = $('chatInput'), nickEl = $('chatNick');
-          var msg = (input.value || '').trim();
-          var nick = (nickEl.value || '').trim();
-          if (!msg) return;
-          if (nick) { state.nick = nick; localStorage.setItem('tequio_chat_nick', nick); }
-          var now = Date.now();
-          if (now - state.lastEnvioTs < 3000) { setError('Espera 3 segundos entre mensajes'); return; }
-          state.enviando = true;
-          state.sb.rpc('chat_enviar', { p_mensaje: msg, p_sala: state.sala, p_nick: state.nick || 'anon' })
-            .then(function(r){
-              state.enviando = false;
-              if (r.error) { setError('Error: ' + r.error.message); return; }
-              if (r.data && r.data.ok) { input.value=''; state.lastEnvioTs = now; setError(''); }
-              else { setError((r.data && r.data.error) || 'Error al enviar'); }
-            })
-            .catch(function(){ state.enviando = false; setError('Error de red'); });
-        };
-
-        window.chatReportar = function(id){
-          if (!confirm('¿Reportar este mensaje como inapropiado?')) return;
-          state.sb.rpc('chat_reportar', { p_mensaje_id: id, p_motivo: 'inapropiado' })
-            .then(function(r){
-              if (r.error) { setError('No se pudo reportar'); return; }
-              if (r.data && r.data.ok) setError(r.data.oculto ? 'Mensaje oculto (≥3 reportes)' : 'Reporte enviado, gracias');
-              else setError((r.data && r.data.error) || 'No se pudo reportar');
-            })
-            .catch(function(){ setError('Error de red'); });
-        };
-
-        // ---- Tabs + inputs ----
-        function attachTabs(){
-          var tabs = document.querySelectorAll('#chatTabs .chat-tab');
-          tabs.forEach(function(tab){
-            tab.addEventListener('click', function(){
-              tabs.forEach(function(t){ t.classList.remove('chat-tab-active'); });
-              tab.classList.add('chat-tab-active');
-              var sala = tab.getAttribute('data-sala');
-              if (!sala || sala === state.sala) return;
-              state.sala = sala;
-              setStatus('#fb923c', 'Cambiando a #'+sala+'…');
-              loadMessages().then(subscribeSala);
-            });
-          });
-        }
-        function attachInputs(){
-          var input = $('chatInput'), nickEl = $('chatNick');
-          if (nickEl && state.nick) nickEl.value = state.nick;
-          if (input) input.addEventListener('keypress', function(e){
-            if (e.key === 'Enter') { e.preventDefault(); window.chatEnviar(); }
-          });
-          if (nickEl) nickEl.addEventListener('change', function(){
-            var v = (nickEl.value || '').trim();
-            if (v) { state.nick = v; localStorage.setItem('tequio_chat_nick', v); }
-          });
-        }
-
-        // ---- Init (llamado por router al abrir page-comunidad) ----
-        window.initComunidad = function(){
-          if (state.hydratado) return;
-          var box = $('chatMessages'); if (!box) return;
-          state.hydratado = true;
-          attachTabs();
-          attachInputs();
-          setStatus('#666', 'Cargando SDK…');
-          loadSdk().then(function(sb){
-            state.sb = sb.createClient(SB_URL, SB_ANON, {
-              realtime: { params: { eventsPerSecond: 5 } },
-              auth: { persistSession: true, storage: window.localStorage, storageKey: 'tequio-chat-auth' }
-            });
-            setStatus('#666', 'Autenticando…');
-            return ensureAuth();
-          }).then(function(ok){
-            if (!ok) return;
-            setStatus('#22c55e', 'Cargando #'+state.sala+'…');
-            return loadMessages().then(subscribeSala);
-          }).catch(function(e){
-            console.error(e);
-            setStatus('#ef4444', 'Error: '+(e && e.message || 'desconocido'));
-          });
-        };
-      })();
-      </script>
     </div>
     <!-- ───── VERIFICACIÓN CIUDADANA ───── -->
     <div id="page-verificacion" class="page">
@@ -10544,7 +10201,7 @@ window.addEventListener('load', function(){
           <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">2. LIMITACIONES DEL CONTENIDO IA</div><ul style="padding-left:20px;display:flex;flex-direction:column;gap:6px"><li>No constituye asesoría jurídica bajo ninguna legislación.</li><li>Puede contener errores, imprecisiones o información desactualizada.</li><li>No debe presentarse ante autoridades sin revisión profesional previa.</li><li>No crea relación abogado-cliente.</li><li>La IA puede generar información inexistente o incorrecta ("alucinaciones").</li></ul></div>
           <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">3. EXONERACIÓN DE RESPONSABILIDAD</div><p>Tequio, sus desarrolladores, operadores y proveedores <strong>no serán responsables</strong> por daños directos, indirectos, económicos, laborales, morales o de cualquier tipo derivados del uso de esta plataforma o su contenido, en la máxima extensión permitida por la ley.</p></div>
           <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">4. RESPONSABILIDADES DEL USUARIO</div><ul style="padding-left:20px;display:flex;flex-direction:column;gap:6px"><li>Es el único responsable del uso que haga del contenido.</li><li>Debe verificar toda información legal con profesionales calificados.</li><li>No usará la plataforma para actividades ilegales.</li><li>Exonera expresamente a Tequio de toda responsabilidad por daños derivados del servicio.</li></ul></div>
-          <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">5. PRIVACIDAD Y DATOS</div><p>Los datos se almacenan exclusivamente en tu dispositivo. Las consultas de IA son procesadas por Anthropic, PBC. Cumplimos con la LFPDPPP de México.</p></div>
+          <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">5. PRIVACIDAD Y DATOS</div><p>Datos personales mínimos · hashes (no IP/UA en claro). Consultas IA por Google Gemini (transferencia EE.UU.). Información completa en <a href="/panel/privacidad.html" style="color:var(--accent2)">aviso de privacidad LFPDPPP</a> con tus derechos ARCO.</p></div>
           <div class="card"><div style="font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;margin-bottom:10px">6. LEY APLICABLE</div><p>Estos términos se rigen por las leyes de los <strong>Estados Unidos Mexicanos</strong>. Cualquier controversia se resolverá ante los tribunales competentes de la <strong>Ciudad de México</strong>.</p></div>
           <div class="card" style="background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.25)"><div style="font-size:11px;font-weight:700;color:var(--green2);letter-spacing:1.5px;margin-bottom:10px">ASESORÍA LEGAL GRATUITA</div>
             <a href="tel:8002003030" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;text-decoration:none;margin-bottom:6px"><span style="font-size:12px;color:var(--text)">Defensoría Pública Federal</span><span style="font-weight:700;color:var(--green2)">800 200 3030</span></a>
@@ -12756,7 +12413,7 @@ window.addEventListener('load', function(){
           <button id="legal-disclaimer-confirm" onclick="legalDisclaimerConfirmar()" disabled style="width:100%;padding:13px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.4;transition:opacity 0.2s">✅ Acepto — Continuar</button>
           <button onclick="legalDisclaimerCancelar()" style="width:100%;padding:11px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text3);font-size:13px;cursor:pointer;font-family:inherit">Cancelar</button>
         </div>
-        <div style="margin-top:10px;font-size:10px;color:var(--text3);text-align:center">Tequio opera bajo las leyes de México · LFPDPPP · Art. 1 y 16 CPEUM</div>
+        <div style="margin-top:10px;font-size:10px;color:var(--text3);text-align:center">Tequio opera bajo las leyes de México · <a href="/panel/privacidad.html" style="color:var(--text3);text-decoration:underline">Aviso de privacidad LFPDPPP</a> · Art. 1 y 16 CPEUM</div>
       </div>
     </div>
   </div>

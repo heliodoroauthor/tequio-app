@@ -293,6 +293,12 @@
         <div id="geo-info" class="geo-info"></div>
       </div>
 
+      <div style="margin: 14px 0 10px; padding: 12px; background: rgba(129,140,248,0.06); border: 1px solid rgba(129,140,248,0.35); border-radius: 8px;">
+        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.45;">
+          <input type="checkbox" id="consent-aviso" oninput="if(typeof updateSubmit==='function')updateSubmit()" style="margin-top: 3px; flex-shrink: 0;">
+          <span>Acepto el <a href="/panel/privacidad.html" target="_blank" style="color: #818cf8;">aviso de privacidad</a> de Tequio. Entiendo que mi reporte (incluyendo foto y ubicación aproximada) será visible públicamente al publicarse, y que conservo mis derechos ARCO.</span>
+        </label>
+      </div>
       <button type="submit" id="btn-submit" class="btn" disabled>Publicar reporte</button>
     </form>
     <div class="disclaimer">
@@ -544,7 +550,8 @@
         nombre_municipio: geoData.mun,
         device_hash: getDeviceHash(),
         honeypot,
-        tiempo_en_pagina_ms: Date.now() - T0
+        tiempo_en_pagina_ms: Date.now() - T0,
+        consentimiento_aviso: document.getElementById('consent-aviso').checked
       };
 
       const res = await fetch('/api/data?vista=testigo_crear', {

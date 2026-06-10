@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Chat Comunitario · Tequio</title>
-<script src="/js/anti-bot.js?v=be6069a" defer></script>
+<title>Comunidad · Próximamente · Tequio</title>
 <style>
   :root {
     --bg: #0b0e14;
@@ -13,354 +12,73 @@
     --border: #232a3a;
     --text: #e6edf3;
     --muted: #9aa6b8;
-    --accent: #5eead4;
-    --accent-2: #34d399;
-    --danger: #f87171;
+    --accent: #818cf8;
     --warn: #fbbf24;
     --warn-bg: #2a230b;
-    --system: #818cf8;
-    --mine: #34d399;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
   body { min-height: 100vh; display: flex; flex-direction: column; }
   a { color: var(--accent); text-decoration: none; }
-  .container { max-width: 760px; margin: 0 auto; width: 100%; padding: 16px; display: flex; flex-direction: column; flex: 1; gap: 12px; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 600px; margin: 0 auto; width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
   .topbar { display: flex; align-items: center; gap: 12px; }
   .back { color: var(--muted); font-size: 13px; }
   .back:hover { color: var(--text); }
   h1 { margin: 0 0 4px 0; font-size: 22px; font-weight: 700; }
   .subtitle { color: var(--muted); font-size: 13px; margin: 0; }
-  .disclaimer { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 12px; color: #fde68a; font-size: 12.5px; line-height: 1.45; }
-  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .select, .input, .textarea { background: var(--bg-2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; }
-  .select:focus, .input:focus, .textarea:focus { border-color: var(--accent); }
-  .select { min-width: 200px; flex: 1; }
-  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent-2); background: var(--bg-2); border: 1px solid var(--border); padding: 6px 10px; border-radius: 999px; }
-  .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); animation: pulse 1.6s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
-  .feed { flex: 1; background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; overflow-y: auto; max-height: 60vh; min-height: 280px; display: flex; flex-direction: column; gap: 8px; }
-  .empty { color: var(--muted); text-align: center; padding: 40px 12px; font-size: 14px; }
-  .msg { background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-  .msg-system { border-color: var(--system); background: linear-gradient(180deg, #1a1e35, var(--bg-3)); }
-  .msg-mine { border-color: var(--mine); }
-  .msg-head { display: flex; gap: 8px; align-items: center; font-size: 11.5px; color: var(--muted); margin-bottom: 6px; flex-wrap: wrap; }
-  .msg-hash { font-family: ui-monospace, 'SF Mono', monospace; color: var(--muted); font-weight: 600; }
-  .msg-system .msg-hash { color: var(--system); }
-  .msg-mine .msg-hash { color: var(--mine); }
-  .msg-estado { background: var(--bg-2); border: 1px solid var(--border); padding: 1px 7px; border-radius: 999px; font-size: 10.5px; color: var(--accent); }
-  .msg-time { color: var(--muted); margin-left: auto; }
-  .msg-flag { background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 2px 4px; font-size: 13px; border-radius: 6px; }
-  .msg-flag:hover { color: var(--danger); background: var(--bg-2); }
-  .msg-body { font-size: 14.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
-  .form { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .telemetry { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
-  .textarea { resize: vertical; min-height: 70px; font-family: inherit; }
-  .form-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .form-row .select { min-width: 0; flex: 1; }
-  .count { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .btn { background: var(--accent); color: #06281f; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; font-size: 14px; transition: opacity .15s, transform .05s; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn:not(:disabled):active { transform: translateY(1px); }
-  .honeypot { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-  .hidden { display: none !important; }
-  @media (max-width: 480px) {
-    .container { padding: 12px; }
-    h1 { font-size: 19px; }
-    .feed { max-height: 55vh; }
-  }
+  .hero { background: linear-gradient(135deg,#1e3a8a 0%,#3730a3 50%,#6366f1 100%); border-radius: 16px; padding: 22px; color: #fff; }
+  .hero-emoji { font-size: 50px; line-height: 1; }
+  .hero h2 { margin: 8px 0 4px; font-size: 22px; font-weight: 800; }
+  .hero p { margin: 0; font-size: 14px; opacity: 0.94; line-height: 1.45; }
+  .card { background: var(--warn-bg); border: 1px solid var(--warn); border-radius: 14px; padding: 18px; }
+  .card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #fde68a; }
+  .card p { margin: 0 0 10px; font-size: 13.5px; line-height: 1.5; color: var(--text); }
+  .card ul { margin: 0 0 8px 18px; font-size: 13.5px; line-height: 1.7; color: var(--text); }
+  .card .small { font-size: 12px; color: var(--muted); }
+  .alt { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .alt strong { color: var(--text); }
 </style>
 </head>
 <body>
   <div class="container">
-
-    <div id="topbar" class="topbar">
-      <a id="back-link" target="_top" class="back" target="_top" href="/">&larr; Tequio</a>
+    <div class="topbar" id="topbar">
+      <a href="/" class="back" target="_top">← Tequio</a>
     </div>
-
-    <header>
-      <h1>&#128172; Chat Comunitario</h1>
-      <p class="subtitle">Denuncias, ideas y alertas ciudadanas por estado. Anti-bot Nivel 2.</p>
-    </header>
-
-    <div class="disclaimer">
-      Espacio p&uacute;blico. Cero datos personales &mdash; solo hash an&oacute;nimo de dispositivo. Rate limit: 1 mensaje cada 30s. Contenido abusivo: 3 reportes = oculto autom&aacute;ticamente.
+    <div>
+      <h1>💬 Comunidad Tequio</h1>
+      <p class="subtitle">Chat cívico anónimo</p>
     </div>
-
-    <div class="controls">
-      <select id="filtro-estado" class="select" aria-label="Filtrar por estado">
-        <option value="todos">&#128205; Todos los estados</option>
-      </select>
-      <span id="live-indicator" class="live"><span class="dot"></span><span id="live-text">conectando&hellip;</span></span>
+    <div class="hero">
+      <div class="hero-emoji">🟡</div>
+      <h2>Próximamente</h2>
+      <p>Estamos diseñando la moderación antes de abrirlo.</p>
     </div>
-
-    <div id="feed" class="feed" aria-live="polite">
-      <div class="empty">Cargando mensajes&hellip;</div>
+    <div class="card">
+      <h3>🛡️ Por qué no está abierto todavía</h3>
+      <p>Para abrir un chat público sin email se necesita una capa de protección que no improvise. Antes del lanzamiento decidimos hacerlo bien o no hacerlo:</p>
+      <ul>
+        <li>Verificación humana al primer mensaje (Cloudflare Turnstile · gratis · sin email)</li>
+        <li>Lista de filtros automáticos contra spam y discurso violento</li>
+        <li>Moderación distribuida por reportes con respuesta &lt;24h</li>
+        <li>Bloqueo automático por reincidencia (device + IP hash)</li>
+      </ul>
+      <p class="small">Volveremos a abrirlo cuando los cuatro estén operativos. Aviso desde tequio.app cuando suceda.</p>
     </div>
-
-    <form id="form" class="form" onsubmit="return enviarMensaje(event)" autocomplete="off">
-      <div class="telemetry">
-        <span>Tu mensaje ser&aacute; visible a todos</span>
-        <span id="tiempo">Tiempo en p&aacute;gina: 0s</span>
-      </div>
-      <div class="form-row">
-        <select id="mensaje-estado" class="select" aria-label="Estado del mensaje"></select>
-      </div>
-      <textarea id="msg-input" class="textarea" maxlength="500" placeholder="Cuenta lo que est&aacute; pasando en tu estado&hellip; (5-500 caracteres)" oninput="onInput()"></textarea>
-      <div class="form-row" style="justify-content: space-between;">
-        <span id="char-count" class="count">0/500</span>
-        <button id="btn-enviar" class="btn" type="submit" disabled>Enviar</button>
-      </div>
-      <input id="hp" class="honeypot" type="text" name="website_url" tabindex="-1" autocomplete="off" aria-hidden="true" />
-    </form>
-
+    <div class="alt">
+      <span style="font-size:20px">📬</span>
+      <span>¿Algo urgente? <strong><a href="mailto:hola@tequio.app">hola@tequio.app</a></strong> · revisamos cada 24h.</span>
+    </div>
+    <div class="alt">
+      <span style="font-size:20px">🦎</span>
+      <span>Mientras tanto el resto de Tequio funciona al 100% — leyes, IA legal, votaciones, dinero público, red de poder.</span>
+    </div>
   </div>
-
-<script>
-  // Embedded mode (iframe inside panel)
-  if (new URLSearchParams(location.search).get('embedded') === '1') {
-    document.getElementById('back-link').classList.add('hidden');
-    document.getElementById('topbar').classList.add('hidden');
-  }
-
-  const ESTADOS = [
-    'Nacional', 'Aguascalientes', 'Baja California', 'Baja California Sur',
-    'Campeche', 'Chiapas', 'Chihuahua', 'Ciudad de Mexico', 'Coahuila',
-    'Colima', 'Durango', 'Estado de Mexico', 'Guanajuato', 'Guerrero',
-    'Hidalgo', 'Jalisco', 'Michoacan', 'Morelos', 'Nayarit', 'Nuevo Leon',
-    'Oaxaca', 'Puebla', 'Queretaro', 'Quintana Roo', 'San Luis Potosi',
-    'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz',
-    'Yucatan', 'Zacatecas'
-  ];
-
-  let polling = null;
-  let deviceHash = null;
-  let pageLoadTime = Date.now();
-  let ultimoCount = 0;
-
-  function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
-  }
-
-  function relativeTime(ts) {
-    const diff = (Date.now() - new Date(ts).getTime()) / 1000;
-    if (diff < 5) return 'ahora';
-    if (diff < 60) return 'hace ' + Math.floor(diff) + ' s';
-    if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + ' min';
-    if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + ' h';
-    return new Date(ts).toLocaleDateString('es-MX');
-  }
-
-  function poblarSelectores() {
-    const filtro = document.getElementById('filtro-estado');
-    const msgSel = document.getElementById('mensaje-estado');
-    // Nacional + 32 estados, filtro tiene "todos" como primera opcion ya
-    ESTADOS.forEach(e => {
-      const o1 = document.createElement('option');
-      o1.value = e; o1.textContent = (e === 'Nacional' ? '\u{1F1F2}\u{1F1FD} ' : '') + e;
-      filtro.appendChild(o1);
-      const o2 = document.createElement('option');
-      o2.value = e; o2.textContent = (e === 'Nacional' ? '\u{1F1F2}\u{1F1FD} ' : '') + e;
-      msgSel.appendChild(o2);
-    });
-    msgSel.value = 'Nacional';
-  }
-
-  function onInput() {
-    const ta = document.getElementById('msg-input');
-    const val = ta.value;
-    document.getElementById('char-count').textContent = val.length + '/500';
-    actualizarBotonEnviar();
-  }
-
-  function actualizarBotonEnviar() {
-    const ta = document.getElementById('msg-input');
-    const tEnPagina = (Date.now() - pageLoadTime) / 1000;
-    const btn = document.getElementById('btn-enviar');
-    btn.disabled = !(ta.value.trim().length >= 5 && tEnPagina >= 5);
-  }
-
-  function tickTelemetria() {
-    const s = Math.floor((Date.now() - pageLoadTime) / 1000);
-    document.getElementById('tiempo').textContent = 'Tiempo en pagina: ' + s + 's';
-    actualizarBotonEnviar();
-  }
-
-  async function cargarMensajes() {
-    try {
-      const filtro = document.getElementById('filtro-estado').value;
-      let url = '/api/data?vista=chat_listar&limit=80';
-      if (filtro && filtro !== 'todos') url += '&estado=' + encodeURIComponent(filtro);
-      const r = await fetch(url);
-      const data = await r.json();
-      renderMensajes(data.items || []);
-      const txt = document.getElementById('live-text');
-      txt.textContent = (data.items && data.items.length) ? data.items.length + ' mensajes' : 'sin mensajes';
-      ultimoCount = (data.items || []).length;
-    } catch (err) {
-      document.getElementById('live-text').textContent = 'sin conexion';
+  <script>
+    // Embedded mode (iframe inside panel)
+    if (new URLSearchParams(location.search).get('embedded') === '1') {
+      document.getElementById('topbar').style.display = 'none';
     }
-  }
-
-  function renderMensajes(items) {
-    const feed = document.getElementById('feed');
-    if (!items || items.length === 0) {
-      feed.innerHTML = '<div class="empty">Sin mensajes en este filtro. Se el primero.</div>';
-      return;
-    }
-    const html = items.map(m => {
-      const dh = String(m.device_hash || '');
-      const hashShort = dh.slice(0, 8);
-      const isSystem = dh.indexOf('tequio-s') === 0 || dh.indexOf('tequio_s') === 0 || dh === 'system' || dh.indexOf('sistema') === 0;
-      const isMine = deviceHash && dh === deviceHash;
-      const cls = isSystem ? 'msg msg-system' : (isMine ? 'msg msg-mine' : 'msg');
-      const ident = isSystem ? '\u{1F916} Tequio' : (isMine ? '\u{1F464} Tu' : '\u{1F310} ' + escapeHtml(hashShort) + '...');
-      const estadoBadge = m.estado ? '<span class="msg-estado">' + escapeHtml(m.estado) + '</span>' : '';
-      const flagBtn = isSystem ? '' : '<button class="msg-flag" onclick="flagMensaje(' + Number(m.id) + ')" title="Reportar mensaje">&#128681;</button>';
-      return '<div class="' + cls + '">' +
-        '<div class="msg-head">' +
-          '<span class="msg-hash">' + ident + '</span>' +
-          estadoBadge +
-          '<span class="msg-time">' + relativeTime(m.timestamp) + '</span>' +
-          flagBtn +
-        '</div>' +
-        '<div class="msg-body">' + escapeHtml(m.mensaje) + '</div>' +
-      '</div>';
-    }).join('');
-    feed.innerHTML = html;
-    feed.scrollTop = feed.scrollHeight;
-  }
-
-  function startPolling() {
-    if (polling) clearInterval(polling);
-    polling = setInterval(cargarMensajes, 8000);
-  }
-
-  async function enviarMensaje(e) {
-    e.preventDefault();
-    const ta = document.getElementById('msg-input');
-    const mensaje = ta.value.trim();
-    if (!mensaje || mensaje.length < 5) return false;
-    const estado = document.getElementById('mensaje-estado').value;
-    const honeypotVal = document.getElementById('hp').value;
-
-    if (!window.AntiBot) {
-      alert('Anti-bot no cargó todavía. Recarga la página.');
-      return false;
-    }
-
-    let ctx;
-    try {
-      ctx = await window.AntiBot.contextoNivel2({ honeypot: () => honeypotVal });
-    } catch (err) {
-      alert('Error de validación anti-bot.');
-      return false;
-    }
-
-    // Silently ignore bots
-    if (ctx && ctx.honeypot) return false;
-
-    const btn = document.getElementById('btn-enviar');
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
-
-    try {
-      const r = await fetch('/api/data?vista=chat_enviar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mensaje,
-          estado,
-          device_hash: ctx.device_hash,
-          honeypot: ctx.honeypot,
-          tiempo_en_pagina_ms: ctx.tiempo_en_pagina_ms
-        })
-      });
-      const data = await r.json().catch(() => ({}));
-      if (r.ok) {
-        deviceHash = ctx.device_hash;
-        ta.value = '';
-        document.getElementById('char-count').textContent = '0/500';
-        await cargarMensajes();
-      } else {
-        alert('No se envió: ' + (data.error || ('HTTP ' + r.status)));
-      }
-    } catch (err) {
-      alert('Error de conexión. Intenta de nuevo.');
-    }
-
-    btn.textContent = 'Enviar';
-    actualizarBotonEnviar();
-    return false;
-  }
-
-  async function flagMensaje(id) {
-    if (!confirm('Reportar este mensaje como abusivo? Con 3 reportes se ocultará automáticamente.')) return;
-    try {
-      let dh = deviceHash;
-      if (!dh && window.AntiBot) {
-        const ctx = await window.AntiBot.contextoNivel2();
-        dh = ctx.device_hash;
-        deviceHash = dh;
-      }
-      if (!dh) { alert('No se pudo identificar el dispositivo.'); return; }
-      const r = await fetch('/api/data?vista=chat_flag', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensaje_id: id, device_hash: dh })
-      });
-      const data = await r.json().catch(() => ({}));
-      if (r.ok) {
-        alert(data.oculto ? 'Mensaje reportado y ocultado.' : 'Mensaje reportado. Gracias.');
-        await cargarMensajes();
-      } else {
-        alert('No se pudo reportar: ' + (data.error || ('HTTP ' + r.status)));
-      }
-    } catch (err) {
-      alert('Error de conexión al reportar.');
-    }
-  }
-
-  async function init() {
-    poblarSelectores();
-
-    // Sugerir estado del usuario si esta en localStorage
-    const estadoUsuario = localStorage.getItem('tequio_estado_nombre');
-    if (estadoUsuario) {
-      const sel = document.getElementById('mensaje-estado');
-      for (const opt of sel.options) {
-        if (opt.value === estadoUsuario) { sel.value = estadoUsuario; break; }
-      }
-    }
-
-    // Filtro: recargar al cambiar
-    document.getElementById('filtro-estado').addEventListener('change', cargarMensajes);
-
-    // Anti-bot device hash
-    try {
-      if (window.AntiBot && window.AntiBot.contextoNivel2) {
-        const ctx = await window.AntiBot.contextoNivel2();
-        deviceHash = ctx.device_hash;
-      }
-    } catch (err) { /* ignore */ }
-
-    await cargarMensajes();
-    startPolling();
-
-    // Telemetria cada segundo
-    setInterval(tickTelemetria, 1000);
-    tickTelemetria();
-  }
-
-  window.flagMensaje = flagMensaje;
-  window.enviarMensaje = enviarMensaje;
-  window.onInput = onInput;
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-</script>
+  </script>
 </body>
 </html>
