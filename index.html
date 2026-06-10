@@ -5169,7 +5169,7 @@ window.addEventListener('load', function(){
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">132</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Actores</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a">64</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Vínculos</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" id="red-stats-vinculos">64</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Vínculos</div><div style="font-size:9px;color:#86efac;margin-top:2px" id="red-stats-verificados">14 con fuente</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">Curado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Modo editorial</div></div>
             <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">DOF·INE·SAT</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Fuentes</div></div>
           </div>
@@ -5188,7 +5188,7 @@ window.addEventListener('load', function(){
         </details>
         <div class="alert alert-warn mb-16">
           <span>⚠️</span>
-          <span>Datos basados en <strong>fuentes públicas verificadas</strong> (DOF, INE, SAT, Congreso.gob.mx). El grafo carga desde la base de Tequio (<strong>132 actores · 64 vínculos curados</strong>) priorizando por influencia. Cada nodo es figura pública en el ejercicio de cargo o actividad económica; no implica acusación de ilegalidad. Si la base no responde, se muestra el seed curado original.</span>
+          <span>Datos basados en <strong>fuentes públicas verificadas</strong> (DOF, INE, SAT, Congreso.gob.mx). El grafo carga desde la base de Tequio (<strong>132 actores · 64 vínculos curados</strong> · <span style="color:#86efac">14 con URL de fuente oficial pública</span> · <span style="color:#fde68a">50 documentados sin URL pública (curaduría editorial)</span>) priorizando por influencia. Cada nodo es figura pública en el ejercicio de cargo o actividad económica; no implica acusación de ilegalidad. Si la base no responde, se muestra el seed curado original.</span>
         </div>
         <!-- Toggle de vista -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
@@ -22727,14 +22727,27 @@ let REDES_ENLACES = [
           conexiones: conexionesPorId[id] || []
         };
       });
-      // Reemplazar REDES_ENLACES desde edges
+      // Reemplazar REDES_ENLACES desde edges (con fuente_url y verificado para Cero Invención)
       var nuevosEnlaces = (data.edges || []).map(function(e){
         var a = idOf(e.origen), b = idOf(e.destino);
-        // Map tipos DB válidos al CSS color que ya tenemos
         var t = e.tipo;
         if (t !== 'institucional' && t !== 'financiero' && t !== 'mediatico') t = 'partido';
-        return { a:a, b:b, tipo:t, peso: 2 };
+        return {
+          a:a, b:b, tipo:t, peso: 2,
+          verificado: !!e.verificado,           // true si tiene fuente_url
+          fuente_url: e.fuente_url || null,     // URL a fuente oficial si existe
+          descripcion: e.descripcion || ''
+        };
       });
+      // Actualizar contadores honestos en hero stats
+      try {
+        var elV = document.getElementById('red-stats-vinculos');
+        var elVerif = document.getElementById('red-stats-verificados');
+        if (elV) elV.textContent = data.total_vinculos || 0;
+        if (elVerif && data.vinculos_verificados != null) {
+          elVerif.textContent = data.vinculos_verificados + ' con fuente';
+        }
+      } catch(e){}
       REDES_NODOS.length = 0;
       Array.prototype.push.apply(REDES_NODOS, nuevosNodos);
       REDES_ENLACES.length = 0;
