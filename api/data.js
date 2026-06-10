@@ -75,6 +75,27 @@ export default async function handler(req, res) {
     return true;
   }
 
+  // sbAuth: lecturas server-side de tablas con PII (usuarios_ciudadanos, etc.)
+  // RLS para anon está cerrado en estas tablas; SERVICE_KEY bypassea RLS.
+  // 🦎 HOTFIX 0 · 2026-06-10
+  async function sbAuth(path) {
+    if (!SERVICE_KEY) {
+      console.warn('[Tequio] sbAuth llamado sin SERVICE_KEY — caerá a ANON_KEY y fallará si RLS cerrado');
+    }
+    const key = SERVICE_KEY || ANON_KEY;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Accept': 'application/json',
+        'Range-Unit': 'items',
+        'Range': '0-49999',
+      },
+    });
+    if (!r.ok) throw new Error(`Supabase auth-read ${r.status}`);
+    return r.json();
+  }
+
   try {
     if (req.method === 'POST' && vista === 'crear_lead') {
       const body = req.body || {};
@@ -322,7 +343,7 @@ export default async function handler(req, res) {
       if (!cookie_id || !/^[0-9a-f-]{36}$/i.test(cookie_id)) {
         return res.status(200).json({ logueado: false });
       }
-      const rows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito,declara_mayor_edad,created_at`);
+      const rows = await sbAuth(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito,declara_mayor_edad,created_at`);
       if (!rows || !rows.length) return res.status(200).json({ logueado: false });
       const u = rows[0];
       // Cuenta cuántos votos ha emitido
@@ -350,7 +371,7 @@ export default async function handler(req, res) {
           resultados[v.votacion_pendiente_id].total++;
         }
         if (cookie_id && /^[0-9a-f-]{36}$/i.test(cookie_id)) {
-          const userRows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id`);
+          const userRows = await sbAuth(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id`);
           const uid = userRows?.[0]?.id;
           if (uid) {
             const misVotos = await sb(`votos_ciudadanos?usuario_id=eq.${uid}&votacion_pendiente_id=in.(${ids})&select=votacion_pendiente_id,voto`);
@@ -402,7 +423,7 @@ export default async function handler(req, res) {
       const cookie_id = req.query.cookie_id || '';
       if (!cookie_id || !/^[0-9a-f-]{36}$/i.test(cookie_id)) return res.status(400).json({ error: 'cookie_id requerido' });
       // 1) Usuario
-      const userRows = await sb(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito`);
+      const userRows = await sbAuth(`usuarios_ciudadanos?cookie_id=eq.${cookie_id}&select=id,entidad,distrito`);
       const u = userRows?.[0];
       if (!u) return res.status(200).json({ logueado: false });
       // 2) Mi diputado (por entidad+distrito)
