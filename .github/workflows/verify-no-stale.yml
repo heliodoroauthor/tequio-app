@@ -91,21 +91,31 @@ jobs:
             echo "::error::panel/privacidad.html no devuelve 200 (got $STATUS)"
             exit 1
           fi
-          # Nota: 'privacidad@tequio.app' está protegido por Cloudflare Email Obfuscation
-          # en producción (reescrito como /cdn-cgi/l/email-protection). El archivo origen
-          # sí lo contiene literal — verificamos la presencia del marker de CF como prueba
-          # indirecta de que un email fue obfuscado en la página.
-          for STR in "LFPDPPP" "ARCO" "responsable" "Supabase" "Vercel" "cdn-cgi/l/email-protection"; do
+          # Asserts independientes del modo email (CF obfuscation activado o no).
+          for STR in "LFPDPPP" "ARCO" "responsable" "Supabase" "Vercel"; do
             if ! grep -Fq "$STR" /tmp/priv.html; then
               echo "::error::aviso de privacidad sin cadena requerida: '$STR'"
               exit 1
             fi
           done
-          echo "✓ Aviso de privacidad publicado con LFPDPPP, ARCO, responsable, contacto, transferencias"
+          # Verificación de presencia real de email de contacto (no que el assert se
+          # esté saltando). Aceptamos: (1) email literal "privacidad@tequio.app",
+          # (2) span Cloudflare-obfuscado, o (3) mailto: anchor. AL MENOS 3 ocurrencias
+          # (responsable corresponden a contacto+general+domicilio).
+          CONTACT_COUNT=$(grep -oE "privacidad@tequio\.app|__cf_email__|mailto:" /tmp/priv.html | wc -l)
+          if [ "$CONTACT_COUNT" -lt 3 ]; then
+            echo "::error::aviso sin canal de contacto suficiente (encontrados $CONTACT_COUNT, requeridos ≥3)"
+            grep -oE "privacidad@tequio\.app|__cf_email__|mailto:|cdn-cgi/l/email-protection" /tmp/priv.html | head -5
+            exit 1
+          fi
+          # Verificación adicional: el endpoint funcional ARCO es lo más importante
+          # porque es el canal real para ejercer derechos. Lo cubre el assert 7.
+          echo "✓ Aviso de privacidad publicado · $CONTACT_COUNT canales de contacto detectados"
 
-      - name: Assert claims falsos eliminados
+      - name: Assert claims falsos eliminados Y reemplazo dice verdad
         run: |
           set -e
+          # Negativos: 4 claims falsos que no pueden reaparecer
           for STR in "compañías del Oeste" "no en Discord, Telegram ni" "Cumplimos con la LFPDPPP" "Cada cifra enlaza al PDF oficial"; do
             if grep -Fq "$STR" /tmp/live.html; then
               echo "::error::Claim falso encontrado en live HTML: '$STR'"
@@ -113,6 +123,15 @@ jobs:
             fi
           done
           echo "✓ 4 claims falsos ausentes"
+          # Positivos: el reemplazo del hero Dinero Público debe describir lo que el
+          # módulo HACE de verdad (KPIs en vivo + Tablas curadas), no dejar hueco.
+          for STR in "KPIs en vivo" "Tablas curadas con fuente por sección" "Aviso de privacidad LFPDPPP"; do
+            if ! grep -Fq "$STR" /tmp/live.html; then
+              echo "::error::Reemplazo honesto faltante: '$STR'"
+              exit 1
+            fi
+          done
+          echo "✓ Reemplazos positivos presentes (KPIs en vivo · Tablas curadas · footer privacidad)"
 
       - name: Assert footer link a aviso
         run: |
