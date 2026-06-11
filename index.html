@@ -16263,6 +16263,7 @@ function leyesFiltrar() {
   const el     = document.getElementById('leyes-lista');
   const vacio  = document.getElementById('leyes-vacio');
   const count  = document.getElementById('leyes-count');
+  if (!el || !vacio || !count) return;
   const ambitoLabel = {todas:'Todas',federal:'Federales',estatal:'Estatales',municipal:'Municipales',reforma:'Reformas Recientes'};
   const total = lista.length;
   const totalPags = Math.max(1, Math.ceil(total / LEYES_POR_PAGINA));
