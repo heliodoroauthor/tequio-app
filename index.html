@@ -3648,8 +3648,9 @@ window.addEventListener('load', function(){
         }
         const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
-          const _click = c.fuente_url ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(c.fuente_url||'').replace(/"/g, '&quot;')}" title="Abrir expediente oficial en nueva pestaña" style="cursor:pointer;` : ` style="`;
-          return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${c.fuente_url ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
+          const _fuenteUrl = c.fuente_url || (c.ocid ? `https://upcp-compranet.hacienda.gob.mx/sitiopublico/#/sitiopublico/detalle-procedimiento/${encodeURIComponent(c.ocid)}` : null);
+          const _click = _fuenteUrl ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(_fuenteUrl||'').replace(/"/g, '&quot;')}" data-ocid="${(c.ocid||'').replace(/"/g, '&quot;')}" title="Abrir expediente en Compranet (OCID copiado al portapapeles)" style="cursor:pointer;` : ` style="`;
+          return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${_fuenteUrl ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
             <div style="min-width:0">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
                 <span style="background:${tp.color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px">${tp.icon} ${tp.txt}</span>
@@ -3657,6 +3658,7 @@ window.addEventListener('load', function(){
                 ${c.tipo_contrato ? `<span style="background:var(--surface2);border:1px solid var(--border);font-size:10px;padding:2px 8px;border-radius:8px;color:var(--text2)">${c.tipo_contrato}</span>` : ''}
               </div>
               <div style="font-size:14px;font-weight:700;line-height:1.35;margin-bottom:6px">${c.titulo || '—'}</div>
+              ${c.ocid ? `<div style="font-size:10px;color:var(--text3);font-family:monospace;margin-bottom:6px;letter-spacing:0.3px">📋 ${c.ocid}</div>` : ''}
               <div style="font-size:12px;color:var(--text2);line-height:1.4">
                 <div>🏛️ <strong>${c.dependencia || '—'}</strong>${c.unidad_compradora ? ' · ' + c.unidad_compradora : ''}</div>
                 <div>🏢 ${c.proveedor_nombre || '—'}${c.proveedor_rfc ? ' (' + c.proveedor_rfc + ')' : ''}</div>
@@ -3672,8 +3674,14 @@ window.addEventListener('load', function(){
         }).join('');
         if (append) { cont.insertAdjacentHTML('beforeend', html); } else { cont.innerHTML = html; }
       }
-      window.cmpAbrirContrato = window.cmpAbrirContrato || function(el) {
-        const u = el && el.getAttribute('data-fuente');
+      window.cmpAbrirContrato = function(el) {
+        if (!el) return;
+        const u = el.getAttribute('data-fuente');
+        const ocid = el.getAttribute('data-ocid');
+        // Copiar OCID al clipboard (respaldo si la SPA de Compranet abre la home)
+        if (ocid && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ocid).catch(() => {});
+        }
         if (u) window.open(u, '_blank', 'noopener,noreferrer');
       };
       window.__cmpState = window.__cmpState || { offset: 0, total: 0, monto: 0 };
