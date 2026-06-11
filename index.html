@@ -15044,7 +15044,9 @@ function filtrarNoticias() {
   const impactoColor = { critico: 'var(--red2)', alto: 'var(--yellow2)', medio: 'var(--accent2)', bajo: 'var(--green2)' };
   const impactoLabel = { critico: '🔴 Crítico', alto: '🟠 Alto', medio: '🔵 Medio', bajo: '🟢 Bajo' };
   const ambitoLabel  = { nacional: 'Nacional', estatal: 'Estatal', municipal: 'Municipal', alerta: 'Alerta' };
-  document.getElementById('noticias-lista').innerHTML = lista.map(n => `
+  const _lista = document.getElementById('noticias-lista');
+  if (!_lista) return;
+  _lista.innerHTML = lista.map(n => `
     <div class="noticia-card ${n.ambito}" onclick="abrirFuenteNoticia('${n.id}')">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <span class="noticia-tag ${n.ambito}">${ambitoLabel[n.ambito]}</span>
