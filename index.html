@@ -3648,7 +3648,8 @@ window.addEventListener('load', function(){
         }
         const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
-          return `<div style="background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start">
+          const _click = c.fuente_url ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(c.fuente_url||'').replace(/"/g, '&quot;')}" title="Abrir expediente oficial en nueva pestaña" style="cursor:pointer;` : ` style="`;
+          return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${c.fuente_url ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
             <div style="min-width:0">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
                 <span style="background:${tp.color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px">${tp.icon} ${tp.txt}</span>
@@ -3661,7 +3662,7 @@ window.addEventListener('load', function(){
                 <div>🏢 ${c.proveedor_nombre || '—'}${c.proveedor_rfc ? ' (' + c.proveedor_rfc + ')' : ''}</div>
                 <div>📅 ${cmpFmtFecha(c.fecha_firma)}${c.entidad_federativa ? ' · 📍 ' + c.entidad_federativa : ''}</div>
               </div>
-              ${c.fuente_url ? `<div style="margin-top:8px"><a href="${c.fuente_url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent2);text-decoration:none">Ver expediente oficial →</a></div>` : ''}
+              ${c.fuente_url ? `<div style="margin-top:8px"><a href="${c.fuente_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none">Ver expediente oficial →</a></div>` : ''}
             </div>
             <div style="text-align:right;flex-shrink:0">
               <div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:${tp.color};line-height:1">${cmpFmtMonto(c.monto_mxn)}</div>
@@ -3671,6 +3672,10 @@ window.addEventListener('load', function(){
         }).join('');
         if (append) { cont.insertAdjacentHTML('beforeend', html); } else { cont.innerHTML = html; }
       }
+      window.cmpAbrirContrato = window.cmpAbrirContrato || function(el) {
+        const u = el && el.getAttribute('data-fuente');
+        if (u) window.open(u, '_blank', 'noopener,noreferrer');
+      };
       window.__cmpState = window.__cmpState || { offset: 0, total: 0, monto: 0 };
       const CMP_PAGE_SIZE = 50;
       async function cmpBuscar(append) {
