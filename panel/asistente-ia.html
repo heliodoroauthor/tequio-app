@@ -97,8 +97,8 @@
 
   .chat { background: var(--card); border: 1px solid var(--border-soft); border-radius: 16px; display: flex; flex-direction: column; min-height: 380px; max-height: calc(100vh - 360px); overflow: hidden; }
   body.embedded .chat { max-height: calc(100vh - 320px); }
-  .chat-head { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; background: rgba(168,85,247,0.06); }
-  .chat-head-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px rgba(16,185,129,0.6); animation: pulse 2s infinite; }
+  .chat-head { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; background: rgba(251,191,36,0.08); }
+  .chat-head-dot { width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.6); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .chat-head-title { font-size: 13px; font-weight: 700; color: var(--text); }
   .chat-head-sub { font-size: 11px; color: var(--text-dim); margin-left: auto; }
@@ -180,7 +180,7 @@
       <p>Tequio IA usa una arquitectura <strong>RAG (Retrieval-Augmented Generation)</strong>: antes de responder, busca en la base verificada de leyes mexicanas los fragmentos más relevantes a tu pregunta, y genera la respuesta <strong>solo con base en esas fuentes</strong>.</p>
       <p>Si no encuentra leyes específicas, lo dice claramente. <strong>Cero invención</strong> es nuestro compromiso fundacional.</p>
       <div class="edu-grid">
-        <div class="edu-cell"><div class="edu-cell-num">1</div><div class="edu-cell-lbl"><strong>Buscamos</strong> en 651k fragmentos embeddings semánticos de leyes oficiales</div></div>
+        <div class="edu-cell"><div class="edu-cell-num">1</div><div class="edu-cell-lbl"><strong>Buscamos</strong> en <span data-kpi="chunks_ia">651k</span> fragmentos embeddings semánticos de leyes oficiales</div></div>
         <div class="edu-cell"><div class="edu-cell-num">2</div><div class="edu-cell-lbl"><strong>Ranqueamos</strong> los más relevantes a tu pregunta por similitud vectorial</div></div>
         <div class="edu-cell"><div class="edu-cell-num">3</div><div class="edu-cell-lbl"><strong>Generamos</strong> respuesta con IA citando ley, artículo y URL oficial</div></div>
       </div>
@@ -202,8 +202,8 @@
   <div class="chat">
     <div class="chat-head">
       <div class="chat-head-dot"></div>
-      <div class="chat-head-title">Asistente activo</div>
-      <div class="chat-head-sub">Inteligencia Artificial + RAG semántico</div>
+      <div class="chat-head-title">Pausado · corpus migrando a infraestructura libre</div>
+      <div class="chat-head-sub">Revive con el servidor propio</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-bar">
@@ -250,11 +250,38 @@
     messagesEl.scrollTop=messagesEl.scrollHeight;
   }
   function removeTyping(){const el=document.getElementById('typing-indicator'); if(el) el.remove();}
+  // GATE 2026-06-12: asistente pausado hasta servidor propio (issue #2).
+  // El gate ANTES del fetch evita llamadas zombi al endpoint Gemini muerto.
+  const ASISTENTE_PAUSADO = true;
+
+  function gateMessage(){
+    return (
+      '<div style="line-height:1.55">' +
+      '<div style="font-weight:700;color:#fbbf24;margin-bottom:8px">🦎 Asistente pausado · corpus migrando a infraestructura libre</div>' +
+      '<div style="font-size:13px;color:#94a3b8;margin-bottom:12px">' +
+      'Pausado hasta el servidor propio. Mientras tanto, el corpus se prepara con <strong>sentence-transformers e5-base</strong> en GitHub Actions: cero costo, cero dependencia externa.' +
+      '</div>' +
+      '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">📚 <strong>El resto de Tequio funciona al 100%</strong> — leyes, jurisprudencia, votaciones del Congreso, contratos públicos, todo sin tocar la IA.</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+      '<a href="/panel/meta-servidor.html" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:12px 14px;border-radius:10px;font-weight:800;font-size:13px;text-decoration:none;display:inline-block;text-align:center">🦎 Ver meta del servidor propio</a>' +
+      '<a href="/panel/leyes.html" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">📚 Buscar leyes directamente (sin IA)</a>' +
+      '<a href="mailto:hola@tequio.app?subject=Avísame%20cuando%20el%20Asistente%20vuelva" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e8edf5;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;text-align:center">✉️ Avísame cuando vuelva</a>' +
+      '</div>' +
+      '<div style="font-size:11px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">🦎 Cero invención: si la página dice "pausado", el endpoint está apagado. Cero llamadas zombi.</div>' +
+      '</div>'
+    );
+  }
+
   async function send(question){
     if(!question.trim()) return;
     addMessage('user',question);
     history.push({role:'user',content:question});
     inputEl.value=''; inputEl.style.height='auto'; sendBtn.disabled=true;
+    if (ASISTENTE_PAUSADO) {
+      addMessage('ai', gateMessage(), [], true);
+      sendBtn.disabled=false;
+      return;
+    }
     addTyping();
     try {
       const r=await fetch('/api/ai-proxy',{
@@ -285,9 +312,9 @@
       if (msg.indexOf('429') >= 0 || /depleted|rate_limited|quota|credits|exceeded/i.test(msg)) {
         humano =
           '<div style="line-height:1.55">' +
-          '<div style="font-weight:700;color:#fbbf24;margin-bottom:8px">🦎 Asistente sin créditos · Tequio se autofinancia</div>' +
+          '<div style="font-weight:700;color:#fbbf24;margin-bottom:8px">🦎 Asistente pausado · corpus migrando a infraestructura libre</div>' +
           '<div style="font-size:13px;color:#94a3b8;margin-bottom:12px">' +
-          'La IA legal nos cuesta <strong>$80 USD/mes</strong> en tokens de Google Gemini. Cuando hay tráfico viral, agotamos la cuota mensual prepagada y volvemos al mes siguiente.' +
+          'Pausado hasta el servidor propio. El corpus se prepara con <strong>sentence-transformers e5-base</strong> en GitHub Actions: cero costo, cero dependencia externa.' +
           '</div>' +
           '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">📚 <strong>El resto de Tequio funciona al 100%</strong> — 9,290 leyes, 300,000 tesis SCJN, votaciones del Congreso, contratos públicos, todo sin tocar la IA.</div>' +
           '<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;font-weight:700">🦅 Camino a no depender de Google:</div>' +
@@ -300,33 +327,4 @@
           '<a href="https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=10644737-6ab4a3de-060d-4174-a08f-626c40701bdc" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#00b1ea,#009ee3);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">🇲🇽 Donar con Mercado Pago (SPEI/Oxxo)</a>' +
           '<div style="font-size:10px;color:#94a3b8;margin-top:2px;text-align:center;line-height:1.4">Cuenta Business "Tequio.app" · A.C. en trámite</div>' +
           '<a href="/panel/leyes.html" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:inline-block;text-align:center">📚 Buscar leyes directamente (sin IA)</a>' +
-          '<a href="mailto:hola@tequio.app?subject=Avísame%20cuando%20el%20Asistente%20vuelva" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e8edf5;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;text-align:center">✉️ Avísame cuando vuelva</a>' +
-          '</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">🦎 Cero invención: te decimos exactamente cuánto cuesta y por qué se topa. <a href="https://docs.google.com/spreadsheets/d/165Zq7QwlnVkQqwnw3F1VOocrHbT0W-Dzhh5kPXxVz9s/edit?usp=sharing" target="_blank" rel="noopener" style="color:#86efac">📊 Ver hoja pública de transparencia →</a></div>' +
-          '</div>';
-      } else if (msg.indexOf('500') >= 0 || msg.indexOf('502') >= 0 || msg.indexOf('503') >= 0) {
-        humano = '<strong style="color:#f87171">🦎 El asistente tuvo un error de servidor.</strong> Intenta de nuevo en unos segundos. Si persiste, escríbenos a hola@tequio.app';
-      } else if (/network|fetch|failed|aborted/i.test(msg)) {
-        humano = '<strong style="color:#fbbf24">🌐 Sin conexión al asistente.</strong> Revisa tu internet y vuelve a intentar. Mientras tanto, el <a href="/panel/leyes.html" style="color:#60a5fa">buscador de leyes</a> funciona offline.';
-      } else {
-        humano = '<strong style="color:#f87171">🦎 Algo salió mal.</strong> Intenta reformular tu pregunta. Si el problema persiste, escríbenos a hola@tequio.app · <details style="margin-top:6px"><summary style="cursor:pointer;color:#64748b;font-size:11px">Detalle técnico</summary><pre style="font-size:10px;color:#94a3b8;white-space:pre-wrap;margin-top:6px">' + (msg.replace(/</g,'&lt;')) + '</pre></details>';
-      }
-      addMessage('ai', humano, null, true);
-    } finally {
-      sendBtn.disabled=false;
-      inputEl.focus();
-    }
-  }
-  sendBtn.addEventListener('click',()=>send(inputEl.value));
-  inputEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault(); send(inputEl.value);}});
-  inputEl.addEventListener('input',()=>{inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,160)+'px';});
-  document.querySelectorAll('.sugg-card').forEach(el=>{el.addEventListener('click',()=>send(el.dataset.q));});
-  try {
-    const urlPrompt=params.get('iaPrompt')||params.get('q');
-    if(urlPrompt) setTimeout(()=>send(urlPrompt),300);
-    else inputEl.focus();
-  } catch(e){inputEl.focus();}
-})();
-</script>
-</body>
-</html>
+          '<a href="mailto:hola@tequio.app?subject=Avísame%20cuando%20el%20Asistente%20vuelva" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e8edf5;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;text-decorat
