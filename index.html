@@ -3648,9 +3648,10 @@ window.addEventListener('load', function(){
         }
         const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
-          const _fuenteUrl = c.fuente_url || (c.ocid ? 'https://upcp-compranet.buengobierno.gob.mx/sitiopublico/' : null);
-          const _click = _fuenteUrl ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(_fuenteUrl||'').replace(/"/g, '&quot;')}" data-ocid="${(c.ocid||'').replace(/"/g, '&quot;')}" title="Abrir Compras MX (código de expediente copiado al portapapeles — pega y busca)" style="cursor:pointer;` : ` style="`;
-          return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${_fuenteUrl ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
+          const _hasDetail = !!(c.ocid || c.titulo);
+          const _payload = JSON.stringify(c).replace(/"/g, '&quot;');
+          const _click = _hasDetail ? ` onclick="cmpVerDetalle(this)" data-contrato="${_payload}" title="Ver detalles + ruta de verificación oficial" style="cursor:pointer;` : ` style="`;
+          return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${_hasDetail ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
             <div style="min-width:0">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
                 <span style="background:${tp.color};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px">${tp.icon} ${tp.txt}</span>
@@ -3664,7 +3665,7 @@ window.addEventListener('load', function(){
                 <div>🏢 ${c.proveedor_nombre || '—'}${c.proveedor_rfc ? ' (' + c.proveedor_rfc + ')' : ''}</div>
                 <div>📅 ${cmpFmtFecha(c.fecha_firma)}${c.entidad_federativa ? ' · 📍 ' + c.entidad_federativa : ''}</div>
               </div>
-              ${c.fuente_url ? `<div style="margin-top:8px"><a href="${c.fuente_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none">Ver expediente oficial →</a></div>` : ''}
+              
             </div>
             <div style="text-align:right;flex-shrink:0">
               <div style="font-size:22px;font-weight:800;font-family:var(--font-display);color:${tp.color};line-height:1">${cmpFmtMonto(c.monto_mxn)}</div>
@@ -3674,36 +3675,121 @@ window.addEventListener('load', function(){
         }).join('');
         if (append) { cont.insertAdjacentHTML('beforeend', html); } else { cont.innerHTML = html; }
       }
-      window.cmpAbrirContrato = function(el) {
-        if (!el) return;
-        const u = el.getAttribute('data-fuente');
-        const ocid = el.getAttribute('data-ocid');
-        // Compras MX busca por "código de expediente" formato E-{año}-{XXXXXXX}.
-        // Nuestro OCID tiene prefijo OCDS "CN-MX-" que hay que quitar para que la
-        // búsqueda funcione.
-        const codigoExp = (ocid || '').replace(/^CN-MX-/, '').trim();
-        let copied = false;
-        if (codigoExp && navigator.clipboard && navigator.clipboard.writeText) {
-          try { navigator.clipboard.writeText(codigoExp); copied = true; } catch(e) {}
-        }
-        if (u) window.open(u, '_blank', 'noopener,noreferrer');
-        // Toast informativo
-        if (codigoExp) {
-          let toast = document.getElementById('cmp-toast');
-          if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'cmp-toast';
-            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0e1525;color:#fff;border:1px solid #334155;border-radius:10px;padding:14px 20px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 28px rgba(0,0,0,0.55);max-width:92vw;text-align:center;line-height:1.5';
-            document.body.appendChild(toast);
+      // Tequio · Modal de detalle de contrato
+      // Por qué existe: Compras MX (sitiopublico/) NO soporta deep-linking público
+      // por OCID; su SPA usa UUIDs internos. Probado: cualquier URL con OCID → /notfound.
+      // La promesa de Tequio es "datos + ruta de verificación", no "enlace mágico".
+      // Issue futuro: si Compras MX algún día publica URLs estables por OCID,
+      // simplificar este modal a un onclick directo.
+      window.cmpEscapeHtml = function(s) {
+        return String(s == null ? '' : s).replace(/[&<>"\']/g, function(c) {
+          return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+        });
+      };
+      window.cmpFmtFechaModal = function(f) {
+        if (!f) return '—';
+        try {
+          const d = new Date(f);
+          if (isNaN(d.getTime())) return f;
+          return d.toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' });
+        } catch(e) { return f; }
+      };
+      window.cmpCerrarDetalle = function() {
+        const ov = document.getElementById('cmp-detalle-overlay');
+        if (ov) { ov.style.display = 'none'; }
+        document.body.style.overflow = '';
+      };
+      window.cmpCopiarCodigo = function(btn) {
+        const codigo = btn && btn.getAttribute('data-codigo');
+        if (!codigo) return;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(codigo);
           }
-          toast.innerHTML = (copied ? '📋 <strong>Código copiado:</strong> ' : 'Código de expediente: ')
-            + '<code style="background:rgba(59,130,246,0.20);padding:3px 8px;border-radius:5px;font-family:monospace;font-size:13px;color:#93c5fd">' + codigoExp + '</code>'
-            + '<div style="font-size:11px;font-weight:400;margin-top:6px;opacity:0.85">Pégalo en el buscador de Compras MX (Ctrl+V)</div>';
-          toast.style.opacity = '1';
-          toast.style.transition = 'opacity 0.4s';
-          clearTimeout(window.__cmpToastT);
-          window.__cmpToastT = setTimeout(() => { if (toast) toast.style.opacity = '0'; }, 8000);
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✓ Copiado';
+          btn.style.background = 'rgba(34,197,94,0.18)';
+          btn.style.color = '#4ade80';
+          btn.style.borderColor = 'rgba(34,197,94,0.4)';
+          setTimeout(function(){
+            btn.innerHTML = orig;
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }, 1800);
+        } catch(e) {}
+      };
+      window.cmpVerDetalle = function(el) {
+        if (!el) return;
+        const raw = el.getAttribute('data-contrato');
+        if (!raw) return;
+        let c;
+        try { c = JSON.parse(raw); } catch(e) { return; }
+        const esc = window.cmpEscapeHtml;
+        const codigoExp = (c.ocid || '').replace(/^CN-MX-/, '').trim();
+        const compraMxUrl = 'https://upcp-compranet.buengobierno.gob.mx/sitiopublico/';
+        const googleUrl = codigoExp
+          ? 'https://www.google.com/search?q=' + encodeURIComponent('"' + codigoExp + '" site:gob.mx')
+          : null;
+        const datasetUrl = 'https://datos.gob.mx/busca/dataset/concentrado-de-contrataciones-abiertas-de-la-apf-shcp';
+
+        let ov = document.getElementById('cmp-detalle-overlay');
+        if (!ov) {
+          ov = document.createElement('div');
+          ov.id = 'cmp-detalle-overlay';
+          ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99998;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px;';
+          ov.onclick = function(e) { if (e.target === ov) window.cmpCerrarDetalle(); };
+          document.body.appendChild(ov);
         }
+        const dato = function(label, val) {
+          if (val === null || val === undefined || val === '' || val === '—') return '';
+          return '<div style="margin-bottom:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:700;margin-bottom:3px">' + esc(label) + '</div><div style="font-size:13px;color:var(--text)">' + esc(val) + '</div></div>';
+        };
+        const montoFmt = (typeof cmpFmtMonto === 'function' && c.monto_mxn != null) ? cmpFmtMonto(c.monto_mxn) : (c.monto_mxn != null ? String(c.monto_mxn) : '—');
+        ov.innerHTML = ''
+          + '<div role="dialog" aria-modal="true" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:680px;width:100%;margin:0 auto;box-shadow:0 24px 60px rgba(0,0,0,0.6);overflow:hidden">'
+          + '  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border)">'
+          + '    <div style="font-size:14px;font-weight:700;color:var(--text)">Detalle del contrato</div>'
+          + '    <button onclick="window.cmpCerrarDetalle()" aria-label="Cerrar" style="background:transparent;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:4px 10px;border-radius:6px;line-height:1">×</button>'
+          + '  </div>'
+          + '  <div style="padding:22px;max-height:70vh;overflow-y:auto">'
+          + (c.titulo ? '<div style="font-size:16px;font-weight:700;line-height:1.35;margin-bottom:14px;color:var(--text)">' + esc(c.titulo) + '</div>' : '')
+          + '    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:18px">'
+          +        dato('Monto MXN', montoFmt)
+          +        dato('Fecha firma', window.cmpFmtFechaModal(c.fecha_firma))
+          +        dato('Tipo procedimiento', c.tipo_procedimiento)
+          +        dato('Tipo contrato', c.tipo_contrato)
+          +        dato('Dependencia', c.dependencia)
+          +        dato('Unidad compradora', c.unidad_compradora)
+          +        dato('Proveedor', c.proveedor_nombre)
+          +        dato('RFC proveedor', c.proveedor_rfc)
+          +        dato('Entidad federativa', c.entidad_federativa)
+          + (c.flag_adjudicacion_directa_alta ? '<div style="margin-bottom:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#fca5a5;font-weight:700;margin-bottom:3px">🚩 Bandera</div><div style="font-size:12px;color:#fca5a5">Adjudicación directa de monto alto</div></div>' : '')
+          + '    </div>'
+          + (codigoExp
+              ? '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px">'
+                + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:700;margin-bottom:6px">Código de expediente · OCDS</div>'
+                + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'
+                + '<code style="background:rgba(59,130,246,0.18);color:#93c5fd;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700;letter-spacing:0.3px">' + esc(codigoExp) + '</code>'
+                + '<button onclick="window.cmpCopiarCodigo(this)" data-codigo="' + esc(codigoExp) + '" style="background:rgba(99,179,237,0.10);border:1px solid rgba(99,179,237,0.30);color:var(--accent2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit">📋 Copiar</button>'
+                + '</div>'
+                + '</div>'
+              : '')
+          + '    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--text2);line-height:1.55">'
+          + '      <strong style="color:#fbbf24">⚠️ Sobre la verificación oficial:</strong> el portal Compras MX no permite enlazar directo a un procedimiento. Copia el código y pégalo en su buscador: <strong>Anuncios → Concluidos → buscar</strong>.'
+          + '    </div>'
+          + '    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+          + '      <a href="' + compraMxUrl + '" target="_blank" rel="noopener noreferrer" onclick="window.cmpCopiarCodigo({getAttribute:function(){return \'' + esc(codigoExp) + '\'},innerHTML:\'\',style:{}})" style="display:block;text-align:center;background:var(--accent2);color:#0e1525;font-weight:700;padding:11px 14px;border-radius:10px;text-decoration:none;font-size:13px">Abrir Compras MX' + (codigoExp ? ' (código copiado)' : '') + '</a>'
+          + (googleUrl ? '      <a href="' + googleUrl + '" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;background:transparent;color:var(--text2);font-weight:600;padding:11px 14px;border-radius:10px;text-decoration:none;font-size:13px;border:1px solid var(--border)">Buscar con Google</a>' : '<div></div>')
+          + '    </div>'
+          + '    <div style="border-top:1px solid var(--border);padding-top:12px;font-size:11px;color:var(--text3);line-height:1.5">'
+          + '      <a href="' + datasetUrl + '" target="_blank" rel="noopener noreferrer" style="color:var(--accent2);text-decoration:none">📂 Concentrado de Contrataciones Abiertas de la APF (SHCP)</a>'
+          + '      <div style="margin-top:3px">Dataset oficial OCDS · verificación de auditor · cobertura 2017–presente</div>'
+          + '    </div>'
+          + '  </div>'
+          + '</div>';
+        ov.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
       };
       window.__cmpState = window.__cmpState || { offset: 0, total: 0, monto: 0 };
       const CMP_PAGE_SIZE = 50;
