@@ -54,6 +54,55 @@ jobs:
           done
           if [ "$FAIL" = "1" ]; then exit 1; fi
 
+      - name: Assert asistente honesty (copy muerto NO reaparece)
+        run: |
+          set -e
+          # Phase 2.6 issue #2: el copy del degradado y el badge "Asistente activo"
+          # NO pueden reaparecer en panel/asistente-ia.html ni en index.html.
+          STATUS=$(curl -sS -o /tmp/asi.html -w "%{http_code}" --max-time 10 https://tequio.app/panel/asistente-ia.html)
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::panel/asistente-ia.html no devuelve 200 (got $STATUS)"
+            exit 1
+          fi
+          FAIL=0
+          # Frases muertas que mienten sobre el estado del asistente
+          for STR in '$80 USD/mes' 'volvemos al mes siguiente' 'Asistente activo' 'Asistente sin créditos'; do
+            for FILE in /tmp/asi.html /tmp/live.html; do
+              if grep -Fq "$STR" "$FILE"; then
+                echo "::error::Copy muerto reapareció en $FILE: '$STR'"
+                FAIL=1
+              fi
+            done
+          done
+          if [ "$FAIL" = "1" ]; then exit 1; fi
+          # Verificación positiva: el copy honesto está presente
+          if ! grep -Fq "Pausado · corpus migrando" /tmp/asi.html; then
+            echo "::error::Copy honesto del asistente AUSENTE en /panel/asistente-ia.html"
+            exit 1
+          fi
+          echo "✓ Copy muerto NO reapareció + copy honesto presente"
+
+      - name: Assert /api/ai-proxy gate (503 humano sin tocar Gemini)
+        run: |
+          set -e
+          # Phase 2.6 issue #2: curl directo al endpoint debe responder 503 con cuerpo JSON.
+          BODY=$(curl -sS -X POST -H "Content-Type: application/json" -o /tmp/proxy.json -w "%{http_code}" \
+            --max-time 10 \
+            -d '{"messages":[{"role":"user","content":"test"}]}' \
+            https://tequio.app/api/ai-proxy)
+          if [ "$BODY" != "503" ]; then
+            echo "::error::/api/ai-proxy NO devuelve 503 con switch OFF (got $BODY)"
+            cat /tmp/proxy.json
+            exit 1
+          fi
+          if ! grep -q "service_paused\|corpus migrando" /tmp/proxy.json; then
+            echo "::error::503 sin payload humano esperado"
+            cat /tmp/proxy.json
+            exit 1
+          fi
+          echo "✓ /api/ai-proxy 503 humano · cero llamadas Gemini"
+
+
       - name: Assert meta == data-kpi=leyes
         run: |
           set -e
