@@ -3648,8 +3648,8 @@ window.addEventListener('load', function(){
         }
         const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
-          const _fuenteUrl = c.fuente_url || (c.ocid ? `https://upcp-compranet.buengobierno.gob.mx/sitiopublico/#/sitiopublico/detalle-procedimiento/${encodeURIComponent(c.ocid)}` : null);
-          const _click = _fuenteUrl ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(_fuenteUrl||'').replace(/"/g, '&quot;')}" data-ocid="${(c.ocid||'').replace(/"/g, '&quot;')}" title="Abrir expediente en Compranet (OCID copiado al portapapeles)" style="cursor:pointer;` : ` style="`;
+          const _fuenteUrl = c.fuente_url || (c.ocid ? 'https://upcp-compranet.buengobierno.gob.mx/sitiopublico/' : null);
+          const _click = _fuenteUrl ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(_fuenteUrl||'').replace(/"/g, '&quot;')}" data-ocid="${(c.ocid||'').replace(/"/g, '&quot;')}" title="Abrir Compras MX (OCID copiado al portapapeles — pega en el buscador)" style="cursor:pointer;` : ` style="`;
           return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${_fuenteUrl ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
             <div style="min-width:0">
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
@@ -3678,11 +3678,29 @@ window.addEventListener('load', function(){
         if (!el) return;
         const u = el.getAttribute('data-fuente');
         const ocid = el.getAttribute('data-ocid');
-        // Copiar OCID al clipboard (respaldo si la SPA de Compranet abre la home)
+        // Compras MX no soporta deep-linking por OCID público (requiere UUID interno).
+        // Workaround: copiar el OCID al clipboard y abrir su home para que el usuario
+        // pegue el código en su buscador.
+        let copied = false;
         if (ocid && navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(ocid).catch(() => {});
+          try { navigator.clipboard.writeText(ocid); copied = true; } catch(e) {}
         }
         if (u) window.open(u, '_blank', 'noopener,noreferrer');
+        // Mostrar toast informativo
+        if (ocid) {
+          let toast = document.getElementById('cmp-toast');
+          if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'cmp-toast';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0e1525;color:#fff;border:1px solid #334155;border-radius:10px;padding:12px 18px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 28px rgba(0,0,0,0.55);max-width:90vw;text-align:center;line-height:1.4';
+            document.body.appendChild(toast);
+          }
+          toast.innerHTML = (copied ? '📋 OCID copiado · ' : '') + 'Pega <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;font-family:monospace">' + ocid + '</code> en el buscador de Compras MX';
+          toast.style.opacity = '1';
+          toast.style.transition = 'opacity 0.4s';
+          clearTimeout(window.__cmpToastT);
+          window.__cmpToastT = setTimeout(() => { if (toast) toast.style.opacity = '0'; }, 6000);
+        }
       };
       window.__cmpState = window.__cmpState || { offset: 0, total: 0, monto: 0 };
       const CMP_PAGE_SIZE = 50;
