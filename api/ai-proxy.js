@@ -225,6 +225,22 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  // GATE 2026-06-12 issue #2: asistente pausado hasta servidor propio.
+  // Defensa server-side al gate del frontend. Curl directo recibe 503 humano,
+  // sin tocar Gemini (credit depleted). Revive con ASISTENTE_PAUSADO=false.
+  if (process.env.ASISTENTE_PAUSADO !== 'false') {
+    res.setHeader('Retry-After', '2592000');
+    res.status(503).json({
+      error: {
+        type: 'service_paused',
+        message: 'Asistente pausado: corpus migrando a infraestructura libre. Pausado hasta el servidor propio. El corpus se prepara con sentence-transformers e5-base en GitHub Actions (cero costo, cero dependencia externa). Ver https://tequio.app/panel/meta-servidor.html',
+        status: 'paused',
+        replacement: 'sentence-transformers/intfloat/multilingual-e5-base',
+      },
+    });
+    return;
+  }
+
   // Rate limit por IP
   const clientIp = getClientIp(req);
   const rateCheck = await checkRateLimit(clientIp);
