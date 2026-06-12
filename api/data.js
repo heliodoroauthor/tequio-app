@@ -561,56 +561,17 @@ export default async function handler(req, res) {
     }
 
     if (vista === 'senadores_busqueda') {
-      // Búsqueda semántica con embeddings vía Gemini
+      // GATE 2026-06-12: búsqueda semántica DESHABILITADA temporalmente.
+      // Razón: Gemini credits depleted desde ~29-may (ref: issue #2). Plan de migración
+      // a e5-base en infraestructura libre en curso. Revive con el servidor propio,
+      // mismo switch que el asistente. Hasta entonces va directo al camino de texto
+      // trigram: búsquedas más rápidas hoy y cero llamadas zombi a Gemini.
       const q = (req.query.q || '').trim();
       if (!q) return res.status(400).json({ error: 'query requerida' });
       const limit = Math.min(parseInt(req.query.limit || '20', 10), 50);
-      // 1) Generar embedding del query con Gemini
-      const GEMINI_KEY = process.env.GEMINI_API_KEY;
-      if (!GEMINI_KEY) {
-        // Fallback: búsqueda texto trigram
-        const safeQ = encodeURIComponent(q);
-        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
-        return res.status(200).json({ senadores: rows || [], modo: 'texto', query: q });
-      }
-      try {
-        const er = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'models/gemini-embedding-001',
-            content: { parts: [{ text: q }] },
-            outputDimensionality: 768,
-          }),
-        });
-        if (!er.ok) throw new Error('embed failed');
-        const ej = await er.json();
-        const emb = ej?.embedding?.values;
-        if (!emb || emb.length !== 768) throw new Error('embed bad shape');
-        // 2) RPC contra Supabase (vector search). Si no existe la RPC, fallback a texto.
-        const url = `${process.env.SUPABASE_URL}/rest/v1/rpc/match_senadores`;
-        const rr = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query_embedding: emb, match_count: limit }),
-        });
-        if (rr.ok) {
-          const rows = await rr.json();
-          return res.status(200).json({ senadores: rows || [], modo: 'semantica', query: q });
-        }
-        // RPC no existe → fallback texto
-        const safeQ = encodeURIComponent(q);
-        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
-        return res.status(200).json({ senadores: rows || [], modo: 'texto_fallback', query: q });
-      } catch (e) {
-        const safeQ = encodeURIComponent(q);
-        const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
-        return res.status(200).json({ senadores: rows || [], modo: 'texto_err', query: q, err: String(e).slice(0, 100) });
-      }
+      const safeQ = encodeURIComponent(q);
+      const rows = await sb(`politicos_senadores?or=(nombre_completo.ilike.*${safeQ}*,cargo_especial.ilike.*${safeQ}*)&select=id,nombre_completo,foto_url,partido,entidad_federativa,cargo_especial,comisiones_integrante&limit=${limit}`);
+      return res.status(200).json({ senadores: rows || [], modo: 'texto', query: q });
     }
 
     if (vista === 'buscar_diputado') {
@@ -2464,3 +2425,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
         }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
