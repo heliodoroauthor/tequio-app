@@ -67,27 +67,42 @@ for arg in sys.argv[4:]:
 # Per-table config
 # ------------------------------------------------------------------
 def _passage_chunks(r: dict) -> str:
-    """Preserva semántica del Gemini Edge Function original."""
-    art = r.get('articulo_num')
+    """Preserva semántica del Gemini Edge Function original. Colapsa separadores vacíos."""
+    art = (r.get('articulo_num') or '').strip()
+    ley = (r.get('ley_nombre') or '').strip()
+    texto = (r.get('texto') or '').strip()
+    if art and ley:
+        return f"Artículo {art} de {ley}: {texto}"
     if art:
-        return f"Artículo {art} de {r.get('ley_nombre') or ''}: {r.get('texto') or ''}"
-    return r.get('texto') or ''
+        return f"Artículo {art}: {texto}"
+    if ley:
+        return f"{ley}: {texto}"
+    return texto
 
 
 def _passage_leyes(r: dict) -> str:
-    """Preserva semántica de backfill_embeddings.py v4 Gemini original."""
-    return f"{r.get('nombre') or ''} {r.get('texto') or ''}".strip()
+    """Preserva semántica de backfill_embeddings.py v4 Gemini original. Colapsa vacíos."""
+    nombre = (r.get('nombre') or '').strip()
+    texto = (r.get('texto') or '').strip()
+    if nombre and texto:
+        return f"{nombre} {texto}"
+    return nombre or texto
 
 
 def _passage_senadores(r: dict) -> str:
-    """Diseño nuevo: campos searchables + semblanza."""
-    return (
-        f"{r.get('nombre_completo') or ''} | "
-        f"{r.get('partido') or ''} | "
-        f"{r.get('entidad_federativa') or ''} | "
-        f"{r.get('cargo_especial') or ''}. "
-        f"Semblanza: {r.get('semblanza') or ''}"
-    )
+    """Diseño nuevo: campos searchables + semblanza. Salta NULLs en lugar de embeber 'None'."""
+    parts = []
+    for col in ('nombre_completo', 'partido', 'entidad_federativa', 'cargo_especial'):
+        v = (r.get(col) or '').strip()
+        if v:
+            parts.append(v)
+    head = ' | '.join(parts)
+    sem = (r.get('semblanza') or '').strip()
+    if head and sem:
+        return f"{head}. Semblanza: {sem}"
+    if sem:
+        return f"Semblanza: {sem}"
+    return head
 
 
 TABLE_CONFIG: Dict[str, Dict] = {
@@ -144,14 +159,22 @@ model.max_seq_length = 512
 print(f'✅ Modelo listo en {time.time()-t_load:.1f}s · device={device}', flush=True)
 
 
-def fetch_rows(last_id: int) -> List[dict]:
-    """Lee próximas N filas con id > last_id, filtrando por embedding_model si mode=null."""
+def fetch_rows() -> List[dict]:
+    """Fetch desde el INICIO del selector (sin cursor id).
+
+    Razón: el set que matchea se encoge naturalmente con cada PATCH exitoso.
+    Cursor-based saltaría rows con PATCH fallido (selector las mantiene, cursor las pasó).
+    Sin cursor: cada fetch ve el conjunto actual desde el inicio → reintentos gratis,
+    cero rows perdidas.
+
+    Trade-off: 10x más fetches con multi-shard (cada shard re-fetcha la misma ventana
+    hasta que su sub-batch esté hecho), pero correctness > eficiencia.
+    """
     url = f'{SUPABASE_URL}/rest/v1/{TABLE}'
     params = {
         'select': CONFIG['select'],
         'order': 'id.asc',
         'limit': str(FETCH_BATCH),
-        'id': f'gt.{last_id}',
     }
     if MODE == 'null':
         # IS DISTINCT FROM 'e5-base' = (IS NULL) OR (!= 'e5-base')
@@ -193,27 +216,32 @@ def patch_row(row_id: int, vec: List[float]) -> bool:
 
 
 def main():
-    last_id = 0
     processed = 0
     embedded = 0
     failed = 0
     skipped = 0
+    consecutive_no_progress = 0
+    MAX_NO_PROGRESS = 20  # iter sin filas propias → otros shards trabajando, salir y dejar terminar
     start_t = time.time()
     last_log_at = start_t
 
     while True:
-        rows = fetch_rows(last_id)
+        rows = fetch_rows()
         if not rows:
-            print(f'  [batch {BATCH_IDX}/{TABLE}] No more rows. Done.', flush=True)
+            print(f'  [batch {BATCH_IDX}/{TABLE}] Selector vacío. Done.', flush=True)
             break
-
-        # Cursor SIEMPRE avanza
-        last_id = rows[-1]['id']
 
         # Shard filter (id % TOTAL_BATCHES == BATCH_IDX)
         mine = [r for r in rows if r['id'] % TOTAL_BATCHES == BATCH_IDX]
         if not mine:
+            consecutive_no_progress += 1
+            if consecutive_no_progress >= MAX_NO_PROGRESS:
+                print(f'  [batch {BATCH_IDX}/{TABLE}] {MAX_NO_PROGRESS} iter sin filas propias. Otros shards trabajan. Done.', flush=True)
+                break
+            time.sleep(2)  # backoff para no saturar con fetches
             continue
+
+        consecutive_no_progress = 0
 
         # Construir pasajes por tabla
         valid_rows = []
@@ -238,38 +266,4 @@ def main():
         for r, v in zip(valid_rows, vecs):
             if len(v) != 768:
                 print(f'FATAL: vector dim != 768 (got {len(v)}) id={r["id"]} tabla={TABLE}', flush=True)
-                sys.exit(4)
-            ok = patch_row(r['id'], v)
-            if ok:
-                embedded += 1
-            else:
-                failed += 1
-            processed += 1
-
-        now = time.time()
-        if now - last_log_at >= 10:
-            elapsed = now - start_t
-            rate = processed / elapsed if elapsed > 0 else 0
-            print(
-                f'  [batch {BATCH_IDX}/{TABLE}] last_id={last_id} processed={processed} '
-                f'embedded={embedded} failed={failed} skipped={skipped} rate={rate:.1f}/s',
-                flush=True,
-            )
-            last_log_at = now
-
-    elapsed = time.time() - start_t
-    print(f'\n═══ SUMMARY batch {BATCH_IDX} tabla={TABLE} ═══', flush=True)
-    print(f'  processed: {processed}', flush=True)
-    print(f'  embedded:  {embedded}', flush=True)
-    print(f'  failed:    {failed}', flush=True)
-    print(f'  skipped:   {skipped}', flush=True)
-    print(f'  elapsed:   {elapsed:.0f}s', flush=True)
-    print(f'  rate:      {processed/elapsed if elapsed > 0 else 0:.1f}/s', flush=True)
-
-    if processed > 0 and embedded == 0:
-        print('FATAL: 0 embeddings persistidos pese a procesar filas. Aborting.', flush=True)
-        sys.exit(5)
-
-
-if __name__ == '__main__':
-    main()
+       
