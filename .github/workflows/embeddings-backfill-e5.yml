@@ -1,0 +1,76 @@
+name: Embeddings Backfill MASSIVE e5-base
+
+# Re-embed completo con intfloat/multilingual-e5-base (768d, gratis).
+# workflow_dispatch ONLY — para correr las 3 tablas, disparar 3 veces (una por tabla).
+# Reemplaza al pipeline Gemini agotado. Ver issue #2 del repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      table:
+        description: 'Tabla a re-embeber'
+        required: true
+        type: choice
+        options:
+          - leyes_chunks
+          - leyes
+          - politicos_senadores
+      mode:
+        description: 'null = solo pendientes/Gemini · all = TODO (re-embed incluso e5)'
+        required: false
+        default: 'null'
+        type: choice
+        options:
+          - 'null'
+          - 'all'
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        batch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-embed-e5-v1
+          restore-keys: |
+            pip-embed-
+
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-multilingual-e5-base-v1
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install requests "sentence-transformers>=2.7,<3.0" "torch>=2.0" --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple/ || \
+          pip install requests "sentence-transformers>=2.7,<3.0" torch
+
+      - name: Run backfill batch ${{ matrix.batch }} table=${{ inputs.table }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TABLE: ${{ inputs.table }}
+          BATCH_IDX: ${{ matrix.batch }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          python3 scripts/backfill_embeddings_e5.py "$TABLE" "$BATCH_IDX" 10 "--mode=$MODE"
