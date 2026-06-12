@@ -3648,7 +3648,7 @@ window.addEventListener('load', function(){
         }
         const html = contratos.map(c => {
           const tp = TIPO_PROC_LABEL[c.tipo_procedimiento] || { txt: c.tipo_procedimiento || '—', color: '#94a3b8', icon: '⚪' };
-          const _fuenteUrl = c.fuente_url || (c.ocid ? `https://upcp-compranet.hacienda.gob.mx/sitiopublico/#/sitiopublico/detalle-procedimiento/${encodeURIComponent(c.ocid)}` : null);
+          const _fuenteUrl = c.fuente_url || (c.ocid ? `https://upcp-compranet.buengobierno.gob.mx/sitiopublico/#/sitiopublico/detalle-procedimiento/${encodeURIComponent(c.ocid)}` : null);
           const _click = _fuenteUrl ? ` onclick="cmpAbrirContrato(this)" data-fuente="${(_fuenteUrl||'').replace(/"/g, '&quot;')}" data-ocid="${(c.ocid||'').replace(/"/g, '&quot;')}" title="Abrir expediente en Compranet (OCID copiado al portapapeles)" style="cursor:pointer;` : ` style="`;
           return `<div${_click}background:var(--surface);border:1px solid var(--border);border-left:5px solid ${tp.color};border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;transition:border-color 0.15s,transform 0.15s" ${_fuenteUrl ? 'onmouseover="this.style.borderColor=\''+tp.color+'\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\'"' : ''}>
             <div style="min-width:0">
