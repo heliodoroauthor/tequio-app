@@ -223,6 +223,10 @@ def main():
             break
 
         mine = [r for r in rows if r['id'] % TOTAL_BATCHES == BATCH_IDX]
+        # DBG temporal: ver qué devuelve fetch
+        if iter_count <= 3:
+            sample_ids = [r.get('id') for r in rows[:5]]
+            print(f'[DBG] iter={iter_count} fetched={len(rows)} sample_ids={sample_ids} mine={len(mine)} BATCH_IDX={BATCH_IDX} TOTAL={TOTAL_BATCHES}', flush=True)
         if not mine:
             consecutive_no_progress += 1
             if consecutive_no_progress >= MAX_NO_PROGRESS:
