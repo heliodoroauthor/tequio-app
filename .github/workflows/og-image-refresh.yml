@@ -1,0 +1,52 @@
+name: OG Image Refresh
+
+# Regenera og-image.png con la cifra actual de leyes (desde kpis_globales_cache).
+# Bug 13-jun-2026: el PNG estatico mostraba "9,101 leyes" mientras la app servia
+# 9,618. WhatsApp/Telegram renderizan el PNG, no los meta tags.
+# Este workflow lo refresca semanal + commit + push.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # lunes 09:00 UTC = domingo 03:00 CDMX
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["🔄 Sync KPIs Fallback (SEO + crawlers)"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Pillow
+        run: pip install Pillow requests
+
+      - name: Regenerate og-image.png
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OG_OUT: og-image.png
+        run: python3 scripts/generate_og_image.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet og-image.png; then
+            echo "No changes to og-image.png"
+            exit 0
+          fi
+          git config user.name "tequio-bot"
+          git config user.email "bot@tequio.app"
+          git add og-image.png
+          git commit -m "chore(og): refresh og-image.png con cifra actual de leyes"
+          git push
