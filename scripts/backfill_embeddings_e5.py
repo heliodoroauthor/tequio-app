@@ -122,6 +122,7 @@ print(f'Modelo listo en {time.time()-t_load:.1f}s device={device}', flush=True)
 
 
 def fetch_rows():
+    """Retry x3 con backoff exponencial (1s, 2s, 4s). exit 1 si todo falla."""
     url = f'{SUPABASE_URL}/rest/v1/{TABLE}'
     params = {
         'select': CONFIG['select'],
@@ -130,10 +131,20 @@ def fetch_rows():
     }
     if MODE == 'null':
         params['or'] = '(embedding_model.is.null,embedding_model.neq.e5-base)'
-    r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-    if not r.ok:
-        raise RuntimeError(f'fetch fail {r.status_code}: {r.text[:200]}')
-    return r.json() or []
+    last_err = None
+    for attempt in range(3):
+        try:
+            r = requests.get(url, headers=HEADERS, params=params, timeout=30)
+            if r.ok:
+                return r.json() or []
+            last_err = f'HTTP {r.status_code}: {r.text[:200]}'
+        except Exception as e:
+            last_err = f'{type(e).__name__}: {e}'
+        if attempt < 2:
+            sleep_s = 2 ** attempt
+            print(f'WARN fetch attempt {attempt+1}/3 fail: {last_err} - sleeping {sleep_s}s', flush=True)
+            time.sleep(sleep_s)
+    raise RuntimeError(f'fetch fail after 3 attempts: {last_err}')
 
 
 def embed_texts(texts):
@@ -149,19 +160,40 @@ def embed_texts(texts):
 
 
 def patch_row(row_id, vec):
+    """Retry x3 con backoff. Return True si succeeded; False si los 3 attempts fallaron."""
     url = f'{SUPABASE_URL}/rest/v1/{TABLE}'
     payload = {'embedding': vec, 'embedding_model': 'e5-base'}
-    r = requests.patch(
-        url,
-        params={'id': f'eq.{row_id}'},
-        headers={**HEADERS, 'Prefer': 'return=minimal'},
-        json=payload,
-        timeout=20,
-    )
-    if not r.ok:
-        print(f'PATCH fail id={row_id}: {r.status_code} {r.text[:120]}', flush=True)
-        return False
-    return True
+    last_err = None
+    for attempt in range(3):
+        try:
+            r = requests.patch(
+                url,
+                params={'id': f'eq.{row_id}'},
+                headers={**HEADERS, 'Prefer': 'return=minimal'},
+                json=payload,
+                timeout=30,
+            )
+            if r.ok:
+                return True
+            last_err = f'HTTP {r.status_code}: {r.text[:120]}'
+        except Exception as e:
+            last_err = f'{type(e).__name__}: {e}'
+        if attempt < 2:
+            time.sleep(2 ** attempt)
+    print(f'PATCH fail id={row_id} after 3 attempts: {last_err}', flush=True)
+    return False
+
+
+
+def print_summary(processed, embedded, failed, skipped, exit_reason, elapsed):
+    """SUMMARY canonical line - parseado por ARMADURA del workflow."""
+    print(f'\n=== SUMMARY batch {BATCH_IDX} tabla={TABLE} ===', flush=True)
+    print(f'  processed: {processed}', flush=True)
+    print(f'  embedded:  {embedded}', flush=True)
+    print(f'  failed:    {failed}', flush=True)
+    print(f'  skipped:   {skipped}', flush=True)
+    print(f'  exit_reason: {exit_reason}', flush=True)
+    print(f'  elapsed:   {elapsed:.0f}s', flush=True)
 
 
 def main():
@@ -174,12 +206,20 @@ def main():
     start_t = time.time()
     last_log_at = start_t
     iter_count = 0
+    exit_reason = 'unknown'  # queue_empty | error | no_progress | fatal
 
     while True:
         iter_count += 1
-        rows = fetch_rows()
+        try:
+            rows = fetch_rows()
+        except Exception as e:
+            print(f'FATAL fetch_rows tras retries: {e}', flush=True)
+            exit_reason = 'error'
+            print_summary(processed, embedded, failed, skipped, exit_reason, time.time()-start_t)
+            sys.exit(1)
         if not rows:
             print(f'  [batch {BATCH_IDX}/{TABLE}] Selector vacio. Done.', flush=True)
+            exit_reason = 'queue_empty'
             break
 
         mine = [r for r in rows if r['id'] % TOTAL_BATCHES == BATCH_IDX]
@@ -187,6 +227,7 @@ def main():
             consecutive_no_progress += 1
             if consecutive_no_progress >= MAX_NO_PROGRESS:
                 print(f'  [batch {BATCH_IDX}/{TABLE}] {MAX_NO_PROGRESS} iter sin filas propias. Done.', flush=True)
+                exit_reason = 'no_progress'
                 break
             time.sleep(2)
             continue
@@ -205,6 +246,7 @@ def main():
             consecutive_no_progress += 1
             if consecutive_no_progress >= MAX_NO_PROGRESS:
                 print(f'  [batch {BATCH_IDX}/{TABLE}] {MAX_NO_PROGRESS} iter solo-skipped. Done.', flush=True)
+                exit_reason = 'no_progress'
                 break
             time.sleep(1)
             continue
@@ -236,16 +278,16 @@ def main():
             last_log_at = now
 
     elapsed = time.time() - start_t
-    print(f'\n=== SUMMARY batch {BATCH_IDX} tabla={TABLE} ===', flush=True)
-    print(f'  processed: {processed}', flush=True)
-    print(f'  embedded:  {embedded}', flush=True)
-    print(f'  failed:    {failed}', flush=True)
-    print(f'  skipped:   {skipped}', flush=True)
-    print(f'  elapsed:   {elapsed:.0f}s', flush=True)
+    print_summary(processed, embedded, failed, skipped, exit_reason, elapsed)
 
     if processed > 0 and embedded == 0:
         print('FATAL: 0 embeddings persistidos. Aborting.', flush=True)
         sys.exit(5)
+    
+    # ARMADURA v2: si exit_reason != queue_empty, exit 1 (workflow lo detecta)
+    if exit_reason != 'queue_empty':
+        print(f'EXIT 1: exit_reason={exit_reason} (esperaba queue_empty)', flush=True)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

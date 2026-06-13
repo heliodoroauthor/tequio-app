@@ -57,20 +57,29 @@ jobs:
           set -o pipefail
           python3 scripts/backfill_embeddings_e5.py "${{ matrix.table }}" 0 1 --mode=null 2>&1 | tee /tmp/script.log
 
-      - name: ARMADURA - Assert SUMMARY printed (no silent exit)
+      - name: ARMADURA v2 - SUMMARY + exit_reason
         if: always()
         run: |
+          # v1 (12-jun): detectar silent exit (null bytes + exit 0 sin output)
+          # v2 (13-jun): exit_reason=queue_empty obligatorio para verde
+          # Status verde = cola REALMENTE vacia, no "proceso terminado"
           if ! grep -q "SUMMARY batch" /tmp/script.log 2>/dev/null; then
             echo "::error::Script NO imprimio SUMMARY - posible silent exit"
-            tail -30 /tmp/script.log 2>/dev/null
+            tail -30 /tmp/script.log 2>/dev/null || echo "(no log)"
             exit 1
           fi
           echo "[ARMADURA] SUMMARY presente:"
-          grep -A6 "SUMMARY batch" /tmp/script.log | head -10
+          grep -A7 "SUMMARY batch" /tmp/script.log | head -12
           EMBEDDED=$(grep -oP "embedded:\s+\K\d+" /tmp/script.log | tail -1 || echo 0)
           PROCESSED=$(grep -oP "processed:\s+\K\d+" /tmp/script.log | tail -1 || echo 0)
+          EXIT_REASON=$(grep -oP "exit_reason:\s+\K\w+" /tmp/script.log | tail -1 || echo "missing")
           if [ "$PROCESSED" -gt "0" ] && [ "$EMBEDDED" = "0" ]; then
-            echo "::error::Processed=$PROCESSED but embedded=0"
+            echo "::error::Processed=$PROCESSED but embedded=0 (script deberia haber exit 5)"
             exit 1
           fi
-          echo "[ARMADURA] processed=$PROCESSED embedded=$EMBEDDED OK"
+          if [ "$EXIT_REASON" != "queue_empty" ]; then
+            echo "::error::exit_reason=$EXIT_REASON (esperaba queue_empty)"
+            echo "Posibles causas: error en fetch/PATCH tras 3 retries, o no_progress timeout"
+            exit 1
+          fi
+          echo "[ARMADURA v2] processed=$PROCESSED embedded=$EMBEDDED exit_reason=$EXIT_REASON OK"
