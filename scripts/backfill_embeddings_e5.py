@@ -121,16 +121,42 @@ model.max_seq_length = 512
 print(f'Modelo listo en {time.time()-t_load:.1f}s device={device}', flush=True)
 
 
-def fetch_rows():
-    """Retry x3 con backoff exponencial (1s, 2s, 4s). exit 1 si todo falla."""
+# OPCION B 2026-06-13: cada shard procesa rango de id propio + cursor
+# (en lugar de cursor-less con shard filter en Python que desperdicia 90%
+# de cada fetch). Indice idx_chunks_pend_e5 acelera el query.
+def _compute_shard_range():
+    r = requests.get(
+        f'{SUPABASE_URL}/rest/v1/{TABLE}',
+        headers=HEADERS,
+        params={'select': 'id', 'order': 'id.desc', 'limit': '1'},
+        timeout=30,
+    )
+    r.raise_for_status()
+    rows = r.json()
+    max_id = rows[0]['id'] if rows else 0
+    shard_size = (max_id // TOTAL_BATCHES) + 1
+    smin = BATCH_IDX * shard_size
+    smax = (BATCH_IDX + 1) * shard_size - 1
+    return smin, smax, max_id
+
+SHARD_MIN_ID, SHARD_MAX_ID, _MAX_ID_TABLE = _compute_shard_range()
+print(f'Shard {BATCH_IDX}/{TOTAL_BATCHES}: id range [{SHARD_MIN_ID}, {SHARD_MAX_ID}] de max_id={_MAX_ID_TABLE}', flush=True)
+
+
+def fetch_rows(last_id):
+    """Cursor-based (id > last_id) + shard range (id <= SHARD_MAX_ID). Retry x3."""
     url = f'{SUPABASE_URL}/rest/v1/{TABLE}'
-    params = {
-        'select': CONFIG['select'],
-        'order': 'id.asc',
-        'limit': str(FETCH_BATCH),
-    }
+    # lista de tuplas para permitir multiples filtros id (gt + lte)
+    cursor_lo = max(last_id, SHARD_MIN_ID - 1)
+    params = [
+        ('select', CONFIG['select']),
+        ('order', 'id.asc'),
+        ('limit', str(FETCH_BATCH)),
+        ('id', f'gt.{cursor_lo}'),
+        ('id', f'lte.{SHARD_MAX_ID}'),
+    ]
     if MODE == 'null':
-        params['or'] = '(embedding_model.is.null,embedding_model.neq.e5-base)'
+        params.append(('or', '(embedding_model.is.null,embedding_model.neq.e5-base)'))
     last_err = None
     for attempt in range(3):
         try:
@@ -208,33 +234,25 @@ def main():
     iter_count = 0
     exit_reason = 'unknown'  # queue_empty | error | no_progress | fatal
 
+    last_id = 0  # cursor; combinado con SHARD_MIN_ID en fetch_rows
+
     while True:
         iter_count += 1
         try:
-            rows = fetch_rows()
+            rows = fetch_rows(last_id)
         except Exception as e:
             print(f'FATAL fetch_rows tras retries: {e}', flush=True)
             exit_reason = 'error'
             print_summary(processed, embedded, failed, skipped, exit_reason, time.time()-start_t)
             sys.exit(1)
         if not rows:
-            print(f'  [batch {BATCH_IDX}/{TABLE}] Selector vacio. Done.', flush=True)
+            print(f'  [batch {BATCH_IDX}/{TABLE}] Selector vacio para shard. Done.', flush=True)
             exit_reason = 'queue_empty'
             break
 
-        mine = [r for r in rows if r['id'] % TOTAL_BATCHES == BATCH_IDX]
-        # DBG temporal: ver qué devuelve fetch
-        if iter_count <= 3:
-            sample_ids = [r.get('id') for r in rows[:5]]
-            print(f'[DBG] iter={iter_count} fetched={len(rows)} sample_ids={sample_ids} mine={len(mine)} BATCH_IDX={BATCH_IDX} TOTAL={TOTAL_BATCHES}', flush=True)
-        if not mine:
-            consecutive_no_progress += 1
-            if consecutive_no_progress >= MAX_NO_PROGRESS:
-                print(f'  [batch {BATCH_IDX}/{TABLE}] {MAX_NO_PROGRESS} iter sin filas propias. Done.', flush=True)
-                exit_reason = 'no_progress'
-                break
-            time.sleep(2)
-            continue
+        # Con id range filter, todas las rows del fetch son mias. Avanzar cursor.
+        last_id = rows[-1]['id']
+        mine = rows
 
         valid_rows = []
         valid_texts = []
