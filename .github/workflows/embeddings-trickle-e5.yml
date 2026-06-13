@@ -54,4 +54,23 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          python3 scripts/backfill_embeddings_e5.py "${{ matrix.table }}" 0 1 --mode=null
+          set -o pipefail
+          python3 scripts/backfill_embeddings_e5.py "${{ matrix.table }}" 0 1 --mode=null 2>&1 | tee /tmp/script.log
+
+      - name: ARMADURA - Assert SUMMARY printed (no silent exit)
+        if: always()
+        run: |
+          if ! grep -q "SUMMARY batch" /tmp/script.log 2>/dev/null; then
+            echo "::error::Script NO imprimio SUMMARY - posible silent exit"
+            tail -30 /tmp/script.log 2>/dev/null
+            exit 1
+          fi
+          echo "[ARMADURA] SUMMARY presente:"
+          grep -A6 "SUMMARY batch" /tmp/script.log | head -10
+          EMBEDDED=$(grep -oP "embedded:\s+\K\d+" /tmp/script.log | tail -1 || echo 0)
+          PROCESSED=$(grep -oP "processed:\s+\K\d+" /tmp/script.log | tail -1 || echo 0)
+          if [ "$PROCESSED" -gt "0" ] && [ "$EMBEDDED" = "0" ]; then
+            echo "::error::Processed=$PROCESSED but embedded=0"
+            exit 1
+          fi
+          echo "[ARMADURA] processed=$PROCESSED embedded=$EMBEDDED OK"
