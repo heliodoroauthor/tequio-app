@@ -4612,14 +4612,16 @@ window.addEventListener('load', function(){
                 var noPct=tot?((no/tot)*100).toFixed(1):0;
                 var abstPct=tot?((abst/tot)*100).toFixed(1):0;
                 var ausPct=tot?((aus/tot)*100).toFixed(1):0;
-                // 13-jun-2026: tri-state. NULL=gris neutro (scraper bug, no inventar)
-                var resColor=v.resultado==='aprobada'?'#22c55e':(v.resultado==='rechazada'?'#ef4444':'#94a3b8');
-                var resEmoji=v.resultado==='aprobada'?'OK':(v.resultado==='rechazada'?'X':'?');
+                // 13-jun-2026 v2: badge claro. NULL = "EN REVISION" (no signos de pregunta)
+                var resColor, resLabel;
+                if (v.resultado === 'aprobada')        { resColor = '#22c55e'; resLabel = 'APROBADA'; }
+                else if (v.resultado === 'rechazada')  { resColor = '#ef4444'; resLabel = 'RECHAZADA'; }
+                else                                    { resColor = '#94a3b8'; resLabel = 'EN REVISION'; }
                 var asunto=(v.asunto||'').substring(0,200);
                 
                 return '<a href="'+(v.url_oficial||'#')+'" target="_blank" rel="noopener" class="card" style="text-decoration:none;color:inherit;border-left:3px solid '+resColor+';display:block">'+
                   '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;flex-wrap:wrap">'+
-                    '<span style="background:'+resColor+'22;color:'+resColor+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase">'+resEmoji+' '+(v.resultado||'?')+'</span>'+
+                    '<span title="'+(v.resultado===null||v.resultado===undefined?'Scraper SITL en arreglo - resultado no extraido, ver SI/NO/abstencion':'')+'" style="background:'+resColor+'22;color:'+resColor+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase">'+resLabel+'</span>'+
                     '<span style="font-size:11px;color:var(--text3)">'+fmtFecha(v.fecha)+' · '+(v.tipo||'?')+'</span>'+
                   '</div>'+
                   '<div style="font-weight:600;font-size:13px;color:var(--text);line-height:1.4;margin-bottom:10px">'+asunto+(v.asunto && v.asunto.length>200?'…':'')+'</div>'+
