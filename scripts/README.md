@@ -72,3 +72,63 @@ Sin esos prefijos la calidad degrada **en silencio** (no falla, solo
 recupera peor). El backfill (`backfill_embeddings_e5.py`) usa
 `passage:`. El embedder de queries (cuando el servidor propio esté
 arriba) **DEBE** usar `query:`. Ver issue #2 checklist día-servidor.
+
+### Bug del "stale-file upload" (13-jun-2026) — antipatron mortal
+
+**Sintoma**: commit a GitHub via API devuelve HTTP 200 + URL de commit,
+pero el archivo subido contiene el ESTADO ANTERIOR del repo, no la edicion
+intentada. Resultado: regresion silenciosa que revierte commits previos
+SIN warning.
+
+**Caso concreto**: commit `9807b52` intentaba arreglar el icono X rojo de
+votaciones. Resultado real: revirtio el commit `37aa77d` previo Y no aplico
+el fix de icono. Doble regresion. HTTP 200 OK en ambos pasos.
+
+**Causa raiz**: secuencia rota de comandos en una sola llamada bash:
+
+```bash
+cp index.html /outputs/index.html              # paso 1: copia archivo stale
+python3 <<'PYEOF'                              # paso 2: intenta edit
+... old_string = """..."""
+... new_string = """..."""
+... print(f'patched. nb: {open(p,"rb").read().count(b"\x00")}')  # SyntaxError!
+PYEOF
+curl -X PUT ... base64(archivo) ...            # paso 3: sube archivo stale
+```
+
+Lo que paso: el `python3 <<EOF` tuvo SyntaxError (backslash en f-string).
+El bloque python NUNCA ejecuto. El archivo en `/outputs/index.html` quedo
+exactamente como el `cp` lo dejo — STALE. El curl PUT subio ese stale,
+**recibiendo HTTP 200**.
+
+**Reglas para evitar repetir**:
+
+1. **NUNCA encadenar cp + python + curl en una sola llamada bash**.
+   Si python falla en setup phase, bash sigue al siguiente comando.
+
+2. **VERIFICAR el needle DESPUES del edit, ANTES del upload**:
+   ```bash
+   grep -c "NUEVA_LINEA_DISTINTIVA" /tmp/edited.py
+   # Debe ser >= 1, si 0 → ABORT
+   ```
+
+3. **Verificar diff intencional**:
+   ```bash
+   diff -u /original.py /tmp/edited.py | head
+   # Si vacio → edit no aplico → ABORT
+   ```
+
+4. **F-strings con \x00**: usar literales fuera del f-string:
+   ```python
+   # MAL:
+   print(f'nb: {data.count(b"\x00")}')   # SyntaxError
+   # BIEN:
+   NULL_BYTE = b'\x00'
+   print(f'nb: {data.count(NULL_BYTE)}')
+   ```
+
+5. **Detectar regresion** post-commit: hacer `git show HEAD --stat` y
+   confirmar que el archivo NUEVO contiene lo intencionado, no algo viejo.
+
+Refs task #73, commits malos `9807b52` y mas. Commits que arreglaron:
+`781c91c`, `67c062e`.
