@@ -1499,10 +1499,12 @@ export default async function handler(req, res) {
       const items = await sb(path);
       const results = await Promise.all(items.map(async (it) => {
         if (it.tipo === 'voto_congreso') {
+          // 13-jun-2026: tabla 'votos' puede no existir aun (esquema legacy).
+          // .catch([]) en cada subquery para no tumbar vista=iniciativas completa.
           const [aFavor, enContra, abst] = await Promise.all([
-            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.a_favor&select=count'),
-            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.en_contra&select=count'),
-            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.abstencion&select=count')
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.a_favor&select=count').catch(() => []),
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.en_contra&select=count').catch(() => []),
+            sb('votos?iniciativa_id=eq.' + encodeURIComponent(it.id) + '&voto=eq.abstencion&select=count').catch(() => [])
           ]);
           return { ...it, votos: { a_favor: aFavor[0]?.count || 0, en_contra: enContra[0]?.count || 0, abstencion: abst[0]?.count || 0 } };
         } else {
