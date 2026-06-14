@@ -4141,6 +4141,14 @@ window.addEventListener('load', function(){
           <button onclick="navegarCon({accionConfig:{tipo:'reforma',titulo:'📜 Propuesta de Reforma Ciudadana',situacion:'Propongo la siguiente reforma a la legislación mexicana:\n\nNombre de la reforma: [escribe aquí]\n\nProblema que resuelve: [describe el problema actual]\n\nTexto propuesto del artículo: [redacta o describe el cambio]\n\nFundamento constitucional: [artículo de la CPEUM que lo ampara]\n\nBeneficios esperados: [quién se beneficia y cómo]'},toast:'Plantilla de reforma cargada'})" style="background:var(--accent);border:none;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">+ Proponer</button>
         </div>
 
+        <!-- ──── TOGGLE OCULTAR SIN PDF (14-jun-2026) ──── -->
+        <!-- Default ON: oculta las 1,139 leyes sin URL. Usuario las activa con un click si quiere verlas. -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px">
+          <input type="checkbox" id="ley-v2-ocultar-sin-pdf" checked onchange="leyesV2ToggleSinPdf()" style="cursor:pointer;width:16px;height:16px;accent-color:var(--accent)">
+          <label for="ley-v2-ocultar-sin-pdf" style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;flex:1">Ocultar leyes sin texto oficial (PDF)</label>
+          <span id="ley-v2-sin-pdf-counter" style="font-size:11px;color:var(--text3)"></span>
+        </div>
+
         <!-- ──── TABS AMBITO ──── -->
         <div class="tab-bar mb-16" id="ley-v2-tabs">
           <div class="tab active" data-amb="todas" onclick="leyesV2SetAmbito('todas')">Todas</div>
@@ -4270,6 +4278,8 @@ window.addEventListener('load', function(){
             }).catch(function(){});
           }
           
+          window.leyesV2ToggleSinPdf=function(){cargarLeyes();};
+          
           function cargarLeyes(){
             document.getElementById('ley-v2-lista').innerHTML='<div style="padding:30px;text-align:center;color:var(--text3)">Cargando…</div>';
             var params={
@@ -4292,6 +4302,22 @@ window.addEventListener('load', function(){
           }
           
           function renderLista(rows){
+            // 14-jun-2026: si toggle "Ocultar sin PDF" esta ON, filtrar client-side
+            var ocultarSinPdf = document.getElementById('ley-v2-ocultar-sin-pdf');
+            var sinPdfCount = 0;
+            if (ocultarSinPdf && ocultarSinPdf.checked) {
+              var originalLen = rows.length;
+              rows = rows.filter(function(r){
+                if (!r.url) { sinPdfCount++; return false; }
+                return true;
+              });
+              // Actualizar contador
+              var counter = document.getElementById('ley-v2-sin-pdf-counter');
+              if (counter) counter.textContent = sinPdfCount > 0 ? '('+sinPdfCount+' ocultas)' : '';
+            } else {
+              var counter = document.getElementById('ley-v2-sin-pdf-counter');
+              if (counter) counter.textContent = '';
+            }
             var total=rows.length>0?rows[0].total_count:0;
             var totalPages=Math.ceil(total/state.perPage);
             var from=state.page*state.perPage+1;
