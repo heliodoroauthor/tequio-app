@@ -10,7 +10,7 @@
 //  • CDNs (Leaflet, fonts): cache-first   (TTL largo)
 //
 // ============================================================
-const VERSION       = 'tequio-v2.0.3-badgev2-13jun';
+const VERSION       = 'tequio-v2.0.3-derivado-13jun';
 const CACHE_SHELL   = `${VERSION}-shell`;
 const CACHE_ASSETS  = `${VERSION}-assets`;
 const CACHE_DATA    = `${VERSION}-data`;
