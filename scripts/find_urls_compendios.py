@@ -92,13 +92,48 @@ def scrape_nuevo_leon():
     return dedup
 
 
-# TODO: implementar siguientes estados
+def scrape_quintana_roo():
+    """congresoqroo.gob.mx/leyes/ - index con 362 links tipo /leyes/<id>/.
+    Cada link es el detalle de una ley. Usamos /leyes/<id>/ como URL final
+    (esa pagina del Congreso lleva al PDF y es URL oficial estable)."""
+    BASE = 'https://www.congresoqroo.gob.mx/leyes/'
+    html = http_get(BASE)
+    soup = BeautifulSoup(html, 'html.parser')
+
+    out = []
+    for a in soup.find_all('a', href=True):
+        href = a['href']
+        text = a.get_text(strip=True)
+        # Solo links a /leyes/<id>/ con nombre real (no #anchors, no exportar)
+        if re.match(r'^/leyes/\d+/?$', href) and text and len(text) > 15:
+            # Quitar punto final
+            nombre = text.rstrip('.').strip()
+            url_full = 'https://www.congresoqroo.gob.mx' + href
+            out.append((nombre, url_full))
+
+    seen = set()
+    dedup = []
+    for nombre, url in out:
+        k = norm(nombre)
+        if k not in seen:
+            seen.add(k)
+            dedup.append((nombre, url))
+    return dedup
+
+
+# TODO: estados con Cloudflare bot-block (AGS, JAL, GUE, VER, COA, SIN).
+# Necesitan Playwright/Selenium con headless browser + residential proxy.
+# Marcado para post-launch con infra dedicada.
 # def scrape_aguascalientes(): pass
 # def scrape_jalisco(): pass
-# def scrape_quintana_roo(): pass
+# def scrape_guerrero(): pass
+# def scrape_veracruz(): pass
+# def scrape_coahuila(): pass
+# def scrape_sinaloa(): pass
 
 STATE_SCRAPERS = {
     'Nuevo Leon': scrape_nuevo_leon,
+    'Quintana Roo': scrape_quintana_roo,
 }
 
 
