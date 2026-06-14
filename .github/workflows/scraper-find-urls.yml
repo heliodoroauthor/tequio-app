@@ -6,8 +6,11 @@ name: Find URLs Leyes Estatales (background)
 # Manual dispatch para testing/aceleracion.
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'  # cada 6 horas
+  # 14-jun-2026: cron desactivado hasta rediseñar estrategia.
+  # Primer run con DDG scraping devolvio 0/100 - DDG bloquea bots de GH Actions.
+  # TODO: scrape compendios oficiales de cada congreso estatal en lugar de buscar.
+  # schedule:
+  #   - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       batch:
