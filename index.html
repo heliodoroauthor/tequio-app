@@ -4086,7 +4086,7 @@ window.addEventListener('load', function(){
               <div style="font-size:22px">🏛️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Federal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-federal">292</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-federal">288</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">Cámara de Diputados</div>
           </button>
           <button onclick="leyesV2SetAmbito('estatal')" id="ley-card-estatal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -4318,6 +4318,7 @@ window.addEventListener('load', function(){
               else {badge='mun';tipo_label='Municipal';}
               var entidad=r.entidad?'<span style="font-size:11px;color:var(--text3);margin-left:6px">· '+r.entidad+'</span>':'';
               var url=r.url||'';
+              var sinTextoOficial = !url;
               return '<div class="ley-item-card">'+
                 '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px">'+
                   '<div style="flex:1;min-width:0"><span class="ley-badge '+badge+'">'+tipo_label+'</span>'+entidad+'</div>'+
@@ -4325,7 +4326,9 @@ window.addEventListener('load', function(){
                 '<div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:6px;line-height:1.3">'+(r.nombre||'(sin nombre)')+'</div>'+
                 '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--text3)">'+
                   '<span>📂 '+(r.fuente||'Fuente oficial')+'</span>'+
-                  (url?'<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;margin-left:auto">Ver PDF →</a>':'')+
+                  (url
+                    ? '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;margin-left:auto">Ver PDF →</a>'
+                    : '<span title="El texto oficial no fue capturado por el scraper. Esta ley existe pero falta link al PDF." style="color:#94a3b8;font-size:11px;font-weight:600;margin-left:auto;background:rgba(148,163,184,0.12);padding:2px 8px;border-radius:6px">📄 Sin texto oficial</span>')+
                 '</div>'+
               '</div>';
             }).join('');
