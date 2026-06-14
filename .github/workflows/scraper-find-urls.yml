@@ -1,22 +1,20 @@
-name: Find URLs Leyes Estatales (background)
+name: Find URLs Leyes Estatales (compendios)
 
-# Background scraper que rellena la columna `url` de las leyes estatales
-# que terminaron NULL (fuente=DOF pero son estatales).
-# Corre cada 6h en batches de 100 para no abusar de DuckDuckGo.
-# Manual dispatch para testing/aceleracion.
+# v2 (15-jun): scrape compendios oficiales por estado en lugar de DDG search.
+# v1 fallo porque DDG bot-blocks GH Actions. Compendios son sitios publicos
+# que entregan PDFs reales por nombre.
 
 on:
-  # 14-jun-2026: cron desactivado hasta rediseñar estrategia.
-  # Primer run con DDG scraping devolvio 0/100 - DDG bloquea bots de GH Actions.
-  # TODO: scrape compendios oficiales de cada congreso estatal en lugar de buscar.
+  # Cron desactivado temporalmente hasta agregar mas estados. NL solo es
+  # 198 leyes que se resuelven en una corrida (~30s).
   # schedule:
-  #   - cron: '0 */6 * * *'
+  #   - cron: '0 3 * * *'  # diario 03:00 UTC
   workflow_dispatch:
     inputs:
-      batch:
-        description: 'Tamano de batch'
+      state:
+        description: 'Estado a procesar (vacio = todos)'
         required: false
-        default: '100'
+        default: ''
         type: string
       dry_run:
         description: 'Solo mostrar sin escribir DB'
@@ -44,9 +42,10 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           set -o pipefail
-          ARGS="--batch=${{ inputs.batch || 100 }}"
+          ARGS=""
+          if [ -n "${{ inputs.state }}" ]; then ARGS="$ARGS --state=${{ inputs.state }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
-          python3 scripts/find_urls_leyes.py $ARGS 2>&1 | tee /tmp/scraper.log
+          python3 scripts/find_urls_compendios.py $ARGS 2>&1 | tee /tmp/scraper.log
 
       - name: Assert SUMMARY exists
         if: always()
