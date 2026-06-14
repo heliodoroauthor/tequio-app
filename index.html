@@ -4466,8 +4466,9 @@ window.addEventListener('load', function(){
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
             <div style="text-align:center"><div style="font-size:20px;font-weight:800" id="vot-stat-total">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Total</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" id="vot-stat-aprob">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Aprobadas</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" id="vot-stat-rech">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Rechazadas</div></div>
+            <!-- 13-jun-2026: split aprobadas/rechazadas oculto. Scraper SITL marcaba TODO como "aprobada" (264/264 = imposible). resultados NULL en DB hasta arreglar. -->
+            <div style="text-align:center" title="Datos en revision: scraper SITL no extraia resultado correctamente"><div style="font-size:14px;font-weight:700;line-height:1.3;color:#fbbf24" id="vot-stat-aprob">en revision</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Resultado</div></div>
+            <div style="text-align:center" title="LXVI sesiona ~6.5 meses al ano: sept-15dic + 1feb-30abr"><div style="font-size:14px;font-weight:700;line-height:1.3" id="vot-stat-rech">LXVI</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Legislatura</div></div>
             <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3" id="vot-stat-fecha">…</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Última fecha</div></div>
           </div>
         </div>
@@ -4611,8 +4612,9 @@ window.addEventListener('load', function(){
                 var noPct=tot?((no/tot)*100).toFixed(1):0;
                 var abstPct=tot?((abst/tot)*100).toFixed(1):0;
                 var ausPct=tot?((aus/tot)*100).toFixed(1):0;
-                var resColor=v.resultado==='aprobada'?'#22c55e':'#ef4444';
-                var resEmoji=v.resultado==='aprobada'?'✅':'❌';
+                // 13-jun-2026: tri-state. NULL=gris neutro (scraper bug, no inventar)
+                var resColor=v.resultado==='aprobada'?'#22c55e':(v.resultado==='rechazada'?'#ef4444':'#94a3b8');
+                var resEmoji=v.resultado==='aprobada'?'OK':(v.resultado==='rechazada'?'X':'?');
                 var asunto=(v.asunto||'').substring(0,200);
                 
                 return '<a href="'+(v.url_oficial||'#')+'" target="_blank" rel="noopener" class="card" style="text-decoration:none;color:inherit;border-left:3px solid '+resColor+';display:block">'+
