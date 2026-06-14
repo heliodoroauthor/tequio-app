@@ -1,0 +1,55 @@
+name: Find URLs Leyes Estatales (background)
+
+# Background scraper que rellena la columna `url` de las leyes estatales
+# que terminaron NULL (fuente=DOF pero son estatales).
+# Corre cada 6h en batches de 100 para no abusar de DuckDuckGo.
+# Manual dispatch para testing/aceleracion.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # cada 6 horas
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: 'Tamano de batch'
+        required: false
+        default: '100'
+        type: string
+      dry_run:
+        description: 'Solo mostrar sin escribir DB'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  find_urls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install requests beautifulsoup4
+      - name: Run scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -o pipefail
+          ARGS="--batch=${{ inputs.batch || 100 }}"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python3 scripts/find_urls_leyes.py $ARGS 2>&1 | tee /tmp/scraper.log
+
+      - name: Assert SUMMARY exists
+        if: always()
+        run: |
+          if ! grep -q "SUMMARY " /tmp/scraper.log 2>/dev/null; then
+            echo "::error::Scraper no imprimio SUMMARY"
+            exit 1
+          fi
+          grep "SUMMARY " /tmp/scraper.log | tail -1
