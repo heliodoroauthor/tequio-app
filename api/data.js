@@ -207,10 +207,7 @@ export default async function handler(req, res) {
       // Lista de los 500 diputados con filtros opcionales por estado y partido
       const filtroEntidad = req.query.entidad || '';
       const filtroPartido = req.query.partido || '';
-      // FIX 13-jun-2026: la tabla tiene 500 titulares + 500 suplentes mezclados.
-      // Los titulares son los que tienen suplente IS NOT NULL (su columna apunta a otra persona).
-      // Los suplentes tienen suplente=NULL. Filtrar solo titulares = 500 diputados reales LXVI.
-      let query = 'politicos_diputados?order=entidad.asc,distrito.asc&select=dipt_id,nombre,partido,partido_codigo,entidad,distrito,principio_eleccion,email,foto_url,curricula_url,curul,reelecto,suplente,comisiones&suplente=not.is.null&limit=1000';
+      let query = 'politicos_diputados?order=entidad.asc,distrito.asc&select=dipt_id,nombre,partido,partido_codigo,entidad,distrito,principio_eleccion,email,foto_url,curricula_url,curul,reelecto,suplente,comisiones&limit=600';
       if (filtroEntidad) query += `&entidad=eq.${encodeURIComponent(filtroEntidad)}`;
       if (filtroPartido) query += `&partido=eq.${encodeURIComponent(filtroPartido)}`;
       const rows = await sb(query);
@@ -530,7 +527,10 @@ export default async function handler(req, res) {
       // Lista de los 128 senadores con filtros
       const filtroPartido = req.query.partido || '';
       const filtroEntidad = req.query.entidad || '';
-      let query = 'politicos_senadores?order=nombre_completo.asc&select=id,nombre_completo,url,partido,entidad_federativa,tipo_eleccion,nombre_suplente,foto_url,email,telefono,direccion_oficina,cargo_especial,comisiones_secretario,comisiones_integrante&limit=200';
+      // FIX 13-jun-2026: la tabla tiene 270 rows pero 138 son garbage del scraper
+      // (todos MORENA con tipo_eleccion=NULL). Filtrar 'tipo_eleccion IS NOT NULL'
+      // deja 132 senadores reales (cerca de los 128 oficiales LXVI: 96 estatal + 32 RP).
+      let query = 'politicos_senadores?order=nombre_completo.asc&select=id,nombre_completo,url,partido,entidad_federativa,tipo_eleccion,nombre_suplente,foto_url,email,telefono,direccion_oficina,cargo_especial,comisiones_secretario,comisiones_integrante&tipo_eleccion=not.is.null&limit=500';
       if (filtroPartido) query += `&partido=eq.${encodeURIComponent(filtroPartido)}`;
       if (filtroEntidad) query += `&entidad_federativa=eq.${encodeURIComponent(filtroEntidad)}`;
       const rows = await sb(query);
