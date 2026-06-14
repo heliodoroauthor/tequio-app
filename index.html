@@ -4562,8 +4562,16 @@ window.addEventListener('load', function(){
               var stats=d.votaciones_stats||d;
               var setText=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
               setText('vot-stat-total',fmt(stats.total));
-              setText('vot-stat-aprob',fmt(stats.aprobadas));
-              setText('vot-stat-rech',fmt(stats.rechazadas));
+              // 13-jun-2026 v3: si DB todavia tiene NULL en resultado (=0 aprobadas Y 0 rechazadas)
+              // dejar las etiquetas estaticas 'en revision'/'LXVI'. Solo sobrescribir cuando
+              // hay datos reales (post-migracion SQL de resultado_derive).
+              var aprob = parseInt(stats.aprobadas) || 0;
+              var rech = parseInt(stats.rechazadas) || 0;
+              if (aprob + rech > 0) {
+                setText('vot-stat-aprob', fmt(aprob));
+                setText('vot-stat-rech', fmt(rech));
+              }
+              // else: mantener 'en revision' / 'LXVI' del HTML estatico
               if(stats.ultima_fecha){var dt=new Date(stats.ultima_fecha);setText('vot-stat-fecha',dt.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}));}
               if(stats.tipos){
                 var ch=document.getElementById('vot-tipos-chips');
