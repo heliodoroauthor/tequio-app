@@ -93,12 +93,18 @@ def scrape_nuevo_leon():
 
 
 def scrape_quintana_roo():
-    """congresoqroo.gob.mx/leyes/ - index con 362 links tipo /leyes/<id>/.
-    Cada link es el detalle de una ley. Usamos /leyes/<id>/ como URL final
-    (esa pagina del Congreso lleva al PDF y es URL oficial estable)."""
+    """congresoqroo.gob.mx/leyes/ - index con 362 links tipo /leyes/<id>/."""
     BASE = 'https://www.congresoqroo.gob.mx/leyes/'
     html = http_get(BASE)
+    # DEBUG
+    print(f'  DEBUG: HTML len={len(html)}, first 200 chars: {html[:200]!r}', flush=True)
     soup = BeautifulSoup(html, 'html.parser')
+    print(f'  DEBUG: total <a> tags: {len(soup.find_all("a"))}', flush=True)
+    leyes_links = [a for a in soup.find_all('a', href=True) if '/leyes/' in a.get('href','')]
+    print(f'  DEBUG: <a> con /leyes/ en href: {len(leyes_links)}', flush=True)
+    if leyes_links:
+        sample = leyes_links[5] if len(leyes_links)>5 else leyes_links[0]
+        print(f'  DEBUG: sample href={sample.get("href")!r} text={sample.get_text(strip=True)[:60]!r}', flush=True)
 
     out = []
     for a in soup.find_all('a', href=True):
