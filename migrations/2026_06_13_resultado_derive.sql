@@ -24,7 +24,7 @@ WHERE resultado IS NULL;
 
 -- 2) TRIGGER: derivar en INSERT/UPDATE si NULL
 CREATE OR REPLACE FUNCTION derive_resultado_votacion()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $func$
 BEGIN
   IF NEW.resultado IS NULL AND (COALESCE(NEW.total_si, 0) + COALESCE(NEW.total_no, 0)) > 0 THEN
     NEW.resultado := CASE
@@ -34,7 +34,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$func$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trg_derive_resultado_votacion ON votaciones_diputados;
 CREATE TRIGGER trg_derive_resultado_votacion
