@@ -4214,6 +4214,47 @@ window.addEventListener('load', function(){
           window._leyV2State=state;
           
           function fmt(n){return Number(n||0).toLocaleString('es-MX');}
+          // 14-jun-2026: mapeo entidad → dominio oficial de cada estado para buscar texto
+          var DOMINIOS_ESTADO = {
+            'Aguascalientes':'congresoags.gob.mx',
+            'Baja California':'congresobc.gob.mx',
+            'Baja California Sur':'cbcs.gob.mx',
+            'Campeche':'congresocam.gob.mx',
+            'Chiapas':'congresochiapas.gob.mx',
+            'Chihuahua':'congresochihuahua2.gob.mx',
+            'Ciudad de Mexico':'congresocdmx.gob.mx',
+            'Coahuila':'congresocoahuila.gob.mx',
+            'Colima':'congresocol.gob.mx',
+            'Durango':'congresodurango.gob.mx',
+            'Guanajuato':'congresogto.gob.mx',
+            'Guerrero':'congresogro.gob.mx',
+            'Hidalgo':'congreso-hidalgo.gob.mx',
+            'Jalisco':'congresojal.gob.mx',
+            'Mexico':'legislacion.edomex.gob.mx',
+            'Michoacan':'congresomich.gob.mx',
+            'Morelos':'congresomorelos.gob.mx',
+            'Nayarit':'congresonayarit.mx',
+            'Nuevo Leon':'hcnl.gob.mx',
+            'Oaxaca':'congresooaxaca.gob.mx',
+            'Puebla':'congresopuebla.gob.mx',
+            'Queretaro':'legislaturaqro.gob.mx',
+            'Quintana Roo':'congresoqroo.gob.mx',
+            'San Luis Potosi':'congresosanluis.gob.mx',
+            'Sinaloa':'congresosinaloa.gob.mx',
+            'Sonora':'congresoson.gob.mx',
+            'Tabasco':'congresotabasco.gob.mx',
+            'Tamaulipas':'congresotamaulipas.gob.mx',
+            'Tlaxcala':'congresotlaxcala.gob.mx',
+            'Veracruz':'legisver.gob.mx',
+            'Yucatan':'congresoyucatan.gob.mx',
+            'Zacatecas':'congresozac.gob.mx'
+          };
+          function buscarUrlOficial(nombre, entidad){
+            var domain = DOMINIOS_ESTADO[entidad] || '';
+            var q = encodeURIComponent('"'+(nombre||'')+'"'+(domain?' site:'+domain:''));
+            return 'https://duckduckgo.com/?q='+q;
+          }
+          
           function rpc(name,body){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON,'Authorization':'Bearer '+ANON},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
           
           window.leyesV2SetAmbito=function(a){
@@ -4354,7 +4395,7 @@ window.addEventListener('load', function(){
                   '<span>📂 '+(r.fuente||'Fuente oficial')+'</span>'+
                   (url
                     ? '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;margin-left:auto">Ver PDF →</a>'
-                    : '<span title="El texto oficial no fue capturado por el scraper. Esta ley existe pero falta link al PDF." style="color:#94a3b8;font-size:11px;font-weight:600;margin-left:auto;background:rgba(148,163,184,0.12);padding:2px 8px;border-radius:6px">📄 Sin texto oficial</span>')+
+                    : '<a href="'+buscarUrlOficial(r.nombre, r.entidad)+'" target="_blank" rel="noopener" title="Te lleva a buscar el texto oficial en el sitio del estado" style="color:#94a3b8;font-size:11px;font-weight:600;margin-left:auto;background:rgba(148,163,184,0.12);padding:2px 8px;border-radius:6px;text-decoration:none">🔍 Buscar texto oficial</a>')+
                 '</div>'+
               '</div>';
             }).join('');
