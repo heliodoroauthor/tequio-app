@@ -40,12 +40,15 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STATE_FILTER: ${{ inputs.state }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -o pipefail
-          ARGS=""
-          if [ -n "${{ inputs.state }}" ]; then ARGS="$ARGS --state=${{ inputs.state }}"; fi
-          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
-          python3 scripts/find_urls_compendios.py $ARGS 2>&1 | tee /tmp/scraper.log
+          # Quoting array para soportar nombres con espacios (Nuevo Leon, etc)
+          ARGS=()
+          if [ -n "$STATE_FILTER" ]; then ARGS+=("--state=$STATE_FILTER"); fi
+          if [ "$DRY_RUN" = "true" ]; then ARGS+=("--dry-run"); fi
+          python3 scripts/find_urls_compendios.py "${ARGS[@]}" 2>&1 | tee /tmp/scraper.log
 
       - name: Assert SUMMARY exists
         if: always()
