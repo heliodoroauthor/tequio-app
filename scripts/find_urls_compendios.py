@@ -38,7 +38,7 @@ HEADERS = {
     'Authorization': f'Bearer {SERVICE_KEY}',
     'Content-Type': 'application/json',
 }
-UA = 'Mozilla/5.0 (Tequio civic platform; public laws scraper)'
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 
 def norm(s):
