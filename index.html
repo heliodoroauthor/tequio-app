@@ -14517,9 +14517,26 @@ function cargarPanel(slug, extras) {
       'scrapers-admin': 'Scrapers Health',
       'directorio': '📞 Directorio 32 Estados',
       'cambios-recientes': '📡 Cambios Recientes',
-      'me-afectan': '🎯 Leyes que me afectan'
+      'me-afectan': '🎯 Leyes que me afectan',
+      // Paginas con sidebar nav que faltaban (fix '#91 Panel en headers')
+      'diario': '🗞️ Diario Cívico',
+      'atlas': '🗺️ Atlas Nacional',
+      'offline': '📵 Sin Internet',
+      'deuda': '💳 Deuda Pública',
+      'precios': '💲 Precios Justos',
+      'contratos': '📋 Contratos Públicos',
+      'votaciones': '🗳️ Votaciones del Pleno',
+      'diputados': '🏛️ Cámara de Diputados',
+      'senado': '⚖️ Senado',
+      'leyes': '📜 Leyes y Decretos',
+      'jurisprudencia': '⚖️ Jurisprudencia SCJN',
+      'presas': '💧 Presas y Cuencas',
+      'sequia': '☀️ Monitor de Sequía',
+      'meteo': '🌩️ Alertas Meteorológicas'
     };
-    titleEl.textContent = TITLES[slug] || 'Panel';
+    // Fallback: capitalizar el slug en vez de 'Panel' generico
+    const fallback = slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/[-_]/g, ' ') : 'Panel';
+    titleEl.textContent = TITLES[slug] || fallback;
   }
 }
 function mostrarProximamente(slug) {
@@ -15900,7 +15917,7 @@ function filtrarNoticias() {
   if (orden === 'impacto')    lista.sort((a,b) => ['critico','alto','medio','bajo'].indexOf(a.impactoNivel) - ['critico','alto','medio','bajo'].indexOf(b.impactoNivel));
   else if (orden === 'comentados') lista.sort((a,b) => b.comentarios - a.comentarios);
   { const _e = document.getElementById('noticias-count'); if (_e) _e.textContent = `${lista.length} noticía${lista.length !== 1 ? 's' : ''}`; }
-  document.getElementById('noticias-vacio').style.display = lista.length === 0 ? 'block' : 'none';
+  { const _v = document.getElementById('noticias-vacio'); if (_v) _v.style.display = lista.length === 0 ? 'block' : 'none'; else return; }
   const impactoColor = { critico: 'var(--red2)', alto: 'var(--yellow2)', medio: 'var(--accent2)', bajo: 'var(--green2)' };
   const impactoLabel = { critico: '🔴 Crítico', alto: '🟠 Alto', medio: '🔵 Medio', bajo: '🟢 Bajo' };
   const ambitoLabel  = { nacional: 'Nacional', estatal: 'Estatal', municipal: 'Municipal', alerta: 'Alerta' };
@@ -17121,6 +17138,8 @@ function leyesFiltrar() {
   const el     = document.getElementById('leyes-lista');
   const vacio  = document.getElementById('leyes-vacio');
   const count  = document.getElementById('leyes-count');
+  // Defensive: si la pagina Leyes no esta montada todavia, salir sin crash (#91)
+  if (!el || !vacio || !count) return;
   const ambitoLabel = {todas:'Todas',federal:'Federales',estatal:'Estatales',municipal:'Municipales',reforma:'Reformas Recientes'};
   const total = lista.length;
   const totalPags = Math.max(1, Math.ceil(total / LEYES_POR_PAGINA));
