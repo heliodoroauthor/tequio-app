@@ -1623,7 +1623,42 @@
 </style>
 </head>
 <body>
-<!-- ════════ ONBOARDING viejo eliminado completo v3 (overlay duplicado conflictaba con el rico) ════════ -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
+  <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
+    <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <div class="ob-step-bar active" id="ob-bar-1" style="flex:1;height:4px;border-radius:4px;background:#fbbf24;"></div>
+        <div class="ob-step-bar" id="ob-bar-2" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
+        <div class="ob-step-bar" id="ob-bar-3" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;color:#9ca3af;" id="ob-step-label">Paso 1 de 3</div>
+        <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
+      </div>
+    </div>
+    <div id="ob-step-1" style="padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿De dónde eres?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Personalizamos tu Tequio según tu estado.</p>
+      <div id="ob-estados-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
+      <div id="ob-estado-selected" style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;color:#fbbf24;display:none;">
+        <strong>Tu estado:</strong> <span id="ob-estado-txt"></span>
+      </div>
+      <button onclick="obGoStep(2)" id="ob-step1-next" disabled style="margin-top:20px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-2" style="display:none;padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿Qué te importa?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Selecciona los temas que más te interesan (mín. 1).</p>
+      <div id="ob-intereses-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;"></div>
+      <button onclick="obGoStep(3)" id="ob-step2-next" disabled style="margin-top:24px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-3" style="display:none;padding:28px 4px 40px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¡Listo, ciudadano!</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;line-height:1.6;">Tequio queda personalizado para ti. Toda tu información se guarda <strong>solo en tu dispositivo</strong> — cero servidores externos.</p>
+      <div id="ob-preview" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:18px;margin-bottom:20px;"></div>
+      <button onclick="obComplete()" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🚀 Entrar a Tequio</button>
+    </div>
+  </div>
+</div>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1648,12 +1683,14 @@ let _obEstado = null;
 let _obIntereses = new Set();
 function obShow() {
   if (localStorage.getItem('tequio_onboarding_done') === '1') return;
+  // 🦎 Welcome disclaimer ANTES del onboarding (solo primera vez)
   if (localStorage.getItem('tequio_welcome_accepted') !== '1') {
     tequioMostrarWelcome();
     return;
   }
   document.getElementById('onboarding-overlay').style.display = 'block';
-  if (typeof obGoStep === 'function') obGoStep(1);
+  obRenderEstados();
+  obRenderIntereses();
 }
 
 // 🦎 Welcome Disclaimer Modal (primera visita)
@@ -1684,7 +1721,7 @@ function tequioMostrarWelcome() {
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">📚</span>' +
-          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,937</span> leyes · <span data-kpi="chunks-embedded">695,049</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,582</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
         '</div>' +
       '</div>' +
       '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px">' +
@@ -1723,13 +1760,13 @@ window.tequioWelcomeAceptar = function(){
   var m = document.getElementById('tequio-welcome-modal');
   if(m) m.remove();
   document.body.style.overflow = '';
-  // Lanzar onboarding rico (diseno a50fe78)
+  // Lanzar onboarding
   document.getElementById('onboarding-overlay').style.display = 'block';
-  if(typeof obGoStep === 'function') obGoStep(1);
+  if(typeof obRenderEstados === 'function') obRenderEstados();
+  if(typeof obRenderIntereses === 'function') obRenderIntereses();
 };
 function obRenderEstados() {
   const grid = document.getElementById('ob-estados-grid');
-  if (!grid) return; // div eliminado en migracion rich
   grid.innerHTML = Object.entries(OB_ESTADOS).map(([k,v]) => '<button onclick="obSelectEstado(\''+k+'\')" class="ob-estado-btn" data-clave="'+k+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.15s;">'+v+'</button>').join('');
 }
 function obSelectEstado(clave) {
@@ -1748,7 +1785,6 @@ function obSelectEstado(clave) {
 }
 function obRenderIntereses() {
   const grid = document.getElementById('ob-intereses-grid');
-  if (!grid) return; // div eliminado en migracion rich
   grid.innerHTML = OB_INTERESES.map(i => '<button onclick="obToggleInteres(\''+i.id+'\')" class="ob-interes-btn" data-id="'+i.id+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:14px;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.15s;"><div style="font-size:24px;margin-bottom:6px;">'+i.emoji+'</div><div style="font-size:14px;font-weight:600;margin-bottom:2px;">'+i.titulo+'</div><div style="font-size:11px;color:#9ca3af;line-height:1.4;">'+i.desc+'</div></button>').join('');
 }
 function obToggleInteres(id) {
@@ -1767,31 +1803,25 @@ function obToggleInteres(id) {
   next.style.opacity = _obIntereses.size === 0 ? '0.5' : '1';
 }
 function obGoStep(n) {
-  // Solo ocultar/mostrar los 3 divs de paso (no ob-step-label ni ob-step-hint)
-  [1,2,3].forEach(i => {
-    const el = document.getElementById('ob-step-' + i);
-    if (el) el.style.display = (i === n) ? 'block' : 'none';
-  });
+  document.querySelectorAll('[id^="ob-step-"]').forEach(s => s.style.display = 'none');
+  document.getElementById('ob-step-' + n).style.display = 'block';
   document.querySelectorAll('.ob-step-bar').forEach((b,i) => {
     b.style.background = (i + 1 <= n) ? '#fbbf24' : '#1f2937';
   });
-  const lbl = document.getElementById('ob-step-label');
-  if (lbl) lbl.textContent = 'Paso ' + n + ' de 3';
+  document.getElementById('ob-step-label').textContent = 'Paso ' + n + ' de 3';
   if (n === 3) obBuildPreview();
 }
 function obBuildPreview() {
-  const set = (typeof obIntereses !== 'undefined' && obIntereses.size > 0) ? obIntereses : _obIntereses;
-  const intereses = Array.from(set).map(id => {
+  const intereses = Array.from(_obIntereses).map(id => {
     const i = OB_INTERESES.find(x => x.id === id);
     return '<span style="display:inline-block;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;padding:4px 10px;border-radius:20px;font-size:12px;margin:3px;">'+i.emoji+' '+i.titulo+'</span>';
   }).join('');
-  document.getElementById('ob-preview').innerHTML = '<div style="color:#9ca3af;font-size:11px;letter-spacing:1px;margin-bottom:8px;">TU PERFIL</div><div style="color:#f3f4f6;font-size:14px;margin-bottom:12px;">📍 <strong>'+((typeof obEstado!=='undefined'&&obEstado)?obEstado:(OB_ESTADOS[_obEstado]||''))+'</strong></div><div>'+intereses+'</div>';
+  document.getElementById('ob-preview').innerHTML = '<div style="color:#9ca3af;font-size:11px;letter-spacing:1px;margin-bottom:8px;">TU PERFIL</div><div style="color:#f3f4f6;font-size:14px;margin-bottom:12px;">📍 <strong>'+OB_ESTADOS[_obEstado]+'</strong></div><div>'+intereses+'</div>';
 }
 function obComplete() {
-  const est = (typeof obEstado!=='undefined' && obEstado) ? obEstado : (_obEstado ? (OB_ESTADOS[_obEstado]||_obEstado) : '');
-  const set = (typeof obIntereses !== 'undefined' && obIntereses.size > 0) ? obIntereses : _obIntereses;
-  if (est) localStorage.setItem('tequio_estado_nombre', est);
-  localStorage.setItem('tequio_intereses', JSON.stringify(Array.from(set || [])));
+  localStorage.setItem('tequio_estado_clave', _obEstado);
+  localStorage.setItem('tequio_estado_nombre', OB_ESTADOS[_obEstado]);
+  localStorage.setItem('tequio_intereses', JSON.stringify(Array.from(_obIntereses)));
   localStorage.setItem('tequio_onboarding_done', '1');
   document.getElementById('onboarding-overlay').style.display = 'none';
 }
@@ -2688,7 +2718,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,937</div>
+            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,582</div>
             <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
           <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
@@ -2703,7 +2733,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
           <div class="stat-card" onclick="showPage('ombligo')" style="cursor:pointer">
             <div class="stat-label">PATRIMONIO INAH <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('patrimonio_inah')">🔍</button></div>
-            <div class="stat-value" data-kpi="inah-patrimonio" style="color:var(--purple)">0+0</div>
+            <div class="stat-value" data-kpi="inah-patrimonio" style="color:var(--purple)">195+165</div>
             <div class="stat-change" style="color:var(--green2)">✓ Zonas + museos INAH</div>
           </div>
         </div>
@@ -5297,10 +5327,10 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
           <!-- Stats inline en el hero -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,937</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,582</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">32/32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">560+</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Ciudades</div></div>
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">695,049</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">325,751</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
           </div>
         </div>
 
@@ -5327,7 +5357,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:22px">🏙️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Municipal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,902</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,631</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">2,400+ ayuntamientos</div>
           </button>
           <button onclick="leyesV2SetTipo('gaceta-municipal')" id="ley-card-gacetas" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -5335,7 +5365,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:22px">📰</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Gacetas</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-gaceta">84</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-gaceta">134</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">Boletines oficiales</div>
           </button>
         </div>
@@ -6570,7 +6600,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           <div style="font-size:28px">✅</div>
           <div style="flex:1;min-width:220px">
             <div style="font-size:13px;font-weight:700;color:#22c55e;letter-spacing:0.5px">RAG SOBRE FUENTES OFICIALES</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong><span data-kpi="chunks-embedded">695,049</span> artículos completos</strong> de leyes federales, estatales y municipales (Cámara de Diputados + Congresos estatales + Ayuntamientos) más 20 tesis SCJN. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Powered by <strong>Gemini</strong> + <strong>Supabase</strong> (FTS spanish + pgvector). <strong>No sustituye asesoría legal profesional.</strong></div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Cada respuesta busca en <strong><span data-kpi="chunks-embedded">325,751</span> artículos completos</strong> de leyes federales, estatales y municipales (Cámara de Diputados + Congresos estatales + Ayuntamientos) más 20 tesis SCJN. <strong>Cuando hay artículo aplicable, la IA cita texto literal con su número.</strong> Powered by <strong>Gemini</strong> + <strong>Supabase</strong> (FTS spanish + pgvector). <strong>No sustituye asesoría legal profesional.</strong></div>
           </div>
         </div>
         <div class="alert alert-warn mb-16">
@@ -14517,26 +14547,9 @@ function cargarPanel(slug, extras) {
       'scrapers-admin': 'Scrapers Health',
       'directorio': '📞 Directorio 32 Estados',
       'cambios-recientes': '📡 Cambios Recientes',
-      'me-afectan': '🎯 Leyes que me afectan',
-      // Paginas con sidebar nav que faltaban (fix '#91 Panel en headers')
-      'diario': '🗞️ Diario Cívico',
-      'atlas': '🗺️ Atlas Nacional',
-      'offline': '📵 Sin Internet',
-      'deuda': '💳 Deuda Pública',
-      'precios': '💲 Precios Justos',
-      'contratos': '📋 Contratos Públicos',
-      'votaciones': '🗳️ Votaciones del Pleno',
-      'diputados': '🏛️ Cámara de Diputados',
-      'senado': '⚖️ Senado',
-      'leyes': '📜 Leyes y Decretos',
-      'jurisprudencia': '⚖️ Jurisprudencia SCJN',
-      'presas': '💧 Presas y Cuencas',
-      'sequia': '☀️ Monitor de Sequía',
-      'meteo': '🌩️ Alertas Meteorológicas'
+      'me-afectan': '🎯 Leyes que me afectan'
     };
-    // Fallback: capitalizar el slug en vez de 'Panel' generico
-    const fallback = slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/[-_]/g, ' ') : 'Panel';
-    titleEl.textContent = TITLES[slug] || fallback;
+    titleEl.textContent = TITLES[slug] || 'Panel';
   }
 }
 function mostrarProximamente(slug) {
@@ -15917,7 +15930,7 @@ function filtrarNoticias() {
   if (orden === 'impacto')    lista.sort((a,b) => ['critico','alto','medio','bajo'].indexOf(a.impactoNivel) - ['critico','alto','medio','bajo'].indexOf(b.impactoNivel));
   else if (orden === 'comentados') lista.sort((a,b) => b.comentarios - a.comentarios);
   { const _e = document.getElementById('noticias-count'); if (_e) _e.textContent = `${lista.length} noticía${lista.length !== 1 ? 's' : ''}`; }
-  { const _v = document.getElementById('noticias-vacio'); if (_v) _v.style.display = lista.length === 0 ? 'block' : 'none'; else return; }
+  document.getElementById('noticias-vacio').style.display = lista.length === 0 ? 'block' : 'none';
   const impactoColor = { critico: 'var(--red2)', alto: 'var(--yellow2)', medio: 'var(--accent2)', bajo: 'var(--green2)' };
   const impactoLabel = { critico: '🔴 Crítico', alto: '🟠 Alto', medio: '🔵 Medio', bajo: '🟢 Bajo' };
   const ambitoLabel  = { nacional: 'Nacional', estatal: 'Estatal', municipal: 'Municipal', alerta: 'Alerta' };
@@ -17138,8 +17151,6 @@ function leyesFiltrar() {
   const el     = document.getElementById('leyes-lista');
   const vacio  = document.getElementById('leyes-vacio');
   const count  = document.getElementById('leyes-count');
-  // Defensive: si la pagina Leyes no esta montada todavia, salir sin crash (#91)
-  if (!el || !vacio || !count) return;
   const ambitoLabel = {todas:'Todas',federal:'Federales',estatal:'Estatales',municipal:'Municipales',reforma:'Reformas Recientes'};
   const total = lista.length;
   const totalPags = Math.max(1, Math.ceil(total / LEYES_POR_PAGINA));
@@ -19156,15 +19167,23 @@ async function toggleLecturaFacil() {
 // Navegación inteligente tras onboarding
 function finishOnboardingSmartNav() {
   finishOnboarding();
-  // Siempre aterrizar en el Dashboard — el usuario explora desde alli.
-  // (Antes saltabamos a un modulo segun el primer interes, pero se sentia agresivo.)
-  setTimeout(() => {
-    if (typeof showPage === 'function') showPage('dashboard');
-    if (typeof mostrarToast === 'function') {
-      const n = (typeof obIntereses !== 'undefined' && obIntereses.size) ? obIntereses.size : 0;
-      mostrarToast(n > 0 ? `Tu Tequio esta listo con ${n} tema${n>1?'s':''} 🎯` : 'Bienvenido a Tequio', 'success');
+  // Determinar módulo más relevante según intereses
+  const moduloMap = {
+    seguridad: 'derechos', corrupcion: 'dinero', salud: 'derechos',
+    educacion: 'leyes', laboral: 'acciones', economia: 'dinero',
+    medio_ambiente: 'leyes', derechos: 'derechos', politica: 'votaciones', vivienda: 'acciones'
+  };
+  const interesesArr = [...obIntereses];
+  if (interesesArr.length > 0) {
+    const primero = interesesArr[0];
+    const modulo = moduloMap[primero] || 'dashboard';
+    if (modulo !== 'dashboard') {
+      setTimeout(() => {
+        showPage(modulo);
+        mostrarToast('Te llevamos a ' + modulo + ' según tus intereses 🎯', 'success');
+      }, 400);
     }
-  }, 200);
+  }
 }
 // selectOBEstadoVal para el dropdown
 function selectOBEstadoVal(val) {
