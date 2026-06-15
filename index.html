@@ -1623,24 +1623,7 @@
 </style>
 </head>
 <body>
-<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:9500;overflow-y:auto;background:linear-gradient(135deg,#060c1a 0%,#0e1525 60%,#0a1628 100%);">
-  <div style="max-width:680px;margin:0 auto;padding:20px 24px;">
-    <div style="position:sticky;top:0;background:rgba(6,12,26,0.9);backdrop-filter:blur(10px);padding:14px 0;margin-bottom:8px;z-index:10;">
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <div class="ob-step-bar active" id="ob-bar-1" style="flex:1;height:4px;border-radius:4px;background:#fbbf24;"></div>
-        <div class="ob-step-bar" id="ob-bar-2" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
-        <div class="ob-step-bar" id="ob-bar-3" style="flex:1;height:4px;border-radius:4px;background:#1f2937;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:11px;color:#9ca3af;" id="ob-step-label">Paso 1 de 3</div>
-        <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
-      </div>
-    </div>
-    <!-- ob-step-1 viejo eliminado v2 -->
-    <!-- ob-step-2 viejo eliminado v2 -->
-    <!-- ob-step-3 viejo eliminado v2 -->
-  </div>
-</div>
+<!-- ════════ ONBOARDING viejo eliminado completo v3 (overlay duplicado conflictaba con el rico) ════════ -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
