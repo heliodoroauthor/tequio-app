@@ -19137,23 +19137,15 @@ async function toggleLecturaFacil() {
 // Navegación inteligente tras onboarding
 function finishOnboardingSmartNav() {
   finishOnboarding();
-  // Determinar módulo más relevante según intereses
-  const moduloMap = {
-    seguridad: 'derechos', corrupcion: 'dinero', salud: 'derechos',
-    educacion: 'leyes', laboral: 'acciones', economia: 'dinero',
-    medio_ambiente: 'leyes', derechos: 'derechos', politica: 'votaciones', vivienda: 'acciones'
-  };
-  const interesesArr = [...obIntereses];
-  if (interesesArr.length > 0) {
-    const primero = interesesArr[0];
-    const modulo = moduloMap[primero] || 'dashboard';
-    if (modulo !== 'dashboard') {
-      setTimeout(() => {
-        showPage(modulo);
-        mostrarToast('Te llevamos a ' + modulo + ' según tus intereses 🎯', 'success');
-      }, 400);
+  // Siempre aterrizar en el Dashboard — el usuario explora desde alli.
+  // (Antes saltabamos a un modulo segun el primer interes, pero se sentia agresivo.)
+  setTimeout(() => {
+    if (typeof showPage === 'function') showPage('dashboard');
+    if (typeof mostrarToast === 'function') {
+      const n = (typeof obIntereses !== 'undefined' && obIntereses.size) ? obIntereses.size : 0;
+      mostrarToast(n > 0 ? `Tu Tequio esta listo con ${n} tema${n>1?'s':''} 🎯` : 'Bienvenido a Tequio', 'success');
     }
-  }
+  }, 200);
 }
 // selectOBEstadoVal para el dropdown
 function selectOBEstadoVal(val) {
