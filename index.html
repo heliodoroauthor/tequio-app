@@ -1636,27 +1636,9 @@
         <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
       </div>
     </div>
-    <div id="ob-step-1" style="padding:28px 4px 32px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿De dónde eres?</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Personalizamos tu Tequio según tu estado.</p>
-      <div id="ob-estados-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
-      <div id="ob-estado-selected" style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;color:#fbbf24;display:none;">
-        <strong>Tu estado:</strong> <span id="ob-estado-txt"></span>
-      </div>
-      <button onclick="obGoStep(2)" id="ob-step1-next" disabled style="margin-top:20px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
-    </div>
-    <div id="ob-step-2" style="display:none;padding:28px 4px 32px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿Qué te importa?</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Selecciona los temas que más te interesan (mín. 1).</p>
-      <div id="ob-intereses-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;"></div>
-      <button onclick="obGoStep(3)" id="ob-step2-next" disabled style="margin-top:24px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
-    </div>
-    <div id="ob-step-3" style="display:none;padding:28px 4px 40px;">
-      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¡Listo, ciudadano!</h2>
-      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;line-height:1.6;">Tequio queda personalizado para ti. Toda tu información se guarda <strong>solo en tu dispositivo</strong> — cero servidores externos.</p>
-      <div id="ob-preview" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:18px;margin-bottom:20px;"></div>
-      <button onclick="obComplete()" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🚀 Entrar a Tequio</button>
-    </div>
+    <!-- ob-step-1 viejo eliminado v2 -->
+    <!-- ob-step-2 viejo eliminado v2 -->
+    <!-- ob-step-3 viejo eliminado v2 -->
   </div>
 </div>
 <script>
@@ -1683,14 +1665,12 @@ let _obEstado = null;
 let _obIntereses = new Set();
 function obShow() {
   if (localStorage.getItem('tequio_onboarding_done') === '1') return;
-  // 🦎 Welcome disclaimer ANTES del onboarding (solo primera vez)
   if (localStorage.getItem('tequio_welcome_accepted') !== '1') {
     tequioMostrarWelcome();
     return;
   }
   document.getElementById('onboarding-overlay').style.display = 'block';
-  obRenderEstados();
-  obRenderIntereses();
+  if (typeof obGoStep === 'function') obGoStep(1);
 }
 
 // 🦎 Welcome Disclaimer Modal (primera visita)
@@ -1812,16 +1792,18 @@ function obGoStep(n) {
   if (n === 3) obBuildPreview();
 }
 function obBuildPreview() {
-  const intereses = Array.from(_obIntereses).map(id => {
+  const set = (typeof obIntereses !== 'undefined' && obIntereses.size > 0) ? obIntereses : _obIntereses;
+  const intereses = Array.from(set).map(id => {
     const i = OB_INTERESES.find(x => x.id === id);
     return '<span style="display:inline-block;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;padding:4px 10px;border-radius:20px;font-size:12px;margin:3px;">'+i.emoji+' '+i.titulo+'</span>';
   }).join('');
-  document.getElementById('ob-preview').innerHTML = '<div style="color:#9ca3af;font-size:11px;letter-spacing:1px;margin-bottom:8px;">TU PERFIL</div><div style="color:#f3f4f6;font-size:14px;margin-bottom:12px;">📍 <strong>'+OB_ESTADOS[_obEstado]+'</strong></div><div>'+intereses+'</div>';
+  document.getElementById('ob-preview').innerHTML = '<div style="color:#9ca3af;font-size:11px;letter-spacing:1px;margin-bottom:8px;">TU PERFIL</div><div style="color:#f3f4f6;font-size:14px;margin-bottom:12px;">📍 <strong>'+((typeof obEstado!=='undefined'&&obEstado)?obEstado:(OB_ESTADOS[_obEstado]||''))+'</strong></div><div>'+intereses+'</div>';
 }
 function obComplete() {
-  localStorage.setItem('tequio_estado_clave', _obEstado);
-  localStorage.setItem('tequio_estado_nombre', OB_ESTADOS[_obEstado]);
-  localStorage.setItem('tequio_intereses', JSON.stringify(Array.from(_obIntereses)));
+  const est = (typeof obEstado!=='undefined' && obEstado) ? obEstado : (_obEstado ? (OB_ESTADOS[_obEstado]||_obEstado) : '');
+  const set = (typeof obIntereses !== 'undefined' && obIntereses.size > 0) ? obIntereses : _obIntereses;
+  if (est) localStorage.setItem('tequio_estado_nombre', est);
+  localStorage.setItem('tequio_intereses', JSON.stringify(Array.from(set || [])));
   localStorage.setItem('tequio_onboarding_done', '1');
   document.getElementById('onboarding-overlay').style.display = 'none';
 }
