@@ -1784,12 +1784,16 @@ function obToggleInteres(id) {
   next.style.opacity = _obIntereses.size === 0 ? '0.5' : '1';
 }
 function obGoStep(n) {
-  document.querySelectorAll('[id^="ob-step-"]').forEach(s => s.style.display = 'none');
-  document.getElementById('ob-step-' + n).style.display = 'block';
+  // Solo ocultar/mostrar los 3 divs de paso (no ob-step-label ni ob-step-hint)
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('ob-step-' + i);
+    if (el) el.style.display = (i === n) ? 'block' : 'none';
+  });
   document.querySelectorAll('.ob-step-bar').forEach((b,i) => {
     b.style.background = (i + 1 <= n) ? '#fbbf24' : '#1f2937';
   });
-  document.getElementById('ob-step-label').textContent = 'Paso ' + n + ' de 3';
+  const lbl = document.getElementById('ob-step-label');
+  if (lbl) lbl.textContent = 'Paso ' + n + ' de 3';
   if (n === 3) obBuildPreview();
 }
 function obBuildPreview() {
