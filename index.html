@@ -1740,13 +1740,13 @@ window.tequioWelcomeAceptar = function(){
   var m = document.getElementById('tequio-welcome-modal');
   if(m) m.remove();
   document.body.style.overflow = '';
-  // Lanzar onboarding
+  // Lanzar onboarding rico (diseno a50fe78)
   document.getElementById('onboarding-overlay').style.display = 'block';
-  if(typeof obRenderEstados === 'function') obRenderEstados();
-  if(typeof obRenderIntereses === 'function') obRenderIntereses();
+  if(typeof obGoStep === 'function') obGoStep(1);
 };
 function obRenderEstados() {
   const grid = document.getElementById('ob-estados-grid');
+  if (!grid) return; // div eliminado en migracion rich
   grid.innerHTML = Object.entries(OB_ESTADOS).map(([k,v]) => '<button onclick="obSelectEstado(\''+k+'\')" class="ob-estado-btn" data-clave="'+k+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.15s;">'+v+'</button>').join('');
 }
 function obSelectEstado(clave) {
@@ -1765,6 +1765,7 @@ function obSelectEstado(clave) {
 }
 function obRenderIntereses() {
   const grid = document.getElementById('ob-intereses-grid');
+  if (!grid) return; // div eliminado en migracion rich
   grid.innerHTML = OB_INTERESES.map(i => '<button onclick="obToggleInteres(\''+i.id+'\')" class="ob-interes-btn" data-id="'+i.id+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:14px;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.15s;"><div style="font-size:24px;margin-bottom:6px;">'+i.emoji+'</div><div style="font-size:14px;font-weight:600;margin-bottom:2px;">'+i.titulo+'</div><div style="font-size:11px;color:#9ca3af;line-height:1.4;">'+i.desc+'</div></button>').join('');
 }
 function obToggleInteres(id) {
