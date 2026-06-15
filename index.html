@@ -1636,9 +1636,27 @@
         <button onclick="obSkip()" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:12px;font-family:inherit;">Omitir →</button>
       </div>
     </div>
-        <!-- ob-step-1 viejo eliminado 14-jun-2026 (colision id duplicado) -->
-        <!-- ob-step-2 viejo eliminado 14-jun-2026 (colision id duplicado) -->
-    <!-- ob-step-3 viejo eliminado 14-jun-2026: era duplicado con id colisionando, ahora se usa el segundo con TU PERFIL + alertas -->
+    <div id="ob-step-1" style="padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿De dónde eres?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Personalizamos tu Tequio según tu estado.</p>
+      <div id="ob-estados-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;"></div>
+      <div id="ob-estado-selected" style="margin-top:20px;padding:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;color:#fbbf24;display:none;">
+        <strong>Tu estado:</strong> <span id="ob-estado-txt"></span>
+      </div>
+      <button onclick="obGoStep(2)" id="ob-step1-next" disabled style="margin-top:20px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-2" style="display:none;padding:28px 4px 32px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¿Qué te importa?</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;">Selecciona los temas que más te interesan (mín. 1).</p>
+      <div id="ob-intereses-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;"></div>
+      <button onclick="obGoStep(3)" id="ob-step2-next" disabled style="margin-top:24px;width:100%;background:#fbbf24;color:#111827;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;opacity:0.5;">Siguiente →</button>
+    </div>
+    <div id="ob-step-3" style="display:none;padding:28px 4px 40px;">
+      <h2 style="font-size:24px;font-weight:800;color:#f3f4f6;margin:0 0 6px 0;">¡Listo, ciudadano!</h2>
+      <p style="color:#9ca3af;font-size:14px;margin:0 0 22px 0;line-height:1.6;">Tequio queda personalizado para ti. Toda tu información se guarda <strong>solo en tu dispositivo</strong> — cero servidores externos.</p>
+      <div id="ob-preview" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:18px;margin-bottom:20px;"></div>
+      <button onclick="obComplete()" style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111827;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🚀 Entrar a Tequio</button>
+    </div>
   </div>
 </div>
 <script>
@@ -1703,7 +1721,7 @@ function tequioMostrarWelcome() {
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">📚</span>' +
-          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,518</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,582</span> leyes · <span data-kpi="chunks-embedded">325,751</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
         '</div>' +
       '</div>' +
       '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px">' +
@@ -2700,7 +2718,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,518</div>
+            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,582</div>
             <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
           <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
@@ -5309,7 +5327,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
           </div>
           <!-- Stats inline en el hero -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,518</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,582</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">32/32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">560+</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Ciudades</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">325,751</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
@@ -5323,7 +5341,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:22px">🏛️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Federal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-federal">292</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-federal">286</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">Cámara de Diputados</div>
           </button>
           <button onclick="leyesV2SetAmbito('estatal')" id="ley-card-estatal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -5331,7 +5349,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:22px">🗺️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Estatal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-estatal">5,669</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-estatal">5,665</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">32 Congresos</div>
           </button>
           <button onclick="leyesV2SetAmbito('municipal')" id="ley-card-municipal" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -5339,7 +5357,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
               <div style="font-size:22px">🏙️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Municipal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,423</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,631</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">2,400+ ayuntamientos</div>
           </button>
           <button onclick="leyesV2SetTipo('gaceta-municipal')" id="ley-card-gacetas" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -6573,7 +6591,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
             <div style="font-size:54px;line-height:1">🧠</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Asistente Legal IA</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes-federal-estatal">5,951</span> leyes federales/estatales</strong>, <strong>20 tesis SCJN</strong> y <strong>noticias DOF</strong> en vivo.</p>
             </div>
           </div>
         </div>
@@ -6623,7 +6641,7 @@ window.addEventListener('load', function(){ setTimeout(obShow, 1400); });
                   ¡Hola! Soy el <strong>Asistente Legal de Tequio</strong>.<br><br>
                   Antes de responder, busco en una base vectorial de fuentes oficiales:
                   <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
-                    <li><strong><span data-kpi="leyes-federal-estatal">5,961</span> leyes</strong> federales y estatales (Cám. Diputados + Congresos)</li>
+                    <li><strong><span data-kpi="leyes-federal-estatal">5,951</span> leyes</strong> federales y estatales (Cám. Diputados + Congresos)</li>
                     <li><strong>20 tesis emblemáticas</strong> de la SCJN (Semanario Judicial)</li>
                     <li><strong>Decretos del DOF</strong> y comunicados SCJN (RSS oficial)</li>
                   </ul>
