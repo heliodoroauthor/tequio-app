@@ -10,7 +10,7 @@
 //  • CDNs (Leaflet, fonts): cache-first   (TTL largo)
 //
 // ============================================================
-const VERSION       = 'tequio-v2.0.3-onbrich5-14jun';
+const VERSION       = 'tequio-v2.0.3-titles91-15jun';
 const CACHE_SHELL   = `${VERSION}-shell`;
 const CACHE_ASSETS  = `${VERSION}-assets`;
 const CACHE_DATA    = `${VERSION}-data`;
