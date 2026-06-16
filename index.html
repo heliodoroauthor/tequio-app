@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#fbbf24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tequio — Plataforma Cívica Digital de México · Leyes, Congreso, Presupuesto</title>
-<meta name="description" content="Plataforma cívica de México con 8,582 leyes (federal/estatal/municipal), 300,000 tesis SCJN, votaciones del Congreso, PEF, contratos públicos. Sin registro. Gratis. Cero invención.">
+<meta name="description" content="Plataforma cívica de México con 9,678 leyes (federal/estatal/municipal), 300,000 tesis SCJN, votaciones del Congreso, PEF, contratos públicos. Sin registro. Gratis. Cero invención.">
 <meta name="keywords" content="México, leyes mexicanas, Congreso, Cámara Diputados, Senado, SCJN, jurisprudencia, presupuesto federal, PEF, contratos públicos, transparencia, derechos ciudadanos, ley municipal, ley estatal">
 <meta name="author" content="Tequio">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="Tequio">
 <meta property="og:url" content="https://tequio.app/">
 <meta property="og:title" content="Tequio — Plataforma Cívica Digital de México">
-<meta property="og:description" content="8,582 leyes mexicanas · 300,000 tesis SCJN · Congreso en vivo · PEF 2026 · contratos públicos. Cero invención.">
+<meta property="og:description" content="9,678 leyes mexicanas · 300,000 tesis SCJN · Congreso en vivo · PEF 2026 · contratos públicos. Cero invención.">
 <meta property="og:image" content="https://tequio.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -109,8 +109,9 @@ function obShow() {
     return;
   }
   document.getElementById('onboarding-overlay').style.display = 'block';
-  obRenderEstados();
-  obRenderIntereses();
+  // Onboarding rico (v2): el HTML del overlay ya tiene los 8 estados destacados +
+  // 10 cards de intereses pre-renderizados. Solo hace falta inicializar Paso 1.
+  if (typeof obGoStep === 'function') obGoStep(1);
 }
 
 // 🦎 Welcome Disclaimer Modal (primera visita)
@@ -141,7 +142,7 @@ function tequioMostrarWelcome() {
         '</div>' +
         '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05)">' +
           '<span style="font-size:18px;flex-shrink:0">📚</span>' +
-          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">8,582</span> leyes · <span data-kpi="chunks-embedded">709,891</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
+          '<div style="font-size:12px;color:#d1d5db;line-height:1.5"><strong style="color:#fbbf24">Lo que tienes acceso:</strong> <span data-kpi="leyes">9,678</span> leyes · <span data-kpi="chunks-embedded">709,891</span> artículos · 32 estados · 560+ ciudades · Chat IA · Datos PEF/deuda en vivo.</div>' +
         '</div>' +
       '</div>' +
       '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;margin-bottom:16px">' +
@@ -191,6 +192,7 @@ window.tequioWelcomeAceptar = function(){
 };
 function obRenderEstados() {
   const grid = document.getElementById('ob-estados-grid');
+  if (!grid) return; // HTML rico v2: este grid no existe (los 8 estados ya estan en HTML)
   grid.innerHTML = Object.entries(OB_ESTADOS).map(([k,v]) => '<button onclick="obSelectEstado(\''+k+'\')" class="ob-estado-btn" data-clave="'+k+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.15s;">'+v+'</button>').join('');
 }
 function obSelectEstado(clave) {
@@ -216,6 +218,7 @@ function obSelectEstado(clave) {
 }
 function obRenderIntereses() {
   const grid = document.getElementById('ob-intereses-grid');
+  if (!grid) return; // HTML rico v2: este grid no existe (los 10 intereses ya estan en HTML)
   grid.innerHTML = OB_INTERESES.map(i => '<button onclick="obToggleInteres(\''+i.id+'\')" class="ob-interes-btn" data-id="'+i.id+'" style="background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:14px;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.15s;"><div style="font-size:24px;margin-bottom:6px;">'+i.emoji+'</div><div style="font-size:14px;font-weight:600;margin-bottom:2px;">'+i.titulo+'</div><div style="font-size:11px;color:#9ca3af;line-height:1.4;">'+i.desc+'</div></button>').join('');
 }
 function obToggleInteres(id) {
@@ -239,13 +242,23 @@ function obToggleInteres(id) {
   next.style.opacity = _obIntereses.size === 0 ? '0.5' : '1';
 }
 function obGoStep(n) {
-  document.querySelectorAll('[id^="ob-step-"]').forEach(s => s.style.display = 'none');
-  document.getElementById('ob-step-' + n).style.display = 'block';
+  // Onboarding rico v2: explicit IDs [1,2,3] + null checks (sin [id^="ob-step-"]
+  // porque tambien matcheaba ob-step-label y ob-step-hint).
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('ob-step-' + i);
+    if (el) el.style.display = (i === n) ? 'block' : 'none';
+  });
   document.querySelectorAll('.ob-step-bar').forEach((b,i) => {
+    b.classList.remove('active','done');
+    if (i + 1 < n) b.classList.add('done');
+    else if (i + 1 === n) b.classList.add('active');
     b.style.background = (i + 1 <= n) ? '#fbbf24' : '#1f2937';
   });
-  document.getElementById('ob-step-label').textContent = 'Paso ' + n + ' de 3';
-  if (n === 3) obBuildPreview();
+  const lbl = document.getElementById('ob-step-label');
+  if (lbl) lbl.textContent = 'Paso ' + n + ' de 3';
+  const overlay = document.getElementById('onboarding-overlay');
+  if (overlay) overlay.scrollTop = 0;
+  if (n === 3 && typeof obBuildPreview === 'function') obBuildPreview();
 }
 function obBuildPreview() {
   const intereses = Array.from(_obIntereses).map(id => {
@@ -760,7 +773,7 @@ window.addEventListener('load', function(){
             <div style="background:rgba(255,255,255,0.18);padding:10px 14px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">⚡ LIVE</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" data-kpi="leyes">8,582</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac" data-kpi="leyes">9,678</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" data-kpi="votos-individuales">129,240</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Votos LXVI</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#67e8f9" data-kpi="diputados">500</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Diputados</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fda4af" data-kpi="senadores">260</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Senadores</div></div>
@@ -1203,7 +1216,7 @@ window.addEventListener('load', function(){
         <div class="grid-4 mb-16">
           <div class="stat-card" onclick="showPage('leyes')" style="cursor:pointer">
             <div class="stat-label">LEYES VIGENTES <button class="fuente-btn" onclick="event.stopPropagation();mostrarFuente('leyes_vigentes')">🔍</button></div>
-            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">8,582</div>
+            <div class="stat-value" data-kpi="leyes" style="color:var(--accent2)">9,678</div>
             <div class="stat-change" style="color:var(--green2)">✓ DOF + Cámara</div>
           </div>
           <div class="stat-card" onclick="showPage('mapacontratos')" style="cursor:pointer">
@@ -4072,7 +4085,7 @@ window.addEventListener('load', function(){
           </div>
           <!-- Stats inline en el hero -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,582</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">9,678</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes totales</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">32/32</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Estados</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800">560+</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Ciudades</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="chunks-embedded">709,891</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Artículos IA</div></div>
@@ -4102,7 +4115,7 @@ window.addEventListener('load', function(){
               <div style="font-size:22px">🏙️</div>
               <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Municipal</div>
             </div>
-            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">2,631</div>
+            <div style="font-size:22px;font-weight:800" data-kpi="leyes-municipal-reglamento">3,727</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">2,400+ ayuntamientos</div>
           </button>
           <button onclick="leyesV2SetTipo('gaceta-municipal')" id="ley-card-gacetas" class="ley-stat-card" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s">
@@ -5543,11 +5556,11 @@ window.addEventListener('load', function(){
             <div style="font-size:54px;line-height:1">🧠</div>
             <div style="flex:1;min-width:240px">
               <h1 style="font-size:26px;font-weight:800;font-family:var(--font-display);margin:0;color:#fff">Asistente Legal IA</h1>
-              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes">8,582</span> leyes mexicanas</strong> (federal/estatal/municipal). El RAG devuelve los <strong>5 fragmentos más relevantes</strong> de tu pregunta y cita texto literal.</p>
+              <p style="margin:6px 0 0;opacity:0.94;font-size:14px;line-height:1.4">Chatea con un experto legal mexicano respaldado por <strong><span data-kpi="leyes">9,678</span> leyes mexicanas</strong> (federal/estatal/municipal). El RAG devuelve los <strong>5 fragmentos más relevantes</strong> de tu pregunta y cita texto literal.</p>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px;padding:14px;background:rgba(255,255,255,0.10);border-radius:12px;backdrop-filter:blur(10px)">
-            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">8,582</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800" data-kpi="leyes">9,678</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Leyes</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fde68a" data-kpi="leyes-calidad">6,941</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Calidad</div></div>
             <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#86efac">RAG</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Cita fuentes</div></div>
             <div style="text-align:center"><div style="font-size:14px;font-weight:700;line-height:1.3">No es abogado</div><div style="font-size:10px;opacity:0.8;text-transform:uppercase">Orientativo</div></div>
@@ -5611,7 +5624,7 @@ window.addEventListener('load', function(){
                   ¡Hola! Soy el <strong>Asistente Legal de Tequio</strong>.<br><br>
                   Antes de responder, busco en una base vectorial de fuentes oficiales:
                   <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;font-size:13px">
-                    <li><strong><span data-kpi="leyes">8,582</span> leyes mexicanas</strong> federal/estatal/municipal (Cám. Diputados + 32 Congresos estatales + 560+ ayuntamientos)</li>
+                    <li><strong><span data-kpi="leyes">9,678</span> leyes mexicanas</strong> federal/estatal/municipal (Cám. Diputados + 32 Congresos estatales + 560+ ayuntamientos)</li>
                     <li><strong><span data-kpi="chunks-embedded">709,891</span> artículos vectorizados</strong> con embeddings semánticos pgvector 768-d</li>
                     <li><strong>300,000 tesis SCJN</strong> en panel Jurisprudencia (consulta manual · NO integradas al RAG aún)</li>
                     <li><strong>Decretos del DOF</strong> y comunicados SCJN (RSS oficial)</li>
