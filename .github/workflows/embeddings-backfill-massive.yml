@@ -59,4 +59,4 @@ jobs:
         run: |
           curl -s -X POST -H "apikey: $SUPABASE_ANON" -H "Authorization: Bearer $SUPABASE_ANON" \
             -H "Content-Type: application/json" \
-            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | grep chunks
+            "$SUPABASE_URL/rest/v1/rpc/kpis_globales_refresh" -d '{}' | python3 -m json.tool | grep chunks || true
